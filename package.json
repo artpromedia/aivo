@@ -5,6 +5,7 @@
     "pnpm": ">=9 <10"
   },
   "scripts": {
+    "prepare": "husky",
     "lint:md": "markdownlint '**/*.md' -i node_modules",
     "lint:yml": "yamllint -s .",
     "lint:docker": "hadolint **/Dockerfile || true",
@@ -14,9 +15,14 @@
     "verify-all": "pnpm -r run build --if-present && pnpm run lint:yml && pnpm run lint:docker && pnpm run lint:actions && pnpm run contracts:lint"
   },
   "devDependencies": {
+    "@commitlint/cli": "^19.0.0",
+    "@commitlint/config-conventional": "^19.0.0",
     "@stoplight/spectral-cli": "^6.11.1",
+    "actionlint-bin": "^1.7.1",
+    "cz-git": "^1.9.0",
+    "husky": "^9.0.0",
+    "lint-staged": "^15.0.0",
     "markdownlint-cli": "^0.41.0",
-    "yaml-language-server": "^1.15.0",
-    "actionlint-bin": "^1.7.1"
+    "yaml-language-server": "^1.15.0"
   }
 }

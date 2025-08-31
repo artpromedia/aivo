@@ -1,4 +1,6 @@
 packages:
-  - 'packages/*'
-  - 'tools/*'
-  - 'apps/*'
+  - apps/*
+  - services/*
+  - libs/*
+  - infra/*
+  - docs/*
