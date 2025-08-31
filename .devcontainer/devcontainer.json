@@ -1,0 +1,46 @@
+{
+    "name": "Monorepo Dev Container",
+    "build": {
+        "dockerfile": "Dockerfile",
+        "context": ".."
+    },
+    "features": {
+        "ghcr.io/devcontainers/features/github-cli:1": {}
+    },
+    "postCreateCommand": "corepack enable && pnpm -v && node -v && python3 -V",
+    "customizations": {
+        "vscode": {
+            "extensions": [
+                "ms-vscode.vscode-json",
+                "ms-python.python",
+                "ms-vscode.vscode-typescript-next",
+                "esbenp.prettier-vscode",
+                "ms-vscode.vscode-eslint",
+                "bradlc.vscode-tailwindcss",
+                "ms-vscode.vscode-yaml",
+                "redhat.vscode-yaml",
+                "ms-vscode.vscode-markdownlint",
+                "GitHub.copilot",
+                "GitHub.copilot-chat"
+            ],
+            "settings": {
+                "editor.formatOnSave": true,
+                "editor.defaultFormatter": "esbenp.prettier-vscode",
+                "python.defaultInterpreterPath": "/usr/bin/python3",
+                "python.formatting.provider": "black",
+                "python.linting.enabled": true,
+                "python.linting.pylintEnabled": false,
+                "python.linting.flake8Enabled": true,
+                "typescript.preferences.importModuleSpecifier": "relative",
+                "emmet.includeLanguages": {
+                    "typescript": "html",
+                    "typescriptreact": "html"
+                }
+            }
+        }
+    },
+    "remoteUser": "vscode",
+    "mounts": [
+        "source=${localWorkspaceFolder}/.git,target=/workspaces/${localWorkspaceFolderBasename}/.git,type=bind,consistency=cached"
+    ]
+}
