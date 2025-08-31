@@ -1,0 +1,31 @@
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
+
+[tool.poetry]
+name = "hello-svc"
+version = "0.1.0"
+description = "FastAPI sanity service for monorepo"
+authors = ["Platform Team <platform@example.com>"]
+packages = [{include = "app"}]
+
+[tool.poetry.dependencies]
+python = "^3.11"
+fastapi = "0.111.*"
+uvicorn = "0.30.*"
+
+[tool.poetry.group.dev.dependencies]
+ruff = "^0.6.0"
+mypy = "^1.11.0"
+pytest = "^8.3.0"
+
+[tool.ruff]
+line-length = 100
+select = ["E", "F", "I", "N", "UP", "ANN"]
+target-version = "py311"
+ignore = ["E501"]
+
+[tool.mypy]
+python_version = "3.11"
+strict = true
+warn_unused_ignores = true

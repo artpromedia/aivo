@@ -1,0 +1,75 @@
+name: Security Scan
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+  schedule:
+    # Run daily at 3 AM UTC to catch new vulnerabilities
+    - cron: '0 3 * * *'
+
+jobs:
+  trivy-fs:
+    name: Trivy Filesystem Scan
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4.2.2
+
+      - name: Run Trivy vulnerability scanner in fs mode
+        uses: aquasecurity/trivy-action@0.28.0
+        with:
+          scan-type: 'fs'
+          scan-ref: '.'
+          severity: 'HIGH,CRITICAL'
+          exit-code: '1'
+          format: 'sarif'
+          output: 'trivy-results.sarif'
+
+      - name: Upload Trivy scan results to GitHub Security tab
+        uses: github/codeql-action/upload-sarif@v3.27.0
+        if: always()
+        with:
+          sarif_file: 'trivy-results.sarif'
+
+  pip-audit:
+    name: Python Dependencies Audit
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        service: ['hello-svc']
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4.2.2
+
+      - name: Setup Python
+        uses: actions/setup-python@v5.3.0
+        with:
+          python-version: '3.11'
+
+      - name: Install pip-audit
+        run: pip install pip-audit
+
+      - name: Check if requirements.txt exists
+        id: check-requirements
+        run: |
+          if [ -f "services/${{ matrix.service }}/requirements.txt" ]; then
+            echo "exists=true" >> $GITHUB_OUTPUT
+          else
+            echo "exists=false" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Run pip-audit
+        if: steps.check-requirements.outputs.exists == 'true'
+        run: |
+          cd services/${{ matrix.service }}
+          pip-audit -r requirements.txt --desc --format=json --output=pip-audit-results.json
+          pip-audit -r requirements.txt --desc
+
+      - name: Upload pip-audit results
+        if: steps.check-requirements.outputs.exists == 'true' && always()
+        uses: actions/upload-artifact@v4.4.3
+        with:
+          name: pip-audit-results-${{ matrix.service }}
+          path: services/${{ matrix.service }}/pip-audit-results.json
