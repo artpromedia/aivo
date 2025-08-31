@@ -82,3 +82,24 @@ jobs:
 
       - name: Enforce ESLint v9
         run: node scripts/ensure-eslint9.mjs
+
+  dep-guard:
+    name: Deprecated Dependencies Check
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4.2.2
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4.0.4
+        with:
+          node-version: '20.19.4'
+
+      - name: Enable corepack
+        run: corepack enable
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Check for deprecated packages
+        run: node scripts/check-npm-deprecations.mjs
