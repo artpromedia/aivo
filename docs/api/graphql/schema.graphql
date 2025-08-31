@@ -1,0 +1,42 @@
+"""
+Monorepo GraphQL API Schema
+
+This is a sample GraphQL schema for the monorepo.
+Extend this schema as you add more services and features.
+"""
+
+type Query {
+  """Health check query"""
+  ping: String!
+
+  """Get current API version"""
+  version: String!
+
+  """Get server status"""
+  status: Status!
+}
+
+type Mutation {
+  """Placeholder mutation - add your mutations here"""
+  noop: Boolean!
+}
+
+type Status {
+  """Service status"""
+  status: String!
+
+  """Current timestamp"""
+  timestamp: String!
+
+  """API version"""
+  version: String!
+
+  """Uptime in seconds"""
+  uptime: Int!
+}
+
+"""Custom scalar for DateTime"""
+scalar DateTime
+
+"""Custom scalar for JSON"""
+scalar JSON

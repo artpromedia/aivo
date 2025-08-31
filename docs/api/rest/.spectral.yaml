@@ -1,0 +1,53 @@
+extends: spectral:oas
+
+rules:
+  tags-required:
+    description: All operations must have tags
+    given: $.paths.*.*.tags
+    severity: error
+    then:
+      function: truthy
+
+  contact-required:
+    description: API must have contact information
+    given: $.info.contact
+    severity: error
+    then:
+      function: truthy
+
+  servers-non-empty:
+    description: API must define at least one server
+    given: $.servers
+    severity: error
+    then:
+      function: length
+      functionOptions:
+        min: 1
+
+  operation-summary:
+    description: All operations must have a summary
+    given: $.paths.*.*.summary
+    severity: warn
+    then:
+      function: truthy
+
+  operation-description:
+    description: All operations should have a description
+    given: $.paths.*.*.description
+    severity: info
+    then:
+      function: truthy
+
+  schema-examples:
+    description: Schema properties should have examples
+    given: $.components.schemas.*.properties.*.example
+    severity: info
+    then:
+      function: truthy
+
+  response-examples:
+    description: Responses should have examples
+    given: $.paths.*.*.responses.*.content.*.example
+    severity: info
+    then:
+      function: truthy

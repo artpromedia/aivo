@@ -1,0 +1,114 @@
+openapi: 3.1.0
+info:
+  title: Monorepo API
+  version: 1.0.0
+  description: Sample API specification for the monorepo
+  contact:
+    name: API Team
+    email: api@example.com
+  license:
+    name: MIT
+    url: https://opensource.org/licenses/MIT
+
+servers:
+  - url: https://api.example.com/v1
+    description: Production server
+  - url: https://staging.api.example.com/v1
+    description: Staging server
+  - url: http://localhost:3000/v1
+    description: Local development server
+
+tags:
+  - name: Health
+    description: Health check endpoints
+
+paths:
+  /ping:
+    get:
+      tags:
+        - Health
+      summary: Health check endpoint
+      description: Returns a simple ping response to verify API availability
+      operationId: getPing
+      responses:
+        '200':
+          description: Successful ping response
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    example: "ok"
+                    enum: ["ok"]
+                  timestamp:
+                    type: string
+                    format: date-time
+                    example: "2025-01-01T00:00:00Z"
+                  version:
+                    type: string
+                    example: "1.0.0"
+                required:
+                  - status
+                  - timestamp
+                  - version
+              example:
+                status: "ok"
+                timestamp: "2025-01-01T00:00:00Z"
+                version: "1.0.0"
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                    example: "Internal server error"
+                  code:
+                    type: string
+                    example: "INTERNAL_ERROR"
+                required:
+                  - error
+                  - code
+              example:
+                error: "Internal server error"
+                code: "INTERNAL_ERROR"
+
+components:
+  schemas:
+    Error:
+      type: object
+      properties:
+        error:
+          type: string
+          description: Error message
+          example: "Something went wrong"
+        code:
+          type: string
+          description: Error code
+          example: "ERROR_CODE"
+      required:
+        - error
+        - code
+
+    HealthResponse:
+      type: object
+      properties:
+        status:
+          type: string
+          enum: ["ok"]
+          example: "ok"
+        timestamp:
+          type: string
+          format: date-time
+          example: "2025-01-01T00:00:00Z"
+        version:
+          type: string
+          example: "1.0.0"
+      required:
+        - status
+        - timestamp
+        - version
