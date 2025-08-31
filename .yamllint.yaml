@@ -1,0 +1,47 @@
+extends: default
+
+rules:
+  indentation:
+    spaces: 2
+    indent-sequences: true
+    check-multi-line-strings: false
+
+  line-length:
+    max: 120
+    level: warning
+
+  truthy:
+    check-keys: false
+
+  comments-indentation: disable
+
+  comments:
+    min-spaces-from-content: 1
+
+  empty-lines:
+    max-start: 1
+    max-end: 1
+    max: 2
+
+  new-lines:
+    type: unix
+
+  new-line-at-end-of-file: enable
+
+  document-start: disable
+
+ignore: |
+  /node_modules/
+  /.git/
+  /dist/
+  /build/
+  /.next/
+  /.nuxt/
+  /.output/
+  /.vercel/
+  /.netlify/
+  /coverage/
+  /*.min.*
+  /package-lock.json
+  /yarn.lock
+  /pnpm-lock.yaml

@@ -13,6 +13,7 @@
     "lint:docker": "hadolint **/Dockerfile || true",
     "lint:actions": "actionlint",
     "contracts:lint": "spectral lint 'docs/api/rest/**/*.yaml'",
+    "compose:check": "docker compose -f infra/compose/local.yml config",
     "typecheck": "echo skip",
     "format": "prettier --write .",
     "format:check": "prettier --check .",

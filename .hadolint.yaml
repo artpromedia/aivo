@@ -1,0 +1,12 @@
+ignored:
+  - DL3008  # Pin versions in apt get install - we handle this in base images
+  - DL3018  # Pin versions in apk add - we handle this in base images
+  - DL3013  # Pin versions in pip install - we handle this in requirements files
+  - DL3042  # Avoid cache directory with pip install - not always applicable
+
+trustedRegistries:
+  - docker.io
+  - gcr.io
+  - registry.k8s.io
+  - quay.io
+  - ghcr.io
