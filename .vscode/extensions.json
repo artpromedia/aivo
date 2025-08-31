@@ -1,0 +1,12 @@
+{
+  "recommendations": [
+    "redhat.vscode-yaml",
+    "esbenp.prettier-vscode",
+    "ms-python.python",
+    "ms-python.pylint",
+    "ms-python.flake8",
+    "charliermarsh.ruff",
+    "aquasec.trivy-vulnerability-scanner",
+    "ms-vscode.vscode-json"
+  ]
+}

@@ -252,6 +252,8 @@ Desktop.ini
 
 # VS Code
 .vscode/
+!.vscode/settings.json
+!.vscode/extensions.json
 
 # Temporary files
 *.tmp
@@ -307,8 +309,6 @@ secrets/
 # Editor files
 *.sublime-project
 *.sublime-workspace
-.vscode/settings.json
-.vscode/launch.json
 
 # CI/CD
 .gitlab-ci.yml
