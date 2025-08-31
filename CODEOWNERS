@@ -1,0 +1,22 @@
+# This file defines the code owners for this repository
+# When a pull request is opened, the users listed here will be automatically
+# requested for review
+
+# Global owners - catch-all for files not covered below
+* @maintainer
+
+# Documentation
+/docs/ @tech-writer @maintainer
+
+# Security-related files
+SECURITY.md @security-team
+CODEOWNERS @admin
+
+# CI/CD and infrastructure
+/.github/ @devops
+.git* @admin
+
+# Note: Add specific team handles as needed
+# Example:
+# /packages/frontend/ @frontend-team
+# /packages/backend/ @backend-team
