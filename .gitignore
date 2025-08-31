@@ -311,7 +311,6 @@ secrets/
 .vscode/launch.json
 
 # CI/CD
-.github/workflows/*.yml
 .gitlab-ci.yml
 .travis.yml
 
