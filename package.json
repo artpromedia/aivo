@@ -6,23 +6,36 @@
   },
   "scripts": {
     "prepare": "husky",
+    "lint": "eslint .",
+    "lint:fix": "eslint . --fix",
     "lint:md": "markdownlint '**/*.md' -i node_modules",
     "lint:yml": "yamllint -s .",
     "lint:docker": "hadolint **/Dockerfile || true",
     "lint:actions": "actionlint",
     "contracts:lint": "spectral lint 'docs/api/rest/**/*.yaml'",
     "typecheck": "echo skip",
-    "verify-all": "pnpm -r run build --if-present && pnpm run lint:yml && pnpm run lint:docker && pnpm run lint:actions && pnpm run contracts:lint"
+    "format": "prettier --write .",
+    "format:check": "prettier --check .",
+    "verify-all": "pnpm -r run build --if-present && pnpm run lint && pnpm run format:check && pnpm run lint:yml && pnpm run lint:docker && pnpm run lint:actions && pnpm run contracts:lint"
   },
   "devDependencies": {
     "@commitlint/cli": "^19.0.0",
     "@commitlint/config-conventional": "^19.0.0",
+    "@eslint/js": "^9.9.0",
     "@stoplight/spectral-cli": "^6.11.1",
+    "@typescript-eslint/eslint-plugin": "^8.7.0",
+    "@typescript-eslint/parser": "^8.7.0",
     "actionlint-bin": "^1.7.1",
     "cz-git": "^1.9.0",
+    "eslint": "^9.9.0",
+    "eslint-config-prettier": "^9.1.0",
+    "eslint-plugin-import": "^2.29.1",
+    "eslint-plugin-unused-imports": "^4.1.3",
     "husky": "^9.0.0",
     "lint-staged": "^15.0.0",
     "markdownlint-cli": "^0.41.0",
+    "prettier": "^3.3.3",
+    "typescript": "^5.5.4",
     "yaml-language-server": "^1.15.0"
   }
 }
