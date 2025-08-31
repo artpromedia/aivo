@@ -1,0 +1,32 @@
+name: Dependency Guard
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+  schedule:
+    # Run daily at 2 AM UTC to catch newly deprecated packages
+    - cron: '0 2 * * *'
+
+jobs:
+  dep-guard:
+    name: Check for Deprecated Dependencies
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4.2.2
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4.0.4
+        with:
+          node-version: '20.19.4'
+
+      - name: Enable corepack
+        run: corepack enable
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Check for deprecated packages
+        run: node scripts/check-npm-deprecations.mjs
