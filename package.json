@@ -1,0 +1,22 @@
+{
+  "private": true,
+  "engines": {
+    "node": "20.19.4",
+    "pnpm": ">=9 <10"
+  },
+  "scripts": {
+    "lint:md": "markdownlint '**/*.md' -i node_modules",
+    "lint:yml": "yamllint -s .",
+    "lint:docker": "hadolint **/Dockerfile || true",
+    "lint:actions": "actionlint",
+    "contracts:lint": "spectral lint 'docs/api/rest/**/*.yaml'",
+    "typecheck": "echo skip",
+    "verify-all": "pnpm -r run build --if-present && pnpm run lint:yml && pnpm run lint:docker && pnpm run lint:actions && pnpm run contracts:lint"
+  },
+  "devDependencies": {
+    "@stoplight/spectral-cli": "^6.11.1",
+    "markdownlint-cli": "^0.41.0",
+    "yaml-language-server": "^1.15.0",
+    "actionlint-bin": "^1.7.1"
+  }
+}
