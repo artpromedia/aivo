@@ -7,5 +7,13 @@
   "files.eol": "\n",
   "[yaml]": {
     "editor.defaultFormatter": "redhat.vscode-yaml"
-  }
+  },
+  "[python]": {
+    "editor.defaultFormatter": "ms-python.python"
+  },
+  "python.defaultInterpreterPath": "./.venv/Scripts/python.exe",
+  "python.analysis.extraPaths": [
+    "./services/hello-svc"
+  ],
+  "python.analysis.autoSearchPaths": true
 }
