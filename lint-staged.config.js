@@ -1,10 +1,10 @@
 module.exports = {
   '*.{js,jsx,ts,tsx,json,css,scss,md}': [
-    'prettier --write',
-    'eslint --fix',
+    'pnpm prettier --write',
+    'pnpm eslint --fix',
   ],
   '*.{yml,yaml}': [
-    'yamllint -s',
+    'pnpm yamllint -s',
   ],
   '**/Dockerfile*': [
     'hadolint',

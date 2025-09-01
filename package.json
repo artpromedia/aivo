@@ -2,7 +2,7 @@
   "private": true,
   "engines": {
     "node": "20.19.4",
-    "pnpm": ">=9 <10"
+    "pnpm": ">=8 <10"
   },
   "scripts": {
     "prepare": "husky",
@@ -27,7 +27,6 @@
     "@stoplight/spectral-cli": "^6.11.1",
     "@typescript-eslint/eslint-plugin": "^8.7.0",
     "@typescript-eslint/parser": "^8.7.0",
-    "actionlint-bin": "^1.7.1",
     "cz-git": "^1.9.0",
     "eslint": "^9.9.0",
     "eslint-config-prettier": "^9.1.0",
