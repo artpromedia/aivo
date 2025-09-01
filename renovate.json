@@ -1,0 +1,58 @@
+{
+  "$schema": "https://docs.renovatebot.com/renovate-schema.json",
+  "extends": ["config:recommended"],
+  "rangeStrategy": "bump",
+  "semanticCommits": "enabled",
+  "schedule": ["after 2am on sunday"],
+  "packageRules": [
+    {
+      "matchPackagePatterns": ["^eslint$", "^@eslint/js$"],
+      "allowedVersions": ">=9 <10",
+      "description": "Lock ESLint to v9.x to prevent downgrades"
+    },
+    {
+      "matchManagers": ["npm"],
+      "postUpdateOptions": ["npmDedupe"],
+      "description": "Deduplicate npm packages after updates"
+    },
+    {
+      "matchDepTypes": ["dependencies", "devDependencies"],
+      "excludePackagePatterns": ["deprecated"],
+      "enabled": true,
+      "description": "Update all deps except deprecated packages"
+    },
+    {
+      "matchPackagePatterns": ["^@typescript-eslint/"],
+      "allowedVersions": ">=8.0.0",
+      "description": "Ensure TypeScript ESLint plugins are compatible with ESLint v9"
+    },
+    {
+      "matchPackagePatterns": ["^eslint-plugin-"],
+      "allowedVersions": ">=2.0.0",
+      "description": "Ensure ESLint plugins support ESLint v9"
+    }
+  ],
+  "pin": {
+    "enabled": true
+  },
+  "prHourlyLimit": 2,
+  "prConcurrentLimit": 5,
+  "rebaseWhen": "conflicted",
+  "labels": ["dependencies"],
+  "reviewers": ["@platform-team"],
+  "assignees": ["@platform-team"],
+  "vulnerabilityAlerts": {
+    "enabled": true,
+    "schedule": ["at any time"]
+  },
+  "lockFileMaintenance": {
+    "enabled": true,
+    "schedule": ["before 5am on monday"]
+  },
+  "python": {
+    "enabled": true
+  },
+  "docker": {
+    "enabled": true
+  }
+}

@@ -1,0 +1,121 @@
+name: Renovate Validation
+
+on:
+  pull_request:
+    branches: [main]
+    paths:
+      - 'package.json'
+      - 'pnpm-lock.yaml'
+      - 'services/*/requirements.txt'
+      - 'services/*/pyproject.toml'
+
+jobs:
+  validate-renovate:
+    name: Validate Renovate Updates
+    runs-on: ubuntu-latest
+    if: startsWith(github.head_ref, 'renovate/')
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4.2.2
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4.0.4
+        with:
+          node-version: '20.19.4'
+
+      - name: Enable corepack
+        run: corepack enable
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Validate ESLint v9 requirement
+        run: |
+          echo "🔍 Validating ESLint version..."
+          node scripts/ensure-eslint9.mjs
+          echo "✅ ESLint v9 requirement validated"
+
+      - name: Check for deprecated packages
+        run: |
+          echo "🔍 Checking for deprecated packages..."
+          node scripts/check-npm-deprecations.mjs
+          echo "✅ No deprecated packages found"
+
+      - name: Validate package compatibility
+        run: |
+          echo "🔍 Validating package compatibility..."
+          # Check if TypeScript ESLint plugins are compatible
+          if npm list @typescript-eslint/eslint-plugin 2>/dev/null; then
+            TYPESCRIPT_ESLINT_VERSION=$(npm list @typescript-eslint/eslint-plugin --depth=0 --json | jq -r '.dependencies."@typescript-eslint/eslint-plugin".version // empty')
+            if [ ! -z "$TYPESCRIPT_ESLINT_VERSION" ]; then
+              echo "TypeScript ESLint version: $TYPESCRIPT_ESLINT_VERSION"
+              if [[ "$TYPESCRIPT_ESLINT_VERSION" < "8.0.0" ]]; then
+                echo "❌ TypeScript ESLint plugin version $TYPESCRIPT_ESLINT_VERSION may not be compatible with ESLint v9"
+                exit 1
+              fi
+            fi
+          fi
+          echo "✅ Package compatibility validated"
+
+      - name: Run basic tests to ensure functionality
+        run: |
+          echo "🧪 Running basic functionality tests..."
+          pnpm run lint --max-warnings=0
+          echo "✅ Basic functionality tests passed"
+
+  comment-validation-result:
+    name: Comment Validation Result
+    runs-on: ubuntu-latest
+    needs: validate-renovate
+    if: always() && startsWith(github.head_ref, 'renovate/')
+    steps:
+      - name: Comment on PR
+        uses: actions/github-script@v7.0.1
+        with:
+          script: |
+            const { data: comments } = await github.rest.issues.listComments({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: context.issue.number,
+            });
+            
+            const botComment = comments.find(comment => 
+              comment.user.type === 'Bot' && 
+              comment.body.includes('🤖 Renovate Validation')
+            );
+            
+            const validationStatus = '${{ needs.validate-renovate.result }}';
+            const commentBody = validationStatus === 'success' 
+              ? `🤖 **Renovate Validation: ✅ PASSED**
+            
+            This Renovate PR has been validated:
+            - ✅ ESLint v9 requirement maintained
+            - ✅ No deprecated packages introduced
+            - ✅ Package compatibility verified
+            - ✅ Basic functionality tests passed
+            
+            Safe to merge! 🚀`
+              : `🤖 **Renovate Validation: ❌ FAILED**
+            
+            This Renovate PR failed validation:
+            - ❌ Check the workflow logs for details
+            - ❌ May violate ESLint v9 requirement
+            - ❌ May introduce deprecated packages
+            
+            Please review before merging! ⚠️`;
+            
+            if (botComment) {
+              await github.rest.issues.updateComment({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                comment_id: botComment.id,
+                body: commentBody
+              });
+            } else {
+              await github.rest.issues.createComment({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                issue_number: context.issue.number,
+                body: commentBody
+              });
+            }

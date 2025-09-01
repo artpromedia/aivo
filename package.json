@@ -17,7 +17,8 @@
     "typecheck": "echo skip",
     "format": "prettier --write .",
     "format:check": "prettier --check .",
-    "verify-all": "pnpm -r run build --if-present && pnpm run lint && pnpm run format:check && pnpm run lint:yml && pnpm run lint:docker && pnpm run lint:actions && pnpm run contracts:lint"
+    "verify-all": "pnpm -r run build --if-present && pnpm run lint && pnpm run format:check && pnpm run lint:yml && pnpm run lint:docker && pnpm run lint:actions && pnpm run contracts:lint",
+    "renovate:validate": "node scripts/validate-renovate-update.mjs"
   },
   "devDependencies": {
     "@commitlint/cli": "^19.0.0",
