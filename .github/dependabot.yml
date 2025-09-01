@@ -1,83 +1,83 @@
 version: 2
 updates:
   # Node.js dependencies
-  - package-ecosystem: "npm"
-    directory: "/"
+  - package-ecosystem: 'npm'
+    directory: '/'
     schedule:
-      interval: "weekly"
-      day: "sunday"
-      time: "02:00"
+      interval: 'weekly'
+      day: 'sunday'
+      time: '02:00'
     open-pull-requests-limit: 5
     assignees:
-      - "platform-team"
+      - 'platform-team'
     commit-message:
-      prefix: "chore(deps)"
-      include: "scope"
+      prefix: 'chore(deps)'
+      include: 'scope'
     labels:
-      - "dependencies"
-      - "npm"
+      - 'dependencies'
+      - 'npm'
     ignore:
       # Prevent ESLint downgrades - only allow v9.x
-      - dependency-name: "eslint"
-        versions: ["< 9.0.0", ">= 10.0.0"]
-      - dependency-name: "@eslint/js"
-        versions: ["< 9.0.0", ">= 10.0.0"]
+      - dependency-name: 'eslint'
+        versions: ['< 9.0.0', '>= 10.0.0']
+      - dependency-name: '@eslint/js'
+        versions: ['< 9.0.0', '>= 10.0.0']
       # Ensure TypeScript ESLint compatibility with v9
-      - dependency-name: "@typescript-eslint/*"
-        versions: ["< 8.0.0"]
+      - dependency-name: '@typescript-eslint/*'
+        versions: ['< 8.0.0']
       # Prevent deprecated packages (common ones)
-      - dependency-name: "request"
-      - dependency-name: "node-uuid"
-      - dependency-name: "babel-preset-es2015"
-      - dependency-name: "babel-preset-stage-*"
+      - dependency-name: 'request'
+      - dependency-name: 'node-uuid'
+      - dependency-name: 'babel-preset-es2015'
+      - dependency-name: 'babel-preset-stage-*'
 
   # Python dependencies for hello-svc
-  - package-ecosystem: "pip"
-    directory: "/services/hello-svc"
+  - package-ecosystem: 'pip'
+    directory: '/services/hello-svc'
     schedule:
-      interval: "weekly"
-      day: "sunday"
-      time: "03:00"
+      interval: 'weekly'
+      day: 'sunday'
+      time: '03:00'
     open-pull-requests-limit: 3
     assignees:
-      - "platform-team"
+      - 'platform-team'
     commit-message:
-      prefix: "chore(deps)"
-      include: "scope"
+      prefix: 'chore(deps)'
+      include: 'scope'
     labels:
-      - "dependencies"
-      - "python"
+      - 'dependencies'
+      - 'python'
 
   # Docker base images
-  - package-ecosystem: "docker"
-    directory: "/infra/compose"
+  - package-ecosystem: 'docker'
+    directory: '/infra/compose'
     schedule:
-      interval: "weekly"
-      day: "sunday"
-      time: "04:00"
+      interval: 'weekly'
+      day: 'sunday'
+      time: '04:00'
     open-pull-requests-limit: 2
     assignees:
-      - "platform-team"
+      - 'platform-team'
     commit-message:
-      prefix: "chore(deps)"
-      include: "scope"
+      prefix: 'chore(deps)'
+      include: 'scope'
     labels:
-      - "dependencies"
-      - "docker"
+      - 'dependencies'
+      - 'docker'
 
   # GitHub Actions
-  - package-ecosystem: "github-actions"
-    directory: "/"
+  - package-ecosystem: 'github-actions'
+    directory: '/'
     schedule:
-      interval: "weekly"
-      day: "sunday"
-      time: "05:00"
+      interval: 'weekly'
+      day: 'sunday'
+      time: '05:00'
     open-pull-requests-limit: 2
     assignees:
-      - "platform-team"
+      - 'platform-team'
     commit-message:
-      prefix: "chore(deps)"
-      include: "scope"
+      prefix: 'chore(deps)'
+      include: 'scope'
     labels:
-      - "dependencies"
-      - "github-actions"
+      - 'dependencies'
+      - 'github-actions'

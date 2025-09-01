@@ -9,17 +9,17 @@ rules:
   oas3-server-not-example.com: true
   oas3-valid-media-example: true
   oas3-valid-schema-example: true
-  
+
   # Path and operation rules
   operation-description: true
   operation-operationId: true
   operation-tags: true
   path-params: true
-  
+
   # Info object rules
   info-contact: true
   info-description: true
-  
+
   # Disable some overly strict rules for our use case
   no-$ref-siblings: false
   oas3-unused-component: warn

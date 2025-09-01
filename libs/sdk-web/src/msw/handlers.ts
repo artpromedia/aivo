@@ -23,7 +23,7 @@ const mockFixtures = {
   orchestrator: {
     // Add mock data for orchestrator service
   },
-  admin-portal: {
+  'admin-portal': {
     // Add mock data for admin-portal service
   },
 };

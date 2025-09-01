@@ -12,6 +12,7 @@ from sqlalchemy import select, update
 from sqlalchemy.exc import IntegrityError
 
 from .models import User, RefreshToken, InviteToken
+from .notifications import get_notification_client
 from .schemas import (
     GuardianRegister,
     LoginRequest,
@@ -100,6 +101,9 @@ async def register_guardian(
     # Create new guardian user
     hashed_password = create_password_hash(request.password)
     
+    # Auto-assign tenant ID for guardians (each guardian gets their own tenant)
+    guardian_tenant_id = uuid.uuid4()
+    
     new_user = User(
         email=request.email,
         hashed_password=hashed_password,
@@ -107,6 +111,7 @@ async def register_guardian(
         last_name=request.last_name,
         phone=request.phone,
         role="guardian",
+        tenant_id=guardian_tenant_id,
         status="active",  # Guardians are active immediately
         is_email_verified=False  # Email verification can be done later
     )
@@ -141,6 +146,14 @@ async def register_guardian(
     )
     db.add(refresh_token)
     await db.commit()
+    
+    # Send welcome email
+    notification_client = get_notification_client()
+    await notification_client.send_welcome_email(
+        email=new_user.email,
+        user_name=f"{new_user.first_name} {new_user.last_name}",
+        role=new_user.role
+    )
     
     return AuthResponse(
         access_token=access_token,
@@ -360,8 +373,20 @@ async def invite_teacher(
     await db.commit()
     await db.refresh(invite_token)
     
-    # TODO: Send invitation email via notification service
-    # This would be queued to notification-svc for email delivery
+    # Send invitation email via notification service
+    notification_client = get_notification_client()
+    email_sent = await notification_client.send_invite_email(
+        email=request.email,
+        invite_token=invite_token_value,
+        role="teacher",
+        invited_by=f"{current_user.first_name} {current_user.last_name}",
+        organization_name="SchoolApp"
+    )
+    
+    if not email_sent:
+        # Log warning but don't fail the invite creation
+        # The invite token is still valid even if email fails
+        pass
     
     return InviteTokenResponse(
         invite_token=invite_token_value,

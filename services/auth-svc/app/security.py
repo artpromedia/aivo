@@ -3,8 +3,12 @@ Security utilities for JWT tokens and password hashing.
 """
 import secrets
 import uuid
+import os
 from datetime import datetime, timedelta, timezone
 from typing import Any, Optional
+from cryptography.hazmat.primitives import serialization
+from cryptography.hazmat.primitives.asymmetric import rsa
+from cryptography.hazmat.backends import default_backend
 
 from fastapi import HTTPException, status
 from jose import JWTError, jwt
@@ -22,10 +26,66 @@ class SecurityConfig:
     ACCESS_TOKEN_EXPIRE_MINUTES = 15  # Short-lived access tokens
     REFRESH_TOKEN_EXPIRE_DAYS = 30    # Longer-lived refresh tokens
     
-    # In production, these would be loaded from environment variables
-    # For now, using a simple secret key for HS256 (development only)
-    SECRET_KEY = "your-super-secret-key-change-in-production"
-    ALGORITHM_DEV = "HS256"  # For development
+    # RSA key pair for JWT signing (in production, load from secure storage)
+    _private_key = None
+    _public_key = None
+    
+    @classmethod
+    def get_private_key(cls):
+        """Get or generate RSA private key for JWT signing."""
+        if cls._private_key is None:
+            # In production, load from environment or key management system
+            private_key_pem = os.getenv("JWT_PRIVATE_KEY")
+            if private_key_pem:
+                cls._private_key = serialization.load_pem_private_key(
+                    private_key_pem.encode(),
+                    password=None,
+                    backend=default_backend()
+                )
+            else:
+                # Generate for development (not recommended for production)
+                cls._private_key = rsa.generate_private_key(
+                    public_exponent=65537,
+                    key_size=2048,
+                    backend=default_backend()
+                )
+        return cls._private_key
+    
+    @classmethod
+    def get_public_key(cls):
+        """Get RSA public key for JWT verification."""
+        if cls._public_key is None:
+            public_key_pem = os.getenv("JWT_PUBLIC_KEY")
+            if public_key_pem:
+                cls._public_key = serialization.load_pem_public_key(
+                    public_key_pem.encode(),
+                    backend=default_backend()
+                )
+            else:
+                # Derive from private key
+                cls._public_key = cls.get_private_key().public_key()
+        return cls._public_key
+    
+    @classmethod
+    def get_private_key_pem(cls):
+        """Get private key as PEM string for JWT signing."""
+        return cls.get_private_key().private_bytes(
+            encoding=serialization.Encoding.PEM,
+            format=serialization.PrivateFormat.PKCS8,
+            encryption_algorithm=serialization.NoEncryption()
+        ).decode()
+    
+    @classmethod
+    def get_public_key_pem(cls):
+        """Get public key as PEM string for JWT verification."""
+        return cls.get_public_key().public_bytes(
+            encoding=serialization.Encoding.PEM,
+            format=serialization.PublicFormat.SubjectPublicKeyInfo
+        ).decode()
+    
+    # Fallback to HS256 for development if RSA keys not available
+    SECRET_KEY = os.getenv("JWT_SECRET_KEY", "your-super-secret-key-change-in-production")
+    ALGORITHM_DEV = "HS256"  # For development fallback
     
     # Password hashing
     ARGON2_ROUNDS = 12
@@ -87,8 +147,13 @@ def create_access_token(
     # Remove None values
     payload = {k: v for k, v in payload.items() if v is not None}
     
-    # Use HS256 for development (in production, use RS256 with key pairs)
-    return jwt.encode(payload, SecurityConfig.SECRET_KEY, algorithm=SecurityConfig.ALGORITHM_DEV)
+    # Use RS256 with asymmetric keys for production
+    try:
+        private_key_pem = SecurityConfig.get_private_key_pem()
+        return jwt.encode(payload, private_key_pem, algorithm=SecurityConfig.ALGORITHM)
+    except Exception:
+        # Fallback to HS256 for development if RSA keys fail
+        return jwt.encode(payload, SecurityConfig.SECRET_KEY, algorithm=SecurityConfig.ALGORITHM_DEV)
 
 
 def create_refresh_token() -> str:
@@ -104,11 +169,21 @@ def create_invite_token() -> str:
 def verify_token(token: str) -> TokenPayload:
     """Verify and decode a JWT token."""
     try:
-        payload = jwt.decode(
-            token, 
-            SecurityConfig.SECRET_KEY, 
-            algorithms=[SecurityConfig.ALGORITHM_DEV]
-        )
+        # Try RS256 first
+        try:
+            public_key_pem = SecurityConfig.get_public_key_pem()
+            payload = jwt.decode(
+                token, 
+                public_key_pem, 
+                algorithms=[SecurityConfig.ALGORITHM]
+            )
+        except Exception:
+            # Fallback to HS256 for development
+            payload = jwt.decode(
+                token, 
+                SecurityConfig.SECRET_KEY, 
+                algorithms=[SecurityConfig.ALGORITHM_DEV]
+            )
         
         # Validate required fields
         user_id = payload.get("sub")

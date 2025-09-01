@@ -78,32 +78,32 @@ jobs:
               repo: context.repo.repo,
               issue_number: context.issue.number,
             });
-            
+
             const botComment = comments.find(comment => 
               comment.user.type === 'Bot' && 
               comment.body.includes('🤖 Renovate Validation')
             );
-            
+
             const validationStatus = '${{ needs.validate-renovate.result }}';
             const commentBody = validationStatus === 'success' 
               ? `🤖 **Renovate Validation: ✅ PASSED**
-            
+
             This Renovate PR has been validated:
             - ✅ ESLint v9 requirement maintained
             - ✅ No deprecated packages introduced
             - ✅ Package compatibility verified
             - ✅ Basic functionality tests passed
-            
+
             Safe to merge! 🚀`
               : `🤖 **Renovate Validation: ❌ FAILED**
-            
+
             This Renovate PR failed validation:
             - ❌ Check the workflow logs for details
             - ❌ May violate ESLint v9 requirement
             - ❌ May introduce deprecated packages
-            
+
             Please review before merging! ⚠️`;
-            
+
             if (botComment) {
               await github.rest.issues.updateComment({
                 owner: context.repo.owner,

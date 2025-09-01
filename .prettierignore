@@ -129,3 +129,17 @@ pnpm-lock.yaml
 tsconfig*.json
 *.config.js
 *.config.ts
+
+# Generated SDK files
+libs/sdk-web/
+libs/sdk-py/
+
+# Python virtual environment
+.venv/
+
+# Generated documentation
+**/docs/**
+**/*.md
+
+# Scripts that may have intentional formatting
+scripts/

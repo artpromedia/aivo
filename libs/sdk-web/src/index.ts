@@ -1,13 +1,13 @@
 // Auto-generated SDK exports
 // Generated on: 2025-09-01T12:20:17.051Z
 
-export * from './services/auth';
-export * from './services/tenant';
-export * from './services/enrollment';
-export * from './services/payments';
-export * from './services/learner';
-export * from './services/orchestrator';
-export * from './services/admin-portal';
+export * from './services/auth/src';
+export * from './services/tenant/src';
+export * from './services/enrollment/src';
+export * from './services/payments/src';
+export * from './services/learner/src';
+export * from './services/orchestrator/src';
+export * from './services/admin-portal/src';
 
 // Re-export common types
 export interface ApiConfig {

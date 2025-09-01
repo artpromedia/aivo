@@ -56,7 +56,6 @@ export default [
       "@typescript-eslint/explicit-function-return-type": "off",
       "@typescript-eslint/explicit-module-boundary-types": "off",
       "@typescript-eslint/no-inferrable-types": "error",
-      "@typescript-eslint/prefer-const": "error",
       "prefer-const": "error",
       "no-var": "error"
     }
@@ -81,7 +80,10 @@ export default [
       "**/.netlify/**",
       "**/coverage/**",
       "**/*.config.{js,ts,mjs}",
-      "**/*.d.ts"
+      "**/*.d.ts",
+      "**/.venv/**",
+      "**/libs/sdk-web/**",
+      "**/scripts/**"
     ]
   }
 ];

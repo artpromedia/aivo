@@ -7,11 +7,11 @@ services:
       POSTGRES_USER: postgres
       POSTGRES_PASSWORD: password
     ports:
-      - "5432:5432"
+      - '5432:5432'
     volumes:
       - postgres_data:/var/lib/postgresql/data
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U postgres -d monorepo"]
+      test: ['CMD-SHELL', 'pg_isready -U postgres -d monorepo']
       interval: 10s
       timeout: 5s
       retries: 5
@@ -22,11 +22,11 @@ services:
     image: redis:7
     container_name: monorepo_redis
     ports:
-      - "6379:6379"
+      - '6379:6379'
     volumes:
       - redis_data:/data
     healthcheck:
-      test: ["CMD-SHELL", "redis-cli ping | grep PONG"]
+      test: ['CMD-SHELL', 'redis-cli ping | grep PONG']
       interval: 10s
       timeout: 5s
       retries: 5
@@ -41,12 +41,16 @@ services:
       MINIO_ROOT_USER: minioadmin
       MINIO_ROOT_PASSWORD: minioadmin
     ports:
-      - "9000:9000"
-      - "9001:9001"
+      - '9000:9000'
+      - '9001:9001'
     volumes:
       - minio_data:/data
     healthcheck:
-      test: ["CMD-SHELL", "curl -f http://localhost:9000/minio/health/live || exit 1"]
+      test:
+        [
+          'CMD-SHELL',
+          'curl -f http://localhost:9000/minio/health/live || exit 1',
+        ]
       interval: 30s
       timeout: 10s
       retries: 3
@@ -58,12 +62,12 @@ services:
     image: docker.redpanda.com/redpandadata/redpanda:v24.1.2
     container_name: monorepo_redpanda
     ports:
-      - "9092:9092"
-      - "9644:9644"
+      - '9092:9092'
+      - '9644:9644'
     volumes:
       - redpanda_data:/var/lib/redpanda/data
     healthcheck:
-      test: ["CMD-SHELL", "rpk cluster info"]
+      test: ['CMD-SHELL', 'rpk cluster info']
       interval: 30s
       timeout: 10s
       retries: 3

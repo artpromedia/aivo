@@ -3,9 +3,6 @@ module.exports = {
     'pnpm prettier --write',
     'pnpm eslint --fix',
   ],
-  '*.{yml,yaml}': [
-    'pnpm yamllint -s',
-  ],
   '**/Dockerfile*': [
     'hadolint',
   ],

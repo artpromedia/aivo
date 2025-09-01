@@ -24,7 +24,7 @@ jobs:
       - name: Validate ESLint v9 requirement
         run: |
           echo "Checking ESLint version constraints..."
-          
+
           # Check if eslint is in package.json changes
           if git diff HEAD~1 HEAD package.json | grep -q '"eslint"'; then
             echo "ESLint version change detected"
@@ -45,19 +45,19 @@ jobs:
       - name: Check for deprecated packages
         run: |
           echo "Checking for deprecated packages..."
-          
+
           # Install dependencies to check for deprecations
           npm ci
-          
+
           # Run our deprecated package check
           node scripts/check-npm-deprecations.mjs
-          
+
           echo "✅ No deprecated packages found"
 
       - name: Validate engines constraint
         run: |
           echo "Validating Node.js engines constraint..."
-          
+
           NODE_ENGINES=$(node -pe "require('./package.json').engines?.node || ''")
           if [ -n "$NODE_ENGINES" ]; then
             echo "Node.js engines constraint: $NODE_ENGINES"
@@ -83,15 +83,15 @@ jobs:
         with:
           script: |
             const comment = `✅ **Dependabot Validation Passed**
-            
+
             This Dependabot update has been validated and meets all requirements:
             - ESLint v9 requirement maintained
             - No deprecated packages introduced
             - Engine constraints respected
             - All safety checks passed
-            
+
             Safe to merge! 🚀`;
-            
+
             github.rest.issues.createComment({
               issue_number: context.issue.number,
               owner: context.repo.owner,
