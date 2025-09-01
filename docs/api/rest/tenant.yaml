@@ -1,0 +1,552 @@
+openapi: 3.1.0
+info:
+  title: Tenant Management API
+  description: Multi-tenant organization management service
+  version: 1.0.0
+  contact:
+    name: API Support
+    email: api-support@aivo.com
+servers:
+  - url: https://api.aivo.com/tenant/v1
+    description: Production server
+  - url: https://staging-api.aivo.com/tenant/v1
+    description: Staging server
+paths:
+  /tenants:
+    get:
+      summary: List tenants
+      operationId: listTenants
+      tags:
+        - Tenants
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: limit
+          in: query
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 100
+            default: 20
+        - name: offset
+          in: query
+          schema:
+            type: integer
+            minimum: 0
+            default: 0
+        - name: status
+          in: query
+          schema:
+            type: string
+            enum: [active, inactive, trial, suspended]
+      responses:
+        '200':
+          description: Tenants retrieved successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                required:
+                  - data
+                  - total
+                  - limit
+                  - offset
+                properties:
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Tenant'
+                  total:
+                    type: integer
+                    example: 150
+                  limit:
+                    type: integer
+                    example: 20
+                  offset:
+                    type: integer
+                    example: 0
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+    post:
+      summary: Create new tenant
+      operationId: createTenant
+      tags:
+        - Tenants
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateTenantRequest'
+      responses:
+        '201':
+          description: Tenant created successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Tenant'
+        '400':
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '422':
+          description: Validation error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ValidationError'
+
+  /tenants/{tenantId}:
+    get:
+      summary: Get tenant by ID
+      operationId: getTenant
+      tags:
+        - Tenants
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: tenantId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: Tenant retrieved successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Tenant'
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '404':
+          description: Tenant not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+    put:
+      summary: Update tenant
+      operationId: updateTenant
+      tags:
+        - Tenants
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: tenantId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateTenantRequest'
+      responses:
+        '200':
+          description: Tenant updated successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Tenant'
+        '400':
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '404':
+          description: Tenant not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '422':
+          description: Validation error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ValidationError'
+
+    delete:
+      summary: Delete tenant
+      operationId: deleteTenant
+      tags:
+        - Tenants
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: tenantId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '204':
+          description: Tenant deleted successfully
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '404':
+          description: Tenant not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+  /tenants/{tenantId}/settings:
+    get:
+      summary: Get tenant settings
+      operationId: getTenantSettings
+      tags:
+        - Tenant Settings
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: tenantId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: Tenant settings retrieved successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TenantSettings'
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '404':
+          description: Tenant not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+    put:
+      summary: Update tenant settings
+      operationId: updateTenantSettings
+      tags:
+        - Tenant Settings
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: tenantId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/TenantSettings'
+      responses:
+        '200':
+          description: Tenant settings updated successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TenantSettings'
+        '400':
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '404':
+          description: Tenant not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+
+  schemas:
+    Tenant:
+      type: object
+      required:
+        - id
+        - name
+        - slug
+        - status
+        - plan
+        - createdAt
+        - updatedAt
+      properties:
+        id:
+          type: string
+          format: uuid
+          example: "456e7890-e89b-12d3-a456-426614174000"
+        name:
+          type: string
+          example: "Acme Corporation"
+        slug:
+          type: string
+          pattern: "^[a-z0-9-]+$"
+          example: "acme-corp"
+        description:
+          type: string
+          nullable: true
+          example: "Leading provider of educational content"
+        logo:
+          type: string
+          format: uri
+          nullable: true
+          example: "https://example.com/logo.png"
+        website:
+          type: string
+          format: uri
+          nullable: true
+          example: "https://acme.com"
+        status:
+          type: string
+          enum: [active, inactive, trial, suspended]
+          example: "active"
+        plan:
+          type: string
+          enum: [free, starter, professional, enterprise]
+          example: "professional"
+        maxUsers:
+          type: integer
+          minimum: 1
+          example: 100
+        maxSeats:
+          type: integer
+          minimum: 1
+          example: 50
+        trialEndsAt:
+          type: string
+          format: date-time
+          nullable: true
+          example: "2024-01-31T23:59:59Z"
+        createdAt:
+          type: string
+          format: date-time
+          example: "2023-01-01T00:00:00Z"
+        updatedAt:
+          type: string
+          format: date-time
+          example: "2023-12-01T10:30:00Z"
+
+    CreateTenantRequest:
+      type: object
+      required:
+        - name
+        - slug
+        - plan
+      properties:
+        name:
+          type: string
+          minLength: 2
+          maxLength: 100
+          example: "Acme Corporation"
+        slug:
+          type: string
+          pattern: "^[a-z0-9-]+$"
+          minLength: 2
+          maxLength: 50
+          example: "acme-corp"
+        description:
+          type: string
+          maxLength: 500
+          example: "Leading provider of educational content"
+        website:
+          type: string
+          format: uri
+          example: "https://acme.com"
+        plan:
+          type: string
+          enum: [free, starter, professional, enterprise]
+          example: "professional"
+        maxUsers:
+          type: integer
+          minimum: 1
+          maximum: 10000
+          example: 100
+
+    UpdateTenantRequest:
+      type: object
+      properties:
+        name:
+          type: string
+          minLength: 2
+          maxLength: 100
+          example: "Acme Corporation"
+        description:
+          type: string
+          maxLength: 500
+          example: "Leading provider of educational content"
+        logo:
+          type: string
+          format: uri
+          example: "https://example.com/logo.png"
+        website:
+          type: string
+          format: uri
+          example: "https://acme.com"
+        status:
+          type: string
+          enum: [active, inactive, trial, suspended]
+          example: "active"
+
+    TenantSettings:
+      type: object
+      required:
+        - tenantId
+        - features
+        - branding
+        - notifications
+      properties:
+        tenantId:
+          type: string
+          format: uuid
+          example: "456e7890-e89b-12d3-a456-426614174000"
+        features:
+          type: object
+          properties:
+            enableSso:
+              type: boolean
+              default: false
+            enableApi:
+              type: boolean
+              default: true
+            enableReporting:
+              type: boolean
+              default: true
+            enableCustomBranding:
+              type: boolean
+              default: false
+        branding:
+          type: object
+          properties:
+            primaryColor:
+              type: string
+              pattern: "^#[0-9A-Fa-f]{6}$"
+              example: "#007bff"
+            secondaryColor:
+              type: string
+              pattern: "^#[0-9A-Fa-f]{6}$"
+              example: "#6c757d"
+            logo:
+              type: string
+              format: uri
+              example: "https://example.com/logo.png"
+            favicon:
+              type: string
+              format: uri
+              example: "https://example.com/favicon.ico"
+        notifications:
+          type: object
+          properties:
+            emailNotifications:
+              type: boolean
+              default: true
+            slackWebhook:
+              type: string
+              format: uri
+              nullable: true
+              example: "https://hooks.slack.com/services/..."
+            webhookUrl:
+              type: string
+              format: uri
+              nullable: true
+              example: "https://api.acme.com/webhooks/aivo"
+
+    Error:
+      type: object
+      required:
+        - error
+        - message
+      properties:
+        error:
+          type: string
+          example: "tenant_not_found"
+        message:
+          type: string
+          example: "Tenant not found"
+        details:
+          type: object
+          additionalProperties: true
+
+    ValidationError:
+      type: object
+      required:
+        - error
+        - message
+        - validationErrors
+      properties:
+        error:
+          type: string
+          example: "validation_failed"
+        message:
+          type: string
+          example: "Request validation failed"
+        validationErrors:
+          type: array
+          items:
+            type: object
+            required:
+              - field
+              - message
+            properties:
+              field:
+                type: string
+                example: "name"
+              message:
+                type: string
+                example: "Name is required"

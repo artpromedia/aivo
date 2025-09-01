@@ -1,0 +1,1310 @@
+openapi: 3.1.0
+info:
+  title: Learning Orchestrator API
+  description: Course orchestration and learning path management service
+  version: 1.0.0
+  contact:
+    name: API Support
+    email: api-support@aivo.com
+servers:
+  - url: https://api.aivo.com/orchestrator/v1
+    description: Production server
+  - url: https://staging-api.aivo.com/orchestrator/v1
+    description: Staging server
+paths:
+  /courses:
+    get:
+      summary: List courses
+      operationId: listCourses
+      tags:
+        - Courses
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: tenantId
+          in: query
+          schema:
+            type: string
+            format: uuid
+        - name: category
+          in: query
+          schema:
+            type: string
+        - name: difficulty
+          in: query
+          schema:
+            type: string
+            enum: [beginner, intermediate, advanced]
+        - name: status
+          in: query
+          schema:
+            type: string
+            enum: [draft, published, archived]
+        - name: search
+          in: query
+          schema:
+            type: string
+            description: Search by title or description
+        - name: limit
+          in: query
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 100
+            default: 20
+        - name: offset
+          in: query
+          schema:
+            type: integer
+            minimum: 0
+            default: 0
+      responses:
+        '200':
+          description: Courses retrieved successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                required:
+                  - data
+                  - total
+                  - limit
+                  - offset
+                properties:
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Course'
+                  total:
+                    type: integer
+                    example: 150
+                  limit:
+                    type: integer
+                    example: 20
+                  offset:
+                    type: integer
+                    example: 0
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+    post:
+      summary: Create new course
+      operationId: createCourse
+      tags:
+        - Courses
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateCourseRequest'
+      responses:
+        '201':
+          description: Course created successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Course'
+        '400':
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '422':
+          description: Validation error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ValidationError'
+
+  /courses/{courseId}:
+    get:
+      summary: Get course by ID
+      operationId: getCourse
+      tags:
+        - Courses
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: courseId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: Course retrieved successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CourseDetailed'
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '404':
+          description: Course not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+    put:
+      summary: Update course
+      operationId: updateCourse
+      tags:
+        - Courses
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: courseId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateCourseRequest'
+      responses:
+        '200':
+          description: Course updated successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Course'
+        '400':
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '404':
+          description: Course not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+    delete:
+      summary: Delete course
+      operationId: deleteCourse
+      tags:
+        - Courses
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: courseId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '204':
+          description: Course deleted successfully
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '404':
+          description: Course not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+  /courses/{courseId}/modules:
+    get:
+      summary: Get course modules
+      operationId: getCourseModules
+      tags:
+        - Modules
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: courseId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: Course modules retrieved successfully
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Module'
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '404':
+          description: Course not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+    post:
+      summary: Add module to course
+      operationId: addCourseModule
+      tags:
+        - Modules
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: courseId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateModuleRequest'
+      responses:
+        '201':
+          description: Module added successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Module'
+        '400':
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '404':
+          description: Course not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+  /learning-paths:
+    get:
+      summary: List learning paths
+      operationId: listLearningPaths
+      tags:
+        - Learning Paths
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: tenantId
+          in: query
+          schema:
+            type: string
+            format: uuid
+        - name: category
+          in: query
+          schema:
+            type: string
+        - name: status
+          in: query
+          schema:
+            type: string
+            enum: [draft, published, archived]
+        - name: limit
+          in: query
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 100
+            default: 20
+        - name: offset
+          in: query
+          schema:
+            type: integer
+            minimum: 0
+            default: 0
+      responses:
+        '200':
+          description: Learning paths retrieved successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                required:
+                  - data
+                  - total
+                  - limit
+                  - offset
+                properties:
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/LearningPath'
+                  total:
+                    type: integer
+                    example: 50
+                  limit:
+                    type: integer
+                    example: 20
+                  offset:
+                    type: integer
+                    example: 0
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+    post:
+      summary: Create new learning path
+      operationId: createLearningPath
+      tags:
+        - Learning Paths
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateLearningPathRequest'
+      responses:
+        '201':
+          description: Learning path created successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/LearningPath'
+        '400':
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '422':
+          description: Validation error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ValidationError'
+
+  /learning-paths/{pathId}:
+    get:
+      summary: Get learning path by ID
+      operationId: getLearningPath
+      tags:
+        - Learning Paths
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: pathId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: Learning path retrieved successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/LearningPathDetailed'
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '404':
+          description: Learning path not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+  /assessments:
+    get:
+      summary: List assessments
+      operationId: listAssessments
+      tags:
+        - Assessments
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: courseId
+          in: query
+          schema:
+            type: string
+            format: uuid
+        - name: moduleId
+          in: query
+          schema:
+            type: string
+            format: uuid
+        - name: type
+          in: query
+          schema:
+            type: string
+            enum: [quiz, assignment, final_exam, certification]
+        - name: limit
+          in: query
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 100
+            default: 20
+        - name: offset
+          in: query
+          schema:
+            type: integer
+            minimum: 0
+            default: 0
+      responses:
+        '200':
+          description: Assessments retrieved successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                required:
+                  - data
+                  - total
+                  - limit
+                  - offset
+                properties:
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Assessment'
+                  total:
+                    type: integer
+                    example: 75
+                  limit:
+                    type: integer
+                    example: 20
+                  offset:
+                    type: integer
+                    example: 0
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+  /assessments/{assessmentId}/submit:
+    post:
+      summary: Submit assessment
+      operationId: submitAssessment
+      tags:
+        - Assessments
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: assessmentId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SubmitAssessmentRequest'
+      responses:
+        '200':
+          description: Assessment submitted successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AssessmentResult'
+        '400':
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '404':
+          description: Assessment not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+
+  schemas:
+    Course:
+      type: object
+      required:
+        - id
+        - title
+        - description
+        - category
+        - difficulty
+        - status
+        - estimatedDuration
+        - createdAt
+        - updatedAt
+      properties:
+        id:
+          type: string
+          format: uuid
+          example: "course_123e4567-e89b-12d3-a456-426614174000"
+        title:
+          type: string
+          example: "Advanced JavaScript Programming"
+        description:
+          type: string
+          example: "Master advanced JavaScript concepts and modern frameworks"
+        shortDescription:
+          type: string
+          example: "Learn advanced JS concepts"
+        category:
+          type: string
+          example: "Programming"
+        tags:
+          type: array
+          items:
+            type: string
+          example: ["javascript", "programming", "web-development"]
+        difficulty:
+          type: string
+          enum: [beginner, intermediate, advanced]
+          example: "advanced"
+        status:
+          type: string
+          enum: [draft, published, archived]
+          example: "published"
+        estimatedDuration:
+          type: integer
+          description: Estimated duration in minutes
+          example: 1200
+        thumbnailUrl:
+          type: string
+          format: uri
+          example: "https://example.com/thumbnails/js-course.jpg"
+        instructorId:
+          type: string
+          format: uuid
+          example: "inst_456e7890-e89b-12d3-a456-426614174000"
+        prerequisites:
+          type: array
+          items:
+            type: string
+            format: uuid
+          example: ["course_abc123", "course_def456"]
+        learningObjectives:
+          type: array
+          items:
+            type: string
+          example: ["Understand closures", "Master async/await", "Build modern web apps"]
+        moduleCount:
+          type: integer
+          example: 8
+        enrollmentCount:
+          type: integer
+          example: 1250
+        averageRating:
+          type: number
+          minimum: 0
+          maximum: 5
+          example: 4.7
+        reviewCount:
+          type: integer
+          example: 127
+        isPublic:
+          type: boolean
+          default: true
+        metadata:
+          type: object
+          additionalProperties: true
+        createdAt:
+          type: string
+          format: date-time
+          example: "2023-01-01T00:00:00Z"
+        updatedAt:
+          type: string
+          format: date-time
+          example: "2023-12-01T10:30:00Z"
+
+    CourseDetailed:
+      allOf:
+        - $ref: '#/components/schemas/Course'
+        - type: object
+          properties:
+            modules:
+              type: array
+              items:
+                $ref: '#/components/schemas/Module'
+            assessments:
+              type: array
+              items:
+                $ref: '#/components/schemas/Assessment'
+            requirements:
+              type: object
+              properties:
+                systemRequirements:
+                  type: array
+                  items:
+                    type: string
+                softwareRequirements:
+                  type: array
+                  items:
+                    type: string
+
+    CreateCourseRequest:
+      type: object
+      required:
+        - title
+        - description
+        - category
+        - difficulty
+      properties:
+        title:
+          type: string
+          minLength: 3
+          maxLength: 200
+          example: "Advanced JavaScript Programming"
+        description:
+          type: string
+          minLength: 10
+          maxLength: 2000
+          example: "Master advanced JavaScript concepts and modern frameworks"
+        shortDescription:
+          type: string
+          maxLength: 500
+          example: "Learn advanced JS concepts"
+        category:
+          type: string
+          example: "Programming"
+        tags:
+          type: array
+          items:
+            type: string
+          maxItems: 10
+        difficulty:
+          type: string
+          enum: [beginner, intermediate, advanced]
+          example: "advanced"
+        estimatedDuration:
+          type: integer
+          minimum: 1
+          example: 1200
+        thumbnailUrl:
+          type: string
+          format: uri
+          example: "https://example.com/thumbnails/js-course.jpg"
+        instructorId:
+          type: string
+          format: uuid
+          example: "inst_456e7890-e89b-12d3-a456-426614174000"
+        prerequisites:
+          type: array
+          items:
+            type: string
+            format: uuid
+        learningObjectives:
+          type: array
+          items:
+            type: string
+          maxItems: 20
+        isPublic:
+          type: boolean
+          default: true
+        metadata:
+          type: object
+          additionalProperties: true
+
+    UpdateCourseRequest:
+      type: object
+      properties:
+        title:
+          type: string
+          minLength: 3
+          maxLength: 200
+        description:
+          type: string
+          minLength: 10
+          maxLength: 2000
+        shortDescription:
+          type: string
+          maxLength: 500
+        category:
+          type: string
+        tags:
+          type: array
+          items:
+            type: string
+          maxItems: 10
+        difficulty:
+          type: string
+          enum: [beginner, intermediate, advanced]
+        status:
+          type: string
+          enum: [draft, published, archived]
+        estimatedDuration:
+          type: integer
+          minimum: 1
+        thumbnailUrl:
+          type: string
+          format: uri
+        learningObjectives:
+          type: array
+          items:
+            type: string
+          maxItems: 20
+        isPublic:
+          type: boolean
+        metadata:
+          type: object
+          additionalProperties: true
+
+    Module:
+      type: object
+      required:
+        - id
+        - courseId
+        - title
+        - type
+        - order
+        - estimatedDuration
+        - createdAt
+        - updatedAt
+      properties:
+        id:
+          type: string
+          format: uuid
+          example: "mod_123e4567-e89b-12d3-a456-426614174000"
+        courseId:
+          type: string
+          format: uuid
+          example: "course_123e4567-e89b-12d3-a456-426614174000"
+        title:
+          type: string
+          example: "Closures and Scope"
+        description:
+          type: string
+          example: "Understanding JavaScript closures and lexical scope"
+        type:
+          type: string
+          enum: [video, text, interactive, assignment, quiz]
+          example: "video"
+        order:
+          type: integer
+          minimum: 1
+          example: 1
+        estimatedDuration:
+          type: integer
+          description: Estimated duration in minutes
+          example: 45
+        contentUrl:
+          type: string
+          format: uri
+          example: "https://example.com/content/module1.mp4"
+        transcriptUrl:
+          type: string
+          format: uri
+          nullable: true
+          example: "https://example.com/transcripts/module1.vtt"
+        resources:
+          type: array
+          items:
+            type: object
+            properties:
+              title:
+                type: string
+              url:
+                type: string
+                format: uri
+              type:
+                type: string
+                enum: [pdf, link, code, dataset]
+        isOptional:
+          type: boolean
+          default: false
+        prerequisites:
+          type: array
+          items:
+            type: string
+            format: uuid
+        metadata:
+          type: object
+          additionalProperties: true
+        createdAt:
+          type: string
+          format: date-time
+          example: "2023-01-01T00:00:00Z"
+        updatedAt:
+          type: string
+          format: date-time
+          example: "2023-12-01T10:30:00Z"
+
+    CreateModuleRequest:
+      type: object
+      required:
+        - title
+        - type
+        - order
+      properties:
+        title:
+          type: string
+          minLength: 3
+          maxLength: 200
+          example: "Closures and Scope"
+        description:
+          type: string
+          maxLength: 1000
+          example: "Understanding JavaScript closures and lexical scope"
+        type:
+          type: string
+          enum: [video, text, interactive, assignment, quiz]
+          example: "video"
+        order:
+          type: integer
+          minimum: 1
+          example: 1
+        estimatedDuration:
+          type: integer
+          minimum: 1
+          example: 45
+        contentUrl:
+          type: string
+          format: uri
+          example: "https://example.com/content/module1.mp4"
+        transcriptUrl:
+          type: string
+          format: uri
+          example: "https://example.com/transcripts/module1.vtt"
+        isOptional:
+          type: boolean
+          default: false
+        prerequisites:
+          type: array
+          items:
+            type: string
+            format: uuid
+        metadata:
+          type: object
+          additionalProperties: true
+
+    LearningPath:
+      type: object
+      required:
+        - id
+        - title
+        - description
+        - category
+        - status
+        - estimatedDuration
+        - courseCount
+        - createdAt
+        - updatedAt
+      properties:
+        id:
+          type: string
+          format: uuid
+          example: "path_123e4567-e89b-12d3-a456-426614174000"
+        title:
+          type: string
+          example: "Full Stack Developer Path"
+        description:
+          type: string
+          example: "Comprehensive path to become a full stack developer"
+        category:
+          type: string
+          example: "Software Development"
+        status:
+          type: string
+          enum: [draft, published, archived]
+          example: "published"
+        difficulty:
+          type: string
+          enum: [beginner, intermediate, advanced]
+          example: "intermediate"
+        estimatedDuration:
+          type: integer
+          description: Total estimated duration in minutes
+          example: 7200
+        thumbnailUrl:
+          type: string
+          format: uri
+          example: "https://example.com/thumbnails/fullstack-path.jpg"
+        courseCount:
+          type: integer
+          example: 6
+        enrollmentCount:
+          type: integer
+          example: 500
+        averageRating:
+          type: number
+          minimum: 0
+          maximum: 5
+          example: 4.5
+        tags:
+          type: array
+          items:
+            type: string
+          example: ["javascript", "react", "nodejs", "database"]
+        createdAt:
+          type: string
+          format: date-time
+          example: "2023-01-01T00:00:00Z"
+        updatedAt:
+          type: string
+          format: date-time
+          example: "2023-12-01T10:30:00Z"
+
+    LearningPathDetailed:
+      allOf:
+        - $ref: '#/components/schemas/LearningPath'
+        - type: object
+          properties:
+            courses:
+              type: array
+              items:
+                type: object
+                properties:
+                  courseId:
+                    type: string
+                    format: uuid
+                  course:
+                    $ref: '#/components/schemas/Course'
+                  order:
+                    type: integer
+                  isOptional:
+                    type: boolean
+                  unlockConditions:
+                    type: object
+                    properties:
+                      prerequisiteCourses:
+                        type: array
+                        items:
+                          type: string
+                          format: uuid
+                      minimumScore:
+                        type: number
+                        minimum: 0
+                        maximum: 100
+
+    CreateLearningPathRequest:
+      type: object
+      required:
+        - title
+        - description
+        - category
+        - courses
+      properties:
+        title:
+          type: string
+          minLength: 3
+          maxLength: 200
+          example: "Full Stack Developer Path"
+        description:
+          type: string
+          minLength: 10
+          maxLength: 2000
+          example: "Comprehensive path to become a full stack developer"
+        category:
+          type: string
+          example: "Software Development"
+        difficulty:
+          type: string
+          enum: [beginner, intermediate, advanced]
+          example: "intermediate"
+        thumbnailUrl:
+          type: string
+          format: uri
+          example: "https://example.com/thumbnails/fullstack-path.jpg"
+        tags:
+          type: array
+          items:
+            type: string
+          maxItems: 10
+        courses:
+          type: array
+          items:
+            type: object
+            required:
+              - courseId
+              - order
+            properties:
+              courseId:
+                type: string
+                format: uuid
+              order:
+                type: integer
+                minimum: 1
+              isOptional:
+                type: boolean
+                default: false
+          minItems: 1
+
+    Assessment:
+      type: object
+      required:
+        - id
+        - title
+        - type
+        - courseId
+        - maxScore
+        - passingScore
+        - timeLimit
+        - createdAt
+        - updatedAt
+      properties:
+        id:
+          type: string
+          format: uuid
+          example: "assess_123e4567-e89b-12d3-a456-426614174000"
+        title:
+          type: string
+          example: "JavaScript Fundamentals Quiz"
+        description:
+          type: string
+          example: "Test your knowledge of JavaScript fundamentals"
+        type:
+          type: string
+          enum: [quiz, assignment, final_exam, certification]
+          example: "quiz"
+        courseId:
+          type: string
+          format: uuid
+          example: "course_123e4567-e89b-12d3-a456-426614174000"
+        moduleId:
+          type: string
+          format: uuid
+          nullable: true
+          example: "mod_123e4567-e89b-12d3-a456-426614174000"
+        maxScore:
+          type: number
+          minimum: 0
+          example: 100
+        passingScore:
+          type: number
+          minimum: 0
+          example: 70
+        timeLimit:
+          type: integer
+          description: Time limit in minutes
+          nullable: true
+          example: 60
+        attemptsAllowed:
+          type: integer
+          minimum: 1
+          nullable: true
+          example: 3
+        questionCount:
+          type: integer
+          example: 20
+        isRequired:
+          type: boolean
+          default: true
+        metadata:
+          type: object
+          additionalProperties: true
+        createdAt:
+          type: string
+          format: date-time
+          example: "2023-01-01T00:00:00Z"
+        updatedAt:
+          type: string
+          format: date-time
+          example: "2023-12-01T10:30:00Z"
+
+    SubmitAssessmentRequest:
+      type: object
+      required:
+        - answers
+      properties:
+        answers:
+          type: array
+          items:
+            type: object
+            required:
+              - questionId
+              - answer
+            properties:
+              questionId:
+                type: string
+                format: uuid
+              answer:
+                oneOf:
+                  - type: string
+                  - type: array
+                    items:
+                      type: string
+                  - type: number
+        timeSpent:
+          type: integer
+          description: Time spent in minutes
+          example: 45
+
+    AssessmentResult:
+      type: object
+      required:
+        - id
+        - assessmentId
+        - learnerId
+        - score
+        - maxScore
+        - passed
+        - submittedAt
+      properties:
+        id:
+          type: string
+          format: uuid
+          example: "result_123e4567-e89b-12d3-a456-426614174000"
+        assessmentId:
+          type: string
+          format: uuid
+          example: "assess_123e4567-e89b-12d3-a456-426614174000"
+        learnerId:
+          type: string
+          format: uuid
+          example: "123e4567-e89b-12d3-a456-426614174000"
+        score:
+          type: number
+          example: 85
+        maxScore:
+          type: number
+          example: 100
+        percentage:
+          type: number
+          minimum: 0
+          maximum: 100
+          example: 85
+        passed:
+          type: boolean
+          example: true
+        timeSpent:
+          type: integer
+          description: Time spent in minutes
+          example: 45
+        attempt:
+          type: integer
+          example: 1
+        feedback:
+          type: string
+          nullable: true
+          example: "Great job! You demonstrated strong understanding of the concepts."
+        detailedResults:
+          type: array
+          items:
+            type: object
+            properties:
+              questionId:
+                type: string
+                format: uuid
+              correct:
+                type: boolean
+              points:
+                type: number
+              feedback:
+                type: string
+        submittedAt:
+          type: string
+          format: date-time
+          example: "2023-12-01T16:45:00Z"
+
+    Error:
+      type: object
+      required:
+        - error
+        - message
+      properties:
+        error:
+          type: string
+          example: "course_not_found"
+        message:
+          type: string
+          example: "Course not found"
+        details:
+          type: object
+          additionalProperties: true
+
+    ValidationError:
+      type: object
+      required:
+        - error
+        - message
+        - validationErrors
+      properties:
+        error:
+          type: string
+          example: "validation_failed"
+        message:
+          type: string
+          example: "Request validation failed"
+        validationErrors:
+          type: array
+          items:
+            type: object
+            required:
+              - field
+              - message
+            properties:
+              field:
+                type: string
+                example: "title"
+              message:
+                type: string
+                example: "Title is required"

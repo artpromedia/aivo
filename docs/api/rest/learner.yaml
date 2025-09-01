@@ -1,0 +1,1009 @@
+openapi: 3.1.0
+info:
+  title: Learner Management API
+  description: Learner profile and learning data management service
+  version: 1.0.0
+  contact:
+    name: API Support
+    email: api-support@aivo.com
+servers:
+  - url: https://api.aivo.com/learner/v1
+    description: Production server
+  - url: https://staging-api.aivo.com/learner/v1
+    description: Staging server
+paths:
+  /learners:
+    get:
+      summary: List learners
+      operationId: listLearners
+      tags:
+        - Learners
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: tenantId
+          in: query
+          required: true
+          schema:
+            type: string
+            format: uuid
+        - name: status
+          in: query
+          schema:
+            type: string
+            enum: [active, inactive, pending, suspended]
+        - name: search
+          in: query
+          schema:
+            type: string
+            description: Search by name or email
+        - name: limit
+          in: query
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 100
+            default: 20
+        - name: offset
+          in: query
+          schema:
+            type: integer
+            minimum: 0
+            default: 0
+      responses:
+        '200':
+          description: Learners retrieved successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                required:
+                  - data
+                  - total
+                  - limit
+                  - offset
+                properties:
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Learner'
+                  total:
+                    type: integer
+                    example: 500
+                  limit:
+                    type: integer
+                    example: 20
+                  offset:
+                    type: integer
+                    example: 0
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+    post:
+      summary: Create new learner
+      operationId: createLearner
+      tags:
+        - Learners
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateLearnerRequest'
+      responses:
+        '201':
+          description: Learner created successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Learner'
+        '400':
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '409':
+          description: Learner already exists
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '422':
+          description: Validation error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ValidationError'
+
+  /learners/{learnerId}:
+    get:
+      summary: Get learner by ID
+      operationId: getLearner
+      tags:
+        - Learners
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: learnerId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: Learner retrieved successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Learner'
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '404':
+          description: Learner not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+    put:
+      summary: Update learner
+      operationId: updateLearner
+      tags:
+        - Learners
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: learnerId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateLearnerRequest'
+      responses:
+        '200':
+          description: Learner updated successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Learner'
+        '400':
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '404':
+          description: Learner not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+    delete:
+      summary: Delete learner
+      operationId: deleteLearner
+      tags:
+        - Learners
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: learnerId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '204':
+          description: Learner deleted successfully
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '404':
+          description: Learner not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+  /learners/{learnerId}/profile:
+    get:
+      summary: Get learner profile
+      operationId: getLearnerProfile
+      tags:
+        - Learner Profile
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: learnerId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: Learner profile retrieved successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/LearnerProfile'
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '404':
+          description: Learner not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+    put:
+      summary: Update learner profile
+      operationId: updateLearnerProfile
+      tags:
+        - Learner Profile
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: learnerId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateLearnerProfileRequest'
+      responses:
+        '200':
+          description: Learner profile updated successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/LearnerProfile'
+        '400':
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '404':
+          description: Learner not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+  /learners/{learnerId}/analytics:
+    get:
+      summary: Get learner analytics
+      operationId: getLearnerAnalytics
+      tags:
+        - Analytics
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: learnerId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+        - name: range
+          in: query
+          schema:
+            type: string
+            enum: [7d, 30d, 90d, 1y]
+            default: 30d
+      responses:
+        '200':
+          description: Learner analytics retrieved successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/LearnerAnalytics'
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '404':
+          description: Learner not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+  /learners/{learnerId}/achievements:
+    get:
+      summary: Get learner achievements
+      operationId: getLearnerAchievements
+      tags:
+        - Achievements
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: learnerId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: Learner achievements retrieved successfully
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Achievement'
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '404':
+          description: Learner not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+    post:
+      summary: Award achievement to learner
+      operationId: awardAchievement
+      tags:
+        - Achievements
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: learnerId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AwardAchievementRequest'
+      responses:
+        '201':
+          description: Achievement awarded successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Achievement'
+        '400':
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '404':
+          description: Learner not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+  /bulk-import:
+    post:
+      summary: Bulk import learners
+      operationId: bulkImportLearners
+      tags:
+        - Bulk Operations
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/BulkImportRequest'
+      responses:
+        '200':
+          description: Bulk import completed
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BulkImportResponse'
+        '400':
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+
+  schemas:
+    Learner:
+      type: object
+      required:
+        - id
+        - tenantId
+        - email
+        - firstName
+        - lastName
+        - status
+        - createdAt
+        - updatedAt
+      properties:
+        id:
+          type: string
+          format: uuid
+          example: "123e4567-e89b-12d3-a456-426614174000"
+        tenantId:
+          type: string
+          format: uuid
+          example: "456e7890-e89b-12d3-a456-426614174000"
+        email:
+          type: string
+          format: email
+          example: "learner@example.com"
+        firstName:
+          type: string
+          example: "Jane"
+        lastName:
+          type: string
+          example: "Smith"
+        status:
+          type: string
+          enum: [active, inactive, pending, suspended]
+          example: "active"
+        avatar:
+          type: string
+          format: uri
+          nullable: true
+          example: "https://example.com/avatar.jpg"
+        timezone:
+          type: string
+          example: "America/New_York"
+        language:
+          type: string
+          example: "en"
+        department:
+          type: string
+          nullable: true
+          example: "Engineering"
+        jobTitle:
+          type: string
+          nullable: true
+          example: "Software Engineer"
+        manager:
+          type: string
+          format: uuid
+          nullable: true
+          example: "234e5678-e89b-12d3-a456-426614174000"
+        lastLoginAt:
+          type: string
+          format: date-time
+          nullable: true
+          example: "2023-12-01T10:30:00Z"
+        enrollmentCount:
+          type: integer
+          example: 5
+        completionCount:
+          type: integer
+          example: 3
+        totalLearningMinutes:
+          type: integer
+          example: 1250
+        metadata:
+          type: object
+          additionalProperties: true
+          example:
+            employeeId: "EMP001"
+            hireDate: "2022-01-15"
+        createdAt:
+          type: string
+          format: date-time
+          example: "2023-01-01T00:00:00Z"
+        updatedAt:
+          type: string
+          format: date-time
+          example: "2023-12-01T10:30:00Z"
+
+    CreateLearnerRequest:
+      type: object
+      required:
+        - tenantId
+        - email
+        - firstName
+        - lastName
+      properties:
+        tenantId:
+          type: string
+          format: uuid
+          example: "456e7890-e89b-12d3-a456-426614174000"
+        email:
+          type: string
+          format: email
+          example: "learner@example.com"
+        firstName:
+          type: string
+          minLength: 1
+          maxLength: 50
+          example: "Jane"
+        lastName:
+          type: string
+          minLength: 1
+          maxLength: 50
+          example: "Smith"
+        timezone:
+          type: string
+          example: "America/New_York"
+        language:
+          type: string
+          example: "en"
+        department:
+          type: string
+          maxLength: 100
+          example: "Engineering"
+        jobTitle:
+          type: string
+          maxLength: 100
+          example: "Software Engineer"
+        manager:
+          type: string
+          format: uuid
+          example: "234e5678-e89b-12d3-a456-426614174000"
+        metadata:
+          type: object
+          additionalProperties: true
+
+    UpdateLearnerRequest:
+      type: object
+      properties:
+        firstName:
+          type: string
+          minLength: 1
+          maxLength: 50
+          example: "Jane"
+        lastName:
+          type: string
+          minLength: 1
+          maxLength: 50
+          example: "Smith"
+        status:
+          type: string
+          enum: [active, inactive, pending, suspended]
+          example: "active"
+        timezone:
+          type: string
+          example: "America/New_York"
+        language:
+          type: string
+          example: "en"
+        department:
+          type: string
+          maxLength: 100
+          example: "Engineering"
+        jobTitle:
+          type: string
+          maxLength: 100
+          example: "Senior Software Engineer"
+        manager:
+          type: string
+          format: uuid
+          example: "234e5678-e89b-12d3-a456-426614174000"
+        metadata:
+          type: object
+          additionalProperties: true
+
+    LearnerProfile:
+      type: object
+      required:
+        - learnerId
+        - preferences
+        - skills
+        - goals
+      properties:
+        learnerId:
+          type: string
+          format: uuid
+          example: "123e4567-e89b-12d3-a456-426614174000"
+        bio:
+          type: string
+          maxLength: 500
+          nullable: true
+          example: "Passionate software engineer with 5 years of experience"
+        preferences:
+          type: object
+          properties:
+            learningStyle:
+              type: string
+              enum: [visual, auditory, kinesthetic, reading]
+              example: "visual"
+            difficultyLevel:
+              type: string
+              enum: [beginner, intermediate, advanced]
+              example: "intermediate"
+            notificationsEnabled:
+              type: boolean
+              default: true
+            emailDigest:
+              type: boolean
+              default: true
+            preferredLearningTime:
+              type: string
+              enum: [morning, afternoon, evening, night]
+              example: "morning"
+        skills:
+          type: array
+          items:
+            type: object
+            properties:
+              skillId:
+                type: string
+                format: uuid
+              skillName:
+                type: string
+              level:
+                type: string
+                enum: [beginner, intermediate, advanced, expert]
+              verifiedAt:
+                type: string
+                format: date-time
+                nullable: true
+        goals:
+          type: array
+          items:
+            type: object
+            properties:
+              goalId:
+                type: string
+                format: uuid
+              title:
+                type: string
+              description:
+                type: string
+              targetDate:
+                type: string
+                format: date
+              status:
+                type: string
+                enum: [active, completed, paused, canceled]
+              progress:
+                type: number
+                minimum: 0
+                maximum: 100
+        interests:
+          type: array
+          items:
+            type: string
+          example: ["JavaScript", "Machine Learning", "Leadership"]
+
+    UpdateLearnerProfileRequest:
+      type: object
+      properties:
+        bio:
+          type: string
+          maxLength: 500
+          example: "Passionate software engineer with 5 years of experience"
+        preferences:
+          type: object
+          properties:
+            learningStyle:
+              type: string
+              enum: [visual, auditory, kinesthetic, reading]
+            difficultyLevel:
+              type: string
+              enum: [beginner, intermediate, advanced]
+            notificationsEnabled:
+              type: boolean
+            emailDigest:
+              type: boolean
+            preferredLearningTime:
+              type: string
+              enum: [morning, afternoon, evening, night]
+        interests:
+          type: array
+          items:
+            type: string
+
+    LearnerAnalytics:
+      type: object
+      required:
+        - learnerId
+        - range
+        - totalLearningTime
+        - completionRate
+        - streakDays
+        - activityData
+      properties:
+        learnerId:
+          type: string
+          format: uuid
+          example: "123e4567-e89b-12d3-a456-426614174000"
+        range:
+          type: string
+          example: "30d"
+        totalLearningTime:
+          type: integer
+          description: Total learning time in minutes
+          example: 1250
+        completionRate:
+          type: number
+          minimum: 0
+          maximum: 100
+          example: 75.5
+        streakDays:
+          type: integer
+          example: 7
+        coursesStarted:
+          type: integer
+          example: 5
+        coursesCompleted:
+          type: integer
+          example: 3
+        averageSessionLength:
+          type: integer
+          description: Average session length in minutes
+          example: 45
+        activityData:
+          type: array
+          items:
+            type: object
+            properties:
+              date:
+                type: string
+                format: date
+              minutesLearned:
+                type: integer
+              sessionsCount:
+                type: integer
+        subjectBreakdown:
+          type: array
+          items:
+            type: object
+            properties:
+              subject:
+                type: string
+              minutesLearned:
+                type: integer
+              percentage:
+                type: number
+
+    Achievement:
+      type: object
+      required:
+        - id
+        - learnerId
+        - type
+        - title
+        - description
+        - earnedAt
+      properties:
+        id:
+          type: string
+          format: uuid
+          example: "ach_123e4567-e89b-12d3-a456-426614174000"
+        learnerId:
+          type: string
+          format: uuid
+          example: "123e4567-e89b-12d3-a456-426614174000"
+        type:
+          type: string
+          enum: [course_completion, streak, skill_mastery, certification, milestone]
+          example: "course_completion"
+        title:
+          type: string
+          example: "JavaScript Master"
+        description:
+          type: string
+          example: "Completed advanced JavaScript course with 95% score"
+        iconUrl:
+          type: string
+          format: uri
+          example: "https://example.com/icons/js-master.png"
+        badgeUrl:
+          type: string
+          format: uri
+          example: "https://example.com/badges/js-master.png"
+        points:
+          type: integer
+          example: 100
+        metadata:
+          type: object
+          additionalProperties: true
+          example:
+            courseId: "course_123"
+            score: 95
+        earnedAt:
+          type: string
+          format: date-time
+          example: "2023-12-01T16:45:00Z"
+
+    AwardAchievementRequest:
+      type: object
+      required:
+        - type
+        - title
+        - description
+      properties:
+        type:
+          type: string
+          enum: [course_completion, streak, skill_mastery, certification, milestone]
+          example: "course_completion"
+        title:
+          type: string
+          example: "JavaScript Master"
+        description:
+          type: string
+          example: "Completed advanced JavaScript course with 95% score"
+        iconUrl:
+          type: string
+          format: uri
+          example: "https://example.com/icons/js-master.png"
+        badgeUrl:
+          type: string
+          format: uri
+          example: "https://example.com/badges/js-master.png"
+        points:
+          type: integer
+          default: 0
+          example: 100
+        metadata:
+          type: object
+          additionalProperties: true
+
+    BulkImportRequest:
+      type: object
+      required:
+        - tenantId
+        - learners
+      properties:
+        tenantId:
+          type: string
+          format: uuid
+          example: "456e7890-e89b-12d3-a456-426614174000"
+        learners:
+          type: array
+          items:
+            $ref: '#/components/schemas/CreateLearnerRequest'
+          minItems: 1
+          maxItems: 1000
+
+    BulkImportResponse:
+      type: object
+      required:
+        - successful
+        - failed
+        - total
+      properties:
+        successful:
+          type: integer
+          example: 95
+        failed:
+          type: integer
+          example: 5
+        total:
+          type: integer
+          example: 100
+        errors:
+          type: array
+          items:
+            type: object
+            properties:
+              index:
+                type: integer
+              email:
+                type: string
+              error:
+                type: string
+              message:
+                type: string
+
+    Error:
+      type: object
+      required:
+        - error
+        - message
+      properties:
+        error:
+          type: string
+          example: "learner_not_found"
+        message:
+          type: string
+          example: "Learner not found"
+        details:
+          type: object
+          additionalProperties: true
+
+    ValidationError:
+      type: object
+      required:
+        - error
+        - message
+        - validationErrors
+      properties:
+        error:
+          type: string
+          example: "validation_failed"
+        message:
+          type: string
+          example: "Request validation failed"
+        validationErrors:
+          type: array
+          items:
+            type: object
+            required:
+              - field
+              - message
+            properties:
+              field:
+                type: string
+                example: "email"
+              message:
+                type: string
+                example: "Valid email is required"

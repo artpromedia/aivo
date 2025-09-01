@@ -17,13 +17,16 @@
     "typecheck": "echo skip",
     "format": "prettier --write .",
     "format:check": "prettier --check .",
+    "gen:sdk": "node scripts/generate-sdks.mjs",
     "verify-all": "pnpm -r run build --if-present && pnpm run lint && pnpm run format:check && pnpm run lint:yml && pnpm run lint:docker && pnpm run lint:actions && pnpm run contracts:lint",
-    "renovate:validate": "node scripts/validate-renovate-update.mjs"
+    "renovate:validate": "node scripts/validate-renovate-update.mjs",
+    "gen:sdk:watch": "nodemon --watch docs/api/rest --ext yaml,yml --exec \"npm run gen:sdk\""
   },
   "devDependencies": {
     "@commitlint/cli": "^19.0.0",
     "@commitlint/config-conventional": "^19.0.0",
     "@eslint/js": "^9.9.0",
+    "@openapitools/openapi-generator-cli": "^2.7.0",
     "@stoplight/spectral-cli": "^6.11.1",
     "@typescript-eslint/eslint-plugin": "^8.7.0",
     "@typescript-eslint/parser": "^8.7.0",
@@ -35,6 +38,7 @@
     "husky": "^9.0.0",
     "lint-staged": "^15.0.0",
     "markdownlint-cli": "^0.41.0",
+    "msw": "^2.0.0",
     "prettier": "^3.3.3",
     "typescript": "^5.5.4",
     "yaml-language-server": "^1.15.0"

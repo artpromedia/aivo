@@ -1,0 +1,663 @@
+openapi: 3.1.0
+info:
+  title: Enrollment Management API
+  description: Learner enrollment and course assignment service
+  version: 1.0.0
+  contact:
+    name: API Support
+    email: api-support@aivo.com
+servers:
+  - url: https://api.aivo.com/enrollment/v1
+    description: Production server
+  - url: https://staging-api.aivo.com/enrollment/v1
+    description: Staging server
+paths:
+  /enrollments:
+    get:
+      summary: List enrollments
+      operationId: listEnrollments
+      tags:
+        - Enrollments
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: tenantId
+          in: query
+          required: true
+          schema:
+            type: string
+            format: uuid
+        - name: learnerId
+          in: query
+          schema:
+            type: string
+            format: uuid
+        - name: courseId
+          in: query
+          schema:
+            type: string
+            format: uuid
+        - name: status
+          in: query
+          schema:
+            type: string
+            enum: [enrolled, in_progress, completed, dropped, expired]
+        - name: limit
+          in: query
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 100
+            default: 20
+        - name: offset
+          in: query
+          schema:
+            type: integer
+            minimum: 0
+            default: 0
+      responses:
+        '200':
+          description: Enrollments retrieved successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                required:
+                  - data
+                  - total
+                  - limit
+                  - offset
+                properties:
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Enrollment'
+                  total:
+                    type: integer
+                    example: 250
+                  limit:
+                    type: integer
+                    example: 20
+                  offset:
+                    type: integer
+                    example: 0
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+    post:
+      summary: Create new enrollment
+      operationId: createEnrollment
+      tags:
+        - Enrollments
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateEnrollmentRequest'
+      responses:
+        '201':
+          description: Enrollment created successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Enrollment'
+        '400':
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '409':
+          description: Enrollment already exists
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '422':
+          description: Validation error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ValidationError'
+
+  /enrollments/{enrollmentId}:
+    get:
+      summary: Get enrollment by ID
+      operationId: getEnrollment
+      tags:
+        - Enrollments
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: enrollmentId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: Enrollment retrieved successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Enrollment'
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '404':
+          description: Enrollment not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+    put:
+      summary: Update enrollment
+      operationId: updateEnrollment
+      tags:
+        - Enrollments
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: enrollmentId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateEnrollmentRequest'
+      responses:
+        '200':
+          description: Enrollment updated successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Enrollment'
+        '400':
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '404':
+          description: Enrollment not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+    delete:
+      summary: Delete enrollment
+      operationId: deleteEnrollment
+      tags:
+        - Enrollments
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: enrollmentId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '204':
+          description: Enrollment deleted successfully
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '404':
+          description: Enrollment not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+  /enrollments/{enrollmentId}/progress:
+    get:
+      summary: Get enrollment progress
+      operationId: getEnrollmentProgress
+      tags:
+        - Progress
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: enrollmentId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: Progress retrieved successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EnrollmentProgress'
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '404':
+          description: Enrollment not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+    put:
+      summary: Update enrollment progress
+      operationId: updateEnrollmentProgress
+      tags:
+        - Progress
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: enrollmentId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateProgressRequest'
+      responses:
+        '200':
+          description: Progress updated successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EnrollmentProgress'
+        '400':
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '404':
+          description: Enrollment not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+  /bulk-enroll:
+    post:
+      summary: Bulk enroll learners
+      operationId: bulkEnroll
+      tags:
+        - Bulk Operations
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/BulkEnrollRequest'
+      responses:
+        '200':
+          description: Bulk enrollment completed
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BulkEnrollResponse'
+        '400':
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+
+  schemas:
+    Enrollment:
+      type: object
+      required:
+        - id
+        - tenantId
+        - learnerId
+        - courseId
+        - status
+        - enrolledAt
+        - createdAt
+        - updatedAt
+      properties:
+        id:
+          type: string
+          format: uuid
+          example: "789e0123-e89b-12d3-a456-426614174000"
+        tenantId:
+          type: string
+          format: uuid
+          example: "456e7890-e89b-12d3-a456-426614174000"
+        learnerId:
+          type: string
+          format: uuid
+          example: "123e4567-e89b-12d3-a456-426614174000"
+        courseId:
+          type: string
+          format: uuid
+          example: "012e3456-e89b-12d3-a456-426614174000"
+        status:
+          type: string
+          enum: [enrolled, in_progress, completed, dropped, expired]
+          example: "in_progress"
+        enrolledAt:
+          type: string
+          format: date-time
+          example: "2023-10-01T09:00:00Z"
+        startedAt:
+          type: string
+          format: date-time
+          nullable: true
+          example: "2023-10-02T14:30:00Z"
+        completedAt:
+          type: string
+          format: date-time
+          nullable: true
+          example: "2023-11-15T16:45:00Z"
+        expiresAt:
+          type: string
+          format: date-time
+          nullable: true
+          example: "2024-01-01T23:59:59Z"
+        enrolledBy:
+          type: string
+          format: uuid
+          example: "345e6789-e89b-12d3-a456-426614174000"
+        metadata:
+          type: object
+          additionalProperties: true
+          example:
+            source: "bulk_import"
+            cohort: "Q4_2023"
+        createdAt:
+          type: string
+          format: date-time
+          example: "2023-10-01T09:00:00Z"
+        updatedAt:
+          type: string
+          format: date-time
+          example: "2023-11-15T16:45:00Z"
+
+    CreateEnrollmentRequest:
+      type: object
+      required:
+        - tenantId
+        - learnerId
+        - courseId
+      properties:
+        tenantId:
+          type: string
+          format: uuid
+          example: "456e7890-e89b-12d3-a456-426614174000"
+        learnerId:
+          type: string
+          format: uuid
+          example: "123e4567-e89b-12d3-a456-426614174000"
+        courseId:
+          type: string
+          format: uuid
+          example: "012e3456-e89b-12d3-a456-426614174000"
+        expiresAt:
+          type: string
+          format: date-time
+          example: "2024-01-01T23:59:59Z"
+        metadata:
+          type: object
+          additionalProperties: true
+          example:
+            source: "manual_enrollment"
+
+    UpdateEnrollmentRequest:
+      type: object
+      properties:
+        status:
+          type: string
+          enum: [enrolled, in_progress, completed, dropped, expired]
+          example: "completed"
+        expiresAt:
+          type: string
+          format: date-time
+          example: "2024-01-01T23:59:59Z"
+        metadata:
+          type: object
+          additionalProperties: true
+
+    EnrollmentProgress:
+      type: object
+      required:
+        - enrollmentId
+        - progressPercentage
+        - timeSpentMinutes
+        - lastAccessedAt
+      properties:
+        enrollmentId:
+          type: string
+          format: uuid
+          example: "789e0123-e89b-12d3-a456-426614174000"
+        progressPercentage:
+          type: number
+          minimum: 0
+          maximum: 100
+          example: 75.5
+        timeSpentMinutes:
+          type: integer
+          minimum: 0
+          example: 1250
+        lastAccessedAt:
+          type: string
+          format: date-time
+          example: "2023-11-15T16:45:00Z"
+        completedModules:
+          type: array
+          items:
+            type: string
+            format: uuid
+          example: ["mod1-uuid", "mod2-uuid"]
+        currentModule:
+          type: string
+          format: uuid
+          nullable: true
+          example: "mod3-uuid"
+        assessmentScores:
+          type: array
+          items:
+            type: object
+            properties:
+              assessmentId:
+                type: string
+                format: uuid
+              score:
+                type: number
+                minimum: 0
+                maximum: 100
+              completedAt:
+                type: string
+                format: date-time
+
+    UpdateProgressRequest:
+      type: object
+      required:
+        - progressPercentage
+        - timeSpentMinutes
+      properties:
+        progressPercentage:
+          type: number
+          minimum: 0
+          maximum: 100
+          example: 80.0
+        timeSpentMinutes:
+          type: integer
+          minimum: 0
+          example: 1320
+        completedModules:
+          type: array
+          items:
+            type: string
+            format: uuid
+        currentModule:
+          type: string
+          format: uuid
+          nullable: true
+
+    BulkEnrollRequest:
+      type: object
+      required:
+        - tenantId
+        - courseId
+        - learnerIds
+      properties:
+        tenantId:
+          type: string
+          format: uuid
+          example: "456e7890-e89b-12d3-a456-426614174000"
+        courseId:
+          type: string
+          format: uuid
+          example: "012e3456-e89b-12d3-a456-426614174000"
+        learnerIds:
+          type: array
+          items:
+            type: string
+            format: uuid
+          minItems: 1
+          maxItems: 1000
+          example: ["123e4567-e89b-12d3-a456-426614174000"]
+        expiresAt:
+          type: string
+          format: date-time
+          example: "2024-01-01T23:59:59Z"
+        metadata:
+          type: object
+          additionalProperties: true
+
+    BulkEnrollResponse:
+      type: object
+      required:
+        - successful
+        - failed
+        - total
+      properties:
+        successful:
+          type: integer
+          example: 95
+        failed:
+          type: integer
+          example: 5
+        total:
+          type: integer
+          example: 100
+        errors:
+          type: array
+          items:
+            type: object
+            properties:
+              learnerId:
+                type: string
+                format: uuid
+              error:
+                type: string
+              message:
+                type: string
+
+    Error:
+      type: object
+      required:
+        - error
+        - message
+      properties:
+        error:
+          type: string
+          example: "enrollment_not_found"
+        message:
+          type: string
+          example: "Enrollment not found"
+        details:
+          type: object
+          additionalProperties: true
+
+    ValidationError:
+      type: object
+      required:
+        - error
+        - message
+        - validationErrors
+      properties:
+        error:
+          type: string
+          example: "validation_failed"
+        message:
+          type: string
+          example: "Request validation failed"
+        validationErrors:
+          type: array
+          items:
+            type: object
+            required:
+              - field
+              - message
+            properties:
+              field:
+                type: string
+                example: "learnerId"
+              message:
+                type: string
+                example: "Invalid learner ID format"

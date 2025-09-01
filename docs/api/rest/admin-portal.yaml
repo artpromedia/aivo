@@ -1,0 +1,1033 @@
+openapi: 3.1.0
+info:
+  title: Admin Portal Aggregator API
+  description: Read-only aggregator API for admin dashboard widgets and KPIs
+  version: 1.0.0
+  contact:
+    name: API Support
+    email: api-support@aivo.com
+servers:
+  - url: https://api.aivo.com/admin/v1
+    description: Production server
+  - url: https://staging-api.aivo.com/admin/v1
+    description: Staging server
+paths:
+  /summary:
+    get:
+      summary: Get tenant KPI summary
+      operationId: getTenantSummary
+      tags:
+        - Dashboard
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: tenantId
+          in: query
+          required: true
+          schema:
+            type: string
+            format: uuid
+          description: Tenant ID to get summary for
+          example: "456e7890-e89b-12d3-a456-426614174000"
+      responses:
+        '200':
+          description: Tenant summary retrieved successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TenantSummary'
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '403':
+          description: Forbidden - insufficient permissions
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '404':
+          description: Tenant not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+  /subscription:
+    get:
+      summary: Get tenant subscription details
+      operationId: getTenantSubscription
+      tags:
+        - Subscription
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: tenantId
+          in: query
+          required: true
+          schema:
+            type: string
+            format: uuid
+          description: Tenant ID to get subscription for
+          example: "456e7890-e89b-12d3-a456-426614174000"
+      responses:
+        '200':
+          description: Subscription details retrieved successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SubscriptionDetails'
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '403':
+          description: Forbidden - insufficient permissions
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '404':
+          description: Tenant not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+  /billing-history:
+    get:
+      summary: Get tenant billing history
+      operationId: getTenantBillingHistory
+      tags:
+        - Billing
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: tenantId
+          in: query
+          required: true
+          schema:
+            type: string
+            format: uuid
+          description: Tenant ID to get billing history for
+          example: "456e7890-e89b-12d3-a456-426614174000"
+        - name: limit
+          in: query
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 50
+            default: 10
+          description: Number of recent invoices to return
+      responses:
+        '200':
+          description: Billing history retrieved successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BillingHistory'
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '403':
+          description: Forbidden - insufficient permissions
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '404':
+          description: Tenant not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+  /team:
+    get:
+      summary: Get tenant team overview
+      operationId: getTenantTeam
+      tags:
+        - Team
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: tenantId
+          in: query
+          required: true
+          schema:
+            type: string
+            format: uuid
+          description: Tenant ID to get team overview for
+          example: "456e7890-e89b-12d3-a456-426614174000"
+      responses:
+        '200':
+          description: Team overview retrieved successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TeamOverview'
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '403':
+          description: Forbidden - insufficient permissions
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '404':
+          description: Tenant not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+  /usage:
+    get:
+      summary: Get tenant usage analytics
+      operationId: getTenantUsage
+      tags:
+        - Analytics
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: tenantId
+          in: query
+          required: true
+          schema:
+            type: string
+            format: uuid
+          description: Tenant ID to get usage for
+          example: "456e7890-e89b-12d3-a456-426614174000"
+        - name: range
+          in: query
+          schema:
+            type: string
+            enum: [7d, 30d, 90d, 1y]
+            default: 30d
+          description: Time range for usage analytics
+      responses:
+        '200':
+          description: Usage analytics retrieved successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UsageAnalytics'
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '403':
+          description: Forbidden - insufficient permissions
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '404':
+          description: Tenant not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+  /namespaces:
+    get:
+      summary: Get tenant namespaces overview
+      operationId: getTenantNamespaces
+      tags:
+        - Namespaces
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: tenantId
+          in: query
+          required: true
+          schema:
+            type: string
+            format: uuid
+          description: Tenant ID to get namespaces for
+          example: "456e7890-e89b-12d3-a456-426614174000"
+      responses:
+        '200':
+          description: Namespaces overview retrieved successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/NamespacesOverview'
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '403':
+          description: Forbidden - insufficient permissions
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '404':
+          description: Tenant not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+
+  schemas:
+    TenantSummary:
+      type: object
+      required:
+        - tenantId
+        - learners
+        - seats
+        - trialCount
+        - openApprovals
+        - lastUpdated
+      properties:
+        tenantId:
+          type: string
+          format: uuid
+          example: "456e7890-e89b-12d3-a456-426614174000"
+        learners:
+          type: object
+          required:
+            - total
+            - active
+            - inactive
+            - pending
+          properties:
+            total:
+              type: integer
+              example: 150
+              description: Total number of learners
+            active:
+              type: integer
+              example: 135
+              description: Number of active learners
+            inactive:
+              type: integer
+              example: 10
+              description: Number of inactive learners
+            pending:
+              type: integer
+              example: 5
+              description: Number of pending learners
+        seats:
+          type: object
+          required:
+            - total
+            - free
+            - reserved
+            - assigned
+          properties:
+            total:
+              type: integer
+              example: 200
+              description: Total seats in subscription
+            free:
+              type: integer
+              example: 50
+              description: Number of free/available seats
+            reserved:
+              type: integer
+              example: 15
+              description: Number of reserved seats
+            assigned:
+              type: integer
+              example: 135
+              description: Number of assigned seats
+        trialCount:
+          type: integer
+          example: 12
+          description: Number of learners currently in trial
+        openApprovals:
+          type: integer
+          example: 3
+          description: Number of pending approval requests
+        enrollmentStats:
+          type: object
+          properties:
+            totalEnrollments:
+              type: integer
+              example: 425
+            activeEnrollments:
+              type: integer
+              example: 350
+            completedThisMonth:
+              type: integer
+              example: 45
+        lastUpdated:
+          type: string
+          format: date-time
+          example: "2023-12-01T10:30:00Z"
+          description: When this summary was last calculated
+
+    SubscriptionDetails:
+      type: object
+      required:
+        - tenantId
+        - plan
+        - seats
+        - renewal
+        - status
+        - lastUpdated
+      properties:
+        tenantId:
+          type: string
+          format: uuid
+          example: "456e7890-e89b-12d3-a456-426614174000"
+        plan:
+          type: object
+          required:
+            - name
+            - tier
+            - features
+          properties:
+            name:
+              type: string
+              example: "Professional"
+              description: Plan name
+            tier:
+              type: string
+              enum: [free, starter, professional, enterprise]
+              example: "professional"
+            features:
+              type: array
+              items:
+                type: string
+              example: ["Advanced Analytics", "API Access", "Custom Branding", "SSO"]
+            pricePerSeat:
+              type: number
+              example: 49.99
+              description: Price per seat per month
+        seats:
+          type: object
+          required:
+            - current
+            - included
+            - additional
+          properties:
+            current:
+              type: integer
+              example: 200
+              description: Current number of seats
+            included:
+              type: integer
+              example: 100
+              description: Seats included in base plan
+            additional:
+              type: integer
+              example: 100
+              description: Additional seats purchased
+        renewal:
+          type: object
+          required:
+            - nextBillingDate
+            - amount
+            - autoRenew
+          properties:
+            nextBillingDate:
+              type: string
+              format: date
+              example: "2024-01-15"
+            amount:
+              type: number
+              example: 9999.00
+              description: Next billing amount
+            currency:
+              type: string
+              example: "USD"
+            autoRenew:
+              type: boolean
+              example: true
+            daysUntilRenewal:
+              type: integer
+              example: 15
+        status:
+          type: string
+          enum: [active, past_due, canceled, trialing]
+          example: "active"
+        coupons:
+          type: array
+          items:
+            type: object
+            properties:
+              code:
+                type: string
+                example: "WELCOME20"
+              discount:
+                type: string
+                example: "20% off"
+              validUntil:
+                type: string
+                format: date
+                example: "2024-01-31"
+              status:
+                type: string
+                enum: [active, used, expired]
+                example: "active"
+        discounts:
+          type: array
+          items:
+            type: object
+            properties:
+              name:
+                type: string
+                example: "Annual Discount"
+              type:
+                type: string
+                enum: [percentage, fixed_amount]
+                example: "percentage"
+              value:
+                type: number
+                example: 15.0
+              description:
+                type: string
+                example: "15% discount for annual billing"
+        trialInfo:
+          type: object
+          nullable: true
+          properties:
+            isTrialing:
+              type: boolean
+              example: false
+            trialEndsAt:
+              type: string
+              format: date-time
+              example: "2023-12-31T23:59:59Z"
+            daysRemaining:
+              type: integer
+              example: 0
+        lastUpdated:
+          type: string
+          format: date-time
+          example: "2023-12-01T10:30:00Z"
+
+    BillingHistory:
+      type: object
+      required:
+        - tenantId
+        - invoices
+        - webhooksStatus
+        - lastUpdated
+      properties:
+        tenantId:
+          type: string
+          format: uuid
+          example: "456e7890-e89b-12d3-a456-426614174000"
+        invoices:
+          type: array
+          items:
+            type: object
+            required:
+              - id
+              - invoiceNumber
+              - amount
+              - status
+              - dueDate
+              - paidAt
+            properties:
+              id:
+                type: string
+                format: uuid
+                example: "inv_123e4567-e89b-12d3-a456-426614174000"
+              invoiceNumber:
+                type: string
+                example: "INV-2023-001"
+              amount:
+                type: number
+                example: 9999.00
+                description: Invoice amount
+              currency:
+                type: string
+                example: "USD"
+              status:
+                type: string
+                enum: [draft, open, paid, void, uncollectible]
+                example: "paid"
+              dueDate:
+                type: string
+                format: date
+                example: "2023-12-31"
+              paidAt:
+                type: string
+                format: date-time
+                nullable: true
+                example: "2023-12-15T14:30:00Z"
+              downloadUrl:
+                type: string
+                format: uri
+                nullable: true
+                example: "https://api.aivo.com/invoices/inv_123/download"
+              description:
+                type: string
+                example: "Professional Plan - December 2023"
+        summary:
+          type: object
+          properties:
+            totalPaid:
+              type: number
+              example: 29997.00
+              description: Total amount paid to date
+            totalOutstanding:
+              type: number
+              example: 0.00
+              description: Total outstanding amount
+            averageMonthlySpend:
+              type: number
+              example: 9999.00
+              description: Average monthly spend
+        webhooksStatus:
+          type: object
+          required:
+            - isConfigured
+            - lastSuccess
+            - failureCount
+          properties:
+            isConfigured:
+              type: boolean
+              example: true
+              description: Whether webhooks are configured
+            lastSuccess:
+              type: string
+              format: date-time
+              nullable: true
+              example: "2023-12-01T10:30:00Z"
+              description: Last successful webhook delivery
+            failureCount:
+              type: integer
+              example: 0
+              description: Number of recent webhook failures
+            endpoint:
+              type: string
+              format: uri
+              nullable: true
+              example: "https://api.customer.com/aivo-webhooks"
+              description: Configured webhook endpoint
+        lastUpdated:
+          type: string
+          format: date-time
+          example: "2023-12-01T10:30:00Z"
+
+    TeamOverview:
+      type: object
+      required:
+        - tenantId
+        - usersByRole
+        - pendingInvites
+        - recentActivity
+        - lastUpdated
+      properties:
+        tenantId:
+          type: string
+          format: uuid
+          example: "456e7890-e89b-12d3-a456-426614174000"
+        usersByRole:
+          type: object
+          required:
+            - tenant_admin
+            - instructor
+            - learner
+          properties:
+            tenant_admin:
+              type: integer
+              example: 2
+              description: Number of tenant administrators
+            instructor:
+              type: integer
+              example: 8
+              description: Number of instructors
+            learner:
+              type: integer
+              example: 135
+              description: Number of learners
+            total:
+              type: integer
+              example: 145
+              description: Total number of users
+        pendingInvites:
+          type: object
+          required:
+            - total
+            - byRole
+          properties:
+            total:
+              type: integer
+              example: 5
+              description: Total pending invitations
+            byRole:
+              type: object
+              properties:
+                tenant_admin:
+                  type: integer
+                  example: 0
+                instructor:
+                  type: integer
+                  example: 2
+                learner:
+                  type: integer
+                  example: 3
+            oldestInvite:
+              type: string
+              format: date-time
+              nullable: true
+              example: "2023-11-15T09:00:00Z"
+              description: Date of oldest pending invite
+        recentActivity:
+          type: object
+          properties:
+            newUsersThisWeek:
+              type: integer
+              example: 3
+            newUsersThisMonth:
+              type: integer
+              example: 12
+            lastUserJoined:
+              type: string
+              format: date-time
+              nullable: true
+              example: "2023-11-28T14:22:00Z"
+        topUsers:
+          type: array
+          items:
+            type: object
+            properties:
+              userId:
+                type: string
+                format: uuid
+              name:
+                type: string
+                example: "John Doe"
+              email:
+                type: string
+                format: email
+                example: "john@example.com"
+              role:
+                type: string
+                example: "instructor"
+              lastActive:
+                type: string
+                format: date-time
+                example: "2023-12-01T09:15:00Z"
+              enrollments:
+                type: integer
+                example: 15
+          maxItems: 10
+          description: Most active users in the tenant
+        lastUpdated:
+          type: string
+          format: date-time
+          example: "2023-12-01T10:30:00Z"
+
+    UsageAnalytics:
+      type: object
+      required:
+        - tenantId
+        - range
+        - totalMinutesLearned
+        - activeLearners
+        - subjectMix
+        - trends
+        - lastUpdated
+      properties:
+        tenantId:
+          type: string
+          format: uuid
+          example: "456e7890-e89b-12d3-a456-426614174000"
+        range:
+          type: string
+          enum: [7d, 30d, 90d, 1y]
+          example: "30d"
+          description: Time range for this analytics data
+        totalMinutesLearned:
+          type: integer
+          example: 12450
+          description: Total learning minutes in the specified range
+        activeLearners:
+          type: object
+          required:
+            - count
+            - percentage
+          properties:
+            count:
+              type: integer
+              example: 89
+              description: Number of active learners in range
+            percentage:
+              type: number
+              minimum: 0
+              maximum: 100
+              example: 65.9
+              description: Percentage of total learners who were active
+        averageSessionLength:
+          type: number
+          example: 42.5
+          description: Average learning session length in minutes
+        completionStats:
+          type: object
+          properties:
+            coursesCompleted:
+              type: integer
+              example: 67
+            modulesCompleted:
+              type: integer
+              example: 234
+            assessmentsPassed:
+              type: integer
+              example: 156
+        subjectMix:
+          type: array
+          items:
+            type: object
+            required:
+              - subject
+              - minutesLearned
+              - percentage
+              - learnerCount
+            properties:
+              subject:
+                type: string
+                example: "JavaScript"
+                description: Subject or course category
+              minutesLearned:
+                type: integer
+                example: 3245
+                description: Minutes learned in this subject
+              percentage:
+                type: number
+                minimum: 0
+                maximum: 100
+                example: 26.1
+                description: Percentage of total learning time
+              learnerCount:
+                type: integer
+                example: 34
+                description: Number of learners who studied this subject
+          description: Breakdown of learning time by subject
+        trends:
+          type: object
+          properties:
+            dailyActivity:
+              type: array
+              items:
+                type: object
+                properties:
+                  date:
+                    type: string
+                    format: date
+                    example: "2023-12-01"
+                  minutesLearned:
+                    type: integer
+                    example: 245
+                  activeLearners:
+                    type: integer
+                    example: 23
+                  sessionsStarted:
+                    type: integer
+                    example: 45
+            peakHours:
+              type: array
+              items:
+                type: object
+                properties:
+                  hour:
+                    type: integer
+                    minimum: 0
+                    maximum: 23
+                    example: 14
+                  sessions:
+                    type: integer
+                    example: 156
+              description: Learning activity by hour of day
+        engagement:
+          type: object
+          properties:
+            averageStreakDays:
+              type: number
+              example: 4.2
+            returnRate:
+              type: number
+              minimum: 0
+              maximum: 100
+              example: 73.5
+              description: Percentage of learners who return within 7 days
+        lastUpdated:
+          type: string
+          format: date-time
+          example: "2023-12-01T10:30:00Z"
+
+    NamespacesOverview:
+      type: object
+      required:
+        - tenantId
+        - totalNamespaces
+        - statusCounts
+        - topNamespaces
+        - lastUpdated
+      properties:
+        tenantId:
+          type: string
+          format: uuid
+          example: "456e7890-e89b-12d3-a456-426614174000"
+        totalNamespaces:
+          type: integer
+          example: 135
+          description: Total number of learner private-brain namespaces
+        statusCounts:
+          type: object
+          required:
+            - active
+            - inactive
+            - initializing
+            - error
+          properties:
+            active:
+              type: integer
+              example: 112
+              description: Namespaces that are active and ready
+            inactive:
+              type: integer
+              example: 18
+              description: Namespaces that are inactive/paused
+            initializing:
+              type: integer
+              example: 3
+              description: Namespaces currently being set up
+            error:
+              type: integer
+              example: 2
+              description: Namespaces with errors
+        storageStats:
+          type: object
+          properties:
+            totalStorageUsed:
+              type: integer
+              example: 2048
+              description: Total storage used across all namespaces (MB)
+            averageStoragePerNamespace:
+              type: number
+              example: 15.2
+              description: Average storage per namespace (MB)
+            maxStorageUsed:
+              type: integer
+              example: 125
+              description: Maximum storage used by a single namespace (MB)
+        topNamespaces:
+          type: array
+          items:
+            type: object
+            required:
+              - namespaceId
+              - learnerId
+              - status
+              - storageUsed
+              - lastActivity
+            properties:
+              namespaceId:
+                type: string
+                format: uuid
+                example: "ns_123e4567-e89b-12d3-a456-426614174000"
+              learnerId:
+                type: string
+                format: uuid
+                example: "123e4567-e89b-12d3-a456-426614174000"
+              learnerName:
+                type: string
+                example: "John Doe"
+              status:
+                type: string
+                enum: [active, inactive, initializing, error]
+                example: "active"
+              storageUsed:
+                type: integer
+                example: 125
+                description: Storage used by this namespace (MB)
+              documentsCount:
+                type: integer
+                example: 234
+                description: Number of documents in namespace
+              lastActivity:
+                type: string
+                format: date-time
+                example: "2023-12-01T09:15:00Z"
+              vectorCount:
+                type: integer
+                example: 15420
+                description: Number of vectors in namespace
+          maxItems: 10
+          description: Most active or largest namespaces
+        recentActivity:
+          type: object
+          properties:
+            namespacesCreatedThisWeek:
+              type: integer
+              example: 5
+            namespacesCreatedThisMonth:
+              type: integer
+              example: 18
+            documentsAddedThisWeek:
+              type: integer
+              example: 142
+        healthSummary:
+          type: object
+          properties:
+            healthScore:
+              type: number
+              minimum: 0
+              maximum: 100
+              example: 94.2
+              description: Overall health score of all namespaces
+            commonIssues:
+              type: array
+              items:
+                type: object
+                properties:
+                  issue:
+                    type: string
+                    example: "Storage quota exceeded"
+                  count:
+                    type: integer
+                    example: 3
+                  severity:
+                    type: string
+                    enum: [low, medium, high, critical]
+                    example: "medium"
+        lastUpdated:
+          type: string
+          format: date-time
+          example: "2023-12-01T10:30:00Z"
+
+    Error:
+      type: object
+      required:
+        - error
+        - message
+      properties:
+        error:
+          type: string
+          example: "tenant_not_found"
+        message:
+          type: string
+          example: "Tenant not found or access denied"
+        details:
+          type: object
+          additionalProperties: true

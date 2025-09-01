@@ -1,0 +1,986 @@
+openapi: 3.1.0
+info:
+  title: Payments & Billing API
+  description: Subscription billing and payment processing service
+  version: 1.0.0
+  contact:
+    name: API Support
+    email: api-support@aivo.com
+servers:
+  - url: https://api.aivo.com/payments/v1
+    description: Production server
+  - url: https://staging-api.aivo.com/payments/v1
+    description: Staging server
+paths:
+  /subscriptions:
+    get:
+      summary: List subscriptions
+      operationId: listSubscriptions
+      tags:
+        - Subscriptions
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: tenantId
+          in: query
+          schema:
+            type: string
+            format: uuid
+        - name: status
+          in: query
+          schema:
+            type: string
+            enum: [active, inactive, past_due, canceled, trialing]
+        - name: limit
+          in: query
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 100
+            default: 20
+        - name: offset
+          in: query
+          schema:
+            type: integer
+            minimum: 0
+            default: 0
+      responses:
+        '200':
+          description: Subscriptions retrieved successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                required:
+                  - data
+                  - total
+                  - limit
+                  - offset
+                properties:
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Subscription'
+                  total:
+                    type: integer
+                    example: 50
+                  limit:
+                    type: integer
+                    example: 20
+                  offset:
+                    type: integer
+                    example: 0
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+    post:
+      summary: Create new subscription
+      operationId: createSubscription
+      tags:
+        - Subscriptions
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateSubscriptionRequest'
+      responses:
+        '201':
+          description: Subscription created successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Subscription'
+        '400':
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '422':
+          description: Validation error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ValidationError'
+
+  /subscriptions/{subscriptionId}:
+    get:
+      summary: Get subscription by ID
+      operationId: getSubscription
+      tags:
+        - Subscriptions
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: subscriptionId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: Subscription retrieved successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Subscription'
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '404':
+          description: Subscription not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+    put:
+      summary: Update subscription
+      operationId: updateSubscription
+      tags:
+        - Subscriptions
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: subscriptionId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateSubscriptionRequest'
+      responses:
+        '200':
+          description: Subscription updated successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Subscription'
+        '400':
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '404':
+          description: Subscription not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+  /subscriptions/{subscriptionId}/cancel:
+    post:
+      summary: Cancel subscription
+      operationId: cancelSubscription
+      tags:
+        - Subscriptions
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: subscriptionId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        required: false
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                reason:
+                  type: string
+                  example: "Customer requested cancellation"
+                cancelAtPeriodEnd:
+                  type: boolean
+                  default: true
+      responses:
+        '200':
+          description: Subscription canceled successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Subscription'
+        '400':
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '404':
+          description: Subscription not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+  /invoices:
+    get:
+      summary: List invoices
+      operationId: listInvoices
+      tags:
+        - Invoices
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: tenantId
+          in: query
+          schema:
+            type: string
+            format: uuid
+        - name: subscriptionId
+          in: query
+          schema:
+            type: string
+            format: uuid
+        - name: status
+          in: query
+          schema:
+            type: string
+            enum: [draft, open, paid, void, uncollectible]
+        - name: limit
+          in: query
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 100
+            default: 20
+        - name: offset
+          in: query
+          schema:
+            type: integer
+            minimum: 0
+            default: 0
+      responses:
+        '200':
+          description: Invoices retrieved successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                required:
+                  - data
+                  - total
+                  - limit
+                  - offset
+                properties:
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Invoice'
+                  total:
+                    type: integer
+                    example: 100
+                  limit:
+                    type: integer
+                    example: 20
+                  offset:
+                    type: integer
+                    example: 0
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+  /invoices/{invoiceId}:
+    get:
+      summary: Get invoice by ID
+      operationId: getInvoice
+      tags:
+        - Invoices
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: invoiceId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: Invoice retrieved successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Invoice'
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '404':
+          description: Invoice not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+  /payment-methods:
+    get:
+      summary: List payment methods
+      operationId: listPaymentMethods
+      tags:
+        - Payment Methods
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: tenantId
+          in: query
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: Payment methods retrieved successfully
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/PaymentMethod'
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+    post:
+      summary: Add payment method
+      operationId: addPaymentMethod
+      tags:
+        - Payment Methods
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AddPaymentMethodRequest'
+      responses:
+        '201':
+          description: Payment method added successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaymentMethod'
+        '400':
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+  /payment-methods/{paymentMethodId}:
+    delete:
+      summary: Remove payment method
+      operationId: removePaymentMethod
+      tags:
+        - Payment Methods
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: paymentMethodId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '204':
+          description: Payment method removed successfully
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '404':
+          description: Payment method not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+  /coupons:
+    get:
+      summary: List coupons
+      operationId: listCoupons
+      tags:
+        - Coupons
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: tenantId
+          in: query
+          schema:
+            type: string
+            format: uuid
+        - name: active
+          in: query
+          schema:
+            type: boolean
+        - name: limit
+          in: query
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 100
+            default: 20
+      responses:
+        '200':
+          description: Coupons retrieved successfully
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Coupon'
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+    post:
+      summary: Create coupon
+      operationId: createCoupon
+      tags:
+        - Coupons
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateCouponRequest'
+      responses:
+        '201':
+          description: Coupon created successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Coupon'
+        '400':
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+
+  schemas:
+    Subscription:
+      type: object
+      required:
+        - id
+        - tenantId
+        - planId
+        - status
+        - currentPeriodStart
+        - currentPeriodEnd
+        - createdAt
+        - updatedAt
+      properties:
+        id:
+          type: string
+          format: uuid
+          example: "sub_123e4567-e89b-12d3-a456-426614174000"
+        tenantId:
+          type: string
+          format: uuid
+          example: "456e7890-e89b-12d3-a456-426614174000"
+        planId:
+          type: string
+          example: "professional_monthly"
+        status:
+          type: string
+          enum: [active, inactive, past_due, canceled, trialing]
+          example: "active"
+        quantity:
+          type: integer
+          minimum: 1
+          example: 50
+        unitAmount:
+          type: integer
+          description: Amount in cents
+          example: 4999
+        currency:
+          type: string
+          example: "usd"
+        currentPeriodStart:
+          type: string
+          format: date-time
+          example: "2023-12-01T00:00:00Z"
+        currentPeriodEnd:
+          type: string
+          format: date-time
+          example: "2024-01-01T00:00:00Z"
+        trialStart:
+          type: string
+          format: date-time
+          nullable: true
+          example: "2023-11-01T00:00:00Z"
+        trialEnd:
+          type: string
+          format: date-time
+          nullable: true
+          example: "2023-12-01T00:00:00Z"
+        cancelAtPeriodEnd:
+          type: boolean
+          default: false
+        canceledAt:
+          type: string
+          format: date-time
+          nullable: true
+        discount:
+          $ref: '#/components/schemas/Discount'
+        metadata:
+          type: object
+          additionalProperties: true
+        createdAt:
+          type: string
+          format: date-time
+          example: "2023-11-01T00:00:00Z"
+        updatedAt:
+          type: string
+          format: date-time
+          example: "2023-12-01T10:30:00Z"
+
+    CreateSubscriptionRequest:
+      type: object
+      required:
+        - tenantId
+        - planId
+      properties:
+        tenantId:
+          type: string
+          format: uuid
+          example: "456e7890-e89b-12d3-a456-426614174000"
+        planId:
+          type: string
+          example: "professional_monthly"
+        quantity:
+          type: integer
+          minimum: 1
+          default: 1
+          example: 50
+        trialPeriodDays:
+          type: integer
+          minimum: 0
+          example: 14
+        couponCode:
+          type: string
+          example: "WELCOME20"
+        paymentMethodId:
+          type: string
+          format: uuid
+          example: "pm_123e4567-e89b-12d3-a456-426614174000"
+        metadata:
+          type: object
+          additionalProperties: true
+
+    UpdateSubscriptionRequest:
+      type: object
+      properties:
+        planId:
+          type: string
+          example: "enterprise_monthly"
+        quantity:
+          type: integer
+          minimum: 1
+          example: 100
+        metadata:
+          type: object
+          additionalProperties: true
+
+    Invoice:
+      type: object
+      required:
+        - id
+        - subscriptionId
+        - tenantId
+        - status
+        - amountDue
+        - amountPaid
+        - currency
+        - dueDate
+        - createdAt
+      properties:
+        id:
+          type: string
+          format: uuid
+          example: "inv_123e4567-e89b-12d3-a456-426614174000"
+        subscriptionId:
+          type: string
+          format: uuid
+          example: "sub_123e4567-e89b-12d3-a456-426614174000"
+        tenantId:
+          type: string
+          format: uuid
+          example: "456e7890-e89b-12d3-a456-426614174000"
+        invoiceNumber:
+          type: string
+          example: "INV-2023-001"
+        status:
+          type: string
+          enum: [draft, open, paid, void, uncollectible]
+          example: "paid"
+        amountDue:
+          type: integer
+          description: Amount in cents
+          example: 4999
+        amountPaid:
+          type: integer
+          description: Amount in cents
+          example: 4999
+        currency:
+          type: string
+          example: "usd"
+        dueDate:
+          type: string
+          format: date-time
+          example: "2023-12-31T23:59:59Z"
+        paidAt:
+          type: string
+          format: date-time
+          nullable: true
+          example: "2023-12-15T14:30:00Z"
+        periodStart:
+          type: string
+          format: date-time
+          example: "2023-12-01T00:00:00Z"
+        periodEnd:
+          type: string
+          format: date-time
+          example: "2024-01-01T00:00:00Z"
+        downloadUrl:
+          type: string
+          format: uri
+          nullable: true
+          example: "https://api.aivo.com/invoices/inv_123/download"
+        lineItems:
+          type: array
+          items:
+            $ref: '#/components/schemas/InvoiceLineItem'
+        createdAt:
+          type: string
+          format: date-time
+          example: "2023-12-01T00:00:00Z"
+
+    InvoiceLineItem:
+      type: object
+      required:
+        - description
+        - quantity
+        - unitAmount
+        - amount
+      properties:
+        description:
+          type: string
+          example: "Professional Plan (Dec 2023)"
+        quantity:
+          type: integer
+          example: 50
+        unitAmount:
+          type: integer
+          description: Amount in cents
+          example: 99
+        amount:
+          type: integer
+          description: Total amount in cents
+          example: 4950
+
+    PaymentMethod:
+      type: object
+      required:
+        - id
+        - tenantId
+        - type
+        - isDefault
+        - createdAt
+      properties:
+        id:
+          type: string
+          format: uuid
+          example: "pm_123e4567-e89b-12d3-a456-426614174000"
+        tenantId:
+          type: string
+          format: uuid
+          example: "456e7890-e89b-12d3-a456-426614174000"
+        type:
+          type: string
+          enum: [card, bank_account, paypal]
+          example: "card"
+        isDefault:
+          type: boolean
+          example: true
+        card:
+          type: object
+          properties:
+            brand:
+              type: string
+              example: "visa"
+            last4:
+              type: string
+              example: "4242"
+            expMonth:
+              type: integer
+              example: 12
+            expYear:
+              type: integer
+              example: 2025
+        bankAccount:
+          type: object
+          properties:
+            bankName:
+              type: string
+              example: "Chase Bank"
+            last4:
+              type: string
+              example: "6789"
+            accountType:
+              type: string
+              enum: [checking, savings]
+              example: "checking"
+        createdAt:
+          type: string
+          format: date-time
+          example: "2023-11-01T00:00:00Z"
+
+    AddPaymentMethodRequest:
+      type: object
+      required:
+        - tenantId
+        - type
+        - token
+      properties:
+        tenantId:
+          type: string
+          format: uuid
+          example: "456e7890-e89b-12d3-a456-426614174000"
+        type:
+          type: string
+          enum: [card, bank_account, paypal]
+          example: "card"
+        token:
+          type: string
+          description: Payment method token from payment processor
+          example: "tok_1234567890abcdef"
+        isDefault:
+          type: boolean
+          default: false
+
+    Coupon:
+      type: object
+      required:
+        - id
+        - code
+        - discountType
+        - discountValue
+        - active
+        - createdAt
+      properties:
+        id:
+          type: string
+          format: uuid
+          example: "coup_123e4567-e89b-12d3-a456-426614174000"
+        code:
+          type: string
+          example: "WELCOME20"
+        name:
+          type: string
+          example: "Welcome Discount"
+        discountType:
+          type: string
+          enum: [percent, amount]
+          example: "percent"
+        discountValue:
+          type: number
+          example: 20.0
+        maxRedemptions:
+          type: integer
+          nullable: true
+          example: 100
+        redemptions:
+          type: integer
+          example: 45
+        validFrom:
+          type: string
+          format: date-time
+          example: "2023-12-01T00:00:00Z"
+        validUntil:
+          type: string
+          format: date-time
+          nullable: true
+          example: "2024-01-31T23:59:59Z"
+        active:
+          type: boolean
+          example: true
+        createdAt:
+          type: string
+          format: date-time
+          example: "2023-11-01T00:00:00Z"
+
+    CreateCouponRequest:
+      type: object
+      required:
+        - code
+        - discountType
+        - discountValue
+      properties:
+        code:
+          type: string
+          pattern: "^[A-Z0-9_-]+$"
+          minLength: 3
+          maxLength: 20
+          example: "WELCOME20"
+        name:
+          type: string
+          example: "Welcome Discount"
+        discountType:
+          type: string
+          enum: [percent, amount]
+          example: "percent"
+        discountValue:
+          type: number
+          minimum: 0
+          example: 20.0
+        maxRedemptions:
+          type: integer
+          minimum: 1
+          example: 100
+        validFrom:
+          type: string
+          format: date-time
+          example: "2023-12-01T00:00:00Z"
+        validUntil:
+          type: string
+          format: date-time
+          example: "2024-01-31T23:59:59Z"
+
+    Discount:
+      type: object
+      nullable: true
+      properties:
+        couponId:
+          type: string
+          format: uuid
+          example: "coup_123e4567-e89b-12d3-a456-426614174000"
+        couponCode:
+          type: string
+          example: "WELCOME20"
+        discountType:
+          type: string
+          enum: [percent, amount]
+          example: "percent"
+        discountValue:
+          type: number
+          example: 20.0
+
+    Error:
+      type: object
+      required:
+        - error
+        - message
+      properties:
+        error:
+          type: string
+          example: "subscription_not_found"
+        message:
+          type: string
+          example: "Subscription not found"
+        details:
+          type: object
+          additionalProperties: true
+
+    ValidationError:
+      type: object
+      required:
+        - error
+        - message
+        - validationErrors
+      properties:
+        error:
+          type: string
+          example: "validation_failed"
+        message:
+          type: string
+          example: "Request validation failed"
+        validationErrors:
+          type: array
+          items:
+            type: object
+            required:
+              - field
+              - message
+            properties:
+              field:
+                type: string
+                example: "planId"
+              message:
+                type: string
+                example: "Plan ID is required"
