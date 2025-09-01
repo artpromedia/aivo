@@ -82,7 +82,7 @@ export default [
       "**/*.config.{js,ts,mjs}",
       "**/*.d.ts",
       "**/.venv/**",
-      "**/libs/sdk-web/**",
+      "**/libs/sdk-web/src/services/**",
       "**/scripts/**"
     ]
   }

@@ -84,7 +84,7 @@ jobs:
           fetch-depth: 0
 
       - name: Run TruffleHog scan
-        uses: trufflesecurity/trufflehog@v3.82.13
+        uses: trufflesecurity/trufflehog@main
         with:
           path: ./
           base: main

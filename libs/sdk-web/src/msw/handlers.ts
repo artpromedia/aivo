@@ -1,7 +1,7 @@
 // Auto-generated MSW handlers for API mocking
 // Generated on: 2025-09-01T12:21:11.862Z
 
-import { rest } from 'msw';
+import { http, HttpResponse } from 'msw';
 
 // Mock data fixtures
 const mockFixtures = {
@@ -31,32 +31,32 @@ const mockFixtures = {
 // Generated handlers
 export const handlers = [
   // AUTH Service Handlers
-  rest.get('*/auth/v1/*', (req, res, ctx) => {
-    return res(ctx.status(200), ctx.json(mockFixtures.auth));
+  http.get('*/auth/v1/*', () => {
+    return HttpResponse.json(mockFixtures.auth);
   }),
   // TENANT Service Handlers
-  rest.get('*/auth/v1/*', (req, res, ctx) => {
-    return res(ctx.status(200), ctx.json(mockFixtures.tenant));
+  http.get('*/tenant/v1/*', () => {
+    return HttpResponse.json(mockFixtures.tenant);
   }),
   // ENROLLMENT Service Handlers
-  rest.get('*/auth/v1/*', (req, res, ctx) => {
-    return res(ctx.status(200), ctx.json(mockFixtures.enrollment));
+  http.get('*/enrollment/v1/*', () => {
+    return HttpResponse.json(mockFixtures.enrollment);
   }),
   // PAYMENTS Service Handlers
-  rest.get('*/auth/v1/*', (req, res, ctx) => {
-    return res(ctx.status(200), ctx.json(mockFixtures.payments));
+  http.get('*/payments/v1/*', () => {
+    return HttpResponse.json(mockFixtures.payments);
   }),
   // LEARNER Service Handlers
-  rest.get('*/auth/v1/*', (req, res, ctx) => {
-    return res(ctx.status(200), ctx.json(mockFixtures.learner));
+  http.get('*/learner/v1/*', () => {
+    return HttpResponse.json(mockFixtures.learner);
   }),
   // ORCHESTRATOR Service Handlers
-  rest.get('*/auth/v1/*', (req, res, ctx) => {
-    return res(ctx.status(200), ctx.json(mockFixtures.orchestrator));
+  http.get('*/orchestrator/v1/*', () => {
+    return HttpResponse.json(mockFixtures.orchestrator);
   }),
   // ADMIN-PORTAL Service Handlers
-  rest.get('*/auth/v1/*', (req, res, ctx) => {
-    return res(ctx.status(200), ctx.json(mockFixtures.admin-portal));
+  http.get('*/admin-portal/v1/*', () => {
+    return HttpResponse.json(mockFixtures['admin-portal']);
   }),
 ];
 
