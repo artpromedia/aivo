@@ -38,7 +38,7 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        service: ['hello-svc']
+        service: ['hello-svc', 'auth-svc']
     steps:
       - name: Checkout code
         uses: actions/checkout@v4.2.2
@@ -46,7 +46,7 @@ jobs:
       - name: Setup Python
         uses: actions/setup-python@v5.3.0
         with:
-          python-version: '3.11'
+          python-version: '3.12'
 
       - name: Install pip-audit
         run: pip install pip-audit
@@ -73,3 +73,20 @@ jobs:
         with:
           name: pip-audit-results-${{ matrix.service }}
           path: services/${{ matrix.service }}/pip-audit-results.json
+
+  trufflehog:
+    name: TruffleHog Secret Scan
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4.2.2
+        with:
+          fetch-depth: 0
+
+      - name: Run TruffleHog scan
+        uses: trufflesecurity/trufflehog@v3.82.13
+        with:
+          path: ./
+          base: main
+          head: HEAD
+          extra_args: --debug --only-verified

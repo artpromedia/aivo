@@ -1,0 +1,579 @@
+"""
+FastAPI routes for authentication and authorization.
+"""
+import uuid
+from datetime import datetime, timedelta, timezone
+from typing import Annotated, Optional
+
+from fastapi import APIRouter, Depends, HTTPException, Request, status
+from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
+from sqlalchemy.ext.asyncio import AsyncSession
+from sqlalchemy import select, update
+from sqlalchemy.exc import IntegrityError
+
+from .models import User, RefreshToken, InviteToken
+from .schemas import (
+    GuardianRegister,
+    LoginRequest,
+    StaffLoginRequest,
+    RefreshTokenRequest,
+    InviteTeacherRequest,
+    AcceptInviteRequest,
+    AuthResponse,
+    UserResponse,
+    ErrorResponse,
+    InviteTokenResponse,
+    TokenPayload,
+)
+from .security import (
+    create_password_hash,
+    verify_password,
+    create_access_token,
+    create_refresh_token,
+    create_invite_token,
+    verify_token,
+    generate_dash_context,
+)
+
+# Security scheme
+security = HTTPBearer()
+
+# Router
+router = APIRouter()
+
+# Database dependency placeholder - will be overridden in main.py
+def get_db_dependency():
+    """Database dependency placeholder."""
+    raise NotImplementedError("Database dependency not configured")
+
+# Dependency to get current user from JWT token
+async def get_current_user(
+    credentials: Annotated[HTTPAuthorizationCredentials, Depends(security)],
+    db: AsyncSession = Depends(get_db_dependency)
+) -> User:
+    """Get current authenticated user from JWT token."""
+    token = credentials.credentials
+    token_payload = verify_token(token)
+    
+    # Get user from database
+    result = await db.execute(
+        select(User).where(User.id == uuid.UUID(token_payload.sub))
+    )
+    user = result.scalar_one_or_none()
+    
+    if user is None:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="User not found",
+            headers={"WWW-Authenticate": "Bearer"},
+        )
+    
+    if user.status != "active":
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="User account is not active",
+            headers={"WWW-Authenticate": "Bearer"},
+        )
+    
+    return user
+
+
+@router.post("/register-guardian", response_model=AuthResponse)
+async def register_guardian(
+    request: GuardianRegister,
+    db: AsyncSession = Depends(get_db_dependency)
+) -> AuthResponse:
+    """Register a new guardian user."""
+    
+    # Check if user already exists
+    result = await db.execute(
+        select(User).where(User.email == request.email)
+    )
+    existing_user = result.scalar_one_or_none()
+    
+    if existing_user:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Email already registered"
+        )
+    
+    # Create new guardian user
+    hashed_password = create_password_hash(request.password)
+    
+    new_user = User(
+        email=request.email,
+        hashed_password=hashed_password,
+        first_name=request.first_name,
+        last_name=request.last_name,
+        phone=request.phone,
+        role="guardian",
+        status="active",  # Guardians are active immediately
+        is_email_verified=False  # Email verification can be done later
+    )
+    
+    try:
+        db.add(new_user)
+        await db.commit()
+        await db.refresh(new_user)
+    except IntegrityError:
+        await db.rollback()
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Email already registered"
+        )
+    
+    # Create tokens
+    access_token = create_access_token(
+        subject=str(new_user.id),
+        email=new_user.email,
+        role=new_user.role,
+        tenant_id=str(new_user.tenant_id) if new_user.tenant_id else None,
+        dash_context=generate_dash_context(new_user.role, str(new_user.tenant_id) if new_user.tenant_id else None)
+    )
+    
+    refresh_token_value = create_refresh_token()
+    
+    # Store refresh token in database
+    refresh_token = RefreshToken(
+        token=refresh_token_value,
+        user_id=new_user.id,
+        expires_at=datetime.now(timezone.utc) + timedelta(days=30)
+    )
+    db.add(refresh_token)
+    await db.commit()
+    
+    return AuthResponse(
+        access_token=access_token,
+        refresh_token=refresh_token_value,
+        expires_in=15 * 60,  # 15 minutes
+        user=UserResponse.model_validate(new_user)
+    )
+
+
+@router.post("/login", response_model=AuthResponse)
+async def login(
+    request: LoginRequest,
+    http_request: Request,
+    db: AsyncSession = Depends(get_db_dependency)
+) -> AuthResponse:
+    """Authenticate user and return JWT tokens."""
+    
+    # Get user by email
+    result = await db.execute(
+        select(User).where(User.email == request.email)
+    )
+    user = result.scalar_one_or_none()
+    
+    if not user or not verify_password(request.password, user.hashed_password):
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Invalid email or password"
+        )
+    
+    if user.status != "active":
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Account is not active"
+        )
+    
+    # Update last login
+    user.last_login_at = datetime.now(timezone.utc)
+    await db.commit()
+    await db.refresh(user)
+    
+    # Create tokens
+    access_token = create_access_token(
+        subject=str(user.id),
+        email=user.email,
+        role=user.role,
+        tenant_id=str(user.tenant_id) if user.tenant_id else None,
+        dash_context=generate_dash_context(user.role, str(user.tenant_id) if user.tenant_id else None)
+    )
+    
+    refresh_token_value = create_refresh_token()
+    
+    # Store refresh token in database
+    refresh_token = RefreshToken(
+        token=refresh_token_value,
+        user_id=user.id,
+        expires_at=datetime.now(timezone.utc) + timedelta(days=30),
+        user_agent=http_request.headers.get("user-agent"),
+        ip_address=http_request.client.host if http_request.client else None
+    )
+    db.add(refresh_token)
+    await db.commit()
+    
+    return AuthResponse(
+        access_token=access_token,
+        refresh_token=refresh_token_value,
+        expires_in=15 * 60,  # 15 minutes
+        user=UserResponse.model_validate(user)
+    )
+
+
+@router.post("/login-staff", response_model=AuthResponse)
+async def login_staff(
+    request: StaffLoginRequest,
+    http_request: Request,
+    db: AsyncSession = Depends(get_db_dependency)
+) -> AuthResponse:
+    """Staff login with optional tenant context."""
+    
+    # Get user by email
+    result = await db.execute(
+        select(User).where(User.email == request.email)
+    )
+    user = result.scalar_one_or_none()
+    
+    if not user or not verify_password(request.password, user.hashed_password):
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Invalid email or password"
+        )
+    
+    if user.role not in ["staff", "admin"]:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Access denied: staff role required"
+        )
+    
+    if user.status != "active":
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Account is not active"
+        )
+    
+    # Validate tenant access for staff users
+    if user.role == "staff" and request.tenant_id:
+        if user.tenant_id != request.tenant_id:
+            raise HTTPException(
+                status_code=status.HTTP_403_FORBIDDEN,
+                detail="Access denied: invalid tenant"
+            )
+    
+    # Update last login
+    await db.execute(
+        update(User)
+        .where(User.id == user.id)
+        .values(last_login_at=datetime.now(timezone.utc))
+    )
+    await db.commit()
+    
+    # Create tokens with tenant context
+    tenant_id = str(request.tenant_id) if request.tenant_id else (
+        str(user.tenant_id) if user.tenant_id else None
+    )
+    
+    access_token = create_access_token(
+        subject=str(user.id),
+        email=user.email,
+        role=user.role,
+        tenant_id=tenant_id,
+        dash_context=generate_dash_context(user.role, tenant_id)
+    )
+    
+    refresh_token_value = create_refresh_token()
+    
+    # Store refresh token in database
+    refresh_token = RefreshToken(
+        token=refresh_token_value,
+        user_id=user.id,
+        expires_at=datetime.now(timezone.utc) + timedelta(days=30),
+        user_agent=http_request.headers.get("user-agent"),
+        ip_address=http_request.client.host if http_request.client else None
+    )
+    db.add(refresh_token)
+    await db.commit()
+    
+    return AuthResponse(
+        access_token=access_token,
+        refresh_token=refresh_token_value,
+        expires_in=15 * 60,  # 15 minutes
+        user=UserResponse.model_validate(user)
+    )
+
+
+@router.post("/invite-teacher", response_model=InviteTokenResponse)
+async def invite_teacher(
+    request: InviteTeacherRequest,
+    current_user: Annotated[User, Depends(get_current_user)],
+    db: AsyncSession = Depends(get_db_dependency)
+) -> InviteTokenResponse:
+    """Invite a teacher to join a tenant."""
+    
+    # Check permissions - only staff and admin can invite teachers
+    if current_user.role not in ["staff", "admin"]:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Insufficient permissions to invite teachers"
+        )
+    
+    # Staff can only invite to their own tenant
+    if current_user.role == "staff" and current_user.tenant_id != request.tenant_id:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Cannot invite teacher to different tenant"
+        )
+    
+    # Check if user already exists
+    result = await db.execute(
+        select(User).where(User.email == request.email)
+    )
+    existing_user = result.scalar_one_or_none()
+    
+    if existing_user:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="User with this email already exists"
+        )
+    
+    # Check for existing pending invitation
+    result = await db.execute(
+        select(InviteToken)
+        .where(
+            InviteToken.email == request.email,
+            InviteToken.is_used == False,
+            InviteToken.expires_at > datetime.now(timezone.utc)
+        )
+    )
+    existing_invite = result.scalar_one_or_none()
+    
+    if existing_invite:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Pending invitation already exists for this email"
+        )
+    
+    # Create invitation token
+    invite_token_value = create_invite_token()
+    
+    invite_token = InviteToken(
+        token=invite_token_value,
+        email=request.email,
+        role="teacher",
+        tenant_id=request.tenant_id,
+        invited_by=current_user.id,
+        expires_at=datetime.now(timezone.utc) + timedelta(days=7)
+    )
+    
+    db.add(invite_token)
+    await db.commit()
+    await db.refresh(invite_token)
+    
+    # TODO: Send invitation email via notification service
+    # This would be queued to notification-svc for email delivery
+    
+    return InviteTokenResponse(
+        invite_token=invite_token_value,
+        email=request.email,
+        role="teacher",
+        expires_at=invite_token.expires_at,
+        invited_by=current_user.id
+    )
+
+
+@router.post("/accept-invite", response_model=AuthResponse)
+async def accept_invite(
+    request: AcceptInviteRequest,
+    db: AsyncSession = Depends(get_db_dependency)
+) -> AuthResponse:
+    """Accept a teacher/staff invitation and create account."""
+    
+    # Get invitation token
+    result = await db.execute(
+        select(InviteToken)
+        .where(
+            InviteToken.token == request.invite_token,
+            InviteToken.is_used == False,
+            InviteToken.expires_at > datetime.now(timezone.utc)
+        )
+    )
+    invite_token = result.scalar_one_or_none()
+    
+    if not invite_token:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Invalid or expired invitation token"
+        )
+    
+    # Check if user already exists
+    result = await db.execute(
+        select(User).where(User.email == invite_token.email)
+    )
+    existing_user = result.scalar_one_or_none()
+    
+    if existing_user:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="User with this email already exists"
+        )
+    
+    # Create new user account
+    hashed_password = create_password_hash(request.password)
+    
+    new_user = User(
+        email=invite_token.email,
+        hashed_password=hashed_password,
+        first_name=request.first_name,
+        last_name=request.last_name,
+        phone=request.phone,
+        role=invite_token.role,
+        tenant_id=invite_token.tenant_id,
+        status="active",
+        is_email_verified=True  # Email is verified through invitation
+    )
+    
+    try:
+        db.add(new_user)
+        
+        # Mark invitation as used
+        await db.execute(
+            update(InviteToken)
+            .where(InviteToken.id == invite_token.id)
+            .values(
+                is_used=True,
+                used_at=datetime.now(timezone.utc)
+            )
+        )
+        
+        await db.commit()
+        await db.refresh(new_user)
+        
+    except IntegrityError:
+        await db.rollback()
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Email already registered"
+        )
+    
+    # Create tokens
+    access_token = create_access_token(
+        subject=str(new_user.id),
+        email=new_user.email,
+        role=new_user.role,
+        tenant_id=str(new_user.tenant_id) if new_user.tenant_id else None,
+        dash_context=generate_dash_context(new_user.role, str(new_user.tenant_id) if new_user.tenant_id else None)
+    )
+    
+    refresh_token_value = create_refresh_token()
+    
+    # Store refresh token in database
+    refresh_token = RefreshToken(
+        token=refresh_token_value,
+        user_id=new_user.id,
+        expires_at=datetime.now(timezone.utc) + timedelta(days=30)
+    )
+    db.add(refresh_token)
+    await db.commit()
+    
+    return AuthResponse(
+        access_token=access_token,
+        refresh_token=refresh_token_value,
+        expires_in=15 * 60,  # 15 minutes
+        user=UserResponse.model_validate(new_user)
+    )
+
+
+@router.post("/refresh", response_model=AuthResponse)
+async def refresh_token(
+    request: RefreshTokenRequest,
+    http_request: Request,
+    db: AsyncSession = Depends(get_db_dependency)
+) -> AuthResponse:
+    """Refresh access token using refresh token."""
+    
+    # Get refresh token from database
+    result = await db.execute(
+        select(RefreshToken)
+        .where(
+            RefreshToken.token == request.refresh_token,
+            RefreshToken.is_revoked == False,
+            RefreshToken.expires_at > datetime.now(timezone.utc)
+        )
+    )
+    refresh_token = result.scalar_one_or_none()
+    
+    if not refresh_token:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Invalid or expired refresh token"
+        )
+    
+    # Get user
+    result = await db.execute(
+        select(User).where(User.id == refresh_token.user_id)
+    )
+    user = result.scalar_one_or_none()
+    
+    if not user or user.status != "active":
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="User account is not active"
+        )
+    
+    # Revoke old refresh token
+    await db.execute(
+        update(RefreshToken)
+        .where(RefreshToken.id == refresh_token.id)
+        .values(is_revoked=True)
+    )
+    
+    # Create new tokens (refresh token rotation)
+    access_token = create_access_token(
+        subject=str(user.id),
+        email=user.email,
+        role=user.role,
+        tenant_id=str(user.tenant_id) if user.tenant_id else None,
+        dash_context=generate_dash_context(user.role, str(user.tenant_id) if user.tenant_id else None)
+    )
+    
+    new_refresh_token_value = create_refresh_token()
+    
+    # Store new refresh token
+    new_refresh_token = RefreshToken(
+        token=new_refresh_token_value,
+        user_id=user.id,
+        expires_at=datetime.now(timezone.utc) + timedelta(days=30),
+        user_agent=http_request.headers.get("user-agent"),
+        ip_address=http_request.client.host if http_request.client else None
+    )
+    db.add(new_refresh_token)
+    await db.commit()
+    
+    return AuthResponse(
+        access_token=access_token,
+        refresh_token=new_refresh_token_value,
+        expires_in=15 * 60,  # 15 minutes
+        user=UserResponse.model_validate(user)
+    )
+
+
+@router.post("/logout")
+async def logout(
+    current_user: Annotated[User, Depends(get_current_user)],
+    request: RefreshTokenRequest,
+    db: AsyncSession = Depends(get_db_dependency)
+) -> dict:
+    """Logout user and revoke refresh token."""
+    
+    # Revoke refresh token if provided
+    if request.refresh_token:
+        await db.execute(
+            update(RefreshToken)
+            .where(
+                RefreshToken.token == request.refresh_token,
+                RefreshToken.user_id == current_user.id
+            )
+            .values(is_revoked=True)
+        )
+        await db.commit()
+    
+    return {"message": "Successfully logged out"}
+
+
+@router.get("/me", response_model=UserResponse)
+async def get_current_user_profile(
+    current_user: Annotated[User, Depends(get_current_user)]
+) -> UserResponse:
+    """Get current user profile."""
+    return UserResponse.model_validate(current_user)
