@@ -1,0 +1,138 @@
+name: Dependabot Validation
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened]
+
+jobs:
+  validate-dependabot-update:
+    name: Validate Dependabot Update
+    if: github.actor == 'dependabot[bot]'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20.19.4'
+          cache: 'npm'
+
+      - name: Validate ESLint v9 requirement
+        run: |
+          echo "Checking ESLint version constraints..."
+          
+          # Check if eslint is in package.json changes
+          if git diff HEAD~1 HEAD package.json | grep -q '"eslint"'; then
+            echo "ESLint version change detected"
+            ESLINT_VERSION=$(node -pe "require('./package.json').devDependencies?.eslint || require('./package.json').dependencies?.eslint || ''")
+            echo "New ESLint version: $ESLINT_VERSION"
+            
+            # Extract major version (supports both ^ and ~ prefixes)
+            MAJOR_VERSION=$(echo "$ESLINT_VERSION" | sed 's/[\^~]//g' | cut -d. -f1)
+            
+            if [ "$MAJOR_VERSION" != "9" ]; then
+              echo "❌ ESLint version must be v9.x, found: $ESLINT_VERSION"
+              exit 1
+            fi
+            
+            echo "✅ ESLint v9 requirement satisfied"
+          fi
+
+      - name: Check for deprecated packages
+        run: |
+          echo "Checking for deprecated packages..."
+          
+          # Install dependencies to check for deprecations
+          npm ci
+          
+          # Run our deprecated package check
+          node scripts/check-npm-deprecations.mjs
+          
+          echo "✅ No deprecated packages found"
+
+      - name: Validate engines constraint
+        run: |
+          echo "Validating Node.js engines constraint..."
+          
+          NODE_ENGINES=$(node -pe "require('./package.json').engines?.node || ''")
+          if [ -n "$NODE_ENGINES" ]; then
+            echo "Node.js engines constraint: $NODE_ENGINES"
+            
+            # Check if the constraint allows our required version
+            if ! npx semver 20.19.4 --range "$NODE_ENGINES"; then
+              echo "❌ Node.js engines constraint does not support required version 20.19.4"
+              exit 1
+            fi
+            
+            echo "✅ Node.js engines constraint is compatible"
+          fi
+
+      - name: Run ESLint enforcement
+        run: |
+          echo "Running ESLint v9 enforcement check..."
+          node scripts/ensure-eslint9.mjs
+          echo "✅ ESLint v9 enforcement passed"
+
+      - name: Comment on PR
+        if: success()
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const comment = `✅ **Dependabot Validation Passed**
+            
+            This Dependabot update has been validated and meets all requirements:
+            - ESLint v9 requirement maintained
+            - No deprecated packages introduced
+            - Engine constraints respected
+            - All safety checks passed
+            
+            Safe to merge! 🚀`;
+            
+            github.rest.issues.createComment({
+              issue_number: context.issue.number,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              body: comment
+            });
+
+  security-check:
+    name: Security Check
+    if: github.actor == 'dependabot[bot]'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20.19.4'
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Run npm audit
+        run: |
+          echo "Running npm security audit..."
+          npm audit --audit-level=moderate
+          echo "✅ Security audit passed"
+
+      - name: Setup Python
+        if: contains(github.event.pull_request.changed_files, 'services/hello-svc/')
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Run pip-audit for Python dependencies
+        if: contains(github.event.pull_request.changed_files, 'services/hello-svc/')
+        run: |
+          echo "Running Python security audit..."
+          cd services/hello-svc
+          pip install pip-audit
+          pip-audit -r requirements.txt
+          echo "✅ Python security audit passed"
