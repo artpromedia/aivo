@@ -1,0 +1,47 @@
+[tool.poetry]
+name = "learner-svc"
+version = "1.0.0"
+description = "Learner Service - Manages learners with guardian-first approach and teacher relationships"
+authors = ["Aivo Team <team@aivo.com>"]
+readme = "README.md"
+packages = [{include = "app"}]
+
+[tool.poetry.dependencies]
+python = "^3.11"
+fastapi = ">=0.115.6"
+uvicorn = {extras = ["standard"], version = ">=0.34.0"}
+sqlalchemy = {extras = ["asyncio"], version = ">=2.0.36"}
+aiosqlite = ">=0.21.0"
+asyncpg = ">=0.30.0"
+pydantic = ">=2.10.5"
+httpx = ">=0.28.1"
+python-multipart = ">=0.0.20"
+
+[tool.poetry.group.dev.dependencies]
+pytest = ">=8.3.4"
+pytest-asyncio = ">=0.25.0"
+pytest-cov = ">=6.0.0"
+httpx = ">=0.28.1"
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
+
+[tool.pytest.ini_options]
+asyncio_mode = "auto"
+testpaths = ["tests"]
+python_files = ["test_*.py"]
+python_functions = ["test_*"]
+addopts = "-v --tb=short"
+
+[tool.coverage.run]
+source = ["app"]
+omit = ["*/tests/*"]
+
+[tool.coverage.report]
+exclude_lines = [
+    "pragma: no cover",
+    "def __repr__",
+    "raise AssertionError",
+    "raise NotImplementedError",
+]
