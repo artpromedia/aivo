@@ -1,12 +1,15 @@
 # Payment Service
 
-A comprehensive payment processing service built with FastAPI and Stripe integration for handling subscription billing, trials, and webhook processing.
+A comprehensive payment processing service built with FastAPI and Stripe
+integration for handling subscription billing, trials, and webhook processing.
 
 ## Features
 
 - **Guardian Trials**: 14-day free trials for guardians
-- **Flexible Subscription Plans**: Monthly, Quarterly, Half-yearly, and Yearly billing
-- **Dynamic Pricing**: Automatic discount calculations based on plan duration and sibling discounts
+- **Flexible Subscription Plans**: Monthly, Quarterly, Half-yearly, and Yearly
+  billing
+- **Dynamic Pricing**: Automatic discount calculations based on plan duration
+  and sibling discounts
 - **Stripe Integration**: Secure payment processing with checkout sessions and webhooks
 - **Multi-tenant Support**: Handle both tenant-based and guardian-based subscriptions
 - **Comprehensive API**: RESTful endpoints for all payment operations
@@ -29,7 +32,7 @@ A comprehensive payment processing service built with FastAPI and Stripe integra
 pip install -r requirements.txt
 ```
 
-2. Set environment variables:
+1. Set environment variables:
 
 ```bash
 export DATABASE_URL="postgresql+asyncpg://user:password@localhost:5432/payment_db"
@@ -37,7 +40,7 @@ export STRIPE_API_KEY="sk_test_..."
 export STRIPE_WEBHOOK_SECRET="whsec_..."
 ```
 
-3. Run the service:
+1. Run the service:
 
 ```bash
 uvicorn app.main:app --host 0.0.0.0 --port 8000
@@ -75,14 +78,17 @@ uvicorn app.main:app --host 0.0.0.0 --port 8000
 ## Pricing Structure
 
 ### Base Pricing
+
 - **Monthly Base Rate**: $40 per seat per month
 
 ### Plan Discounts
+
 - **Quarterly**: 20% off (3 months)
 - **Half-yearly**: 30% off (6 months)
 - **Yearly**: 50% off (12 months)
 
 ### Additional Discounts
+
 - **Sibling Discount**: 10% off applied after plan discount
 
 ### Example Calculations
@@ -103,26 +109,31 @@ uvicorn app.main:app --host 0.0.0.0 --port 8000
 ## Database Schema
 
 ### Subscription
+
 - Tracks subscription lifecycle (trial → active → canceled)
 - Supports both tenant and guardian subscriptions
 - Stores pricing and discount information
 
 ### Invoice
+
 - Records billing history and payment status
 - Links to Stripe invoice objects
 - Tracks payment amounts and due dates
 
 ### PaymentMethod
+
 - Stores customer payment method details
 - Links to Stripe payment method objects
 - Manages default payment methods
 
 ### WebhookEvent
+
 - Ensures idempotent webhook processing
 - Tracks processed events and errors
 - Prevents duplicate processing
 
 ### DiscountRule
+
 - Configurable discount rules
 - Supports percentage and fixed amount discounts
 - Time-based validity periods
@@ -157,8 +168,10 @@ pytest -v
 
 ### Test Coverage
 
-- **Pricing Service**: Tests all plan types, discount combinations, and edge cases
-- **Subscription Service**: Tests trial creation, checkout sessions, and lifecycle management
+- **Pricing Service**: Tests all plan types, discount combinations, and edge
+  cases
+- **Subscription Service**: Tests trial creation, checkout sessions, and
+  lifecycle management
 - **Webhook Service**: Tests idempotent processing and all event types
 - **API Endpoints**: Tests all HTTP endpoints with various scenarios
 - **Database Models**: Tests model relationships and constraints
@@ -187,17 +200,20 @@ pool_recycle=3600
 ## Architecture
 
 ### Service Layer Pattern
+
 - **PricingService**: Handles all pricing calculations and discount logic
 - **StripeService**: Wraps Stripe API calls with error handling
 - **SubscriptionService**: Manages subscription lifecycle and business logic
 - **WebhookService**: Processes Stripe webhooks with idempotency
 
 ### Database Layer
+
 - Async SQLAlchemy with connection pooling
 - Declarative models with relationships
 - Migration support via Alembic
 
 ### API Layer
+
 - FastAPI with automatic OpenAPI documentation
 - Pydantic schemas for request/response validation
 - Comprehensive error handling
@@ -205,6 +221,7 @@ pool_recycle=3600
 ## Error Handling
 
 ### Stripe Errors
+
 All Stripe API errors are caught and returned with appropriate HTTP status codes:
 
 ```python
@@ -218,19 +235,23 @@ async def stripe_error_handler(request: Request, exc: stripe.error.StripeError):
 ```
 
 ### Validation Errors
+
 Pydantic automatically validates request data and returns 422 for validation errors.
 
 ### Database Errors
+
 SQLAlchemy errors are handled gracefully with rollback and appropriate error messages.
 
 ## Security
 
 ### API Security
+
 - Stripe webhook signature verification
 - Input validation with Pydantic
 - SQL injection prevention with parameterized queries
 
 ### Data Security
+
 - Sensitive data is not logged
 - Stripe customer IDs used instead of storing payment details
 - Environment variables for secrets
@@ -238,6 +259,7 @@ SQLAlchemy errors are handled gracefully with rollback and appropriate error mes
 ## Deployment
 
 ### Docker
+
 ```dockerfile
 FROM python:3.11-slim
 WORKDIR /app
@@ -248,9 +270,11 @@ CMD ["uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "8000"]
 ```
 
 ### Health Checks
+
 The service provides a health endpoint at `/health` for load balancer health checks.
 
 ### Database Migrations
+
 Use Alembic for database schema migrations:
 
 ```bash
@@ -262,10 +286,14 @@ alembic upgrade head
 ## Monitoring
 
 ### Logging
-The service uses structured logging with correlation IDs for tracking requests through the system.
+
+The service uses structured logging with correlation IDs for tracking requests
+through the system.
 
 ### Metrics
+
 Key metrics to monitor:
+
 - Trial conversion rates
 - Failed payment attempts
 - Webhook processing latency
@@ -276,12 +304,14 @@ Key metrics to monitor:
 ✅ **S1-04 Payment Service - COMPLETE**
 
 **Test Results**: 40/40 tests passing ✅
+
 - API Tests: 16/16 passing
 - Pricing Tests: 7/7 passing  
 - Subscription Tests: 9/9 passing
 - Webhook Tests: 8/8 passing
 
 **Core Features Implemented**:
+
 - ✅ Guardian trial management (14-day trials)
 - ✅ Complex pricing calculations with multiple discount tiers
 - ✅ Full Stripe integration (checkout, subscriptions, webhooks)
@@ -292,6 +322,7 @@ Key metrics to monitor:
 - ✅ Async architecture throughout
 
 **Technical Highlights**:
+
 - Modern Python 3.13 with async/await patterns
 - SQLAlchemy 2.0 with async support
 - Pydantic v2 for robust data validation

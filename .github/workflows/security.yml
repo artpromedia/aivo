@@ -38,7 +38,7 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        service: ['hello-svc', 'auth-svc']
+        service: ['hello-svc', 'payment-svc', 'enrollment-router-svc']
     steps:
       - name: Checkout code
         uses: actions/checkout@v4.2.2
@@ -84,7 +84,7 @@ jobs:
           fetch-depth: 0
 
       - name: Run TruffleHog scan
-        uses: trufflesecurity/trufflehog@main
+        uses: trufflesecurity/trufflehog@v3.65.0
         with:
           path: ./
           base: main
