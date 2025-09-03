@@ -70,7 +70,7 @@ class WebhookService:
         )
         
         # Send webhook with retries
-        return await self._send_with_retries(approval.webhook_url, payload.dict())
+        return await self._send_with_retries(approval.webhook_url, payload.model_dump())
     
     async def _send_with_retries(self, url: str, payload: Dict[str, Any]) -> bool:
         """Send webhook with retry logic."""

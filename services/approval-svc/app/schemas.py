@@ -4,7 +4,7 @@ Pydantic schemas for the Approval Service API.
 from datetime import datetime
 from typing import List, Optional, Dict, Any
 from uuid import UUID
-from pydantic import BaseModel, Field, EmailStr, validator
+from pydantic import BaseModel, Field, EmailStr, field_validator, model_validator
 
 from .enums import (
     ApprovalStatus, ParticipantRole, DecisionType, 
@@ -85,7 +85,7 @@ class ApprovalCreateInput(BaseSchema):
     ttl_hours: Optional[int] = Field(None, ge=1, le=720)  # 1 hour to 30 days
     
     # Participants
-    participants: List[ParticipantInput] = Field(..., min_items=1, max_items=10)
+    participants: List[ParticipantInput] = Field(..., min_length=1, max_length=10)
     required_participants: Optional[int] = None
     require_all_participants: bool = True
     
@@ -94,7 +94,8 @@ class ApprovalCreateInput(BaseSchema):
     webhook_events: Optional[List[WebhookEventType]] = None
     callback_data: Optional[Dict[str, Any]] = None
     
-    @validator('participants')
+    @field_validator('participants')
+    @classmethod
     def validate_participants(cls, v):
         """Validate participants list."""
         if not v:
@@ -103,33 +104,34 @@ class ApprovalCreateInput(BaseSchema):
         # Check for duplicate user_ids
         user_ids = [p.user_id for p in v]
         if len(user_ids) != len(set(user_ids)):
-            raise ValueError("Duplicate user_ids in participants")
+            raise ValueError("Duplicate user_ids are not allowed")
         
-        # Ensure at least one guardian and one teacher/admin
+        # Check role requirements - must have at least one guardian and one staff
         roles = [p.role for p in v]
-        has_guardian = ParticipantRole.GUARDIAN in roles
-        has_staff = any(role in [
+        has_guardian = any(role == ParticipantRole.GUARDIAN for role in roles)
+        staff_roles = [
             ParticipantRole.TEACHER, 
             ParticipantRole.ADMINISTRATOR,
             ParticipantRole.SPECIAL_EDUCATION_COORDINATOR,
             ParticipantRole.PRINCIPAL
-        ] for role in roles)
+        ]
+        has_staff = any(role in staff_roles for role in roles)
         
-        if not (has_guardian and has_staff):
+        if not has_guardian or not has_staff:
             raise ValueError("Must have at least one guardian and one staff member")
         
         return v
     
-    @validator('required_participants')
-    def validate_required_participants(cls, v, values):
+    @model_validator(mode='after')
+    def validate_required_participants(self):
         """Validate required participants count."""
-        if v is not None and 'participants' in values:
-            participants_count = len(values['participants'])
-            if v > participants_count:
+        if self.required_participants is not None and self.participants:
+            participants_count = len(self.participants)
+            if self.required_participants > participants_count:
                 raise ValueError("Required participants cannot exceed total participants")
-            if v < 1:
+            if self.required_participants < 1:
                 raise ValueError("Required participants must be at least 1")
-        return v
+        return self
 
 
 class ApprovalResponse(BaseSchema):

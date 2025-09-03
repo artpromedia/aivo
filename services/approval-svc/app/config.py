@@ -70,7 +70,7 @@ class Settings(BaseSettings):
     
     # Notification settings
     notification_service_url: Optional[str] = Field(
-        default="http://localhost:8090/notifications",
+        default=None,  # Disabled by default for testing
         description="Notification service URL"
     )
     

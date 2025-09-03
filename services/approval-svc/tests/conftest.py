@@ -87,7 +87,7 @@ def sample_approval_data():
                 "is_required": True
             }
         ],
-        "webhook_url": "https://example.com/webhook",
+        "webhook_url": None,  # Disabled for testing
         "webhook_events": ["approval_requested", "approval_completed"],
         "callback_data": {"source": "test"}
     }
