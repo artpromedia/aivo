@@ -1,0 +1,98 @@
+<mjml>
+  <mj-head>
+    <mj-title>Teacher Invitation - {{ school_name }}</mj-title>
+    <mj-font name="Inter" href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" />
+    <mj-attributes>
+      <mj-all font-family="Inter, Arial, sans-serif" />
+      <mj-text font-size="16px" line-height="1.6" color="#374151" />
+      <mj-button background-color="#3B82F6" color="white" font-weight="600" border-radius="8px" />
+    </mj-attributes>
+    <mj-style>
+      .feature-list {
+        margin: 16px 0;
+        padding: 0;
+        list-style: none;
+      }
+      .feature-item {
+        margin: 8px 0;
+        padding: 8px 12px;
+        background-color: #F8FAFC;
+        border-left: 3px solid #3B82F6;
+        border-radius: 4px;
+      }
+    </mj-style>
+  </mj-head>
+  <mj-body background-color="#F9FAFB">
+    <!-- Header -->
+    <mj-section background-color="#FFFFFF" padding="24px">
+      <mj-column>
+        <mj-text font-size="24px" font-weight="700" color="#1F2937" align="center">
+          {{ app_name }}
+        </mj-text>
+        <mj-divider border-color="#E5E7EB" border-width="1px" />
+      </mj-column>
+    </mj-section>
+
+    <!-- Main Content -->
+    <mj-section background-color="#FFFFFF" padding="32px 24px">
+      <mj-column>
+        <mj-text font-size="20px" font-weight="600" color="#1F2937">
+          Hello {{ teacher_name }},
+        </mj-text>
+        
+        <mj-text>
+          You've been invited by {{ inviter_name }} to join <strong>{{ school_name }}</strong> on {{ app_name }}. 
+          Our platform helps teachers collaborate more effectively with parents and track student progress.
+        </mj-text>
+
+        {% if school_description %}
+        <mj-text color="#6B7280">
+          <em>{{ school_description }}</em>
+        </mj-text>
+        {% endif %}
+
+        <mj-text font-weight="600" color="#1F2937">
+          With {{ app_name }}, you can:
+        </mj-text>
+
+        <!-- Features List -->
+        <mj-raw>
+          <ul class="feature-list">
+            {% for feature in platform_features %}
+            <li class="feature-item">✓ {{ feature }}</li>
+            {% endfor %}
+          </ul>
+        </mj-raw>
+
+        <mj-button href="{{ invite_url }}" padding="20px 0">
+          Accept Invitation
+        </mj-button>
+
+        <mj-text font-size="14px" color="#6B7280" align="center">
+          This invitation expires on {{ expires_at.strftime('%B %d, %Y at %I:%M %p') }}
+        </mj-text>
+      </mj-column>
+    </mj-section>
+
+    <!-- Security Notice -->
+    <mj-section background-color="#FEF2F2" padding="16px 24px">
+      <mj-column>
+        <mj-text font-size="14px" color="#7F1D1D" align="center">
+          🔒 This is a secure invitation link. Please do not share it with others.
+        </mj-text>
+      </mj-column>
+    </mj-section>
+
+    <!-- Footer -->
+    <mj-section background-color="#F3F4F6" padding="24px">
+      <mj-column>
+        <mj-text font-size="12px" color="#6B7280" align="center">
+          If you have any questions, please contact your school administrator.
+        </mj-text>
+        <mj-text font-size="12px" color="#6B7280" align="center">
+          © {{ current_year or 2024 }} {{ app_name }}. All rights reserved.
+        </mj-text>
+      </mj-column>
+    </mj-section>
+  </mj-body>
+</mjml>

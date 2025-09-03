@@ -1,0 +1,24 @@
+{
+  "name": "Approval Request",
+  "description": "Request for approval of IEP or educational documents",
+  "subject": "Approval needed: {{ document_type }} for {{ student_name }}",
+  "required_data": [
+    "approver_name",
+    "requester_name",
+    "student_name",
+    "document_type",
+    "approval_url",
+    "due_date"
+  ],
+  "optional_data": [
+    "school_name",
+    "document_description",
+    "priority_level",
+    "additional_notes",
+    "student_id"
+  ],
+  "defaults": {
+    "priority_level": "normal",
+    "document_type": "IEP Document"
+  }
+}

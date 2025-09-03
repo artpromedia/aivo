@@ -1,0 +1,157 @@
+<mjml>
+  <mj-head>
+    <mj-title>Approval Request - {{ document_type }}</mj-title>
+    <mj-font name="Inter" href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" />
+    <mj-attributes>
+      <mj-all font-family="Inter, Arial, sans-serif" />
+      <mj-text font-size="16px" line-height="1.6" color="#374151" />
+      <mj-button background-color="#059669" color="white" font-weight="600" border-radius="8px" />
+    </mj-attributes>
+    <mj-style>
+      .priority-high {
+        background-color: #FEF2F2;
+        border-left: 4px solid #EF4444;
+        padding: 16px;
+        margin: 16px 0;
+        border-radius: 6px;
+      }
+      .priority-urgent {
+        background-color: #FDF2F8;
+        border-left: 4px solid #EC4899;
+        padding: 16px;
+        margin: 16px 0;
+        border-radius: 6px;
+      }
+      .priority-normal {
+        background-color: #F0F9FF;
+        border-left: 4px solid #0EA5E9;
+        padding: 16px;
+        margin: 16px 0;
+        border-radius: 6px;
+      }
+      .document-info {
+        background-color: #F8FAFC;
+        padding: 20px;
+        border-radius: 8px;
+        margin: 16px 0;
+      }
+    </mj-style>
+  </mj-head>
+  <mj-body background-color="#F9FAFB">
+    <!-- Header -->
+    <mj-section background-color="#FFFFFF" padding="24px">
+      <mj-column>
+        <mj-text font-size="24px" font-weight="700" color="#1F2937" align="center">
+          {{ app_name or "Education Platform" }}
+        </mj-text>
+        <mj-text font-size="14px" color="#6B7280" align="center">
+          {% if school_name %}{{ school_name }}{% endif %}
+        </mj-text>
+        <mj-divider border-color="#E5E7EB" border-width="1px" />
+      </mj-column>
+    </mj-section>
+
+    <!-- Priority Banner -->
+    {% if priority_level == 'urgent' %}
+    <mj-section background-color="#FECACA" padding="12px 24px">
+      <mj-column>
+        <mj-text font-size="14px" font-weight="600" color="#991B1B" align="center">
+          🚨 URGENT APPROVAL REQUIRED
+        </mj-text>
+      </mj-column>
+    </mj-section>
+    {% elif priority_level == 'high' %}
+    <mj-section background-color="#FED7AA" padding="12px 24px">
+      <mj-column>
+        <mj-text font-size="14px" font-weight="600" color="#9A3412" align="center">
+          ⚡ HIGH PRIORITY APPROVAL
+        </mj-text>
+      </mj-column>
+    </mj-section>
+    {% endif %}
+
+    <!-- Main Content -->
+    <mj-section background-color="#FFFFFF" padding="32px 24px">
+      <mj-column>
+        <mj-text font-size="20px" font-weight="600" color="#1F2937">
+          Hello {{ approver_name }},
+        </mj-text>
+        
+        <mj-text>
+          {{ requester_name }} has submitted a <strong>{{ document_type }}</strong> that requires your approval.
+        </mj-text>
+
+        <!-- Document Information -->
+        <mj-raw>
+          <div class="document-info">
+            <h3 style="margin: 0 0 12px 0; color: #1F2937; font-size: 18px; font-weight: 600;">Document Details</h3>
+            <p style="margin: 6px 0; color: #374151;"><strong>Student:</strong> {{ student_name }}{% if student_id %} (ID: {{ student_id }}){% endif %}</p>
+            <p style="margin: 6px 0; color: #374151;"><strong>Document Type:</strong> {{ document_type }}</p>
+            <p style="margin: 6px 0; color: #374151;"><strong>Submitted by:</strong> {{ requester_name }}</p>
+            <p style="margin: 6px 0; color: #374151;"><strong>Due Date:</strong> {{ due_date.strftime('%B %d, %Y at %I:%M %p') }}</p>
+            {% if document_description %}
+            <p style="margin: 12px 0 6px 0; color: #374151;"><strong>Description:</strong></p>
+            <p style="margin: 6px 0; color: #6B7280; font-style: italic;">{{ document_description }}</p>
+            {% endif %}
+          </div>
+        </mj-raw>
+
+        {% if additional_notes %}
+        <mj-text color="#6B7280" font-size="14px">
+          <strong>Additional Notes:</strong><br>
+          {{ additional_notes }}
+        </mj-text>
+        {% endif %}
+
+        <!-- Priority-specific styling -->
+        {% if priority_level in ['urgent', 'high'] %}
+        <mj-raw>
+          <div class="priority-{{ priority_level }}">
+            <p style="margin: 0; color: #1F2937; font-weight: 600;">
+              {% if priority_level == 'urgent' %}
+                ⏰ This document requires immediate attention and approval.
+              {% else %}
+                📋 This document is marked as high priority for review.
+              {% endif %}
+            </p>
+          </div>
+        </mj-raw>
+        {% endif %}
+
+        <mj-button href="{{ approval_url }}" padding="20px 0">
+          Review & Approve Document
+        </mj-button>
+
+        <mj-text font-size="14px" color="#6B7280" align="center">
+          Please review this document by {{ due_date.strftime('%B %d, %Y') }}
+        </mj-text>
+      </mj-column>
+    </mj-section>
+
+    <!-- Action Items -->
+    <mj-section background-color="#F0FDF4" padding="20px 24px">
+      <mj-column>
+        <mj-text font-size="14px" color="#166534" font-weight="600">
+          What happens next?
+        </mj-text>
+        <mj-text font-size="14px" color="#166534">
+          • Click the button above to review the document<br>
+          • Approve or request changes as needed<br>
+          • {{ requester_name }} will be notified of your decision
+        </mj-text>
+      </mj-column>
+    </mj-section>
+
+    <!-- Footer -->
+    <mj-section background-color="#F3F4F6" padding="24px">
+      <mj-column>
+        <mj-text font-size="12px" color="#6B7280" align="center">
+          If you cannot access the approval link, please contact your system administrator.
+        </mj-text>
+        <mj-text font-size="12px" color="#6B7280" align="center">
+          © {{ current_year or 2024 }} {{ app_name or "Education Platform" }}. All rights reserved.
+        </mj-text>
+      </mj-column>
+    </mj-section>
+  </mj-body>
+</mjml>

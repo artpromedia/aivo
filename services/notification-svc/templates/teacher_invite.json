@@ -1,0 +1,16 @@
+{
+  "name": "Teacher Invitation",
+  "description": "Invitation email for teachers to join the platform",
+  "subject": "You're invited to join {{ school_name }} on {{ app_name }}",
+  "required_data": ["teacher_name", "school_name", "invite_url", "expires_at"],
+  "optional_data": ["inviter_name", "school_description", "platform_features"],
+  "defaults": {
+    "inviter_name": "School Administrator",
+    "platform_features": [
+      "Manage IEP documents",
+      "Collaborate with parents",
+      "Track student progress",
+      "Secure communication"
+    ]
+  }
+}

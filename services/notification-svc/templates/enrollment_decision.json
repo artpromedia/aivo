@@ -1,0 +1,27 @@
+{
+  "name": "Enrollment Decision",
+  "description": "Notification of enrollment approval or denial decision",
+  "subject": "Enrollment {{ decision }} for {{ student_name }} - {{ school_name }}",
+  "required_data": [
+    "parent_name",
+    "student_name",
+    "school_name",
+    "decision",
+    "decision_date"
+  ],
+  "optional_data": [
+    "enrollment_date",
+    "next_steps",
+    "contact_person",
+    "contact_email",
+    "contact_phone",
+    "school_address",
+    "additional_requirements",
+    "appeal_process",
+    "portal_url"
+  ],
+  "defaults": {
+    "decision": "approved",
+    "contact_person": "School Registrar"
+  }
+}
