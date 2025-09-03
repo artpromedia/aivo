@@ -23,6 +23,7 @@ export default [
     },
     rules: {
       "no-unused-vars": "off",
+      "no-undef": "off", // TypeScript handles this
       "@typescript-eslint/no-unused-vars": "off",
       "unused-imports/no-unused-imports": "error",
       "unused-imports/no-unused-vars": [

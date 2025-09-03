@@ -1,0 +1,10 @@
+{
+  "line-length": {
+    "line_length": 80,
+    "headings": false,
+    "tables": false,
+    "code_blocks": false
+  },
+  "no-duplicate-heading": false,
+  "no-trailing-punctuation": false
+}
