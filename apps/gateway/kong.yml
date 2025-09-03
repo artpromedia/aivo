@@ -1,8 +1,278 @@
 _format_version: '3.0'
 _transform: true
 
-services: []
-routes: []
-plugins: []
+# Services Configuration
+services:
+  # Authentication Service
+  - name: auth-service
+    url: http://auth-svc:8080
+    connect_timeout: 60000
+    write_timeout: 60000
+    read_timeout: 60000
+    retries: 5
+    tags: ["auth", "s1"]
+
+  # Tenant Management Service
+  - name: tenant-service
+    url: http://tenant-svc:8081
+    connect_timeout: 60000
+    write_timeout: 60000
+    read_timeout: 60000
+    retries: 5
+    tags: ["tenant", "s1"]
+
+  # Payment Service
+  - name: payment-service
+    url: http://payment-svc:8082
+    connect_timeout: 60000
+    write_timeout: 60000
+    read_timeout: 60000
+    retries: 5
+    tags: ["payment", "s1"]
+
+  # Approval Workflow Service
+  - name: approval-service
+    url: http://approval-svc:8083
+    connect_timeout: 60000
+    write_timeout: 60000
+    read_timeout: 60000
+    retries: 5
+    tags: ["approval", "s1"]
+
+  # Notification Service
+  - name: notification-service
+    url: http://notification-svc:8084
+    connect_timeout: 60000
+    write_timeout: 60000
+    read_timeout: 60000
+    retries: 5
+    tags: ["notification", "s1"]
+
+  # Admin Portal Aggregator Service
+  - name: admin-portal-service
+    url: http://admin-portal-svc:8095
+    connect_timeout: 60000
+    write_timeout: 60000
+    read_timeout: 60000
+    retries: 5
+    tags: ["admin", "s1"]
+
+  # Inference Gateway Service
+  - name: inference-gateway-service
+    url: http://inference-gateway-svc:8096
+    connect_timeout: 60000
+    write_timeout: 60000
+    read_timeout: 60000
+    retries: 5
+    tags: ["inference", "s1"]
+
+# Routes Configuration
+routes:
+  # Public Authentication Routes
+  - name: auth-login
+    service: auth-service
+    paths: ["/auth/login"]
+    methods: ["POST"]
+    strip_path: false
+    preserve_host: false
+    tags: ["auth", "public"]
+    plugins:
+      - name: rate-limiting
+        config:
+          minute: 10
+          hour: 100
+          day: 1000
+          policy: "local"
+          fault_tolerant: true
+          hide_client_headers: false
+
+  - name: auth-refresh
+    service: auth-service
+    paths: ["/auth/refresh"]
+    methods: ["POST"]
+    strip_path: false
+    preserve_host: false
+    tags: ["auth", "public"]
+
+  # Tenant Management Routes (Admin only)
+  - name: tenant-routes
+    service: tenant-service
+    paths: ["/tenant"]
+    methods: ["GET", "POST", "PUT", "DELETE"]
+    strip_path: false
+    preserve_host: false
+    tags: ["tenant", "admin"]
+    plugins:
+      - name: jwt
+        config:
+          uri_param_names: ["token"]
+          header_names: ["Authorization"]
+          claims_to_verify: ["exp", "role"]
+          run_on_preflight: false
+      - name: request-transformer
+        config:
+          add:
+            headers:
+              - "X-Required-Roles: staff,district_admin"
+
+  # Payment Routes (Admin only)
+  - name: payment-routes
+    service: payment-service
+    paths: ["/payment"]
+    methods: ["GET", "POST", "PUT"]
+    strip_path: false
+    preserve_host: false
+    tags: ["payment", "admin"]
+    plugins:
+      - name: jwt
+        config:
+          uri_param_names: ["token"]
+          header_names: ["Authorization"]
+          claims_to_verify: ["exp", "role"]
+          run_on_preflight: false
+      - name: request-transformer
+        config:
+          add:
+            headers:
+              - "X-Required-Roles: staff,district_admin"
+
+  # Approval Workflow Routes (Staff and Admin)
+  - name: approval-routes
+    service: approval-service
+    paths: ["/approval"]
+    methods: ["GET", "POST", "PUT"]
+    strip_path: false
+    preserve_host: false
+    tags: ["approval", "staff"]
+    plugins:
+      - name: jwt
+        config:
+          uri_param_names: ["token"]
+          header_names: ["Authorization"]
+          claims_to_verify: ["exp", "role"]
+          run_on_preflight: false
+      - name: request-transformer
+        config:
+          add:
+            headers:
+              - "X-Required-Roles: staff,district_admin"
+
+  # Notification Routes (Staff and Admin)
+  - name: notification-routes
+    service: notification-service
+    paths: ["/notification", "/notify"]
+    methods: ["GET", "POST"]
+    strip_path: false
+    preserve_host: false
+    tags: ["notification", "staff"]
+    plugins:
+      - name: jwt
+        config:
+          uri_param_names: ["token"]
+          header_names: ["Authorization"]
+          claims_to_verify: ["exp", "role"]
+          run_on_preflight: false
+      - name: request-transformer
+        config:
+          add:
+            headers:
+              - "X-Required-Roles: staff,district_admin"
+
+  # Admin Portal Dashboard Routes (Admin only)
+  - name: admin-portal-routes
+    service: admin-portal-service
+    paths: ["/admin"]
+    methods: ["GET"]
+    strip_path: true
+    preserve_host: false
+    tags: ["admin", "dashboard"]
+    plugins:
+      - name: jwt
+        config:
+          uri_param_names: ["token"]
+          header_names: ["Authorization"]
+          claims_to_verify: ["exp", "role"]
+          run_on_preflight: false
+      - name: request-transformer
+        config:
+          add:
+            headers:
+              - "X-Required-Roles: staff,district_admin"
+
+  # Inference Gateway Routes (Rate Limited)
+  - name: inference-routes
+    service: inference-gateway-service
+    paths: ["/inference"]
+    methods: ["GET", "POST"]
+    strip_path: false
+    preserve_host: false
+    tags: ["inference", "rate-limited"]
+    plugins:
+      - name: jwt
+        config:
+          uri_param_names: ["token"]
+          header_names: ["Authorization"]
+          claims_to_verify: ["exp"]
+          run_on_preflight: false
+      - name: rate-limiting
+        config:
+          minute: 60
+          hour: 1000
+          day: 10000
+          policy: "local"
+          fault_tolerant: true
+          hide_client_headers: false
+
+# Global Plugins
+plugins:
+  - name: cors
+    config:
+      origins: ["*"]
+      methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"]
+      headers:
+        - "Accept"
+        - "Accept-Version"
+        - "Content-Length"
+        - "Content-MD5"
+        - "Content-Type"
+        - "Date"
+        - "Authorization"
+        - "X-Auth-Token"
+      exposed_headers: ["X-Auth-Token"]
+      credentials: true
+      max_age: 3600
+
+  - name: prometheus
+    config:
+      per_consumer: true
+      status_code_metrics: true
+      latency_metrics: true
+      bandwidth_metrics: true
+
+# Consumers for Role-Based Access
+consumers:
+  - username: "system-admin"
+    custom_id: "admin-001"
+    tags: ["admin", "system"]
+    jwt_secrets:
+      - algorithm: "HS256"
+        key: "admin-jwt-key"
+        secret: "your-jwt-secret-key-for-admin"
+
+  - username: "district-admin"
+    custom_id: "district-001"
+    tags: ["district_admin", "admin"]
+    jwt_secrets:
+      - algorithm: "HS256"
+        key: "district-jwt-key"
+        secret: "your-jwt-secret-key-for-district"
+
+  - username: "staff-user"
+    custom_id: "staff-001"
+    tags: ["staff", "user"]
+    jwt_secrets:
+      - algorithm: "HS256"
+        key: "staff-jwt-key"
+        secret: "your-jwt-secret-key-for-staff"
+
 upstreams: []
-consumers: []
