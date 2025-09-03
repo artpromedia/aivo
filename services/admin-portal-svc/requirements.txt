@@ -1,0 +1,13 @@
+# Admin Portal Aggregator Service Dependencies
+fastapi>=0.104.1
+uvicorn[standard]>=0.24.0
+redis>=5.0.1
+httpx>=0.25.0
+pydantic>=2.4.2
+pydantic-settings>=2.0.3
+opentelemetry-api>=1.20.0
+opentelemetry-sdk>=1.20.0
+opentelemetry-auto-instrumentation>=0.41b0
+tenacity>=8.2.3
+asyncio-mqtt>=0.13.0
+python-multipart>=0.0.6
