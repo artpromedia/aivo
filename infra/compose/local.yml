@@ -1,4 +1,5 @@
 services:
+  # Infrastructure Services
   postgres:
     image: postgres:16
     container_name: monorepo_postgres
@@ -7,7 +8,7 @@ services:
       POSTGRES_USER: postgres
       POSTGRES_PASSWORD: password
     ports:
-      - '5432:5432'
+      - '5433:5432'
     volumes:
       - postgres_data:/var/lib/postgresql/data
     healthcheck:
@@ -22,7 +23,7 @@ services:
     image: redis:7
     container_name: monorepo_redis
     ports:
-      - '6379:6379'
+      - '6380:6379'
     volumes:
       - redis_data:/data
     healthcheck:
@@ -92,6 +93,361 @@ services:
       - --set redpanda.disable_metrics=true
       - --set redpanda.disable_admin_api=false
       - --set redpanda.admin_api_doc_dir=/usr/share/redpanda/admin-api-doc
+
+  # API Gateway
+  kong:
+    image: kong:3.4
+    container_name: monorepo_kong
+    environment:
+      KONG_DATABASE: "off"
+      KONG_DECLARATIVE_CONFIG: /kong/kong.yml
+      KONG_PROXY_ACCESS_LOG: /dev/stdout
+      KONG_ADMIN_ACCESS_LOG: /dev/stdout
+      KONG_PROXY_ERROR_LOG: /dev/stderr
+      KONG_ADMIN_ERROR_LOG: /dev/stderr
+      KONG_ADMIN_LISTEN: "0.0.0.0:8001"
+    ports:
+      - "8004:8000"
+      - "8005:8001"
+    volumes:
+      - ../../apps/gateway/kong.yml:/kong/kong.yml:ro
+    healthcheck:
+      test: ["CMD", "kong", "health"]
+      interval: 10s
+      timeout: 10s
+      retries: 3
+      start_period: 5s
+    restart: unless-stopped
+
+  # S1 Core Services
+  auth-svc:
+    build:
+      context: ../../services/auth-svc
+      dockerfile: Dockerfile
+    container_name: monorepo_auth_svc
+    environment:
+      DATABASE_URL: "postgresql://postgres:password@postgres:5432/monorepo"
+      REDIS_URL: "redis://redis:6379"
+      JWT_SECRET: "dev-secret-key"
+      PORT: "8081"
+    ports:
+      - "8081:8081"
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8081/health"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+      start_period: 30s
+    restart: unless-stopped
+
+  tenant-svc:
+    build:
+      context: ../../services/tenant-svc
+      dockerfile: Dockerfile
+    container_name: monorepo_tenant_svc
+    environment:
+      DATABASE_URL: "postgresql://postgres:password@postgres:5432/monorepo"
+      AUTH_SERVICE_URL: "http://auth-svc:8081"
+      PORT: "8082"
+    ports:
+      - "8082:8082"
+    depends_on:
+      postgres:
+        condition: service_healthy
+      auth-svc:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8082/health"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+      start_period: 30s
+    restart: unless-stopped
+
+  payment-svc:
+    build:
+      context: ../../services/payment-svc
+      dockerfile: Dockerfile
+    container_name: monorepo_payment_svc
+    environment:
+      DATABASE_URL: "postgresql://postgres:password@postgres:5432/monorepo"
+      STRIPE_SECRET_KEY: "sk_test_dev"
+      STRIPE_WEBHOOK_SECRET: "whsec_dev"
+      PORT: "8083"
+    ports:
+      - "8083:8083"
+    depends_on:
+      postgres:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8083/health"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+      start_period: 30s
+    restart: unless-stopped
+
+  learner-svc:
+    build:
+      context: ../../services/learner-svc
+      dockerfile: Dockerfile
+    container_name: monorepo_learner_svc
+    environment:
+      DATABASE_URL: "postgresql://postgres:password@postgres:5432/monorepo"
+      AUTH_SERVICE_URL: "http://auth-svc:8081"
+      TENANT_SERVICE_URL: "http://tenant-svc:8082"
+      PORT: "8084"
+    ports:
+      - "8084:8084"
+    depends_on:
+      postgres:
+        condition: service_healthy
+      auth-svc:
+        condition: service_healthy
+      tenant-svc:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8084/health"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+      start_period: 30s
+    restart: unless-stopped
+
+  enrollment-router-svc:
+    build:
+      context: ../../services/enrollment-router-svc
+      dockerfile: Dockerfile
+    container_name: monorepo_enrollment_router_svc
+    environment:
+      DATABASE_URL: "postgresql://postgres:password@postgres:5432/monorepo"
+      LEARNER_SERVICE_URL: "http://learner-svc:8084"
+      TENANT_SERVICE_URL: "http://tenant-svc:8082"
+      PORT: "8085"
+    ports:
+      - "8085:8085"
+    depends_on:
+      postgres:
+        condition: service_healthy
+      learner-svc:
+        condition: service_healthy
+      tenant-svc:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8085/health"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+      start_period: 30s
+    restart: unless-stopped
+
+  assessment-svc:
+    build:
+      context: ../../services/assessment-svc
+      dockerfile: Dockerfile
+    container_name: monorepo_assessment_svc
+    environment:
+      DATABASE_URL: "postgresql://postgres:password@postgres:5432/monorepo"
+      LEARNER_SERVICE_URL: "http://learner-svc:8084"
+      INFERENCE_GATEWAY_URL: "http://inference-gateway-svc:8086"
+      PORT: "8087"
+    ports:
+      - "8087:8087"
+    depends_on:
+      postgres:
+        condition: service_healthy
+      learner-svc:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8087/health"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+      start_period: 30s
+    restart: unless-stopped
+
+  inference-gateway-svc:
+    build:
+      context: ../../services/inference-gateway-svc
+      dockerfile: Dockerfile
+    container_name: monorepo_inference_gateway_svc
+    environment:
+      DATABASE_URL: "postgresql://postgres:password@postgres:5432/monorepo"
+      REDIS_URL: "redis://redis:6379"
+      OPENAI_API_KEY: "sk-test-key"
+      PORT: "8086"
+    ports:
+      - "8086:8086"
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8086/health"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+      start_period: 30s
+    restart: unless-stopped
+
+  iep-svc:
+    build:
+      context: ../../services/iep-svc
+      dockerfile: Dockerfile
+    container_name: monorepo_iep_svc
+    environment:
+      DATABASE_URL: "postgresql://postgres:password@postgres:5432/monorepo"
+      LEARNER_SERVICE_URL: "http://learner-svc:8084"
+      ASSESSMENT_SERVICE_URL: "http://assessment-svc:8087"
+      APPROVAL_SERVICE_URL: "http://approval-svc:8088"
+      PORT: "8089"
+    ports:
+      - "8089:8089"
+    depends_on:
+      postgres:
+        condition: service_healthy
+      learner-svc:
+        condition: service_healthy
+      assessment-svc:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8089/health"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+      start_period: 30s
+    restart: unless-stopped
+
+  approval-svc:
+    build:
+      context: ../../services/approval-svc
+      dockerfile: Dockerfile
+    container_name: monorepo_approval_svc
+    environment:
+      DATABASE_URL: "postgresql://postgres:password@postgres:5432/monorepo"
+      NOTIFICATION_SERVICE_URL: "http://notification-svc:8090"
+      PORT: "8088"
+    ports:
+      - "8088:8088"
+    depends_on:
+      postgres:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8088/health"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+      start_period: 30s
+    restart: unless-stopped
+
+  notification-svc:
+    build:
+      context: ../../services/notification-svc
+      dockerfile: Dockerfile
+    container_name: monorepo_notification_svc
+    environment:
+      SMTP_HOST: "mailhog"
+      SMTP_PORT: "1025"
+      SMTP_USER: ""
+      SMTP_PASSWORD: ""
+      FROM_EMAIL: "noreply@aivo.ai"
+      PORT: "8090"
+    ports:
+      - "8090:8090"
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8090/health"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+      start_period: 30s
+    restart: unless-stopped
+
+  admin-portal-svc:
+    build:
+      context: ../../services/admin-portal-svc
+      dockerfile: Dockerfile
+    container_name: monorepo_admin_portal_svc
+    environment:
+      DATABASE_URL: "postgresql://postgres:password@postgres:5432/monorepo"
+      AUTH_SERVICE_URL: "http://auth-svc:8081"
+      TENANT_SERVICE_URL: "http://tenant-svc:8082"
+      LEARNER_SERVICE_URL: "http://learner-svc:8084"
+      PAYMENT_SERVICE_URL: "http://payment-svc:8083"
+      PORT: "8092"
+    ports:
+      - "8092:8092"
+    depends_on:
+      postgres:
+        condition: service_healthy
+      auth-svc:
+        condition: service_healthy
+      tenant-svc:
+        condition: service_healthy
+      learner-svc:
+        condition: service_healthy
+      payment-svc:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8091/health"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+      start_period: 30s
+    restart: unless-stopped
+
+  private-fm-orchestrator:
+    build:
+      context: ../../services/private-fm-orchestrator
+      dockerfile: Dockerfile
+    container_name: monorepo_private_fm_orchestrator
+    environment:
+      DATABASE_URL: "postgresql://postgres:password@postgres:5432/monorepo"
+      REDIS_URL: "redis://redis:6379"
+      KAFKA_BROKERS: "redpanda:9092"
+      ASSESSMENT_SERVICE_URL: "http://assessment-svc:8087"
+      IEP_SERVICE_URL: "http://iep-svc:8089"
+      PORT: "8092"
+    ports:
+      - "8092:8092"
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+      redpanda:
+        condition: service_healthy
+      assessment-svc:
+        condition: service_healthy
+      iep-svc:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8092/health"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+      start_period: 30s
+    restart: unless-stopped
+
+  # Development Tools
+  mailhog:
+    image: mailhog/mailhog:v1.0.1
+    container_name: monorepo_mailhog
+    ports:
+      - "1025:1025"
+      - "8091:8025"
+    healthcheck:
+      test: ["CMD", "nc", "-z", "localhost", "8025"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+      start_period: 5s
+    restart: unless-stopped
 
 volumes:
   postgres_data:

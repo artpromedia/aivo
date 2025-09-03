@@ -10,25 +10,30 @@ $script:ChecksFailed = 0
 $script:TotalChecks = 0
 
 # Helper functions
-function Write-Info($message) {
+function Write-Info {
+    param($message)
     Write-Host "ℹ️  $message" -ForegroundColor Blue
 }
 
-function Write-Success($message) {
+function Write-Success {
+    param($message)
     Write-Host "✅ $message" -ForegroundColor Green
     $script:ChecksPassed++
 }
 
-function Write-Warning($message) {
+function Write-Warning {
+    param($message)
     Write-Host "⚠️  $message" -ForegroundColor Yellow
 }
 
-function Write-Error($message) {
+function Write-Error {
+    param($message)
     Write-Host "❌ $message" -ForegroundColor Red
     $script:ChecksFailed++
 }
 
-function Test-Command($command, $name) {
+function Test-Command {
+    param($command, $name)
     $script:TotalChecks++
     
     try {
@@ -42,7 +47,8 @@ function Test-Command($command, $name) {
     }
 }
 
-function Test-FileExists($path, $description) {
+function Test-FileExists {
+    param($path, $description)
     $script:TotalChecks++
     
     if (Test-Path $path -PathType Leaf) {
@@ -55,7 +61,8 @@ function Test-FileExists($path, $description) {
     }
 }
 
-function Test-DirectoryExists($path, $description) {
+function Test-DirectoryExists {
+    param($path, $description)
     $script:TotalChecks++
     
     if (Test-Path $path -PathType Container) {
@@ -68,9 +75,10 @@ function Test-DirectoryExists($path, $description) {
     }
 }
 
-function Test-CommandExecution($command, $description) {
+function Test-CommandExecution {
+    param($command, $description)
     $script:TotalChecks++
-    
+
     Write-Info "Running: $description"
     try {
         $null = Invoke-Expression $command 2>&1

@@ -50,7 +50,7 @@ services:
 
   # Admin Portal Aggregator Service
   - name: admin-portal-service
-    url: http://admin-portal-svc:8095
+    url: http://admin-portal-svc:8092
     connect_timeout: 60000
     write_timeout: 60000
     read_timeout: 60000
@@ -107,7 +107,7 @@ routes:
         config:
           uri_param_names: ["token"]
           header_names: ["Authorization"]
-          claims_to_verify: ["exp", "role"]
+          claims_to_verify: ["exp"]
           run_on_preflight: false
       - name: request-transformer
         config:
@@ -128,7 +128,7 @@ routes:
         config:
           uri_param_names: ["token"]
           header_names: ["Authorization"]
-          claims_to_verify: ["exp", "role"]
+          claims_to_verify: ["exp"]
           run_on_preflight: false
       - name: request-transformer
         config:
@@ -149,7 +149,7 @@ routes:
         config:
           uri_param_names: ["token"]
           header_names: ["Authorization"]
-          claims_to_verify: ["exp", "role"]
+          claims_to_verify: ["exp"]
           run_on_preflight: false
       - name: request-transformer
         config:
@@ -170,7 +170,7 @@ routes:
         config:
           uri_param_names: ["token"]
           header_names: ["Authorization"]
-          claims_to_verify: ["exp", "role"]
+          claims_to_verify: ["exp"]
           run_on_preflight: false
       - name: request-transformer
         config:
@@ -191,7 +191,7 @@ routes:
         config:
           uri_param_names: ["token"]
           header_names: ["Authorization"]
-          claims_to_verify: ["exp", "role"]
+          claims_to_verify: ["exp"]
           run_on_preflight: false
       - name: request-transformer
         config:
