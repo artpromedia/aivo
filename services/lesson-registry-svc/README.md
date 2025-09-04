@@ -22,19 +22,23 @@ search functionality.
 ### Database Schema
 
 #### Tables
+
 - `lessons`: Core lesson metadata
-- `lesson_versions`: Versioned lesson content 
+- `lesson_versions`: Versioned lesson content
 - `lesson_assets`: Asset metadata with CDN references
 
 #### States
+
 - `DRAFT`: Editable by teachers, not visible to learners
 - `PUBLISHED`: Read-only, visible to learners
 
 ### RBAC (Role-Based Access Control)
+
 - **Teachers**: Can create/edit their own lesson drafts
 - **Admins/District Admins**: Can publish any lesson in their tenant
 
 ### CDN Integration
+
 - **MinIO/S3**: Asset storage backend
 - **CloudFront**: Optional CDN for global distribution
 - **Presigned URLs**: Secure, time-limited asset access (expires=600s)
@@ -42,6 +46,7 @@ search functionality.
 ## Quick Start
 
 ### Prerequisites
+
 - Python 3.11+
 - Poetry
 - PostgreSQL
@@ -50,6 +55,7 @@ search functionality.
 ### Installation
 
 1. Clone and navigate to the service:
+
 ```bash
 cd services/lesson-registry-svc
 ```
@@ -79,11 +85,12 @@ poetry run alembic upgrade head
 poetry run python run.py
 ```
 
-The service will be available at http://localhost:8003
+The service will be available at <http://localhost:8003>
 
 ### Docker
 
 Build and run with Docker:
+
 ```bash
 docker build -t lesson-registry-svc .
 docker run -p 8003:8003 lesson-registry-svc
@@ -112,13 +119,16 @@ JWT_SECRET_KEY=your-secret-key-change-in-production
 ## API Usage
 
 ### Authentication
+
 All endpoints require JWT bearer token:
+
 ```bash
 curl -H "Authorization: Bearer YOUR_JWT_TOKEN" \
   http://localhost:8003/api/v1/lessons
 ```
 
 ### Create a Lesson
+
 ```bash
 curl -X POST http://localhost:8003/api/v1/lessons \
   -H "Content-Type: application/json" \
@@ -133,6 +143,7 @@ curl -X POST http://localhost:8003/api/v1/lessons \
 ```
 
 ### Create a Version
+
 ```bash
 curl -X POST http://localhost:8003/api/v1/lessons/{lesson_id}/versions \
   -H "Content-Type: application/json" \
@@ -150,12 +161,14 @@ curl -X POST http://localhost:8003/api/v1/lessons/{lesson_id}/versions \
 ```
 
 ### Publish a Version (Admin only)
+
 ```bash
 curl -X POST http://localhost:8003/api/v1/versions/{version_id}/publish \
   -H "Authorization: Bearer YOUR_ADMIN_TOKEN"
 ```
 
 ### Add an Asset
+
 ```bash
 curl -X POST http://localhost:8003/api/v1/versions/{version_id}/assets \
   -H "Content-Type: application/json" \
@@ -170,19 +183,23 @@ curl -X POST http://localhost:8003/api/v1/versions/{version_id}/assets \
 ```
 
 ### Search Lessons
+
 ```bash
-curl "http://localhost:8003/api/v1/search?q=python&subject=Computer%20Science&grade_band=9-12" \
+curl "http://localhost:8003/api/v1/search?q=python&subject=Computer%20Science" \
+  -G -d "grade_band=9-12" \
   -H "Authorization: Bearer YOUR_TOKEN"
 ```
 
 ## Development
 
 ### Running Tests
+
 ```bash
 poetry run pytest
 ```
 
 ### Code Quality
+
 ```bash
 # Format code
 poetry run black .
@@ -197,11 +214,13 @@ poetry run mypy .
 ### Database Migrations
 
 Create a new migration:
+
 ```bash
 poetry run alembic revision --autogenerate -m "Description"
 ```
 
 Apply migrations:
+
 ```bash
 poetry run alembic upgrade head
 ```
@@ -209,8 +228,8 @@ poetry run alembic upgrade head
 ## API Documentation
 
 - **OpenAPI Spec**: `/docs/api/rest/lesson-registry.yaml`
-- **Interactive Docs**: http://localhost:8003/docs (when running)
-- **ReDoc**: http://localhost:8003/redoc (when running)
+- **Interactive Docs**: <http://localhost:8003/docs> (when running)
+- **ReDoc**: <http://localhost:8003/redoc> (when running)
 
 ## Health Monitoring
 
