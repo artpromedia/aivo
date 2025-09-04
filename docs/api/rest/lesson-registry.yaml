@@ -1,0 +1,673 @@
+openapi: 3.0.3
+info:
+  title: Lesson Registry API
+  description: |
+    API for managing versioned lessons with signed CDN assets.
+    
+    This service provides:
+    - Versioned lesson management with DRAFT/PUBLISHED states
+    - Role-based access control (teacher draft, admin/district publish)
+    - Presigned CDN URLs for secure asset delivery (expires in 600s)
+    - Search functionality by subject, grade band, and keywords
+    - Asset management with multiple file types
+    
+  version: "0.1.0"
+  contact:
+    name: Aivo API Team
+    email: api@aivo.com
+
+servers:
+  - url: http://localhost:8003
+    description: Development server
+  - url: https://api-staging.aivo.com
+    description: Staging server
+  - url: https://api.aivo.com
+    description: Production server
+
+security:
+  - BearerAuth: []
+
+paths:
+  /:
+    get:
+      summary: Root endpoint
+      tags: [Health]
+      security: []
+      responses:
+        '200':
+          description: Service information
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  service:
+                    type: string
+                    example: lesson-registry-svc
+                  version:
+                    type: string
+                    example: "0.1.0"
+                  status:
+                    type: string
+                    example: running
+
+  /healthz:
+    get:
+      summary: Health check
+      tags: [Health]
+      security: []
+      responses:
+        '200':
+          description: Service is healthy
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HealthCheck'
+        '503':
+          description: Service is unhealthy
+
+  /api/v1/lessons:
+    post:
+      summary: Create a new lesson
+      tags: [Lessons]
+      security:
+        - BearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/LessonCreate'
+      responses:
+        '201':
+          description: Lesson created successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Lesson'
+        '400':
+          description: Invalid input
+        '401':
+          description: Unauthorized
+        '403':
+          description: Insufficient permissions
+
+  /api/v1/lessons/{lesson_id}:
+    get:
+      summary: Get a lesson by ID
+      tags: [Lessons]
+      parameters:
+        - name: lesson_id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: Lesson found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Lesson'
+        '404':
+          description: Lesson not found
+        '401':
+          description: Unauthorized
+
+    put:
+      summary: Update a lesson
+      tags: [Lessons]
+      parameters:
+        - name: lesson_id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/LessonUpdate'
+      responses:
+        '200':
+          description: Lesson updated successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Lesson'
+        '404':
+          description: Lesson not found
+        '403':
+          description: Insufficient permissions
+
+    delete:
+      summary: Delete a lesson
+      tags: [Lessons]
+      parameters:
+        - name: lesson_id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '204':
+          description: Lesson deleted successfully
+        '404':
+          description: Lesson not found
+        '403':
+          description: Insufficient permissions
+
+  /api/v1/lessons/{lesson_id}/versions:
+    post:
+      summary: Create a new version of a lesson
+      tags: [Versions]
+      parameters:
+        - name: lesson_id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/LessonVersionCreate'
+      responses:
+        '201':
+          description: Version created successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/LessonVersion'
+        '404':
+          description: Lesson not found
+        '403':
+          description: Insufficient permissions
+
+  /api/v1/versions/{version_id}:
+    put:
+      summary: Update a lesson version (DRAFT only)
+      tags: [Versions]
+      parameters:
+        - name: version_id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/LessonVersionUpdate'
+      responses:
+        '200':
+          description: Version updated successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/LessonVersion'
+        '404':
+          description: Version not found or not in DRAFT state
+        '403':
+          description: Insufficient permissions
+
+  /api/v1/versions/{version_id}/publish:
+    post:
+      summary: Publish a lesson version (admin only)
+      tags: [Versions]
+      parameters:
+        - name: version_id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: Version published successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PublishResponse'
+        '404':
+          description: Version not found
+        '403':
+          description: Insufficient permissions (admin required)
+
+  /api/v1/versions/{version_id}/assets:
+    post:
+      summary: Add an asset to a lesson version
+      tags: [Assets]
+      parameters:
+        - name: version_id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AssetCreate'
+      responses:
+        '201':
+          description: Asset added successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Asset'
+        '404':
+          description: Version not found
+        '403':
+          description: Insufficient permissions
+
+  /api/v1/assets/{asset_id}/upload-url:
+    get:
+      summary: Get presigned upload URL for asset
+      tags: [Assets]
+      parameters:
+        - name: asset_id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+        - name: content_type
+          in: query
+          required: true
+          schema:
+            type: string
+          description: MIME type of the asset
+      responses:
+        '200':
+          description: Upload URL generated
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  url:
+                    type: string
+                    format: uri
+                  fields:
+                    type: object
+        '500':
+          description: Failed to generate upload URL
+
+  /api/v1/search:
+    get:
+      summary: Search lessons
+      tags: [Search]
+      parameters:
+        - name: q
+          in: query
+          schema:
+            type: string
+          description: Search query
+        - name: subject
+          in: query
+          schema:
+            type: string
+          description: Filter by subject
+        - name: grade_band
+          in: query
+          schema:
+            $ref: '#/components/schemas/GradeBand'
+          description: Filter by grade band
+        - name: keywords
+          in: query
+          schema:
+            type: array
+            items:
+              type: string
+          description: Filter by keywords
+        - name: page
+          in: query
+          schema:
+            type: integer
+            minimum: 1
+            default: 1
+          description: Page number
+        - name: page_size
+          in: query
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 100
+            default: 20
+          description: Items per page
+        - name: sort_by
+          in: query
+          schema:
+            type: string
+            enum: [created_at, updated_at, title, subject]
+            default: created_at
+          description: Sort field
+        - name: sort_order
+          in: query
+          schema:
+            type: string
+            enum: [asc, desc]
+            default: desc
+          description: Sort order
+      responses:
+        '200':
+          description: Search results
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SearchResults'
+
+components:
+  securitySchemes:
+    BearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+
+  schemas:
+    LessonState:
+      type: string
+      enum: [DRAFT, PUBLISHED]
+
+    GradeBand:
+      type: string
+      enum: [K-2, K-5, 3-5, 6-8, 9-12, adult]
+
+    AssetType:
+      type: string
+      enum: [video, document, image, audio, interactive]
+
+    LessonCreate:
+      type: object
+      required: [title, subject, grade_band]
+      properties:
+        title:
+          type: string
+          minLength: 1
+          maxLength: 255
+        description:
+          type: string
+          maxLength: 2000
+        subject:
+          type: string
+          minLength: 1
+          maxLength: 100
+        grade_band:
+          $ref: '#/components/schemas/GradeBand'
+        keywords:
+          type: array
+          items:
+            type: string
+        metadata:
+          type: object
+
+    LessonUpdate:
+      type: object
+      properties:
+        title:
+          type: string
+          minLength: 1
+          maxLength: 255
+        description:
+          type: string
+          maxLength: 2000
+        subject:
+          type: string
+          minLength: 1
+          maxLength: 100
+        grade_band:
+          $ref: '#/components/schemas/GradeBand'
+        keywords:
+          type: array
+          items:
+            type: string
+        metadata:
+          type: object
+
+    Lesson:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        title:
+          type: string
+        description:
+          type: string
+        subject:
+          type: string
+        grade_band:
+          $ref: '#/components/schemas/GradeBand'
+        keywords:
+          type: array
+          items:
+            type: string
+        metadata:
+          type: object
+        created_by:
+          type: string
+          format: uuid
+        tenant_id:
+          type: string
+          format: uuid
+        created_at:
+          type: string
+          format: date-time
+        updated_at:
+          type: string
+          format: date-time
+        versions:
+          type: array
+          items:
+            $ref: '#/components/schemas/LessonVersion'
+
+    LessonVersionCreate:
+      type: object
+      required: [content]
+      properties:
+        content:
+          type: object
+        summary:
+          type: string
+          maxLength: 1000
+        learning_objectives:
+          type: array
+          items:
+            type: string
+        duration_minutes:
+          type: integer
+          minimum: 1
+          maximum: 480
+
+    LessonVersionUpdate:
+      type: object
+      properties:
+        content:
+          type: object
+        summary:
+          type: string
+          maxLength: 1000
+        learning_objectives:
+          type: array
+          items:
+            type: string
+        duration_minutes:
+          type: integer
+          minimum: 1
+          maximum: 480
+
+    LessonVersion:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        lesson_id:
+          type: string
+          format: uuid
+        version_number:
+          type: integer
+        state:
+          $ref: '#/components/schemas/LessonState'
+        content:
+          type: object
+        summary:
+          type: string
+        learning_objectives:
+          type: array
+          items:
+            type: string
+        duration_minutes:
+          type: integer
+        published_by:
+          type: string
+          format: uuid
+        published_at:
+          type: string
+          format: date-time
+        created_at:
+          type: string
+          format: date-time
+        updated_at:
+          type: string
+          format: date-time
+        assets:
+          type: array
+          items:
+            $ref: '#/components/schemas/Asset'
+
+    AssetCreate:
+      type: object
+      required: [name, asset_type, file_path]
+      properties:
+        name:
+          type: string
+          minLength: 1
+          maxLength: 255
+        asset_type:
+          $ref: '#/components/schemas/AssetType'
+        file_path:
+          type: string
+          minLength: 1
+          maxLength: 500
+        file_size:
+          type: integer
+          minimum: 0
+        mime_type:
+          type: string
+          maxLength: 100
+        alt_text:
+          type: string
+          maxLength: 500
+        metadata:
+          type: object
+
+    Asset:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        version_id:
+          type: string
+          format: uuid
+        name:
+          type: string
+        asset_type:
+          $ref: '#/components/schemas/AssetType'
+        file_path:
+          type: string
+        file_size:
+          type: integer
+        mime_type:
+          type: string
+        cdn_url:
+          type: string
+          format: uri
+        s3_bucket:
+          type: string
+        s3_key:
+          type: string
+        signed_url:
+          type: string
+          format: uri
+          description: Presigned URL for secure access (expires in 600s)
+        alt_text:
+          type: string
+        metadata:
+          type: object
+        created_at:
+          type: string
+          format: date-time
+        updated_at:
+          type: string
+          format: date-time
+
+    SearchResults:
+      type: object
+      properties:
+        lessons:
+          type: array
+          items:
+            $ref: '#/components/schemas/Lesson'
+        total:
+          type: integer
+        page:
+          type: integer
+        page_size:
+          type: integer
+        total_pages:
+          type: integer
+        has_next:
+          type: boolean
+        has_prev:
+          type: boolean
+
+    PublishResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+        message:
+          type: string
+        version:
+          $ref: '#/components/schemas/LessonVersion'
+
+    HealthCheck:
+      type: object
+      properties:
+        status:
+          type: string
+          example: healthy
+        timestamp:
+          type: string
+          format: date-time
+        version:
+          type: string
+        database:
+          type: boolean
+        storage:
+          type: boolean
+
+tags:
+  - name: Health
+    description: Health check and service information
+  - name: Lessons
+    description: Lesson management operations
+  - name: Versions
+    description: Lesson version management
+  - name: Assets
+    description: Asset management and CDN operations
+  - name: Search
+    description: Search and discovery operations
