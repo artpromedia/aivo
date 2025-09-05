@@ -1,0 +1,68 @@
+syntax = "proto3";
+
+package eventcollector;
+
+import "google/protobuf/timestamp.proto";
+import "google/protobuf/struct.proto";
+
+// Event Collector gRPC Service
+service EventCollectorService {
+  // Stream events to the collector
+  rpc CollectEvents(stream EventRequest) returns (stream EventResponse);
+  
+  // Get service health
+  rpc Health(HealthRequest) returns (HealthResponse);
+  
+  // Get service readiness
+  rpc Readiness(ReadinessRequest) returns (ReadinessResponse);
+}
+
+// Individual event message
+message Event {
+  string learner_id = 1;
+  string event_type = 2;
+  string event_id = 3;
+  string session_id = 4;
+  google.protobuf.Timestamp timestamp = 5;
+  google.protobuf.Struct data = 6;
+  google.protobuf.Struct metadata = 7;
+  string version = 8;
+}
+
+// Request message for event collection
+message EventRequest {
+  repeated Event events = 1;
+  string batch_id = 2;
+  string source = 3;
+}
+
+// Response message for event collection
+message EventResponse {
+  int32 accepted = 1;
+  int32 rejected = 2;
+  string batch_id = 3;
+  string message = 4;
+  repeated string errors = 5;
+  bool success = 6;
+}
+
+// Health check messages
+message HealthRequest {}
+
+message HealthResponse {
+  string status = 1;
+  string service = 2;
+  string version = 3;
+  google.protobuf.Timestamp timestamp = 4;
+  google.protobuf.Struct checks = 5;
+}
+
+// Readiness check messages
+message ReadinessRequest {}
+
+message ReadinessResponse {
+  bool ready = 1;
+  string service = 2;
+  google.protobuf.Timestamp timestamp = 3;
+  google.protobuf.Struct dependencies = 4;
+}
