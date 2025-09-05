@@ -1,0 +1,404 @@
+openapi: 3.0.3
+info:
+  title: Analytics Service API
+  description: >
+    REST API for learning analytics over Snowflake with differential privacy.
+    
+    
+    Provides tenant-scoped metrics for summary statistics, mastery progression,
+    and learning streaks with privacy-preserving noise and response caching.
+  version: 1.0.0
+  contact:
+    name: Aivo Engineering Team
+    email: engineering@aivo.com
+
+servers:
+  - url: http://localhost:8000
+    description: Development server
+  - url: https://analytics-svc.aivo.com
+    description: Production server
+
+paths:
+  /health:
+    get:
+      summary: Health check
+      description: Check service health status
+      operationId: healthCheck
+      responses:
+        '200':
+          description: Service is healthy
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    example: healthy
+                  timestamp:
+                    type: string
+                    format: date-time
+
+  /metrics/summary:
+    get:
+      summary: Get summary metrics
+      description: >
+        Get overall learning metrics for a tenant including learner counts,
+        session statistics, accuracy rates, and mastery information.
+      operationId: getSummaryMetrics
+      parameters:
+        - name: tenant_id
+          in: query
+          required: true
+          description: Tenant identifier
+          schema:
+            type: string
+            example: tenant_123
+        - name: start_date
+          in: query
+          required: false
+          description: Start date filter (YYYY-MM-DD)
+          schema:
+            type: string
+            format: date
+            example: "2024-01-01"
+        - name: end_date
+          in: query
+          required: false
+          description: End date filter (YYYY-MM-DD)
+          schema:
+            type: string
+            format: date
+            example: "2024-01-31"
+      responses:
+        '200':
+          description: Summary metrics retrieved successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SummaryMetricsResponse'
+        '422':
+          description: Validation error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ValidationError'
+        '500':
+          description: Internal server error
+
+  /metrics/mastery:
+    get:
+      summary: Get mastery metrics
+      description: >
+        Get mastery progression metrics for learners including scores,
+        attempts, and achievement timestamps.
+      operationId: getMasteryMetrics
+      parameters:
+        - name: tenant_id
+          in: query
+          required: true
+          description: Tenant identifier
+          schema:
+            type: string
+            example: tenant_123
+        - name: start_date
+          in: query
+          required: false
+          description: Start date filter (YYYY-MM-DD)
+          schema:
+            type: string
+            format: date
+        - name: end_date
+          in: query
+          required: false
+          description: End date filter (YYYY-MM-DD)
+          schema:
+            type: string
+            format: date
+        - name: limit
+          in: query
+          required: false
+          description: Maximum number of results
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 1000
+            default: 100
+      responses:
+        '200':
+          description: Mastery metrics retrieved successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MasteryMetricsResponse'
+        '422':
+          description: Validation error
+        '500':
+          description: Internal server error
+
+  /metrics/streaks:
+    get:
+      summary: Get streak metrics
+      description: >
+        Get learning streak metrics for learners including current streaks,
+        longest streaks, and learning patterns.
+      operationId: getStreakMetrics
+      parameters:
+        - name: tenant_id
+          in: query
+          required: true
+          description: Tenant identifier
+          schema:
+            type: string
+            example: tenant_123
+        - name: start_date
+          in: query
+          required: false
+          description: Start date filter (YYYY-MM-DD)
+          schema:
+            type: string
+            format: date
+        - name: end_date
+          in: query
+          required: false
+          description: End date filter (YYYY-MM-DD)
+          schema:
+            type: string
+            format: date
+        - name: limit
+          in: query
+          required: false
+          description: Maximum number of results
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 1000
+            default: 100
+      responses:
+        '200':
+          description: Streak metrics retrieved successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/StreakMetricsResponse'
+        '422':
+          description: Validation error
+        '500':
+          description: Internal server error
+
+components:
+  schemas:
+    SummaryMetrics:
+      type: object
+      description: Overall learning metrics summary
+      properties:
+        total_learners:
+          type: integer
+          description: Total number of learners
+          example: 1250
+        active_learners_today:
+          type: integer
+          description: Learners active today
+          example: 89
+        active_learners_week:
+          type: integer
+          description: Learners active this week
+          example: 567
+        total_sessions:
+          type: integer
+          description: Total learning sessions
+          example: 8934
+        avg_session_duration_minutes:
+          type: number
+          format: float
+          description: Average session duration in minutes
+          example: 24.5
+        total_correct_answers:
+          type: integer
+          description: Total correct answers
+          example: 67832
+        total_incorrect_answers:
+          type: integer
+          description: Total incorrect answers
+          example: 12456
+        overall_accuracy:
+          type: number
+          format: float
+          description: Overall accuracy percentage
+          example: 84.5
+        concepts_mastered:
+          type: integer
+          description: Total concepts mastered
+          example: 234
+        avg_mastery_score:
+          type: number
+          format: float
+          description: Average mastery score
+          example: 0.78
+
+    MasteryMetrics:
+      type: object
+      description: Mastery progression metrics for a learner-concept pair
+      properties:
+        learner_id:
+          type: string
+          description: Learner identifier
+          example: learner_456
+        concept_id:
+          type: string
+          description: Concept identifier
+          example: concept_789
+        concept_name:
+          type: string
+          description: Concept name
+          example: Linear Equations
+        mastery_score:
+          type: number
+          format: float
+          description: Mastery score (0-1)
+          example: 0.85
+        attempts:
+          type: integer
+          description: Number of attempts
+          example: 12
+        correct_answers:
+          type: integer
+          description: Correct answers
+          example: 10
+        incorrect_answers:
+          type: integer
+          description: Incorrect answers
+          example: 2
+        accuracy:
+          type: number
+          format: float
+          description: Accuracy percentage
+          example: 83.3
+        first_attempt:
+          type: string
+          format: date-time
+          description: First attempt timestamp
+        last_attempt:
+          type: string
+          format: date-time
+          description: Last attempt timestamp
+        mastery_achieved_at:
+          type: string
+          format: date-time
+          nullable: true
+          description: Mastery achievement timestamp
+
+    StreakMetrics:
+      type: object
+      description: Learning streak metrics for a learner
+      properties:
+        learner_id:
+          type: string
+          description: Learner identifier
+          example: learner_456
+        current_streak:
+          type: integer
+          description: Current learning streak in days
+          example: 7
+        longest_streak:
+          type: integer
+          description: Longest learning streak in days
+          example: 14
+        total_learning_days:
+          type: integer
+          description: Total days with learning activity
+          example: 42
+        streak_start_date:
+          type: string
+          format: date-time
+          description: Current streak start date
+        last_learning_date:
+          type: string
+          format: date-time
+          description: Last learning activity date
+        avg_sessions_per_day:
+          type: number
+          format: float
+          description: Average sessions per learning day
+          example: 2.3
+
+    SummaryMetricsResponse:
+      type: object
+      description: Response wrapper for summary metrics
+      properties:
+        data:
+          $ref: '#/components/schemas/SummaryMetrics'
+        tenant_id:
+          type: string
+          description: Tenant ID
+          example: tenant_123
+        generated_at:
+          type: string
+          format: date-time
+          description: Response generation timestamp
+        cache_hit:
+          type: boolean
+          description: Whether response was served from cache
+          example: false
+
+    MasteryMetricsResponse:
+      type: object
+      description: Response wrapper for mastery metrics
+      properties:
+        data:
+          type: array
+          items:
+            $ref: '#/components/schemas/MasteryMetrics'
+        tenant_id:
+          type: string
+          description: Tenant ID
+        generated_at:
+          type: string
+          format: date-time
+          description: Response generation timestamp
+        cache_hit:
+          type: boolean
+          description: Whether response was served from cache
+
+    StreakMetricsResponse:
+      type: object
+      description: Response wrapper for streak metrics
+      properties:
+        data:
+          type: array
+          items:
+            $ref: '#/components/schemas/StreakMetrics'
+        tenant_id:
+          type: string
+          description: Tenant ID
+        generated_at:
+          type: string
+          format: date-time
+          description: Response generation timestamp
+        cache_hit:
+          type: boolean
+          description: Whether response was served from cache
+
+    ValidationError:
+      type: object
+      description: Request validation error
+      properties:
+        detail:
+          type: array
+          items:
+            type: object
+            properties:
+              loc:
+                type: array
+                items:
+                  type: string
+              msg:
+                type: string
+              type:
+                type: string
+
+tags:
+  - name: Health
+    description: Service health endpoints
+  - name: Metrics
+    description: Analytics metrics endpoints

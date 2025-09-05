@@ -39,7 +39,9 @@ class Settings(BaseSettings):
 
     # AWS S3 settings
     aws_access_key_id: str = Field(default="", description="AWS access key")
-    aws_secret_access_key: str = Field(default="", description="AWS secret key")
+    aws_secret_access_key: str = Field(
+        default="", description="AWS secret key"
+    )
     aws_region: str = Field(default="us-west-2", description="AWS region")
     s3_bucket_raw_events: str = Field(
         default="aivo-data-raw",
