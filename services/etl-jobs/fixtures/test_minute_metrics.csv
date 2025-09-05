@@ -1,0 +1,11 @@
+learner_id,minute_timestamp,session_id,total_events,page_views,interactions,assessments_started,assessments_completed,lessons_started,lessons_completed,errors,time_spent_seconds,created_at,partition_date
+learner_001,2025-09-05T10:00:00Z,session_001,1,0,0,0,0,1,0,0,60,2025-09-05T10:01:00Z,2025-09-05
+learner_001,2025-09-05T10:05:00Z,session_001,1,0,1,0,0,0,0,0,60,2025-09-05T10:06:00Z,2025-09-05
+learner_001,2025-09-05T10:10:00Z,session_001,1,0,0,1,0,0,0,0,60,2025-09-05T10:11:00Z,2025-09-05
+learner_001,2025-09-05T10:15:00Z,session_001,1,0,0,0,1,0,0,0,60,2025-09-05T10:16:00Z,2025-09-05
+learner_001,2025-09-05T10:20:00Z,session_001,1,0,0,0,0,0,1,0,60,2025-09-05T10:21:00Z,2025-09-05
+learner_002,2025-09-05T11:00:00Z,session_002,1,1,0,0,0,0,0,0,60,2025-09-05T11:01:00Z,2025-09-05
+learner_002,2025-09-05T11:05:00Z,session_002,1,0,0,0,0,1,0,0,60,2025-09-05T11:06:00Z,2025-09-05
+learner_002,2025-09-05T11:10:00Z,session_002,1,0,0,0,0,0,0,1,60,2025-09-05T11:11:00Z,2025-09-05
+learner_003,2025-09-05T12:00:00Z,session_003,1,0,0,0,1,0,0,0,60,2025-09-05T12:01:00Z,2025-09-05
+learner_003,2025-09-05T12:30:00Z,session_003,1,0,0,0,1,0,0,0,60,2025-09-05T12:31:00Z,2025-09-05
