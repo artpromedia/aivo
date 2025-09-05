@@ -3,8 +3,10 @@
 import logging
 from typing import Any
 
+# pylint: disable=import-error
 import snowflake.connector
 from snowflake.connector import DictCursor
+# pylint: enable=import-error
 
 from app.config import Settings
 
@@ -33,7 +35,7 @@ class SnowflakeClient:
             )
             logger.info("Connected to Snowflake successfully")
         except Exception as e:
-            logger.error(f"Failed to connect to Snowflake: {e}")
+            logger.error("Failed to connect to Snowflake: %s", e)
             raise
 
     async def test_connection(self) -> bool:
@@ -47,8 +49,8 @@ class SnowflakeClient:
             cursor.fetchone()
             cursor.close()
             return True
-        except Exception as e:
-            logger.error(f"Snowflake connection test failed: {e}")
+        except Exception as e:  # pylint: disable=broad-exception-caught
+            logger.error("Snowflake connection test failed: %s", e)
             return False
 
     async def close(self) -> None:
@@ -71,7 +73,7 @@ class SnowflakeClient:
             cursor.close()
             return results
         except Exception as e:
-            logger.error(f"Query execution failed: {e}")
+            logger.error("Query execution failed: %s", e)
             raise
 
     async def get_summary_metrics(

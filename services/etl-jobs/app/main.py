@@ -25,10 +25,10 @@ class ETLProcessor:
         self.kafka_consumer = KafkaEventConsumer(self._process_event_batch)
         self._running = False
         self._shutdown_event = asyncio.Event()
-        
+
         # Setup signal handlers
         self._setup_signal_handlers()
-        
+
         # Metrics
         self._metrics = {
             "batches_processed": 0,
@@ -44,7 +44,9 @@ class ETLProcessor:
             for sig in [signal.SIGTERM, signal.SIGINT]:
                 signal.signal(sig, self._signal_handler)
 
-    def _signal_handler(self, signum: int, frame: Any) -> None:
+    def _signal_handler(
+        self, signum: int, _frame: object  # pylint: disable=unused-argument
+    ) -> None:
         """Handle shutdown signals."""
         logger.info("Received shutdown signal", signal=signum)
         self._shutdown_event.set()
@@ -52,19 +54,19 @@ class ETLProcessor:
     async def start(self) -> None:
         """Start the ETL processor."""
         logger.info("Starting ETL processor")
-        
+
         try:
             self._running = True
             self._metrics["start_time"] = datetime.now()
-            
+
             # Start services
             await self.kafka_consumer.start()
-            
+
             logger.info("ETL processor started successfully")
-            
+
             # Wait for shutdown signal
             await self._shutdown_event.wait()
-            
+
         except Exception as e:
             logger.error("Failed to start ETL processor", error=str(e))
             raise
@@ -74,27 +76,27 @@ class ETLProcessor:
     async def stop(self) -> None:
         """Stop the ETL processor."""
         logger.info("Stopping ETL processor")
-        
+
         self._running = False
-        
+
         # Stop services
         if self.kafka_consumer:
             await self.kafka_consumer.stop()
-        
+
         logger.info("ETL processor stopped")
 
     async def _process_event_batch(self, events: list[RawEvent]) -> bool:
         """Process a batch of events from Kafka.
-        
+
         Args:
             events: List of events to process
-            
+
         Returns:
             True if processing succeeded, False otherwise
         """
         if not events:
             return True
-        
+
         try:
             logger.info(
                 "Processing event batch",
@@ -102,16 +104,16 @@ class ETLProcessor:
                 first_event_time=events[0].timestamp.isoformat(),
                 last_event_time=events[-1].timestamp.isoformat()
             )
-            
+
             # Write events to S3 as Parquet
             s3_key = await self.s3_writer.write_events_to_s3(events)
-            
+
             if s3_key:
                 # Update metrics
                 self._metrics["batches_processed"] += 1
                 self._metrics["events_processed"] += len(events)
                 self._metrics["s3_files_written"] += 1
-                
+
                 logger.info(
                     "Successfully processed event batch",
                     event_count=len(events),
@@ -125,8 +127,8 @@ class ETLProcessor:
                 )
                 self._metrics["processing_errors"] += 1
                 return False
-                
-        except Exception as e:
+
+        except Exception as e:  # pylint: disable=broad-exception-caught
             logger.error(
                 "Error processing event batch",
                 error=str(e),
@@ -146,21 +148,21 @@ class ETLProcessor:
                 if self._metrics["start_time"] else 0
             ),
         }
-        
+
         # Check component health
         kafka_health = await self.kafka_consumer.health_check()
         s3_health = await self.s3_writer.health_check()
-        
+
         health["components"] = {
             "kafka_consumer": kafka_health,
             "s3_writer": s3_health,
         }
-        
+
         # Overall health depends on all components
-        if (not kafka_health.get("kafka_connected") or 
-            not s3_health.get("s3_connected")):
+        if (not kafka_health.get("kafka_connected") or
+                not s3_health.get("s3_connected")):
             health["status"] = "unhealthy"
-        
+
         return health
 
     def get_metrics(self) -> dict[str, Any]:
@@ -172,13 +174,11 @@ async def main() -> None:
     """Main entry point."""
     # Configure logging
     structlog.configure(
-        wrapper_class=structlog.make_filtering_bound_logger(
-            getattr(structlog.stdlib, settings.log_level.upper(), 20)
-        ),
+        wrapper_class=structlog.make_filtering_bound_logger(20),  # INFO level
         logger_factory=structlog.WriteLoggerFactory(),
         cache_logger_on_first_use=True,
     )
-    
+
     logger.info(
         "Starting Aivo ETL Jobs Service",
         version=settings.version,
@@ -190,14 +190,14 @@ async def main() -> None:
             "flush_interval": settings.flush_interval_seconds,
         }
     )
-    
+
     processor = ETLProcessor()
-    
+
     try:
         await processor.start()
     except KeyboardInterrupt:
         logger.info("Received keyboard interrupt")
-    except Exception as e:
+    except Exception as e:  # pylint: disable=broad-exception-caught
         logger.error("ETL processor failed", error=str(e))
         sys.exit(1)
 

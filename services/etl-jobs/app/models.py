@@ -36,10 +36,10 @@ class ProcessingBatch(BaseModel):
     """Batch of events for processing."""
 
     batch_id: str = Field(..., description="Unique batch identifier")
-    events: List[RawEvent] = Field(..., description="Events in this batch")
+    events: list[RawEvent] = Field(..., description="Events in this batch")
     created_at: datetime = Field(..., description="Batch creation timestamp")
     partition_date: str = Field(..., description="Target partition date")
-    s3_key: Optional[str] = Field(None, description="S3 key for this batch")
+    s3_key: str | None = Field(None, description="S3 key for this batch")
     status: str = Field(default="pending", description="Batch status")
 
 
@@ -48,21 +48,25 @@ class MinuteMetrics(BaseModel):
 
     learner_id: str = Field(..., description="Learner identifier")
     minute_timestamp: datetime = Field(..., description="Minute timestamp")
-    session_id: Optional[str] = Field(None, description="Session identifier")
-    
+    session_id: str | None = Field(None, description="Session identifier")
+
     # Event counts
     total_events: int = Field(default=0, description="Total events in minute")
     page_views: int = Field(default=0, description="Page view events")
     interactions: int = Field(default=0, description="Interaction events")
-    assessments_started: int = Field(default=0, description="Assessments started")
-    assessments_completed: int = Field(default=0, description="Assessments completed")
+    assessments_started: int = Field(
+        default=0, description="Assessments started"
+    )
+    assessments_completed: int = Field(
+        default=0, description="Assessments completed"
+    )
     lessons_started: int = Field(default=0, description="Lessons started")
     lessons_completed: int = Field(default=0, description="Lessons completed")
     errors: int = Field(default=0, description="Error events")
-    
+
     # Timing metrics
     time_spent_seconds: float = Field(default=0.0, description="Time spent")
-    
+
     # Meta
     created_at: datetime = Field(..., description="Record creation time")
     partition_date: str = Field(..., description="Partition date")
@@ -74,34 +78,42 @@ class SessionMetrics(BaseModel):
     session_id: str = Field(..., description="Session identifier")
     learner_id: str = Field(..., description="Learner identifier")
     session_start: datetime = Field(..., description="Session start time")
-    session_end: Optional[datetime] = Field(None, description="Session end time")
-    
+    session_end: datetime | None = Field(None, description="Session end time")
+
     # Duration
-    duration_seconds: Optional[float] = Field(
+    duration_seconds: float | None = Field(
         None, description="Session duration"
     )
-    
+
     # Activity metrics
     total_events: int = Field(default=0, description="Total events in session")
     unique_pages: int = Field(default=0, description="Unique pages visited")
-    total_interactions: int = Field(default=0, description="Total interactions")
-    
+    total_interactions: int = Field(
+        default=0, description="Total interactions"
+    )
+
     # Learning metrics
     lessons_attempted: int = Field(default=0, description="Lessons attempted")
     lessons_completed: int = Field(default=0, description="Lessons completed")
-    assessments_attempted: int = Field(default=0, description="Assessments attempted")
-    assessments_completed: int = Field(default=0, description="Assessments completed")
-    
+    assessments_attempted: int = Field(
+        default=0, description="Assessments attempted"
+    )
+    assessments_completed: int = Field(
+        default=0, description="Assessments completed"
+    )
+
     # Performance
-    avg_assessment_score: Optional[float] = Field(
+    avg_assessment_score: float | None = Field(
         None, description="Average assessment score"
     )
     completion_rate: float = Field(
         default=0.0, description="Completion rate for attempted content"
     )
-    
+
     # Meta
-    is_active: bool = Field(default=True, description="Is session still active")
+    is_active: bool = Field(
+        default=True, description="Is session still active"
+    )
     last_activity: datetime = Field(..., description="Last activity timestamp")
     created_at: datetime = Field(..., description="Record creation time")
     updated_at: datetime = Field(..., description="Record update time")
@@ -113,28 +125,34 @@ class MasteryDelta(BaseModel):
 
     learner_id: str = Field(..., description="Learner identifier")
     content_id: str = Field(..., description="Content/skill identifier")
-    content_type: str = Field(..., description="Type of content (lesson, skill, etc)")
-    
+    content_type: str = Field(
+        ..., description="Type of content (lesson, skill, etc)"
+    )
+
     # Mastery tracking
-    previous_mastery: Optional[float] = Field(
+    previous_mastery: float | None = Field(
         None, description="Previous mastery level (0-1)"
     )
-    current_mastery: float = Field(..., description="Current mastery level (0-1)")
+    current_mastery: float = Field(
+        ..., description="Current mastery level (0-1)"
+    )
     mastery_delta: float = Field(..., description="Change in mastery")
-    
+
     # Context
-    trigger_event_id: str = Field(..., description="Event that triggered change")
+    trigger_event_id: str = Field(
+        ..., description="Event that triggered change"
+    )
     trigger_event_type: str = Field(..., description="Type of trigger event")
-    session_id: Optional[str] = Field(None, description="Session identifier")
-    
+    session_id: str | None = Field(None, description="Session identifier")
+
     # Metadata
-    confidence_score: Optional[float] = Field(
+    confidence_score: float | None = Field(
         None, description="Confidence in mastery calculation"
     )
     evidence_count: int = Field(
         default=1, description="Number of evidence points"
     )
-    
+
     # Meta
     timestamp: datetime = Field(..., description="When mastery changed")
     created_at: datetime = Field(..., description="Record creation time")
@@ -147,20 +165,24 @@ class ETLJobStatus(BaseModel):
     job_id: str = Field(..., description="Unique job identifier")
     job_type: str = Field(..., description="Type of ETL job")
     status: str = Field(..., description="Job status")
-    
+
     # Timing
     started_at: datetime = Field(..., description="Job start time")
-    completed_at: Optional[datetime] = Field(None, description="Job completion time")
-    
+    completed_at: datetime | None = Field(
+        None, description="Job completion time"
+    )
+
     # Metrics
     records_processed: int = Field(default=0, description="Records processed")
     records_failed: int = Field(default=0, description="Records failed")
     bytes_processed: int = Field(default=0, description="Bytes processed")
-    
+
     # Error tracking
-    error_message: Optional[str] = Field(None, description="Error message if failed")
+    error_message: str | None = Field(
+        None, description="Error message if failed"
+    )
     retry_count: int = Field(default=0, description="Number of retries")
-    
+
     # Meta
     created_at: datetime = Field(..., description="Record creation time")
     updated_at: datetime = Field(..., description="Record update time")

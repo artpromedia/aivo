@@ -6,15 +6,6 @@ from contextlib import asynccontextmanager
 from datetime import datetime, timedelta
 
 from fastapi import FastAPI, HTTPException, Query, Request
-from opentelemetry import trace
-from opentelemetry.exporter.otlp.proto.grpc.trace_exporter import (
-    OTLPSpanExporter,
-)
-from opentelemetry.instrumentation.fastapi import FastAPIInstrumentor
-from opentelemetry.instrumentation.snowflake import SnowflakeInstrumentor
-from opentelemetry.sdk.resources import SERVICE_NAME, Resource
-from opentelemetry.sdk.trace import TracerProvider
-from opentelemetry.sdk.trace.export import BatchSpanProcessor
 
 from app.config import Settings
 from app.models import (
@@ -25,6 +16,44 @@ from app.models import (
 )
 from app.privacy import DifferentialPrivacy
 from app.snowflake import SnowflakeClient
+
+# OpenTelemetry imports (may not be available in development)
+try:
+    # pylint: disable=import-error
+    from opentelemetry import trace  # type: ignore[import-untyped]
+    from opentelemetry.exporter.otlp.proto.grpc.trace_exporter import (  # type: ignore[import-not-found]  # noqa: E501
+        OTLPSpanExporter,
+    )  # type: ignore[import-untyped]
+    from opentelemetry.instrumentation.fastapi import (  # type: ignore[import-not-found]  # noqa: E501
+        FastAPIInstrumentor,
+    )  # type: ignore[import-untyped]
+    from opentelemetry.instrumentation.snowflake import (  # type: ignore[import-not-found]  # noqa: E501
+        SnowflakeInstrumentor,
+    )  # type: ignore[import-untyped]
+    from opentelemetry.sdk.resources import (  # type: ignore[import-not-found]  # noqa: E501
+        SERVICE_NAME,
+        Resource,
+    )  # type: ignore[import-untyped]
+    from opentelemetry.sdk.trace import (  # type: ignore[import-not-found]
+        TracerProvider,
+    )  # type: ignore[import-untyped]
+    from opentelemetry.sdk.trace.export import (  # type: ignore[import-not-found]  # noqa: E501
+        BatchSpanProcessor,
+    )  # type: ignore[import-untyped]
+    # pylint: enable=import-error
+
+    OTEL_AVAILABLE = True
+except ImportError:
+    # Fallback for development without OpenTelemetry installed
+    OTEL_AVAILABLE = False
+    trace = None  # type: ignore[assignment]
+    OTLPSpanExporter = None  # type: ignore[assignment,misc]
+    FastAPIInstrumentor = None  # type: ignore[assignment,misc]
+    SnowflakeInstrumentor = None  # type: ignore[assignment,misc]
+    SERVICE_NAME = "service.name"
+    Resource = None  # type: ignore[assignment,misc]
+    TracerProvider = None  # type: ignore[assignment,misc]
+    BatchSpanProcessor = None  # type: ignore[assignment,misc]
 
 # Setup logging
 logging.basicConfig(level=logging.INFO)
@@ -37,22 +66,83 @@ cache: dict[str, dict] = {}
 diff_privacy: DifferentialPrivacy | None = None
 
 # OpenTelemetry setup
-resource = Resource(attributes={SERVICE_NAME: "analytics-svc"})
-provider = TracerProvider(resource=resource)
-processor = BatchSpanProcessor(
-    OTLPSpanExporter(endpoint="http://jaeger:14250", insecure=True)
-)
-provider.add_span_processor(processor)
-trace.set_tracer_provider(provider)
-tracer = trace.get_tracer(__name__)
+if OTEL_AVAILABLE:
+    resource = Resource(attributes={SERVICE_NAME: "analytics-svc"})
+    provider = TracerProvider(resource=resource)
+    processor = BatchSpanProcessor(
+        OTLPSpanExporter(endpoint="http://jaeger:14250", insecure=True)
+    )
+    provider.add_span_processor(processor)
+    trace.set_tracer_provider(provider)
+    tracer = trace.get_tracer(__name__)
 
-# Instrument packages
-SnowflakeInstrumentor().instrument()
+    # Instrument packages
+    SnowflakeInstrumentor().instrument()
+else:
+    # Mock tracer for development
+    class MockStatus:
+        """Mock OpenTelemetry Status for development."""
+
+        def __init__(self, status_code, description: str = ""):
+            """Initialize mock status."""
+            self.status_code = status_code
+            self.description = description
+
+    class MockStatusCode:
+        """Mock OpenTelemetry StatusCode for development."""
+
+        ERROR = "ERROR"
+
+    class MockTrace:
+        """Mock OpenTelemetry trace module for development."""
+
+        Status = MockStatus
+        StatusCode = MockStatusCode
+
+    class MockSpan:
+        """Mock OpenTelemetry Span for development."""
+
+        def set_attribute(self, key: str, value: str) -> None:
+            """Mock set_attribute method."""
+            # In mock implementation, we simply log the attribute
+            logger.debug("Mock span attribute: %s = %s", key, value)
+
+        def record_exception(self, exception: Exception) -> None:
+            """Mock record_exception method."""
+            # In mock implementation, we log the exception
+            logger.error("Mock span exception: %s", exception)
+
+        def set_status(self, status) -> None:  # type: ignore[no-untyped-def]
+            """Mock set_status method."""
+            # In mock implementation, we log the status
+            logger.debug("Mock span status: %s", status)
+
+        def __enter__(self):  # type: ignore[no-untyped-def]
+            """Mock context manager enter."""
+            return self
+
+        def __exit__(self, *args):  # type: ignore[no-untyped-def]
+            """Mock context manager exit."""
+            # In mock implementation, we just return None (successful exit)
+            return None
+
+    class MockTracer:
+        """Mock OpenTelemetry Tracer for development."""
+
+        def start_as_current_span(
+            self, _name: str  # pylint: disable=unused-argument
+        ) -> MockSpan:
+            """Mock start_as_current_span method."""
+            return MockSpan()
+
+    tracer = MockTracer()
+    trace = MockTrace()
 
 
 @asynccontextmanager
-async def lifespan(app: FastAPI):
+async def lifespan(_app: FastAPI):  # pylint: disable=unused-argument
     """Application lifespan events."""
+    # pylint: disable=global-statement
     global settings, snowflake_client, diff_privacy
 
     # Startup
@@ -65,7 +155,7 @@ async def lifespan(app: FastAPI):
         await snowflake_client.test_connection()
         logger.info("✅ Snowflake connection established")
     except Exception as e:
-        logger.error(f"❌ Snowflake connection failed: {e}")
+        logger.error("❌ Snowflake connection failed: %s", e)
         raise
 
     yield
@@ -83,7 +173,8 @@ app = FastAPI(
 )
 
 # Add OpenTelemetry instrumentation
-FastAPIInstrumentor.instrument_app(app)
+if OTEL_AVAILABLE and FastAPIInstrumentor:
+    FastAPIInstrumentor.instrument_app(app)
 
 
 def get_cache_key(tenant_id: str, endpoint: str, **params) -> str:
@@ -104,11 +195,11 @@ async def get_cached_or_compute(
     if cache_key in cache:
         entry = cache[cache_key]
         if is_cache_valid(entry["timestamp"]):
-            logger.info(f"Cache hit for key: {cache_key}")
+            logger.info("Cache hit for key: %s", cache_key)
             return entry["data"]
 
     # Compute new result
-    logger.info(f"Cache miss for key: {cache_key}")
+    logger.info("Cache miss for key: %s", cache_key)
     result = await compute_func(*args, **kwargs)
 
     # Cache the result
@@ -126,7 +217,7 @@ async def health_check():
 
 @app.get("/metrics/summary", response_model=AnalyticsResponse[SummaryMetrics])
 async def get_summary_metrics(
-    request: Request,
+    _request: Request,  # pylint: disable=unused-argument
     tenant_id: str = Query(..., description="Tenant ID"),
     start_date: str | None = Query(
         None, description="Start date (YYYY-MM-DD)"
@@ -162,12 +253,12 @@ async def get_summary_metrics(
             )
 
         except Exception as e:
-            logger.error(f"Error getting summary metrics: {e}")
+            logger.error("Error getting summary metrics: %s", e)
             span.record_exception(e)
             span.set_status(trace.Status(trace.StatusCode.ERROR, str(e)))
             raise HTTPException(
                 status_code=500, detail="Internal server error"
-            )
+            ) from e
 
 
 @app.get(
@@ -175,7 +266,7 @@ async def get_summary_metrics(
     response_model=AnalyticsResponse[list[MasteryMetrics]]
 )
 async def get_mastery_metrics(
-    request: Request,
+    _request: Request,  # pylint: disable=unused-argument
     tenant_id: str = Query(..., description="Tenant ID"),
     start_date: str | None = Query(
         None, description="Start date (YYYY-MM-DD)"
@@ -219,12 +310,12 @@ async def get_mastery_metrics(
             )
 
         except Exception as e:
-            logger.error(f"Error getting mastery metrics: {e}")
+            logger.error("Error getting mastery metrics: %s", e)
             span.record_exception(e)
             span.set_status(trace.Status(trace.StatusCode.ERROR, str(e)))
             raise HTTPException(
                 status_code=500, detail="Internal server error"
-            )
+            ) from e
 
 
 @app.get(
@@ -232,7 +323,7 @@ async def get_mastery_metrics(
     response_model=AnalyticsResponse[list[StreakMetrics]]
 )
 async def get_streak_metrics(
-    request: Request,
+    _request: Request,  # pylint: disable=unused-argument
     tenant_id: str = Query(..., description="Tenant ID"),
     start_date: str | None = Query(
         None, description="Start date (YYYY-MM-DD)"
@@ -276,12 +367,12 @@ async def get_streak_metrics(
             )
 
         except Exception as e:
-            logger.error(f"Error getting streak metrics: {e}")
+            logger.error("Error getting streak metrics: %s", e)
             span.record_exception(e)
             span.set_status(trace.Status(trace.StatusCode.ERROR, str(e)))
             raise HTTPException(
                 status_code=500, detail="Internal server error"
-            )
+            ) from e
 
 
 if __name__ == "__main__":
