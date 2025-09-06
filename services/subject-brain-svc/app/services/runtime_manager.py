@@ -5,8 +5,8 @@ from datetime import datetime, timedelta
 from typing import Any
 
 try:
-    from kubernetes import client, config  # pylint: disable=import-error
-    from kubernetes.client import (  # pylint: disable=import-error
+    from kubernetes import client, config
+    from kubernetes.client import (
         V1Container,
         V1HorizontalPodAutoscaler,
         V1ObjectMeta,
