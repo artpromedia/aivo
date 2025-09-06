@@ -7,13 +7,13 @@ from contextlib import asynccontextmanager
 from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 
-from app.config import settings
-from app.models import (
+from .config import settings
+from .models import (
     PlannerRequest,
     PlannerResponse,
     RuntimeStatusResponse,
 )
-from app.services.runtime_manager import runtime_manager
+from .services.runtime_manager import runtime_manager
 
 # Configure logging
 logging.basicConfig(
@@ -24,15 +24,15 @@ logger = logging.getLogger(__name__)
 
 
 @asynccontextmanager
-async def lifespan(app: FastAPI) -> AsyncGenerator[None, None]:
+async def lifespan(_app: FastAPI) -> AsyncGenerator[None, None]:
     """Application lifespan manager."""
     logger.info("Starting Subject-Brain Service")
 
     # Initialize Kubernetes HPA
     try:
         await runtime_manager.create_hpa()
-    except Exception as e:
-        logger.warning(f"Failed to create HPA: {e}")
+    except Exception as e:  # pylint: disable=broad-exception-caught
+        logger.warning("Failed to create HPA: %s", e)
 
     yield
 
@@ -81,9 +81,11 @@ async def get_metrics() -> dict[str, dict[str, int] | dict[str, int]]:
             },
             "scaling_metrics": scaling_metrics
         }
-    except Exception as e:
-        logger.error(f"Failed to get metrics: {e}")
-        raise HTTPException(status_code=500, detail="Failed to get metrics")
+    except Exception as e:  # pylint: disable=broad-exception-caught
+        logger.error("Failed to get metrics: %s", e)
+        raise HTTPException(
+            status_code=500, detail="Failed to get metrics"
+        ) from e
 
 
 @app.post("/plan", response_model=PlannerResponse)
@@ -91,11 +93,12 @@ async def create_activity_plan(request: PlannerRequest) -> PlannerResponse:
     """Create a personalized activity plan for a learner."""
     try:
         logger.info(
-            f"Creating plan for learner {request.learner_id} "
-            f"in {request.subject}"
+            "Creating plan for learner %s in %s",
+            request.learner_id,
+            request.subject
         )
 
-        # TODO: In a real implementation, we would:
+        # TODO: In a real implementation, we would:  # pylint: disable=fixme
         # 1. Fetch learner baseline from learner service
         # 2. Get available coursework topics from coursework service
         # 3. Retrieve teacher constraints from auth/profile service
@@ -109,12 +112,12 @@ async def create_activity_plan(request: PlannerRequest) -> PlannerResponse:
 
     except HTTPException:
         raise
-    except Exception as e:
-        logger.error(f"Failed to create plan: {e}")
+    except Exception as e:  # pylint: disable=broad-exception-caught
+        logger.error("Failed to create plan: %s", e)
         raise HTTPException(
             status_code=500,
             detail="Internal server error while creating plan"
-        )
+        ) from e
 
 
 @app.get("/runtime/{runtime_id}", response_model=RuntimeStatusResponse)
@@ -133,18 +136,20 @@ async def get_runtime_status(runtime_id: str) -> RuntimeStatusResponse:
             runtime_id=runtime_pod.runtime_id,
             status=runtime_pod.status,
             metrics=runtime_pod.metrics,
+            # pylint: disable-next=fixme
             estimated_completion_minutes=None,  # TODO: Calculate based on plan
+            # pylint: disable-next=fixme
             current_activity=None  # TODO: Get from runtime pod
         )
 
     except HTTPException:
         raise
-    except Exception as e:
-        logger.error(f"Failed to get runtime status: {e}")
+    except Exception as e:  # pylint: disable=broad-exception-caught
+        logger.error("Failed to get runtime status: %s", e)
         raise HTTPException(
             status_code=500,
             detail="Failed to get runtime status"
-        )
+        ) from e
 
 
 @app.delete("/runtime/{runtime_id}")
@@ -159,7 +164,7 @@ async def terminate_runtime(runtime_id: str) -> dict[str, str]:
                 detail=f"Runtime {runtime_id} not found"
             )
 
-        await runtime_manager._terminate_runtime(runtime_id)
+        await runtime_manager.terminate_runtime(runtime_id)
 
         return {
             "message": f"Runtime {runtime_id} termination initiated",
@@ -168,12 +173,12 @@ async def terminate_runtime(runtime_id: str) -> dict[str, str]:
 
     except HTTPException:
         raise
-    except Exception as e:
-        logger.error(f"Failed to terminate runtime: {e}")
+    except Exception as e:  # pylint: disable=broad-exception-caught
+        logger.error("Failed to terminate runtime: %s", e)
         raise HTTPException(
             status_code=500,
             detail="Failed to terminate runtime"
-        )
+        ) from e
 
 
 @app.post("/cleanup")
@@ -188,12 +193,12 @@ async def cleanup_idle_runtimes() -> dict[str, str | list[str] | int]:
             "count": len(cleaned_up)
         }
 
-    except Exception as e:
-        logger.error(f"Failed to cleanup runtimes: {e}")
+    except Exception as e:  # pylint: disable=broad-exception-caught
+        logger.error("Failed to cleanup runtimes: %s", e)
         raise HTTPException(
             status_code=500,
             detail="Failed to cleanup runtimes"
-        )
+        ) from e
 
 
 @app.get("/")
