@@ -1,0 +1,138 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: subject-brain-svc
+  namespace: subject-brain
+  labels:
+    app: subject-brain-svc
+    component: planner
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: subject-brain-svc
+  template:
+    metadata:
+      labels:
+        app: subject-brain-svc
+        component: planner
+    spec:
+      serviceAccountName: subject-brain-sa
+      containers:
+      - name: subject-brain-svc
+        image: subject-brain-svc:latest
+        ports:
+        - containerPort: 8000
+          name: http
+        - containerPort: 9090
+          name: metrics
+        env:
+        - name: SUBJECT_BRAIN_DEBUG
+          value: "false"
+        - name: SUBJECT_BRAIN_LOG_LEVEL
+          value: "INFO"
+        - name: SUBJECT_BRAIN_DATABASE_URL
+          valueFrom:
+            secretKeyRef:
+              name: subject-brain-secrets
+              key: database-url
+        - name: SUBJECT_BRAIN_REDIS_URL
+          valueFrom:
+            secretKeyRef:
+              name: subject-brain-secrets
+              key: redis-url
+        - name: SUBJECT_BRAIN_JWT_SECRET_KEY
+          valueFrom:
+            secretKeyRef:
+              name: subject-brain-secrets
+              key: jwt-secret
+        resources:
+          requests:
+            memory: "512Mi"
+            cpu: "250m"
+          limits:
+            memory: "1Gi"
+            cpu: "500m"
+        livenessProbe:
+          httpGet:
+            path: /health
+            port: 8000
+          initialDelaySeconds: 30
+          periodSeconds: 10
+        readinessProbe:
+          httpGet:
+            path: /health
+            port: 8000
+          initialDelaySeconds: 10
+          periodSeconds: 5
+        volumeMounts:
+        - name: model-storage
+          mountPath: /models
+          readOnly: true
+      volumes:
+      - name: model-storage
+        persistentVolumeClaim:
+          claimName: subject-brain-models-pvc
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: subject-brain-svc
+  namespace: subject-brain
+  labels:
+    app: subject-brain-svc
+spec:
+  type: ClusterIP
+  ports:
+  - port: 8000
+    targetPort: 8000
+    protocol: TCP
+    name: http
+  - port: 9090
+    targetPort: 9090
+    protocol: TCP
+    name: metrics
+  selector:
+    app: subject-brain-svc
+---
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: subject-brain-sa
+  namespace: subject-brain
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+  namespace: subject-brain
+  name: subject-brain-role
+rules:
+- apiGroups: [""]
+  resources: ["pods"]
+  verbs: ["get", "list", "watch", "create", "update", "patch", "delete"]
+- apiGroups: [""]
+  resources: ["pods/log"]
+  verbs: ["get", "list"]
+- apiGroups: ["apps"]
+  resources: ["deployments"]
+  verbs: ["get", "list", "watch", "update", "patch"]
+- apiGroups: ["autoscaling"]
+  resources: ["horizontalpodautoscalers"]
+  verbs: ["get", "list", "watch", "create", "update", "patch", "delete"]
+- apiGroups: ["metrics.k8s.io"]
+  resources: ["pods", "nodes"]
+  verbs: ["get", "list"]
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  name: subject-brain-rolebinding
+  namespace: subject-brain
+subjects:
+- kind: ServiceAccount
+  name: subject-brain-sa
+  namespace: subject-brain
+roleRef:
+  kind: Role
+  name: subject-brain-role
+  apiGroup: rbac.authorization.k8s.io

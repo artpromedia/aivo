@@ -1,0 +1,30 @@
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: subject-brain
+  labels:
+    name: subject-brain
+    component: ai-learning
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: subject-brain-config
+  namespace: subject-brain
+data:
+  gpu-node-selector: |
+    accelerator: nvidia-tesla-v100
+  gpu-resource-requests: |
+    nvidia.com/gpu: "1"
+  gpu-resource-limits: |
+    nvidia.com/gpu: "1"
+  runtime-config: |
+    default_ttl_seconds: "300"
+    max_runtime_minutes: "120"
+    default_memory_mb: "2048"
+    default_cpu_cores: "1.0"
+    max_concurrent_runtimes: "50"
+  planner-config: |
+    cache_ttl_seconds: "3600"
+    max_activities_per_plan: "10"
+    default_session_duration_minutes: "30"
