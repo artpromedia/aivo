@@ -4,18 +4,26 @@ import logging
 from datetime import datetime, timedelta
 from typing import Any
 
-from kubernetes import client, config
-from kubernetes.client import (
-    V1Container,
-    V1HorizontalPodAutoscaler,
-    V1ObjectMeta,
-    V1Pod,
-    V1PodSpec,
-    V1ResourceRequirements,
-)
+try:
+    from kubernetes import client, config  # pylint: disable=import-error
+    from kubernetes.client import (  # pylint: disable=import-error
+        V1Container,
+        V1HorizontalPodAutoscaler,
+        V1ObjectMeta,
+        V1Pod,
+        V1PodSpec,
+        V1ResourceRequirements,
+    )
+    KUBERNETES_AVAILABLE = True
+except ImportError:
+    # Kubernetes client not available in development environment
+    KUBERNETES_AVAILABLE = False
+    # Mock objects for development
+    client = None  # type: ignore
+    config = None  # type: ignore
 
-from app.config import settings
-from app.models import (
+from ..config import settings
+from ..models import (
     RuntimeMetrics,
     RuntimePod,
     RuntimeRequest,
@@ -30,17 +38,36 @@ class KubernetesRuntimeManager:
 
     def __init__(self) -> None:
         """Initialize the Kubernetes runtime manager."""
+        if not KUBERNETES_AVAILABLE:
+            logger.warning(
+                "Kubernetes client not available. "
+                "Service will run in mock mode for development."
+            )
+            
         self.namespace = settings.k8s_namespace
         self.service_account = settings.k8s_service_account
 
         # Initialize Kubernetes client
+        if KUBERNETES_AVAILABLE:
+            self._initialize_kubernetes_client()
+        else:
+            self.v1 = None
+            self.apps_v1 = None
+            self.autoscaling_v2 = None
+
+        # Runtime tracking
+        self.active_runtimes: dict[str, RuntimePod] = {}
+        self.metrics_history: dict[str, list[RuntimeMetrics]] = {}
+
+    def _initialize_kubernetes_client(self) -> None:
+        """Initialize the Kubernetes API clients."""
         try:
             if settings.k8s_config_path:
                 config.load_kube_config(config_file=settings.k8s_config_path)
             else:
                 config.load_incluster_config()
-        except Exception as e:
-            logger.warning(f"Failed to load k8s config: {e}")
+        except Exception as e:  # pylint: disable=broad-exception-caught
+            logger.warning("Failed to load k8s config: %s", e)
             # For development, try loading from default location
             try:
                 config.load_kube_config()
@@ -61,8 +88,9 @@ class KubernetesRuntimeManager:
     ) -> RuntimePod:
         """Create a new per-learner-subject runtime pod."""
         logger.info(
-            f"Creating runtime {runtime_request.runtime_id} for "
-            f"learner {runtime_request.learner_id}"
+            "Creating runtime %s for learner %s",
+            runtime_request.runtime_id,
+            runtime_request.learner_id
         )
 
         # Generate pod name
@@ -105,9 +133,9 @@ class KubernetesRuntimeManager:
                 namespace=self.namespace,
                 body=pod
             )
-            logger.info(f"Created pod {pod_name}")
-        except Exception as e:
-            logger.error(f"Failed to create pod {pod_name}: {e}")
+            logger.info("Created pod %s", pod_name)
+        except Exception as e:  # pylint: disable=broad-exception-caught
+            logger.error("Failed to create pod %s: %s", pod_name, e)
             raise
 
         # Create runtime tracking object
@@ -137,7 +165,7 @@ class KubernetesRuntimeManager:
 
         return f"brain-{clean_learner}-{clean_subject}-{clean_runtime}"
 
-    def _create_pod_spec(self, runtime_request: RuntimeRequest) -> V1PodSpec:
+    def _create_pod_spec(self, runtime_request: RuntimeRequest) -> "V1PodSpec":
         """Create pod specification for the runtime."""
         # Resource requirements
         resources = V1ResourceRequirements(
@@ -228,9 +256,9 @@ class KubernetesRuntimeManager:
             # Update metrics
             await self._update_runtime_metrics(runtime_pod)
 
-        except Exception as e:
+        except Exception as e:  # pylint: disable=broad-exception-caught
             logger.error(
-                f"Failed to get status for runtime {runtime_id}: {e}"
+                "Failed to get status for runtime %s: %s", runtime_id, e
             )
             runtime_pod.status = RuntimeStatus.TERMINATED
 
@@ -273,8 +301,8 @@ class KubernetesRuntimeManager:
                 if m.last_activity_timestamp > cutoff
             ]
 
-        except Exception as e:
-            logger.error(f"Failed to update metrics: {e}")
+        except Exception as e:  # pylint: disable=broad-exception-caught
+            logger.error("Failed to update metrics: %s", e)
 
     async def cleanup_idle_runtimes(self) -> list[str]:
         """Clean up idle runtime pods based on TTL."""
@@ -286,12 +314,12 @@ class KubernetesRuntimeManager:
             if runtime_pod.last_activity_at:
                 idle_time = current_time - runtime_pod.last_activity_at
                 if idle_time.total_seconds() > runtime_pod.ttl_seconds:
-                    await self._terminate_runtime(runtime_id)
+                    await self.terminate_runtime(runtime_id)
                     cleaned_up.append(runtime_id)
 
         return cleaned_up
 
-    async def _terminate_runtime(self, runtime_id: str) -> None:
+    async def terminate_runtime(self, runtime_id: str) -> None:
         """Terminate a specific runtime pod."""
         if runtime_id not in self.active_runtimes:
             return
@@ -308,10 +336,10 @@ class KubernetesRuntimeManager:
             # Update status
             runtime_pod.status = RuntimeStatus.TERMINATING
 
-            logger.info(f"Terminated runtime {runtime_id}")
+            logger.info("Terminated runtime %s", runtime_id)
 
-        except Exception as e:
-            logger.error(f"Failed to terminate runtime {runtime_id}: {e}")
+        except Exception as e:  # pylint: disable=broad-exception-caught
+            logger.error("Failed to terminate runtime %s: %s", runtime_id, e)
 
     async def create_hpa(self) -> None:
         """Create Horizontal Pod Autoscaler for the service."""
@@ -394,9 +422,9 @@ class KubernetesRuntimeManager:
                 namespace=self.namespace,
                 body=hpa
             )
-            logger.info(f"Created HPA {hpa_name}")
-        except Exception as e:
-            logger.error(f"Failed to create HPA: {e}")
+            logger.info("Created HPA %s", hpa_name)
+        except Exception as e:  # pylint: disable=broad-exception-caught
+            logger.error("Failed to create HPA: %s", e)
 
     async def get_scaling_metrics(self) -> dict[str, Any]:
         """Get current scaling metrics for decision making."""
