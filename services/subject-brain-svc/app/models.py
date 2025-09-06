@@ -55,8 +55,8 @@ class LearnerBaseline(BaseModel):
     )
     learning_style: str | None = None
     pace_preference: str | None = None
-    
-    
+
+
 class CourseworkTopic(BaseModel):
     """Topic from current coursework."""
     topic_id: str

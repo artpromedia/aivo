@@ -43,7 +43,7 @@ class KubernetesRuntimeManager:
                 "Kubernetes client not available. "
                 "Service will run in mock mode for development."
             )
-            
+
         self.namespace = settings.k8s_namespace
         self.service_account = settings.k8s_service_account
 
