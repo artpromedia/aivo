@@ -10,6 +10,7 @@ import structlog
 
 from app.config import settings
 from app.models import RawEvent
+from app.services.etl_scheduler import ETLScheduler
 from app.services.kafka_consumer import KafkaEventConsumer
 from app.services.s3_writer import S3ParquetWriter
 
@@ -23,6 +24,7 @@ class ETLProcessor:
         """Initialize the ETL processor."""
         self.s3_writer = S3ParquetWriter()
         self.kafka_consumer = KafkaEventConsumer(self._process_event_batch)
+        self.etl_scheduler = ETLScheduler()
         self._running = False
         self._shutdown_event = asyncio.Event()
 
@@ -61,6 +63,7 @@ class ETLProcessor:
 
             # Start services
             await self.kafka_consumer.start()
+            await self.etl_scheduler.start()
 
             logger.info("ETL processor started successfully")
 
@@ -82,6 +85,9 @@ class ETLProcessor:
         # Stop services
         if self.kafka_consumer:
             await self.kafka_consumer.stop()
+
+        if self.etl_scheduler:
+            await self.etl_scheduler.stop()
 
         logger.info("ETL processor stopped")
 
@@ -152,15 +158,18 @@ class ETLProcessor:
         # Check component health
         kafka_health = await self.kafka_consumer.health_check()
         s3_health = await self.s3_writer.health_check()
+        scheduler_health = await self.etl_scheduler.health_check()
 
         health["components"] = {
             "kafka_consumer": kafka_health,
             "s3_writer": s3_health,
+            "etl_scheduler": scheduler_health,
         }
 
         # Overall health depends on all components
         if (not kafka_health.get("kafka_connected") or
-                not s3_health.get("s3_connected")):
+                not s3_health.get("s3_connected") or
+                not scheduler_health.get("running")):
             health["status"] = "unhealthy"
 
         return health
