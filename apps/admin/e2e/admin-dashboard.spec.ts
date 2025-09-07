@@ -67,10 +67,14 @@ test.describe('Admin Dashboard', () => {
       page.locator('main h1', { hasText: 'Dashboard' })
     ).toBeVisible();
 
-    // Verify dashboard cards are visible
+    // Check all dashboard cards are present
+    await expect(page.locator('text=Usage Summary')).toBeVisible();
+    await expect(page.locator('text=Current Subscription')).toBeVisible();
+    await expect(page.locator('text=Total Users')).toBeVisible();
+    await expect(page.locator('text=Active Licenses')).toBeVisible();
     await expect(page.locator('text=Monthly Revenue')).toBeVisible();
     await expect(page.locator('text=Team Management')).toBeVisible();
-    await expect(page.locator('h3', { hasText: 'Namespaces' })).toBeVisible();
+    await expect(page.locator('text=Namespaces')).toBeVisible();
     await expect(page.locator('text=Usage Analytics')).toBeVisible();
     await expect(page.locator('text=Support & Resources')).toBeVisible();
   });

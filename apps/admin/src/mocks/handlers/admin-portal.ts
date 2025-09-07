@@ -29,8 +29,8 @@ const mockAdminPortalData = {
     members: [
       {
         user_id: 'user_001',
-        email: 'john@example.com',
-        name: 'john.doe',
+        email: 'admin@acme.com',
+        name: 'John Smith',
         role: 'admin',
         status: 'active',
         last_login: '2024-09-02T09:15:00Z',
@@ -343,98 +343,6 @@ export const adminPortalHandlers = [
         'Content-Type': 'application/json',
       },
     });
-  }),
-
-  // Users list endpoint for the Users page
-  http.get('*/admin/users', ({ request }) => {
-    const url = new URL(request.url);
-    const page = parseInt(url.searchParams.get('page') || '1', 10);
-    const limit = parseInt(url.searchParams.get('limit') || '10', 10);
-
-    // Return the same user data from the team endpoint but in the format expected by the users page
-    const users = [
-      {
-        id: 'user_001',
-        email: 'john@example.com',
-        username: 'john.doe',
-        role: 'admin',
-        status: 'active',
-        lastLogin: '2024-09-02T09:15:00Z',
-        createdAt: '2024-08-01T09:15:00Z',
-        permissions: ['admin', 'billing', 'team_management'],
-      },
-      {
-        id: 'user_002',
-        email: 'sarah@acme.com',
-        username: 'Sarah Johnson',
-        role: 'teacher',
-        status: 'active',
-        lastLogin: '2024-09-01T14:30:00Z',
-        createdAt: '2024-08-02T14:30:00Z',
-        permissions: ['documents', 'approvals'],
-      },
-      {
-        id: 'user_003',
-        email: 'mike@acme.com',
-        username: 'Mike Wilson',
-        role: 'teacher',
-        status: 'pending',
-        lastLogin: null,
-        createdAt: '2024-08-03T10:00:00Z',
-        permissions: ['documents'],
-      },
-    ];
-
-    return HttpResponse.json(
-      {
-        users,
-        total: users.length,
-        pagination: {
-          page,
-          limit,
-          total: users.length,
-          totalPages: Math.ceil(users.length / limit),
-        },
-      },
-      {
-        status: 200,
-        headers: {
-          'Content-Type': 'application/json',
-        },
-      }
-    );
-  }),
-
-  // Update user role endpoint
-  http.put('*/admin/users/:userId/role', ({ params }) => {
-    return HttpResponse.json(
-      {
-        success: true,
-        message: `Role updated for user ${params.userId}`,
-      },
-      {
-        status: 200,
-        headers: {
-          'Content-Type': 'application/json',
-        },
-      }
-    );
-  }),
-
-  // Deactivate user endpoint
-  http.post('*/admin/users/:userId/deactivate', ({ params }) => {
-    return HttpResponse.json(
-      {
-        success: true,
-        message: `User ${params.userId} deactivated`,
-      },
-      {
-        status: 200,
-        headers: {
-          'Content-Type': 'application/json',
-        },
-      }
-    );
   }),
 
   // Health Check

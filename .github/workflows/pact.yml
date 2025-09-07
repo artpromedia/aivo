@@ -41,15 +41,14 @@ jobs:
           path: pact/contracts/
           retention-days: 7
 
-      # TODO: Uncomment when Pact Broker is configured
-      # - name: Publish Pacts to Broker
-      #   if: github.ref == 'refs/heads/main'
-      #   env:
-      #     PACT_BROKER_URL: ${{ secrets.PACT_BROKER_URL }}
-      #     PACT_BROKER_TOKEN: ${{ secrets.PACT_BROKER_TOKEN }}
-      #   run: |
-      #     cd pact
-      #     pnpm pact:publish
+      - name: Publish Pacts to Broker
+        if: github.ref == 'refs/heads/main'
+        env:
+          PACT_BROKER_URL: ${{ secrets.PACT_BROKER_URL }}
+          PACT_BROKER_TOKEN: ${{ secrets.PACT_BROKER_TOKEN }}
+        run: |
+          cd pact
+          pnpm pact:publish
 
   pact-provider-tests:
     name: Provider Contract Verification
@@ -115,15 +114,14 @@ jobs:
           PROVIDER_NAME: ${{ matrix.service }}
           PROVIDER_URL: http://localhost:8080
 
-      # TODO: Uncomment when Pact Broker is configured
-      # - name: Can I Deploy?
-      #   if: github.ref == 'refs/heads/main'
-      #   env:
-      #     PACT_BROKER_URL: ${{ secrets.PACT_BROKER_URL }}
-      #     PACT_BROKER_TOKEN: ${{ secrets.PACT_BROKER_TOKEN }}
-      #   run: |
-      #     cd pact
-      #     pnpm pact:can-i-deploy --pacticipant=${{ matrix.service }} --version=${{ github.sha }}
+      - name: Can I Deploy?
+        if: github.ref == 'refs/heads/main'
+        env:
+          PACT_BROKER_URL: ${{ secrets.PACT_BROKER_URL }}
+          PACT_BROKER_TOKEN: ${{ secrets.PACT_BROKER_TOKEN }}
+        run: |
+          cd pact
+          pnpm pact:can-i-deploy --pacticipant=${{ matrix.service }} --version=${{ github.sha }}
 
   msw-integration-tests:
     name: MSW Integration Tests

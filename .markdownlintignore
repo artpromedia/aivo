@@ -1,8 +1,6 @@
 # Markdownlint Ignore Patterns
 
-.markdownlintignore
-
-## Auto-generated documentation
+## Auto-generated SDK documentation
 
 libs/sdk-py/**
 libs/sdk-web/**
@@ -16,7 +14,11 @@ libs/sdk-web/**
 docs/api/**
 **/docs/**
 
-## Project documentation (included)
+## Markdownlint configuration files
+
+.markdownlintignore
+
+## Specific auto-generated files but keep project docs
 
 !README.md
 !SECURITY.md
