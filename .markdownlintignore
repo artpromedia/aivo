@@ -1,12 +1,18 @@
 # Ignore auto-generated SDK documentation
-libs/sdk-py/**/*.md
-libs/sdk-web/**/*.md
+libs/sdk-py/**
+libs/sdk-web/**
 
-# Ignore auto-generated docs 
-**/docs/**/*.md
-docs/**/*.md
+# Ignore Python virtual environment
+.venv/
 
-# Keep our project documentation
+# Ignore auto-generated API docs
+docs/api/**
+**/docs/**
+
+# Ignore markdownlint configuration files
+.markdownlintignore
+
+# Ignore specific auto-generated files but keep project docs
 !README.md
 !SECURITY.md
 !scripts/README.md

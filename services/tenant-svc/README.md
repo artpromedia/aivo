@@ -1,6 +1,7 @@
 # Tenant Service
 
-Multi-tenant service for managing districts, schools, and seat allocation in the Aivo platform.
+Multi-tenant service for managing districts, schools, and seat allocation in
+the Aivo platform.
 
 ## Features
 

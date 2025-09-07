@@ -1,16 +1,20 @@
 # Auth Service
 
-FastAPI-based authentication and authorization service with JWT tokens and role-based access control.
+FastAPI-based authentication and authorization service with JWT tokens and
+role-based access control.
 
 ## Features
 
 - **Guardian Registration**: Self-service registration for guardian users
-- **JWT Authentication**: Secure token-based authentication with refresh token rotation
-- **Role-Based Access Control (RBAC)**: Support for guardian, teacher, staff, and admin roles
+- **JWT Authentication**: Secure token-based authentication with refresh
+  token rotation
+- **Role-Based Access Control (RBAC)**: Support for guardian, teacher, staff,
+  and admin roles
 - **Teacher Invitations**: Staff can invite teachers to join their tenant
 - **Multi-Tenancy**: Support for multiple organizations/schools
 - **Password Security**: Argon2 password hashing
-- **Async Support**: Built with FastAPI and SQLAlchemy async for high performance
+- **Async Support**: Built with FastAPI and SQLAlchemy async for high
+  performance
 
 ## API Endpoints
 

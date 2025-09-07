@@ -11,7 +11,8 @@ We actively support the following versions with security updates:
 
 ## Reporting a Vulnerability
 
-If you discover a security vulnerability in this project, please report it to our security team.
+If you discover a security vulnerability in this project, please report it to
+our security team.
 
 **Please do not report security vulnerabilities through public GitHub issues.**
 
@@ -19,7 +20,8 @@ Instead, please report security vulnerabilities by emailing:
 
 - <security@example.com>
 
-You should receive a response within 48 hours. If for some reason you do not, please follow up via email to ensure we received your original message.
+You should receive a response within 48 hours. If for some reason you do not,
+please follow up via email to ensure we received your original message.
 
 ## Disclosure Policy
 
@@ -34,7 +36,9 @@ We will keep you informed throughout the process.
 
 ## Security Updates
 
-Security updates will be released as soon as possible, typically within a few days of the fix being developed. Critical security issues may result in immediate patch releases.
+Security updates will be released as soon as possible, typically within a few
+days of the fix being developed. Critical security issues may result in
+immediate patch releases.
 
 ## Best Practices
 

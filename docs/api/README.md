@@ -19,11 +19,13 @@ docs/api/
 
 ### OpenAPI Specifications
 
-All REST APIs should follow the OpenAPI 3.1 specification format. Place your API specs in the appropriate service directory under `docs/api/rest/`.
+All REST APIs should follow the OpenAPI 3.1 specification format. Place your
+API specs in the appropriate service directory under `docs/api/rest/`.
 
 ### Spectral Linting
 
-We use [Spectral](https://stoplight.io/open-source/spectral) for API contract linting. The rules are defined in `.spectral.yaml`:
+We use [Spectral](https://stoplight.io/open-source/spectral) for API contract
+linting. The rules are defined in `.spectral.yaml`:
 
 - **tags-required**: All operations must have tags
 - **contact-required**: API must have contact information
@@ -45,7 +47,8 @@ pnpm run contracts:lint
 
 ### Schema Definition
 
-GraphQL schemas should be defined using the GraphQL Schema Definition Language (SDL). Place your schema files in `docs/api/graphql/`.
+GraphQL schemas should be defined using the GraphQL Schema Definition Language
+(SDL). Place your schema files in `docs/api/graphql/`.
 
 ### Best Practices
 
@@ -84,7 +87,8 @@ GraphQL schemas should be defined using the GraphQL Schema Definition Language (
 
 ## Examples
 
-See `docs/api/rest/_examples/ping.yaml` for a complete OpenAPI specification example.
+See `docs/api/rest/_examples/ping.yaml` for a complete OpenAPI specification
+example.
 
 ## Contact
 
