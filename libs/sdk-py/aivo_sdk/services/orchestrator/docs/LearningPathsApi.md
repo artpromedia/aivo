@@ -1,6 +1,6 @@
 # aivo_sdk.LearningPathsApi
 
-All URIs are relative to *https://api.aivo.com/orchestrator/v1*
+All URIs are relative to *<https://api.aivo.com/orchestrator/v1>*
 
 Method | HTTP request | Description
 ------------- | ------------- | -------------
@@ -8,8 +8,8 @@ Method | HTTP request | Description
 [**get_learning_path**](LearningPathsApi.md#get_learning_path) | **GET** /learning-paths/{pathId} | Get learning path by ID
 [**list_learning_paths**](LearningPathsApi.md#list_learning_paths) | **GET** /learning-paths | List learning paths
 
-
 # **create_learning_path**
+>
 > LearningPath create_learning_path(create_learning_path_request)
 
 Create new learning path
@@ -56,14 +56,11 @@ with aivo_sdk.ApiClient(configuration) as api_client:
         print("Exception when calling LearningPathsApi->create_learning_path: %s\n" % e)
 ```
 
-
-
 ### Parameters
-
 
 Name | Type | Description  | Notes
 ------------- | ------------- | ------------- | -------------
- **create_learning_path_request** | [**CreateLearningPathRequest**](CreateLearningPathRequest.md)|  | 
+ **create_learning_path_request** | [**CreateLearningPathRequest**](CreateLearningPathRequest.md)|  |
 
 ### Return type
 
@@ -75,8 +72,8 @@ Name | Type | Description  | Notes
 
 ### HTTP request headers
 
- - **Content-Type**: application/json
- - **Accept**: application/json
+* **Content-Type**: application/json
+* **Accept**: application/json
 
 ### HTTP response details
 
@@ -90,6 +87,7 @@ Name | Type | Description  | Notes
 [[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
 
 # **get_learning_path**
+>
 > LearningPathDetailed get_learning_path(path_id)
 
 Get learning path by ID
@@ -135,14 +133,11 @@ with aivo_sdk.ApiClient(configuration) as api_client:
         print("Exception when calling LearningPathsApi->get_learning_path: %s\n" % e)
 ```
 
-
-
 ### Parameters
-
 
 Name | Type | Description  | Notes
 ------------- | ------------- | ------------- | -------------
- **path_id** | **str**|  | 
+ **path_id** | **str**|  |
 
 ### Return type
 
@@ -154,8 +149,8 @@ Name | Type | Description  | Notes
 
 ### HTTP request headers
 
- - **Content-Type**: Not defined
- - **Accept**: application/json
+* **Content-Type**: Not defined
+* **Accept**: application/json
 
 ### HTTP response details
 
@@ -168,6 +163,7 @@ Name | Type | Description  | Notes
 [[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
 
 # **list_learning_paths**
+>
 > ListLearningPaths200Response list_learning_paths(tenant_id=tenant_id, category=category, status=status, limit=limit, offset=offset)
 
 List learning paths
@@ -217,16 +213,13 @@ with aivo_sdk.ApiClient(configuration) as api_client:
         print("Exception when calling LearningPathsApi->list_learning_paths: %s\n" % e)
 ```
 
-
-
 ### Parameters
-
 
 Name | Type | Description  | Notes
 ------------- | ------------- | ------------- | -------------
- **tenant_id** | **str**|  | [optional] 
- **category** | **str**|  | [optional] 
- **status** | **str**|  | [optional] 
+ **tenant_id** | **str**|  | [optional]
+ **category** | **str**|  | [optional]
+ **status** | **str**|  | [optional]
  **limit** | **int**|  | [optional] [default to 20]
  **offset** | **int**|  | [optional] [default to 0]
 
@@ -240,8 +233,8 @@ Name | Type | Description  | Notes
 
 ### HTTP request headers
 
- - **Content-Type**: Not defined
- - **Accept**: application/json
+* **Content-Type**: Not defined
+* **Accept**: application/json
 
 ### HTTP response details
 
@@ -251,4 +244,3 @@ Name | Type | Description  | Notes
 **401** | Unauthorized |  -  |
 
 [[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
-

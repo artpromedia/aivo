@@ -1,13 +1,12 @@
 # UsageAnalyticsCompletionStats
 
-
 ## Properties
 
 Name | Type | Description | Notes
 ------------ | ------------- | ------------- | -------------
-**courses_completed** | **int** |  | [optional] 
-**modules_completed** | **int** |  | [optional] 
-**assessments_passed** | **int** |  | [optional] 
+**courses_completed** | **int** |  | [optional]
+**modules_completed** | **int** |  | [optional]
+**assessments_passed** | **int** |  | [optional]
 
 ## Example
 
@@ -26,6 +25,5 @@ usage_analytics_completion_stats_dict = usage_analytics_completion_stats_instanc
 # create an instance of UsageAnalyticsCompletionStats from a dict
 usage_analytics_completion_stats_from_dict = UsageAnalyticsCompletionStats.from_dict(usage_analytics_completion_stats_dict)
 ```
+
 [[Back to Model list]](../README.md#documentation-for-models) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to README]](../README.md)
-
-

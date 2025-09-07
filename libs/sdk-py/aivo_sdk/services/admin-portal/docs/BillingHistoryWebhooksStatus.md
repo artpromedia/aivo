@@ -1,14 +1,13 @@
 # BillingHistoryWebhooksStatus
 
-
 ## Properties
 
 Name | Type | Description | Notes
 ------------ | ------------- | ------------- | -------------
-**is_configured** | **bool** | Whether webhooks are configured | 
-**last_success** | **datetime** | Last successful webhook delivery | 
-**failure_count** | **int** | Number of recent webhook failures | 
-**endpoint** | **str** | Configured webhook endpoint | [optional] 
+**is_configured** | **bool** | Whether webhooks are configured |
+**last_success** | **datetime** | Last successful webhook delivery |
+**failure_count** | **int** | Number of recent webhook failures |
+**endpoint** | **str** | Configured webhook endpoint | [optional]
 
 ## Example
 
@@ -27,6 +26,5 @@ billing_history_webhooks_status_dict = billing_history_webhooks_status_instance.
 # create an instance of BillingHistoryWebhooksStatus from a dict
 billing_history_webhooks_status_from_dict = BillingHistoryWebhooksStatus.from_dict(billing_history_webhooks_status_dict)
 ```
+
 [[Back to Model list]](../README.md#documentation-for-models) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to README]](../README.md)
-
-

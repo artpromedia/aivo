@@ -1,15 +1,14 @@
 # LearningPathDetailedAllOfCourses
 
-
 ## Properties
 
 Name | Type | Description | Notes
 ------------ | ------------- | ------------- | -------------
-**course_id** | **str** |  | [optional] 
-**course** | [**Course**](Course.md) |  | [optional] 
-**order** | **int** |  | [optional] 
-**is_optional** | **bool** |  | [optional] 
-**unlock_conditions** | [**LearningPathDetailedAllOfUnlockConditions**](LearningPathDetailedAllOfUnlockConditions.md) |  | [optional] 
+**course_id** | **str** |  | [optional]
+**course** | [**Course**](Course.md) |  | [optional]
+**order** | **int** |  | [optional]
+**is_optional** | **bool** |  | [optional]
+**unlock_conditions** | [**LearningPathDetailedAllOfUnlockConditions**](LearningPathDetailedAllOfUnlockConditions.md) |  | [optional]
 
 ## Example
 
@@ -28,6 +27,5 @@ learning_path_detailed_all_of_courses_dict = learning_path_detailed_all_of_cours
 # create an instance of LearningPathDetailedAllOfCourses from a dict
 learning_path_detailed_all_of_courses_from_dict = LearningPathDetailedAllOfCourses.from_dict(learning_path_detailed_all_of_courses_dict)
 ```
+
 [[Back to Model list]](../README.md#documentation-for-models) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to README]](../README.md)
-
-

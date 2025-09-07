@@ -1,14 +1,14 @@
 # aivo_sdk.TenantSettingsApi
 
-All URIs are relative to *https://api.aivo.com/tenant/v1*
+All URIs are relative to *<https://api.aivo.com/tenant/v1>*
 
 Method | HTTP request | Description
 ------------- | ------------- | -------------
 [**get_tenant_settings**](TenantSettingsApi.md#get_tenant_settings) | **GET** /tenants/{tenantId}/settings | Get tenant settings
 [**update_tenant_settings**](TenantSettingsApi.md#update_tenant_settings) | **PUT** /tenants/{tenantId}/settings | Update tenant settings
 
-
 # **get_tenant_settings**
+>
 > TenantSettings get_tenant_settings(tenant_id)
 
 Get tenant settings
@@ -54,14 +54,11 @@ with aivo_sdk.ApiClient(configuration) as api_client:
         print("Exception when calling TenantSettingsApi->get_tenant_settings: %s\n" % e)
 ```
 
-
-
 ### Parameters
-
 
 Name | Type | Description  | Notes
 ------------- | ------------- | ------------- | -------------
- **tenant_id** | **str**|  | 
+ **tenant_id** | **str**|  |
 
 ### Return type
 
@@ -73,8 +70,8 @@ Name | Type | Description  | Notes
 
 ### HTTP request headers
 
- - **Content-Type**: Not defined
- - **Accept**: application/json
+* **Content-Type**: Not defined
+* **Accept**: application/json
 
 ### HTTP response details
 
@@ -87,6 +84,7 @@ Name | Type | Description  | Notes
 [[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
 
 # **update_tenant_settings**
+>
 > TenantSettings update_tenant_settings(tenant_id, tenant_settings)
 
 Update tenant settings
@@ -133,15 +131,12 @@ with aivo_sdk.ApiClient(configuration) as api_client:
         print("Exception when calling TenantSettingsApi->update_tenant_settings: %s\n" % e)
 ```
 
-
-
 ### Parameters
-
 
 Name | Type | Description  | Notes
 ------------- | ------------- | ------------- | -------------
- **tenant_id** | **str**|  | 
- **tenant_settings** | [**TenantSettings**](TenantSettings.md)|  | 
+ **tenant_id** | **str**|  |
+ **tenant_settings** | [**TenantSettings**](TenantSettings.md)|  |
 
 ### Return type
 
@@ -153,8 +148,8 @@ Name | Type | Description  | Notes
 
 ### HTTP request headers
 
- - **Content-Type**: application/json
- - **Accept**: application/json
+* **Content-Type**: application/json
+* **Accept**: application/json
 
 ### HTTP response details
 
@@ -166,4 +161,3 @@ Name | Type | Description  | Notes
 **404** | Tenant not found |  -  |
 
 [[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
-

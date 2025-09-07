@@ -1,13 +1,12 @@
 # AddPaymentMethodRequest
 
-
 ## Properties
 
 Name | Type | Description | Notes
 ------------ | ------------- | ------------- | -------------
-**tenant_id** | **str** |  | 
-**type** | **str** |  | 
-**token** | **str** | Payment method token from payment processor | 
+**tenant_id** | **str** |  |
+**type** | **str** |  |
+**token** | **str** | Payment method token from payment processor |
 **is_default** | **bool** |  | [optional] [default to False]
 
 ## Example
@@ -27,6 +26,5 @@ add_payment_method_request_dict = add_payment_method_request_instance.to_dict()
 # create an instance of AddPaymentMethodRequest from a dict
 add_payment_method_request_from_dict = AddPaymentMethodRequest.from_dict(add_payment_method_request_dict)
 ```
+
 [[Back to Model list]](../README.md#documentation-for-models) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to README]](../README.md)
-
-

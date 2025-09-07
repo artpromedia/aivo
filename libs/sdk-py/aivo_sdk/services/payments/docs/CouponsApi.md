@@ -1,14 +1,14 @@
 # aivo_sdk.CouponsApi
 
-All URIs are relative to *https://api.aivo.com/payments/v1*
+All URIs are relative to *<https://api.aivo.com/payments/v1>*
 
 Method | HTTP request | Description
 ------------- | ------------- | -------------
 [**create_coupon**](CouponsApi.md#create_coupon) | **POST** /coupons | Create coupon
 [**list_coupons**](CouponsApi.md#list_coupons) | **GET** /coupons | List coupons
 
-
 # **create_coupon**
+>
 > Coupon create_coupon(create_coupon_request)
 
 Create coupon
@@ -55,14 +55,11 @@ with aivo_sdk.ApiClient(configuration) as api_client:
         print("Exception when calling CouponsApi->create_coupon: %s\n" % e)
 ```
 
-
-
 ### Parameters
-
 
 Name | Type | Description  | Notes
 ------------- | ------------- | ------------- | -------------
- **create_coupon_request** | [**CreateCouponRequest**](CreateCouponRequest.md)|  | 
+ **create_coupon_request** | [**CreateCouponRequest**](CreateCouponRequest.md)|  |
 
 ### Return type
 
@@ -74,8 +71,8 @@ Name | Type | Description  | Notes
 
 ### HTTP request headers
 
- - **Content-Type**: application/json
- - **Accept**: application/json
+* **Content-Type**: application/json
+* **Accept**: application/json
 
 ### HTTP response details
 
@@ -88,6 +85,7 @@ Name | Type | Description  | Notes
 [[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
 
 # **list_coupons**
+>
 > List[Coupon] list_coupons(tenant_id=tenant_id, active=active, limit=limit)
 
 List coupons
@@ -135,15 +133,12 @@ with aivo_sdk.ApiClient(configuration) as api_client:
         print("Exception when calling CouponsApi->list_coupons: %s\n" % e)
 ```
 
-
-
 ### Parameters
-
 
 Name | Type | Description  | Notes
 ------------- | ------------- | ------------- | -------------
- **tenant_id** | **str**|  | [optional] 
- **active** | **bool**|  | [optional] 
+ **tenant_id** | **str**|  | [optional]
+ **active** | **bool**|  | [optional]
  **limit** | **int**|  | [optional] [default to 20]
 
 ### Return type
@@ -156,8 +151,8 @@ Name | Type | Description  | Notes
 
 ### HTTP request headers
 
- - **Content-Type**: Not defined
- - **Accept**: application/json
+* **Content-Type**: Not defined
+* **Accept**: application/json
 
 ### HTTP response details
 
@@ -167,4 +162,3 @@ Name | Type | Description  | Notes
 **401** | Unauthorized |  -  |
 
 [[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
-

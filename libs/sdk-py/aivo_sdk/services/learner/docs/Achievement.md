@@ -1,20 +1,19 @@
 # Achievement
 
-
 ## Properties
 
 Name | Type | Description | Notes
 ------------ | ------------- | ------------- | -------------
-**id** | **str** |  | 
-**learner_id** | **str** |  | 
-**type** | **str** |  | 
-**title** | **str** |  | 
-**description** | **str** |  | 
-**icon_url** | **str** |  | [optional] 
-**badge_url** | **str** |  | [optional] 
-**points** | **int** |  | [optional] 
-**metadata** | **Dict[str, object]** |  | [optional] 
-**earned_at** | **datetime** |  | 
+**id** | **str** |  |
+**learner_id** | **str** |  |
+**type** | **str** |  |
+**title** | **str** |  |
+**description** | **str** |  |
+**icon_url** | **str** |  | [optional]
+**badge_url** | **str** |  | [optional]
+**points** | **int** |  | [optional]
+**metadata** | **Dict[str, object]** |  | [optional]
+**earned_at** | **datetime** |  |
 
 ## Example
 
@@ -33,6 +32,5 @@ achievement_dict = achievement_instance.to_dict()
 # create an instance of Achievement from a dict
 achievement_from_dict = Achievement.from_dict(achievement_dict)
 ```
+
 [[Back to Model list]](../README.md#documentation-for-models) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to README]](../README.md)
-
-

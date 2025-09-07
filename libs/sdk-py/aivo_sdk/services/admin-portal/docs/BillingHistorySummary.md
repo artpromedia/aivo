@@ -1,13 +1,12 @@
 # BillingHistorySummary
 
-
 ## Properties
 
 Name | Type | Description | Notes
 ------------ | ------------- | ------------- | -------------
-**total_paid** | **float** | Total amount paid to date | [optional] 
-**total_outstanding** | **float** | Total outstanding amount | [optional] 
-**average_monthly_spend** | **float** | Average monthly spend | [optional] 
+**total_paid** | **float** | Total amount paid to date | [optional]
+**total_outstanding** | **float** | Total outstanding amount | [optional]
+**average_monthly_spend** | **float** | Average monthly spend | [optional]
 
 ## Example
 
@@ -26,6 +25,5 @@ billing_history_summary_dict = billing_history_summary_instance.to_dict()
 # create an instance of BillingHistorySummary from a dict
 billing_history_summary_from_dict = BillingHistorySummary.from_dict(billing_history_summary_dict)
 ```
+
 [[Back to Model list]](../README.md#documentation-for-models) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to README]](../README.md)
-
-

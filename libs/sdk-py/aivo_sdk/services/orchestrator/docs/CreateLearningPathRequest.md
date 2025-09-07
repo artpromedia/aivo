@@ -1,17 +1,16 @@
 # CreateLearningPathRequest
 
-
 ## Properties
 
 Name | Type | Description | Notes
 ------------ | ------------- | ------------- | -------------
-**title** | **str** |  | 
-**description** | **str** |  | 
-**category** | **str** |  | 
-**difficulty** | **str** |  | [optional] 
-**thumbnail_url** | **str** |  | [optional] 
-**tags** | **List[str]** |  | [optional] 
-**courses** | [**List[CreateLearningPathRequestCoursesInner]**](CreateLearningPathRequestCoursesInner.md) |  | 
+**title** | **str** |  |
+**description** | **str** |  |
+**category** | **str** |  |
+**difficulty** | **str** |  | [optional]
+**thumbnail_url** | **str** |  | [optional]
+**tags** | **List[str]** |  | [optional]
+**courses** | [**List[CreateLearningPathRequestCoursesInner]**](CreateLearningPathRequestCoursesInner.md) |  |
 
 ## Example
 
@@ -30,6 +29,5 @@ create_learning_path_request_dict = create_learning_path_request_instance.to_dic
 # create an instance of CreateLearningPathRequest from a dict
 create_learning_path_request_from_dict = CreateLearningPathRequest.from_dict(create_learning_path_request_dict)
 ```
+
 [[Back to Model list]](../README.md#documentation-for-models) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to README]](../README.md)
-
-

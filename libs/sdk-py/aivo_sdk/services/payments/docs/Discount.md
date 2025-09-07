@@ -1,14 +1,13 @@
 # Discount
 
-
 ## Properties
 
 Name | Type | Description | Notes
 ------------ | ------------- | ------------- | -------------
-**coupon_id** | **str** |  | [optional] 
-**coupon_code** | **str** |  | [optional] 
-**discount_type** | **str** |  | [optional] 
-**discount_value** | **float** |  | [optional] 
+**coupon_id** | **str** |  | [optional]
+**coupon_code** | **str** |  | [optional]
+**discount_type** | **str** |  | [optional]
+**discount_value** | **float** |  | [optional]
 
 ## Example
 
@@ -27,6 +26,5 @@ discount_dict = discount_instance.to_dict()
 # create an instance of Discount from a dict
 discount_from_dict = Discount.from_dict(discount_dict)
 ```
+
 [[Back to Model list]](../README.md#documentation-for-models) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to README]](../README.md)
-
-

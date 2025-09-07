@@ -1,14 +1,14 @@
 # aivo_sdk.ModulesApi
 
-All URIs are relative to *https://api.aivo.com/orchestrator/v1*
+All URIs are relative to *<https://api.aivo.com/orchestrator/v1>*
 
 Method | HTTP request | Description
 ------------- | ------------- | -------------
 [**add_course_module**](ModulesApi.md#add_course_module) | **POST** /courses/{courseId}/modules | Add module to course
 [**get_course_modules**](ModulesApi.md#get_course_modules) | **GET** /courses/{courseId}/modules | Get course modules
 
-
 # **add_course_module**
+>
 > Module add_course_module(course_id, create_module_request)
 
 Add module to course
@@ -56,15 +56,12 @@ with aivo_sdk.ApiClient(configuration) as api_client:
         print("Exception when calling ModulesApi->add_course_module: %s\n" % e)
 ```
 
-
-
 ### Parameters
-
 
 Name | Type | Description  | Notes
 ------------- | ------------- | ------------- | -------------
- **course_id** | **str**|  | 
- **create_module_request** | [**CreateModuleRequest**](CreateModuleRequest.md)|  | 
+ **course_id** | **str**|  |
+ **create_module_request** | [**CreateModuleRequest**](CreateModuleRequest.md)|  |
 
 ### Return type
 
@@ -76,8 +73,8 @@ Name | Type | Description  | Notes
 
 ### HTTP request headers
 
- - **Content-Type**: application/json
- - **Accept**: application/json
+* **Content-Type**: application/json
+* **Accept**: application/json
 
 ### HTTP response details
 
@@ -91,6 +88,7 @@ Name | Type | Description  | Notes
 [[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
 
 # **get_course_modules**
+>
 > List[Module] get_course_modules(course_id)
 
 Get course modules
@@ -136,14 +134,11 @@ with aivo_sdk.ApiClient(configuration) as api_client:
         print("Exception when calling ModulesApi->get_course_modules: %s\n" % e)
 ```
 
-
-
 ### Parameters
-
 
 Name | Type | Description  | Notes
 ------------- | ------------- | ------------- | -------------
- **course_id** | **str**|  | 
+ **course_id** | **str**|  |
 
 ### Return type
 
@@ -155,8 +150,8 @@ Name | Type | Description  | Notes
 
 ### HTTP request headers
 
- - **Content-Type**: Not defined
- - **Accept**: application/json
+* **Content-Type**: Not defined
+* **Accept**: application/json
 
 ### HTTP response details
 
@@ -167,4 +162,3 @@ Name | Type | Description  | Notes
 **404** | Course not found |  -  |
 
 [[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
-

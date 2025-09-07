@@ -1,14 +1,13 @@
 # AuthResponse
 
-
 ## Properties
 
 Name | Type | Description | Notes
 ------------ | ------------- | ------------- | -------------
-**access_token** | **str** | JWT access token | 
-**refresh_token** | **str** | JWT refresh token | 
-**user** | [**User**](User.md) |  | 
-**expires_in** | **int** | Token expiration time in seconds | 
+**access_token** | **str** | JWT access token |
+**refresh_token** | **str** | JWT refresh token |
+**user** | [**User**](User.md) |  |
+**expires_in** | **int** | Token expiration time in seconds |
 
 ## Example
 
@@ -27,6 +26,5 @@ auth_response_dict = auth_response_instance.to_dict()
 # create an instance of AuthResponse from a dict
 auth_response_from_dict = AuthResponse.from_dict(auth_response_dict)
 ```
+
 [[Back to Model list]](../README.md#documentation-for-models) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to README]](../README.md)
-
-

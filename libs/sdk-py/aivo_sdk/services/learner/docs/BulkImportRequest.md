@@ -1,12 +1,11 @@
 # BulkImportRequest
 
-
 ## Properties
 
 Name | Type | Description | Notes
 ------------ | ------------- | ------------- | -------------
-**tenant_id** | **str** |  | 
-**learners** | [**List[CreateLearnerRequest]**](CreateLearnerRequest.md) |  | 
+**tenant_id** | **str** |  |
+**learners** | [**List[CreateLearnerRequest]**](CreateLearnerRequest.md) |  |
 
 ## Example
 
@@ -25,6 +24,5 @@ bulk_import_request_dict = bulk_import_request_instance.to_dict()
 # create an instance of BulkImportRequest from a dict
 bulk_import_request_from_dict = BulkImportRequest.from_dict(bulk_import_request_dict)
 ```
+
 [[Back to Model list]](../README.md#documentation-for-models) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to README]](../README.md)
-
-

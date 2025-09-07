@@ -1,13 +1,12 @@
 # TenantSummaryEnrollmentStats
 
-
 ## Properties
 
 Name | Type | Description | Notes
 ------------ | ------------- | ------------- | -------------
-**total_enrollments** | **int** |  | [optional] 
-**active_enrollments** | **int** |  | [optional] 
-**completed_this_month** | **int** |  | [optional] 
+**total_enrollments** | **int** |  | [optional]
+**active_enrollments** | **int** |  | [optional]
+**completed_this_month** | **int** |  | [optional]
 
 ## Example
 
@@ -26,6 +25,5 @@ tenant_summary_enrollment_stats_dict = tenant_summary_enrollment_stats_instance.
 # create an instance of TenantSummaryEnrollmentStats from a dict
 tenant_summary_enrollment_stats_from_dict = TenantSummaryEnrollmentStats.from_dict(tenant_summary_enrollment_stats_dict)
 ```
+
 [[Back to Model list]](../README.md#documentation-for-models) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to README]](../README.md)
-
-

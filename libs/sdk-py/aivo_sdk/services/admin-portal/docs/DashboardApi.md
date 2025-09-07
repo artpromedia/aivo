@@ -1,13 +1,13 @@
 # aivo_sdk.DashboardApi
 
-All URIs are relative to *https://api.aivo.com/admin/v1*
+All URIs are relative to *<https://api.aivo.com/admin/v1>*
 
 Method | HTTP request | Description
 ------------- | ------------- | -------------
 [**get_tenant_summary**](DashboardApi.md#get_tenant_summary) | **GET** /summary | Get tenant KPI summary
 
-
 # **get_tenant_summary**
+>
 > TenantSummary get_tenant_summary(tenant_id)
 
 Get tenant KPI summary
@@ -53,14 +53,11 @@ with aivo_sdk.ApiClient(configuration) as api_client:
         print("Exception when calling DashboardApi->get_tenant_summary: %s\n" % e)
 ```
 
-
-
 ### Parameters
-
 
 Name | Type | Description  | Notes
 ------------- | ------------- | ------------- | -------------
- **tenant_id** | **str**| Tenant ID to get summary for | 
+ **tenant_id** | **str**| Tenant ID to get summary for |
 
 ### Return type
 
@@ -72,8 +69,8 @@ Name | Type | Description  | Notes
 
 ### HTTP request headers
 
- - **Content-Type**: Not defined
- - **Accept**: application/json
+* **Content-Type**: Not defined
+* **Accept**: application/json
 
 ### HTTP response details
 
@@ -85,4 +82,3 @@ Name | Type | Description  | Notes
 **404** | Tenant not found |  -  |
 
 [[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
-

@@ -1,0 +1,14 @@
+# Ignore auto-generated SDK documentation
+libs/sdk-py/**/*.md
+libs/sdk-web/**/*.md
+
+# Ignore auto-generated docs 
+**/docs/**/*.md
+docs/**/*.md
+
+# Keep our project documentation
+!README.md
+!SECURITY.md
+!scripts/README.md
+!apps/**/README*.md
+!services/**/README*.md

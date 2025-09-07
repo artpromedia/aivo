@@ -1,14 +1,13 @@
 # InvoiceLineItem
 
-
 ## Properties
 
 Name | Type | Description | Notes
 ------------ | ------------- | ------------- | -------------
-**description** | **str** |  | 
-**quantity** | **int** |  | 
-**unit_amount** | **int** | Amount in cents | 
-**amount** | **int** | Total amount in cents | 
+**description** | **str** |  |
+**quantity** | **int** |  |
+**unit_amount** | **int** | Amount in cents |
+**amount** | **int** | Total amount in cents |
 
 ## Example
 
@@ -27,6 +26,5 @@ invoice_line_item_dict = invoice_line_item_instance.to_dict()
 # create an instance of InvoiceLineItem from a dict
 invoice_line_item_from_dict = InvoiceLineItem.from_dict(invoice_line_item_dict)
 ```
+
 [[Back to Model list]](../README.md#documentation-for-models) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to README]](../README.md)
-
-

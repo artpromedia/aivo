@@ -1,6 +1,6 @@
 # aivo_sdk.EnrollmentsApi
 
-All URIs are relative to *https://api.aivo.com/enrollment/v1*
+All URIs are relative to *<https://api.aivo.com/enrollment/v1>*
 
 Method | HTTP request | Description
 ------------- | ------------- | -------------
@@ -10,8 +10,8 @@ Method | HTTP request | Description
 [**list_enrollments**](EnrollmentsApi.md#list_enrollments) | **GET** /enrollments | List enrollments
 [**update_enrollment**](EnrollmentsApi.md#update_enrollment) | **PUT** /enrollments/{enrollmentId} | Update enrollment
 
-
 # **create_enrollment**
+>
 > Enrollment create_enrollment(create_enrollment_request)
 
 Create new enrollment
@@ -58,14 +58,11 @@ with aivo_sdk.ApiClient(configuration) as api_client:
         print("Exception when calling EnrollmentsApi->create_enrollment: %s\n" % e)
 ```
 
-
-
 ### Parameters
-
 
 Name | Type | Description  | Notes
 ------------- | ------------- | ------------- | -------------
- **create_enrollment_request** | [**CreateEnrollmentRequest**](CreateEnrollmentRequest.md)|  | 
+ **create_enrollment_request** | [**CreateEnrollmentRequest**](CreateEnrollmentRequest.md)|  |
 
 ### Return type
 
@@ -77,8 +74,8 @@ Name | Type | Description  | Notes
 
 ### HTTP request headers
 
- - **Content-Type**: application/json
- - **Accept**: application/json
+* **Content-Type**: application/json
+* **Accept**: application/json
 
 ### HTTP response details
 
@@ -93,6 +90,7 @@ Name | Type | Description  | Notes
 [[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
 
 # **delete_enrollment**
+>
 > delete_enrollment(enrollment_id)
 
 Delete enrollment
@@ -135,14 +133,11 @@ with aivo_sdk.ApiClient(configuration) as api_client:
         print("Exception when calling EnrollmentsApi->delete_enrollment: %s\n" % e)
 ```
 
-
-
 ### Parameters
-
 
 Name | Type | Description  | Notes
 ------------- | ------------- | ------------- | -------------
- **enrollment_id** | **str**|  | 
+ **enrollment_id** | **str**|  |
 
 ### Return type
 
@@ -154,8 +149,8 @@ void (empty response body)
 
 ### HTTP request headers
 
- - **Content-Type**: Not defined
- - **Accept**: application/json
+* **Content-Type**: Not defined
+* **Accept**: application/json
 
 ### HTTP response details
 
@@ -168,6 +163,7 @@ void (empty response body)
 [[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
 
 # **get_enrollment**
+>
 > Enrollment get_enrollment(enrollment_id)
 
 Get enrollment by ID
@@ -213,14 +209,11 @@ with aivo_sdk.ApiClient(configuration) as api_client:
         print("Exception when calling EnrollmentsApi->get_enrollment: %s\n" % e)
 ```
 
-
-
 ### Parameters
-
 
 Name | Type | Description  | Notes
 ------------- | ------------- | ------------- | -------------
- **enrollment_id** | **str**|  | 
+ **enrollment_id** | **str**|  |
 
 ### Return type
 
@@ -232,8 +225,8 @@ Name | Type | Description  | Notes
 
 ### HTTP request headers
 
- - **Content-Type**: Not defined
- - **Accept**: application/json
+* **Content-Type**: Not defined
+* **Accept**: application/json
 
 ### HTTP response details
 
@@ -246,6 +239,7 @@ Name | Type | Description  | Notes
 [[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
 
 # **list_enrollments**
+>
 > ListEnrollments200Response list_enrollments(tenant_id, learner_id=learner_id, course_id=course_id, status=status, limit=limit, offset=offset)
 
 List enrollments
@@ -296,17 +290,14 @@ with aivo_sdk.ApiClient(configuration) as api_client:
         print("Exception when calling EnrollmentsApi->list_enrollments: %s\n" % e)
 ```
 
-
-
 ### Parameters
-
 
 Name | Type | Description  | Notes
 ------------- | ------------- | ------------- | -------------
- **tenant_id** | **str**|  | 
- **learner_id** | **str**|  | [optional] 
- **course_id** | **str**|  | [optional] 
- **status** | **str**|  | [optional] 
+ **tenant_id** | **str**|  |
+ **learner_id** | **str**|  | [optional]
+ **course_id** | **str**|  | [optional]
+ **status** | **str**|  | [optional]
  **limit** | **int**|  | [optional] [default to 20]
  **offset** | **int**|  | [optional] [default to 0]
 
@@ -320,8 +311,8 @@ Name | Type | Description  | Notes
 
 ### HTTP request headers
 
- - **Content-Type**: Not defined
- - **Accept**: application/json
+* **Content-Type**: Not defined
+* **Accept**: application/json
 
 ### HTTP response details
 
@@ -333,6 +324,7 @@ Name | Type | Description  | Notes
 [[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
 
 # **update_enrollment**
+>
 > Enrollment update_enrollment(enrollment_id, update_enrollment_request)
 
 Update enrollment
@@ -380,15 +372,12 @@ with aivo_sdk.ApiClient(configuration) as api_client:
         print("Exception when calling EnrollmentsApi->update_enrollment: %s\n" % e)
 ```
 
-
-
 ### Parameters
-
 
 Name | Type | Description  | Notes
 ------------- | ------------- | ------------- | -------------
- **enrollment_id** | **str**|  | 
- **update_enrollment_request** | [**UpdateEnrollmentRequest**](UpdateEnrollmentRequest.md)|  | 
+ **enrollment_id** | **str**|  |
+ **update_enrollment_request** | [**UpdateEnrollmentRequest**](UpdateEnrollmentRequest.md)|  |
 
 ### Return type
 
@@ -400,8 +389,8 @@ Name | Type | Description  | Notes
 
 ### HTTP request headers
 
- - **Content-Type**: application/json
- - **Accept**: application/json
+* **Content-Type**: application/json
+* **Accept**: application/json
 
 ### HTTP response details
 
@@ -413,4 +402,3 @@ Name | Type | Description  | Notes
 **404** | Enrollment not found |  -  |
 
 [[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
-

@@ -15,5 +15,25 @@
   "python.analysis.extraPaths": [
     "./services/hello-svc"
   ],
-  "python.analysis.autoSearchPaths": true
+  "python.analysis.autoSearchPaths": true,
+  "eslint.workingDirectories": [
+    {
+      "directory": "./services/notification-svc/nodejs-email-template",
+      "changeProcessCWD": true
+    }
+  ],
+  "[javascript]": {
+    "editor.defaultFormatter": "esbenp.prettier-vscode",
+    "typescript.validate.enable": false
+  },
+  "files.exclude": {
+    "**/.eslintrc.js": true,
+    "**/services/notification-svc/nodejs-email-template/.eslintrc.js": true
+  },
+  "typescript.preferences.includePackageJsonAutoImports": "off",
+  "typescript.suggest.autoImports": false,
+  "typescript.validate.enable": true,
+  "typescript.preferences.exclude": [
+    "**/services/notification-svc/nodejs-email-template/**"
+  ]
 }

@@ -1,12 +1,11 @@
 # CourseDetailedAllOfRequirements
 
-
 ## Properties
 
 Name | Type | Description | Notes
 ------------ | ------------- | ------------- | -------------
-**system_requirements** | **List[str]** |  | [optional] 
-**software_requirements** | **List[str]** |  | [optional] 
+**system_requirements** | **List[str]** |  | [optional]
+**software_requirements** | **List[str]** |  | [optional]
 
 ## Example
 
@@ -25,6 +24,5 @@ course_detailed_all_of_requirements_dict = course_detailed_all_of_requirements_i
 # create an instance of CourseDetailedAllOfRequirements from a dict
 course_detailed_all_of_requirements_from_dict = CourseDetailedAllOfRequirements.from_dict(course_detailed_all_of_requirements_dict)
 ```
+
 [[Back to Model list]](../README.md#documentation-for-models) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to README]](../README.md)
-
-

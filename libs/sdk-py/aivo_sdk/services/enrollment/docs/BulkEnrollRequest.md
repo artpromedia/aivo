@@ -1,15 +1,14 @@
 # BulkEnrollRequest
 
-
 ## Properties
 
 Name | Type | Description | Notes
 ------------ | ------------- | ------------- | -------------
-**tenant_id** | **str** |  | 
-**course_id** | **str** |  | 
-**learner_ids** | **List[str]** |  | 
-**expires_at** | **datetime** |  | [optional] 
-**metadata** | **Dict[str, object]** |  | [optional] 
+**tenant_id** | **str** |  |
+**course_id** | **str** |  |
+**learner_ids** | **List[str]** |  |
+**expires_at** | **datetime** |  | [optional]
+**metadata** | **Dict[str, object]** |  | [optional]
 
 ## Example
 
@@ -28,6 +27,5 @@ bulk_enroll_request_dict = bulk_enroll_request_instance.to_dict()
 # create an instance of BulkEnrollRequest from a dict
 bulk_enroll_request_from_dict = BulkEnrollRequest.from_dict(bulk_enroll_request_dict)
 ```
+
 [[Back to Model list]](../README.md#documentation-for-models) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to README]](../README.md)
-
-

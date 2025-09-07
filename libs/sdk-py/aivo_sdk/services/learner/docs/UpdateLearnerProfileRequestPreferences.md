@@ -1,15 +1,14 @@
 # UpdateLearnerProfileRequestPreferences
 
-
 ## Properties
 
 Name | Type | Description | Notes
 ------------ | ------------- | ------------- | -------------
-**learning_style** | **str** |  | [optional] 
-**difficulty_level** | **str** |  | [optional] 
-**notifications_enabled** | **bool** |  | [optional] 
-**email_digest** | **bool** |  | [optional] 
-**preferred_learning_time** | **str** |  | [optional] 
+**learning_style** | **str** |  | [optional]
+**difficulty_level** | **str** |  | [optional]
+**notifications_enabled** | **bool** |  | [optional]
+**email_digest** | **bool** |  | [optional]
+**preferred_learning_time** | **str** |  | [optional]
 
 ## Example
 
@@ -28,6 +27,5 @@ update_learner_profile_request_preferences_dict = update_learner_profile_request
 # create an instance of UpdateLearnerProfileRequestPreferences from a dict
 update_learner_profile_request_preferences_from_dict = UpdateLearnerProfileRequestPreferences.from_dict(update_learner_profile_request_preferences_dict)
 ```
+
 [[Back to Model list]](../README.md#documentation-for-models) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to README]](../README.md)
-
-

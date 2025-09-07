@@ -1,17 +1,16 @@
 # EnrollmentProgress
 
-
 ## Properties
 
 Name | Type | Description | Notes
 ------------ | ------------- | ------------- | -------------
-**enrollment_id** | **str** |  | 
-**progress_percentage** | **float** |  | 
-**time_spent_minutes** | **int** |  | 
-**last_accessed_at** | **datetime** |  | 
-**completed_modules** | **List[str]** |  | [optional] 
-**current_module** | **str** |  | [optional] 
-**assessment_scores** | [**List[EnrollmentProgressAssessmentScoresInner]**](EnrollmentProgressAssessmentScoresInner.md) |  | [optional] 
+**enrollment_id** | **str** |  |
+**progress_percentage** | **float** |  |
+**time_spent_minutes** | **int** |  |
+**last_accessed_at** | **datetime** |  |
+**completed_modules** | **List[str]** |  | [optional]
+**current_module** | **str** |  | [optional]
+**assessment_scores** | [**List[EnrollmentProgressAssessmentScoresInner]**](EnrollmentProgressAssessmentScoresInner.md) |  | [optional]
 
 ## Example
 
@@ -30,6 +29,5 @@ enrollment_progress_dict = enrollment_progress_instance.to_dict()
 # create an instance of EnrollmentProgress from a dict
 enrollment_progress_from_dict = EnrollmentProgress.from_dict(enrollment_progress_dict)
 ```
+
 [[Back to Model list]](../README.md#documentation-for-models) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to README]](../README.md)
-
-

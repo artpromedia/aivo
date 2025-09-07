@@ -1,6 +1,5 @@
 # SubmitAssessmentRequestAnswersInnerAnswer
 
-
 ## Properties
 
 Name | Type | Description | Notes
@@ -23,6 +22,5 @@ submit_assessment_request_answers_inner_answer_dict = submit_assessment_request_
 # create an instance of SubmitAssessmentRequestAnswersInnerAnswer from a dict
 submit_assessment_request_answers_inner_answer_from_dict = SubmitAssessmentRequestAnswersInnerAnswer.from_dict(submit_assessment_request_answers_inner_answer_dict)
 ```
+
 [[Back to Model list]](../README.md#documentation-for-models) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to README]](../README.md)
-
-

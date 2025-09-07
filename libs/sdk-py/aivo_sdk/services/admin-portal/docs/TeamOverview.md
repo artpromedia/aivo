@@ -1,16 +1,15 @@
 # TeamOverview
 
-
 ## Properties
 
 Name | Type | Description | Notes
 ------------ | ------------- | ------------- | -------------
-**tenant_id** | **str** |  | 
-**users_by_role** | [**TeamOverviewUsersByRole**](TeamOverviewUsersByRole.md) |  | 
-**pending_invites** | [**TeamOverviewPendingInvites**](TeamOverviewPendingInvites.md) |  | 
-**recent_activity** | [**TeamOverviewRecentActivity**](TeamOverviewRecentActivity.md) |  | 
-**top_users** | [**List[TeamOverviewTopUsersInner]**](TeamOverviewTopUsersInner.md) | Most active users in the tenant | [optional] 
-**last_updated** | **datetime** |  | 
+**tenant_id** | **str** |  |
+**users_by_role** | [**TeamOverviewUsersByRole**](TeamOverviewUsersByRole.md) |  |
+**pending_invites** | [**TeamOverviewPendingInvites**](TeamOverviewPendingInvites.md) |  |
+**recent_activity** | [**TeamOverviewRecentActivity**](TeamOverviewRecentActivity.md) |  |
+**top_users** | [**List[TeamOverviewTopUsersInner]**](TeamOverviewTopUsersInner.md) | Most active users in the tenant | [optional]
+**last_updated** | **datetime** |  |
 
 ## Example
 
@@ -29,6 +28,5 @@ team_overview_dict = team_overview_instance.to_dict()
 # create an instance of TeamOverview from a dict
 team_overview_from_dict = TeamOverview.from_dict(team_overview_dict)
 ```
+
 [[Back to Model list]](../README.md#documentation-for-models) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to README]](../README.md)
-
-

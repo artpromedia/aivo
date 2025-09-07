@@ -43,6 +43,7 @@ type(scope): description
 ```
 
 Types:
+
 - `feat`: A new feature
 - `fix`: A bug fix
 - `docs`: Documentation changes

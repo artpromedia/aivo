@@ -1,14 +1,13 @@
 # BulkEnrollResponse
 
-
 ## Properties
 
 Name | Type | Description | Notes
 ------------ | ------------- | ------------- | -------------
-**successful** | **int** |  | 
-**failed** | **int** |  | 
-**total** | **int** |  | 
-**errors** | [**List[BulkEnrollResponseErrorsInner]**](BulkEnrollResponseErrorsInner.md) |  | [optional] 
+**successful** | **int** |  |
+**failed** | **int** |  |
+**total** | **int** |  |
+**errors** | [**List[BulkEnrollResponseErrorsInner]**](BulkEnrollResponseErrorsInner.md) |  | [optional]
 
 ## Example
 
@@ -27,6 +26,5 @@ bulk_enroll_response_dict = bulk_enroll_response_instance.to_dict()
 # create an instance of BulkEnrollResponse from a dict
 bulk_enroll_response_from_dict = BulkEnrollResponse.from_dict(bulk_enroll_response_dict)
 ```
+
 [[Back to Model list]](../README.md#documentation-for-models) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to README]](../README.md)
-
-

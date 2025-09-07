@@ -1,16 +1,15 @@
 # LearnerProfileGoalsInner
 
-
 ## Properties
 
 Name | Type | Description | Notes
 ------------ | ------------- | ------------- | -------------
-**goal_id** | **str** |  | [optional] 
-**title** | **str** |  | [optional] 
-**description** | **str** |  | [optional] 
-**target_date** | **date** |  | [optional] 
-**status** | **str** |  | [optional] 
-**progress** | **float** |  | [optional] 
+**goal_id** | **str** |  | [optional]
+**title** | **str** |  | [optional]
+**description** | **str** |  | [optional]
+**target_date** | **date** |  | [optional]
+**status** | **str** |  | [optional]
+**progress** | **float** |  | [optional]
 
 ## Example
 
@@ -29,6 +28,5 @@ learner_profile_goals_inner_dict = learner_profile_goals_inner_instance.to_dict(
 # create an instance of LearnerProfileGoalsInner from a dict
 learner_profile_goals_inner_from_dict = LearnerProfileGoalsInner.from_dict(learner_profile_goals_inner_dict)
 ```
+
 [[Back to Model list]](../README.md#documentation-for-models) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to README]](../README.md)
-
-

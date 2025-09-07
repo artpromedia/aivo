@@ -1,13 +1,13 @@
 # aivo_sdk.BulkOperationsApi
 
-All URIs are relative to *https://api.aivo.com/enrollment/v1*
+All URIs are relative to *<https://api.aivo.com/enrollment/v1>*
 
 Method | HTTP request | Description
 ------------- | ------------- | -------------
 [**bulk_enroll**](BulkOperationsApi.md#bulk_enroll) | **POST** /bulk-enroll | Bulk enroll learners
 
-
 # **bulk_enroll**
+>
 > BulkEnrollResponse bulk_enroll(bulk_enroll_request)
 
 Bulk enroll learners
@@ -54,14 +54,11 @@ with aivo_sdk.ApiClient(configuration) as api_client:
         print("Exception when calling BulkOperationsApi->bulk_enroll: %s\n" % e)
 ```
 
-
-
 ### Parameters
-
 
 Name | Type | Description  | Notes
 ------------- | ------------- | ------------- | -------------
- **bulk_enroll_request** | [**BulkEnrollRequest**](BulkEnrollRequest.md)|  | 
+ **bulk_enroll_request** | [**BulkEnrollRequest**](BulkEnrollRequest.md)|  |
 
 ### Return type
 
@@ -73,8 +70,8 @@ Name | Type | Description  | Notes
 
 ### HTTP request headers
 
- - **Content-Type**: application/json
- - **Accept**: application/json
+* **Content-Type**: application/json
+* **Accept**: application/json
 
 ### HTTP response details
 
@@ -85,4 +82,3 @@ Name | Type | Description  | Notes
 **401** | Unauthorized |  -  |
 
 [[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
-

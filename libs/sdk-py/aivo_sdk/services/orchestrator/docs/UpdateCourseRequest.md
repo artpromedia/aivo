@@ -1,22 +1,21 @@
 # UpdateCourseRequest
 
-
 ## Properties
 
 Name | Type | Description | Notes
 ------------ | ------------- | ------------- | -------------
-**title** | **str** |  | [optional] 
-**description** | **str** |  | [optional] 
-**short_description** | **str** |  | [optional] 
-**category** | **str** |  | [optional] 
-**tags** | **List[str]** |  | [optional] 
-**difficulty** | **str** |  | [optional] 
-**status** | **str** |  | [optional] 
-**estimated_duration** | **int** |  | [optional] 
-**thumbnail_url** | **str** |  | [optional] 
-**learning_objectives** | **List[str]** |  | [optional] 
-**is_public** | **bool** |  | [optional] 
-**metadata** | **Dict[str, object]** |  | [optional] 
+**title** | **str** |  | [optional]
+**description** | **str** |  | [optional]
+**short_description** | **str** |  | [optional]
+**category** | **str** |  | [optional]
+**tags** | **List[str]** |  | [optional]
+**difficulty** | **str** |  | [optional]
+**status** | **str** |  | [optional]
+**estimated_duration** | **int** |  | [optional]
+**thumbnail_url** | **str** |  | [optional]
+**learning_objectives** | **List[str]** |  | [optional]
+**is_public** | **bool** |  | [optional]
+**metadata** | **Dict[str, object]** |  | [optional]
 
 ## Example
 
@@ -35,6 +34,5 @@ update_course_request_dict = update_course_request_instance.to_dict()
 # create an instance of UpdateCourseRequest from a dict
 update_course_request_from_dict = UpdateCourseRequest.from_dict(update_course_request_dict)
 ```
+
 [[Back to Model list]](../README.md#documentation-for-models) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to README]](../README.md)
-
-

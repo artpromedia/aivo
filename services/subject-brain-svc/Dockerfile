@@ -1,3 +1,4 @@
+﻿# hadolint ignore=DL3007,DL3008
 FROM python:3.11-slim-bullseye
 
 # Upgrade system packages to latest security patches

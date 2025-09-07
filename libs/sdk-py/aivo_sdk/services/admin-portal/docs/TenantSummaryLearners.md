@@ -1,14 +1,13 @@
 # TenantSummaryLearners
 
-
 ## Properties
 
 Name | Type | Description | Notes
 ------------ | ------------- | ------------- | -------------
-**total** | **int** | Total number of learners | 
-**active** | **int** | Number of active learners | 
-**inactive** | **int** | Number of inactive learners | 
-**pending** | **int** | Number of pending learners | 
+**total** | **int** | Total number of learners |
+**active** | **int** | Number of active learners |
+**inactive** | **int** | Number of inactive learners |
+**pending** | **int** | Number of pending learners |
 
 ## Example
 
@@ -27,6 +26,5 @@ tenant_summary_learners_dict = tenant_summary_learners_instance.to_dict()
 # create an instance of TenantSummaryLearners from a dict
 tenant_summary_learners_from_dict = TenantSummaryLearners.from_dict(tenant_summary_learners_dict)
 ```
+
 [[Back to Model list]](../README.md#documentation-for-models) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to README]](../README.md)
-
-

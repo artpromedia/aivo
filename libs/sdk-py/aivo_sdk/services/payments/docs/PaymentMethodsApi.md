@@ -1,6 +1,6 @@
 # aivo_sdk.PaymentMethodsApi
 
-All URIs are relative to *https://api.aivo.com/payments/v1*
+All URIs are relative to *<https://api.aivo.com/payments/v1>*
 
 Method | HTTP request | Description
 ------------- | ------------- | -------------
@@ -8,8 +8,8 @@ Method | HTTP request | Description
 [**list_payment_methods**](PaymentMethodsApi.md#list_payment_methods) | **GET** /payment-methods | List payment methods
 [**remove_payment_method**](PaymentMethodsApi.md#remove_payment_method) | **DELETE** /payment-methods/{paymentMethodId} | Remove payment method
 
-
 # **add_payment_method**
+>
 > PaymentMethod add_payment_method(add_payment_method_request)
 
 Add payment method
@@ -56,14 +56,11 @@ with aivo_sdk.ApiClient(configuration) as api_client:
         print("Exception when calling PaymentMethodsApi->add_payment_method: %s\n" % e)
 ```
 
-
-
 ### Parameters
-
 
 Name | Type | Description  | Notes
 ------------- | ------------- | ------------- | -------------
- **add_payment_method_request** | [**AddPaymentMethodRequest**](AddPaymentMethodRequest.md)|  | 
+ **add_payment_method_request** | [**AddPaymentMethodRequest**](AddPaymentMethodRequest.md)|  |
 
 ### Return type
 
@@ -75,8 +72,8 @@ Name | Type | Description  | Notes
 
 ### HTTP request headers
 
- - **Content-Type**: application/json
- - **Accept**: application/json
+* **Content-Type**: application/json
+* **Accept**: application/json
 
 ### HTTP response details
 
@@ -89,6 +86,7 @@ Name | Type | Description  | Notes
 [[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
 
 # **list_payment_methods**
+>
 > List[PaymentMethod] list_payment_methods(tenant_id)
 
 List payment methods
@@ -134,14 +132,11 @@ with aivo_sdk.ApiClient(configuration) as api_client:
         print("Exception when calling PaymentMethodsApi->list_payment_methods: %s\n" % e)
 ```
 
-
-
 ### Parameters
-
 
 Name | Type | Description  | Notes
 ------------- | ------------- | ------------- | -------------
- **tenant_id** | **str**|  | 
+ **tenant_id** | **str**|  |
 
 ### Return type
 
@@ -153,8 +148,8 @@ Name | Type | Description  | Notes
 
 ### HTTP request headers
 
- - **Content-Type**: Not defined
- - **Accept**: application/json
+* **Content-Type**: Not defined
+* **Accept**: application/json
 
 ### HTTP response details
 
@@ -166,6 +161,7 @@ Name | Type | Description  | Notes
 [[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
 
 # **remove_payment_method**
+>
 > remove_payment_method(payment_method_id)
 
 Remove payment method
@@ -208,14 +204,11 @@ with aivo_sdk.ApiClient(configuration) as api_client:
         print("Exception when calling PaymentMethodsApi->remove_payment_method: %s\n" % e)
 ```
 
-
-
 ### Parameters
-
 
 Name | Type | Description  | Notes
 ------------- | ------------- | ------------- | -------------
- **payment_method_id** | **str**|  | 
+ **payment_method_id** | **str**|  |
 
 ### Return type
 
@@ -227,8 +220,8 @@ void (empty response body)
 
 ### HTTP request headers
 
- - **Content-Type**: Not defined
- - **Accept**: application/json
+* **Content-Type**: Not defined
+* **Accept**: application/json
 
 ### HTTP response details
 
@@ -239,4 +232,3 @@ void (empty response body)
 **404** | Payment method not found |  -  |
 
 [[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
-

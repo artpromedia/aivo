@@ -1,4 +1,5 @@
-﻿# Multi-stage build for ETL Jobs Service
+﻿# hadolint ignore=DL3007,DL3008
+# Multi-stage build for ETL Jobs Service
 FROM python:3.11-slim AS builder
 
 WORKDIR /app

@@ -1,13 +1,13 @@
 # aivo_sdk.ProfileApi
 
-All URIs are relative to *https://api.aivo.com/auth/v1*
+All URIs are relative to *<https://api.aivo.com/auth/v1>*
 
 Method | HTTP request | Description
 ------------- | ------------- | -------------
 [**get_current_user**](ProfileApi.md#get_current_user) | **GET** /me | Get current user profile
 
-
 # **get_current_user**
+>
 > User get_current_user()
 
 Get current user profile
@@ -52,8 +52,6 @@ with aivo_sdk.ApiClient(configuration) as api_client:
         print("Exception when calling ProfileApi->get_current_user: %s\n" % e)
 ```
 
-
-
 ### Parameters
 
 This endpoint does not need any parameter.
@@ -68,8 +66,8 @@ This endpoint does not need any parameter.
 
 ### HTTP request headers
 
- - **Content-Type**: Not defined
- - **Accept**: application/json
+* **Content-Type**: Not defined
+* **Accept**: application/json
 
 ### HTTP response details
 
@@ -79,4 +77,3 @@ This endpoint does not need any parameter.
 **401** | Unauthorized |  -  |
 
 [[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
-

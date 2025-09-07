@@ -1,14 +1,13 @@
 # BulkImportResponse
 
-
 ## Properties
 
 Name | Type | Description | Notes
 ------------ | ------------- | ------------- | -------------
-**successful** | **int** |  | 
-**failed** | **int** |  | 
-**total** | **int** |  | 
-**errors** | [**List[BulkImportResponseErrorsInner]**](BulkImportResponseErrorsInner.md) |  | [optional] 
+**successful** | **int** |  |
+**failed** | **int** |  |
+**total** | **int** |  |
+**errors** | [**List[BulkImportResponseErrorsInner]**](BulkImportResponseErrorsInner.md) |  | [optional]
 
 ## Example
 
@@ -27,6 +26,5 @@ bulk_import_response_dict = bulk_import_response_instance.to_dict()
 # create an instance of BulkImportResponse from a dict
 bulk_import_response_from_dict = BulkImportResponse.from_dict(bulk_import_response_dict)
 ```
+
 [[Back to Model list]](../README.md#documentation-for-models) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to README]](../README.md)
-
-

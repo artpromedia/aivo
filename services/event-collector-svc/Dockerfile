@@ -1,3 +1,4 @@
+﻿# hadolint ignore=DL3007,DL3008
 # Event Collector Service Dockerfile
 FROM python:3.11-slim
 

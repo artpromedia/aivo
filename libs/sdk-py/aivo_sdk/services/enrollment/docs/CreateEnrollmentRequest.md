@@ -1,15 +1,14 @@
 # CreateEnrollmentRequest
 
-
 ## Properties
 
 Name | Type | Description | Notes
 ------------ | ------------- | ------------- | -------------
-**tenant_id** | **str** |  | 
-**learner_id** | **str** |  | 
-**course_id** | **str** |  | 
-**expires_at** | **datetime** |  | [optional] 
-**metadata** | **Dict[str, object]** |  | [optional] 
+**tenant_id** | **str** |  |
+**learner_id** | **str** |  |
+**course_id** | **str** |  |
+**expires_at** | **datetime** |  | [optional]
+**metadata** | **Dict[str, object]** |  | [optional]
 
 ## Example
 
@@ -28,6 +27,5 @@ create_enrollment_request_dict = create_enrollment_request_instance.to_dict()
 # create an instance of CreateEnrollmentRequest from a dict
 create_enrollment_request_from_dict = CreateEnrollmentRequest.from_dict(create_enrollment_request_dict)
 ```
+
 [[Back to Model list]](../README.md#documentation-for-models) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to README]](../README.md)
-
-

@@ -1,0 +1,14 @@
+# Basic postfix main configuration
+myhostname = mailserver1.aivo.local
+mydomain = aivo.local
+myorigin = $mydomain
+inet_interfaces = all
+inet_protocols = ipv4
+
+# Security settings
+smtpd_banner = $myhostname ESMTP
+disable_vrfy_command = yes
+
+# Queue settings
+queue_directory = /var/spool/postfix
+data_directory = /var/lib/postfix

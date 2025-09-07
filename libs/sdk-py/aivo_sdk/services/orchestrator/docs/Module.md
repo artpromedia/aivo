@@ -1,25 +1,24 @@
 # Module
 
-
 ## Properties
 
 Name | Type | Description | Notes
 ------------ | ------------- | ------------- | -------------
-**id** | **str** |  | 
-**course_id** | **str** |  | 
-**title** | **str** |  | 
-**description** | **str** |  | [optional] 
-**type** | **str** |  | 
-**order** | **int** |  | 
-**estimated_duration** | **int** | Estimated duration in minutes | 
-**content_url** | **str** |  | [optional] 
-**transcript_url** | **str** |  | [optional] 
-**resources** | [**List[ModuleResourcesInner]**](ModuleResourcesInner.md) |  | [optional] 
+**id** | **str** |  |
+**course_id** | **str** |  |
+**title** | **str** |  |
+**description** | **str** |  | [optional]
+**type** | **str** |  |
+**order** | **int** |  |
+**estimated_duration** | **int** | Estimated duration in minutes |
+**content_url** | **str** |  | [optional]
+**transcript_url** | **str** |  | [optional]
+**resources** | [**List[ModuleResourcesInner]**](ModuleResourcesInner.md) |  | [optional]
 **is_optional** | **bool** |  | [optional] [default to False]
-**prerequisites** | **List[str]** |  | [optional] 
-**metadata** | **Dict[str, object]** |  | [optional] 
-**created_at** | **datetime** |  | 
-**updated_at** | **datetime** |  | 
+**prerequisites** | **List[str]** |  | [optional]
+**metadata** | **Dict[str, object]** |  | [optional]
+**created_at** | **datetime** |  |
+**updated_at** | **datetime** |  |
 
 ## Example
 
@@ -38,6 +37,5 @@ module_dict = module_instance.to_dict()
 # create an instance of Module from a dict
 module_from_dict = Module.from_dict(module_dict)
 ```
+
 [[Back to Model list]](../README.md#documentation-for-models) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to README]](../README.md)
-
-

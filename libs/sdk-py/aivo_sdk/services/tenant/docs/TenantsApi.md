@@ -1,6 +1,6 @@
 # aivo_sdk.TenantsApi
 
-All URIs are relative to *https://api.aivo.com/tenant/v1*
+All URIs are relative to *<https://api.aivo.com/tenant/v1>*
 
 Method | HTTP request | Description
 ------------- | ------------- | -------------
@@ -10,8 +10,8 @@ Method | HTTP request | Description
 [**list_tenants**](TenantsApi.md#list_tenants) | **GET** /tenants | List tenants
 [**update_tenant**](TenantsApi.md#update_tenant) | **PUT** /tenants/{tenantId} | Update tenant
 
-
 # **create_tenant**
+>
 > Tenant create_tenant(create_tenant_request)
 
 Create new tenant
@@ -58,14 +58,11 @@ with aivo_sdk.ApiClient(configuration) as api_client:
         print("Exception when calling TenantsApi->create_tenant: %s\n" % e)
 ```
 
-
-
 ### Parameters
-
 
 Name | Type | Description  | Notes
 ------------- | ------------- | ------------- | -------------
- **create_tenant_request** | [**CreateTenantRequest**](CreateTenantRequest.md)|  | 
+ **create_tenant_request** | [**CreateTenantRequest**](CreateTenantRequest.md)|  |
 
 ### Return type
 
@@ -77,8 +74,8 @@ Name | Type | Description  | Notes
 
 ### HTTP request headers
 
- - **Content-Type**: application/json
- - **Accept**: application/json
+* **Content-Type**: application/json
+* **Accept**: application/json
 
 ### HTTP response details
 
@@ -92,6 +89,7 @@ Name | Type | Description  | Notes
 [[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
 
 # **delete_tenant**
+>
 > delete_tenant(tenant_id)
 
 Delete tenant
@@ -134,14 +132,11 @@ with aivo_sdk.ApiClient(configuration) as api_client:
         print("Exception when calling TenantsApi->delete_tenant: %s\n" % e)
 ```
 
-
-
 ### Parameters
-
 
 Name | Type | Description  | Notes
 ------------- | ------------- | ------------- | -------------
- **tenant_id** | **str**|  | 
+ **tenant_id** | **str**|  |
 
 ### Return type
 
@@ -153,8 +148,8 @@ void (empty response body)
 
 ### HTTP request headers
 
- - **Content-Type**: Not defined
- - **Accept**: application/json
+* **Content-Type**: Not defined
+* **Accept**: application/json
 
 ### HTTP response details
 
@@ -167,6 +162,7 @@ void (empty response body)
 [[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
 
 # **get_tenant**
+>
 > Tenant get_tenant(tenant_id)
 
 Get tenant by ID
@@ -212,14 +208,11 @@ with aivo_sdk.ApiClient(configuration) as api_client:
         print("Exception when calling TenantsApi->get_tenant: %s\n" % e)
 ```
 
-
-
 ### Parameters
-
 
 Name | Type | Description  | Notes
 ------------- | ------------- | ------------- | -------------
- **tenant_id** | **str**|  | 
+ **tenant_id** | **str**|  |
 
 ### Return type
 
@@ -231,8 +224,8 @@ Name | Type | Description  | Notes
 
 ### HTTP request headers
 
- - **Content-Type**: Not defined
- - **Accept**: application/json
+* **Content-Type**: Not defined
+* **Accept**: application/json
 
 ### HTTP response details
 
@@ -245,6 +238,7 @@ Name | Type | Description  | Notes
 [[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
 
 # **list_tenants**
+>
 > ListTenants200Response list_tenants(limit=limit, offset=offset, status=status)
 
 List tenants
@@ -292,16 +286,13 @@ with aivo_sdk.ApiClient(configuration) as api_client:
         print("Exception when calling TenantsApi->list_tenants: %s\n" % e)
 ```
 
-
-
 ### Parameters
-
 
 Name | Type | Description  | Notes
 ------------- | ------------- | ------------- | -------------
  **limit** | **int**|  | [optional] [default to 20]
  **offset** | **int**|  | [optional] [default to 0]
- **status** | **str**|  | [optional] 
+ **status** | **str**|  | [optional]
 
 ### Return type
 
@@ -313,8 +304,8 @@ Name | Type | Description  | Notes
 
 ### HTTP request headers
 
- - **Content-Type**: Not defined
- - **Accept**: application/json
+* **Content-Type**: Not defined
+* **Accept**: application/json
 
 ### HTTP response details
 
@@ -326,6 +317,7 @@ Name | Type | Description  | Notes
 [[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
 
 # **update_tenant**
+>
 > Tenant update_tenant(tenant_id, update_tenant_request)
 
 Update tenant
@@ -373,15 +365,12 @@ with aivo_sdk.ApiClient(configuration) as api_client:
         print("Exception when calling TenantsApi->update_tenant: %s\n" % e)
 ```
 
-
-
 ### Parameters
-
 
 Name | Type | Description  | Notes
 ------------- | ------------- | ------------- | -------------
- **tenant_id** | **str**|  | 
- **update_tenant_request** | [**UpdateTenantRequest**](UpdateTenantRequest.md)|  | 
+ **tenant_id** | **str**|  |
+ **update_tenant_request** | [**UpdateTenantRequest**](UpdateTenantRequest.md)|  |
 
 ### Return type
 
@@ -393,8 +382,8 @@ Name | Type | Description  | Notes
 
 ### HTTP request headers
 
- - **Content-Type**: application/json
- - **Accept**: application/json
+* **Content-Type**: application/json
+* **Accept**: application/json
 
 ### HTTP response details
 
@@ -407,4 +396,3 @@ Name | Type | Description  | Notes
 **422** | Validation error |  -  |
 
 [[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
-

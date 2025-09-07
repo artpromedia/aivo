@@ -1,13 +1,12 @@
 # NamespacesOverviewRecentActivity
 
-
 ## Properties
 
 Name | Type | Description | Notes
 ------------ | ------------- | ------------- | -------------
-**namespaces_created_this_week** | **int** |  | [optional] 
-**namespaces_created_this_month** | **int** |  | [optional] 
-**documents_added_this_week** | **int** |  | [optional] 
+**namespaces_created_this_week** | **int** |  | [optional]
+**namespaces_created_this_month** | **int** |  | [optional]
+**documents_added_this_week** | **int** |  | [optional]
 
 ## Example
 
@@ -26,6 +25,5 @@ namespaces_overview_recent_activity_dict = namespaces_overview_recent_activity_i
 # create an instance of NamespacesOverviewRecentActivity from a dict
 namespaces_overview_recent_activity_from_dict = NamespacesOverviewRecentActivity.from_dict(namespaces_overview_recent_activity_dict)
 ```
+
 [[Back to Model list]](../README.md#documentation-for-models) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to README]](../README.md)
-
-

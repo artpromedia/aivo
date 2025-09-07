@@ -1,13 +1,12 @@
 # UpdateLearnerProfileRequest
 
-
 ## Properties
 
 Name | Type | Description | Notes
 ------------ | ------------- | ------------- | -------------
-**bio** | **str** |  | [optional] 
-**preferences** | [**UpdateLearnerProfileRequestPreferences**](UpdateLearnerProfileRequestPreferences.md) |  | [optional] 
-**interests** | **List[str]** |  | [optional] 
+**bio** | **str** |  | [optional]
+**preferences** | [**UpdateLearnerProfileRequestPreferences**](UpdateLearnerProfileRequestPreferences.md) |  | [optional]
+**interests** | **List[str]** |  | [optional]
 
 ## Example
 
@@ -26,6 +25,5 @@ update_learner_profile_request_dict = update_learner_profile_request_instance.to
 # create an instance of UpdateLearnerProfileRequest from a dict
 update_learner_profile_request_from_dict = UpdateLearnerProfileRequest.from_dict(update_learner_profile_request_dict)
 ```
+
 [[Back to Model list]](../README.md#documentation-for-models) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to README]](../README.md)
-
-

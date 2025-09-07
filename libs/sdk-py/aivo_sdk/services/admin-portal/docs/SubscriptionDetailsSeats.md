@@ -1,13 +1,12 @@
 # SubscriptionDetailsSeats
 
-
 ## Properties
 
 Name | Type | Description | Notes
 ------------ | ------------- | ------------- | -------------
-**current** | **int** | Current number of seats | 
-**included** | **int** | Seats included in base plan | 
-**additional** | **int** | Additional seats purchased | 
+**current** | **int** | Current number of seats |
+**included** | **int** | Seats included in base plan |
+**additional** | **int** | Additional seats purchased |
 
 ## Example
 
@@ -26,6 +25,5 @@ subscription_details_seats_dict = subscription_details_seats_instance.to_dict()
 # create an instance of SubscriptionDetailsSeats from a dict
 subscription_details_seats_from_dict = SubscriptionDetailsSeats.from_dict(subscription_details_seats_dict)
 ```
+
 [[Back to Model list]](../README.md#documentation-for-models) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to README]](../README.md)
-
-

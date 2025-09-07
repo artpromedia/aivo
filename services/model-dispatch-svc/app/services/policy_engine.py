@@ -321,7 +321,7 @@ class PolicyEngine:
         return response
 
     async def _check_teacher_override(
-        self, request: PolicyRequest
+        self, _request: PolicyRequest
     ) -> PolicyResponse | None:
         """Check for active teacher override."""
         # For demo purposes, this would check a database or cache
@@ -396,7 +396,8 @@ class PolicyEngine:
         try:
             await self.initialize()
             return True
-        except Exception:
+        except Exception:  # pylint: disable=broad-exception-caught
+            # Intentionally broad to ensure reload is robust
             return False
 
 

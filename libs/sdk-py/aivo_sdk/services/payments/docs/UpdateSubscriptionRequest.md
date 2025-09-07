@@ -1,13 +1,12 @@
 # UpdateSubscriptionRequest
 
-
 ## Properties
 
 Name | Type | Description | Notes
 ------------ | ------------- | ------------- | -------------
-**plan_id** | **str** |  | [optional] 
-**quantity** | **int** |  | [optional] 
-**metadata** | **Dict[str, object]** |  | [optional] 
+**plan_id** | **str** |  | [optional]
+**quantity** | **int** |  | [optional]
+**metadata** | **Dict[str, object]** |  | [optional]
 
 ## Example
 
@@ -26,6 +25,5 @@ update_subscription_request_dict = update_subscription_request_instance.to_dict(
 # create an instance of UpdateSubscriptionRequest from a dict
 update_subscription_request_from_dict = UpdateSubscriptionRequest.from_dict(update_subscription_request_dict)
 ```
+
 [[Back to Model list]](../README.md#documentation-for-models) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to README]](../README.md)
-
-

@@ -1,13 +1,12 @@
 # TeamOverviewPendingInvitesByRole
 
-
 ## Properties
 
 Name | Type | Description | Notes
 ------------ | ------------- | ------------- | -------------
-**tenant_admin** | **int** |  | [optional] 
-**instructor** | **int** |  | [optional] 
-**learner** | **int** |  | [optional] 
+**tenant_admin** | **int** |  | [optional]
+**instructor** | **int** |  | [optional]
+**learner** | **int** |  | [optional]
 
 ## Example
 
@@ -26,6 +25,5 @@ team_overview_pending_invites_by_role_dict = team_overview_pending_invites_by_ro
 # create an instance of TeamOverviewPendingInvitesByRole from a dict
 team_overview_pending_invites_by_role_from_dict = TeamOverviewPendingInvitesByRole.from_dict(team_overview_pending_invites_by_role_dict)
 ```
+
 [[Back to Model list]](../README.md#documentation-for-models) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to README]](../README.md)
-
-

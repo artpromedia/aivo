@@ -1,12 +1,11 @@
 # SubmitAssessmentRequest
 
-
 ## Properties
 
 Name | Type | Description | Notes
 ------------ | ------------- | ------------- | -------------
-**answers** | [**List[SubmitAssessmentRequestAnswersInner]**](SubmitAssessmentRequestAnswersInner.md) |  | 
-**time_spent** | **int** | Time spent in minutes | [optional] 
+**answers** | [**List[SubmitAssessmentRequestAnswersInner]**](SubmitAssessmentRequestAnswersInner.md) |  |
+**time_spent** | **int** | Time spent in minutes | [optional]
 
 ## Example
 
@@ -25,6 +24,5 @@ submit_assessment_request_dict = submit_assessment_request_instance.to_dict()
 # create an instance of SubmitAssessmentRequest from a dict
 submit_assessment_request_from_dict = SubmitAssessmentRequest.from_dict(submit_assessment_request_dict)
 ```
+
 [[Back to Model list]](../README.md#documentation-for-models) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to README]](../README.md)
-
-

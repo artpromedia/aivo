@@ -1,14 +1,13 @@
 # PaymentMethodCard
 
-
 ## Properties
 
 Name | Type | Description | Notes
 ------------ | ------------- | ------------- | -------------
-**brand** | **str** |  | [optional] 
-**last4** | **str** |  | [optional] 
-**exp_month** | **int** |  | [optional] 
-**exp_year** | **int** |  | [optional] 
+**brand** | **str** |  | [optional]
+**last4** | **str** |  | [optional]
+**exp_month** | **int** |  | [optional]
+**exp_year** | **int** |  | [optional]
 
 ## Example
 
@@ -27,6 +26,5 @@ payment_method_card_dict = payment_method_card_instance.to_dict()
 # create an instance of PaymentMethodCard from a dict
 payment_method_card_from_dict = PaymentMethodCard.from_dict(payment_method_card_dict)
 ```
+
 [[Back to Model list]](../README.md#documentation-for-models) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to README]](../README.md)
-
-

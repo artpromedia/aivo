@@ -5,6 +5,7 @@ Complete Docker Compose configuration for running all Stage-1 services locally.
 ## Services Included
 
 ### Infrastructure
+
 - **PostgreSQL 16** - Primary database (port 5432)
 - **Redis 7** - Caching and session storage (port 6379)
 - **MinIO** - S3-compatible object storage (ports 9000, 9001)
@@ -13,6 +14,7 @@ Complete Docker Compose configuration for running all Stage-1 services locally.
 - **MailHog** - Email testing (ports 1025, 8025)
 
 ### S1 Core Services
+
 - **auth-svc** - Authentication service (port 8081)
 - **tenant-svc** - District/school management (port 8082)
 - **payment-svc** - Seat purchasing (port 8083)
@@ -29,12 +31,14 @@ Complete Docker Compose configuration for running all Stage-1 services locally.
 ## Quick Start
 
 ### Start All Services
+
 ```bash
 # From repository root
 docker compose -f infra/compose/local.yml up -d
 ```
 
 ### Run Golden Path Verification
+
 ```bash
 # Option 1: PowerShell (Windows)
 ./scripts/verify-stage1.ps1
@@ -47,6 +51,7 @@ node scripts/verify-stage1.js
 ```
 
 ### Stop All Services
+
 ```bash
 docker compose -f infra/compose/local.yml down
 ```
@@ -54,11 +59,13 @@ docker compose -f infra/compose/local.yml down
 ## Health Checks
 
 All services include health checks that verify:
+
 - Service startup completion
 - Database connectivity
 - External service dependencies
 
 Health status can be monitored with:
+
 ```bash
 docker compose -f infra/compose/local.yml ps
 ```
@@ -69,16 +76,17 @@ Once running, services are accessible at:
 
 | Service | URL | Description |
 |---------|-----|-------------|
-| Kong Gateway | http://localhost:8000 | Main API entry point |
-| Kong Admin | http://localhost:8001 | Gateway administration |
-| MailHog UI | http://localhost:8025 | Email testing interface |
-| MinIO Console | http://localhost:9001 | Object storage admin |
+| Kong Gateway | <http://localhost:8000> | Main API entry point |
+| Kong Admin | <http://localhost:8001> | Gateway administration |
+| MailHog UI | <http://localhost:8025> | Email testing interface |
+| MinIO Console | <http://localhost:9001> | Object storage admin |
 | PostgreSQL | localhost:5432 | Database (user: postgres, pass: password) |
 | Redis | localhost:6379 | Cache server |
 
 ## Development
 
 ### View Logs
+
 ```bash
 # All services
 docker compose -f infra/compose/local.yml logs -f
@@ -88,12 +96,14 @@ docker compose -f infra/compose/local.yml logs -f auth-svc
 ```
 
 ### Rebuild Service
+
 ```bash
 # Rebuild and restart a service
 docker compose -f infra/compose/local.yml up -d --build auth-svc
 ```
 
 ### Database Access
+
 ```bash
 # Connect to PostgreSQL
 docker exec -it monorepo_postgres psql -U postgres -d monorepo
@@ -118,6 +128,7 @@ The `verify-stage1` script tests the complete golden path:
 ### Common Issues
 
 **Services not starting:**
+
 ```bash
 # Check Docker daemon is running
 docker info
@@ -127,6 +138,7 @@ netstat -an | grep :8081
 ```
 
 **Database connection errors:**
+
 ```bash
 # Wait for PostgreSQL to be ready
 docker compose -f infra/compose/local.yml logs postgres
@@ -136,6 +148,7 @@ docker compose -f infra/compose/local.yml ps postgres
 ```
 
 **Build failures:**
+
 ```bash
 # Clean rebuild all services
 docker compose -f infra/compose/local.yml down
@@ -144,6 +157,7 @@ docker compose -f infra/compose/local.yml up -d
 ```
 
 ### Reset Environment
+
 ```bash
 # Stop and remove all containers, volumes, networks
 docker compose -f infra/compose/local.yml down -v --remove-orphans
@@ -165,6 +179,7 @@ Key environment variables (all services have defaults for local development):
 ## Network
 
 All services run on the `monorepo_infra` bridge network, allowing:
+
 - Service-to-service communication via container names
 - External access via exposed ports
 - Isolated environment from other Docker projects
@@ -172,6 +187,7 @@ All services run on the `monorepo_infra` bridge network, allowing:
 ## Volumes
 
 Persistent data stored in Docker volumes:
+
 - `postgres_data` - Database files
 - `redis_data` - Cache persistence
 - `minio_data` - Object storage files

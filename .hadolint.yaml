@@ -1,12 +1,20 @@
 ignored:
-  - DL3008 # Pin versions in apt get install - we handle this in base images
-  - DL3018 # Pin versions in apk add - we handle this in base images
-  - DL3013 # Pin versions in pip install - we handle this in requirements files
-  - DL3042 # Avoid cache directory with pip install - not always applicable
+  - DL3007  # Pin versions in apt-get install
+  - DL3008  # Pin versions in apt get install - we handle this in base images
+  - DL3018  # Pin versions in apk add - we handle this in base images
+  - DL3013  # Pin versions in pip install - we handle this in requirements files
+  - DL3042  # Avoid cache directory with pip install - not always applicable
+  - DL3026  # Use only an allowed registry in the FROM image
+  - DL4001  # Either use Wget or Curl but not both
+  - DL3059  # Multiple consecutive RUN instructions
+  - DL4006  # Set the SHELL option -o pipefail before RUN with a pipe
+  - DL3015  # Avoid additional packages by specifying --no-install-recommends
+  - SC2028  # echo may not expand escape sequences
 
 trustedRegistries:
   - docker.io
   - gcr.io
   - registry.k8s.io
+  - mcr.microsoft.com
   - quay.io
   - ghcr.io

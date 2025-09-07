@@ -1,13 +1,12 @@
 # NamespacesOverviewStorageStats
 
-
 ## Properties
 
 Name | Type | Description | Notes
 ------------ | ------------- | ------------- | -------------
-**total_storage_used** | **int** | Total storage used across all namespaces (MB) | [optional] 
-**average_storage_per_namespace** | **float** | Average storage per namespace (MB) | [optional] 
-**max_storage_used** | **int** | Maximum storage used by a single namespace (MB) | [optional] 
+**total_storage_used** | **int** | Total storage used across all namespaces (MB) | [optional]
+**average_storage_per_namespace** | **float** | Average storage per namespace (MB) | [optional]
+**max_storage_used** | **int** | Maximum storage used by a single namespace (MB) | [optional]
 
 ## Example
 
@@ -26,6 +25,5 @@ namespaces_overview_storage_stats_dict = namespaces_overview_storage_stats_insta
 # create an instance of NamespacesOverviewStorageStats from a dict
 namespaces_overview_storage_stats_from_dict = NamespacesOverviewStorageStats.from_dict(namespaces_overview_storage_stats_dict)
 ```
+
 [[Back to Model list]](../README.md#documentation-for-models) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to README]](../README.md)
-
-

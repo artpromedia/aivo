@@ -1,6 +1,5 @@
 # TenantSettingsFeatures
 
-
 ## Properties
 
 Name | Type | Description | Notes
@@ -27,6 +26,5 @@ tenant_settings_features_dict = tenant_settings_features_instance.to_dict()
 # create an instance of TenantSettingsFeatures from a dict
 tenant_settings_features_from_dict = TenantSettingsFeatures.from_dict(tenant_settings_features_dict)
 ```
+
 [[Back to Model list]](../README.md#documentation-for-models) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to README]](../README.md)
-
-

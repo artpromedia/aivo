@@ -1,12 +1,11 @@
 # UsageAnalyticsTrends
 
-
 ## Properties
 
 Name | Type | Description | Notes
 ------------ | ------------- | ------------- | -------------
-**daily_activity** | [**List[UsageAnalyticsTrendsDailyActivityInner]**](UsageAnalyticsTrendsDailyActivityInner.md) |  | [optional] 
-**peak_hours** | [**List[UsageAnalyticsTrendsPeakHoursInner]**](UsageAnalyticsTrendsPeakHoursInner.md) | Learning activity by hour of day | [optional] 
+**daily_activity** | [**List[UsageAnalyticsTrendsDailyActivityInner]**](UsageAnalyticsTrendsDailyActivityInner.md) |  | [optional]
+**peak_hours** | [**List[UsageAnalyticsTrendsPeakHoursInner]**](UsageAnalyticsTrendsPeakHoursInner.md) | Learning activity by hour of day | [optional]
 
 ## Example
 
@@ -25,6 +24,5 @@ usage_analytics_trends_dict = usage_analytics_trends_instance.to_dict()
 # create an instance of UsageAnalyticsTrends from a dict
 usage_analytics_trends_from_dict = UsageAnalyticsTrends.from_dict(usage_analytics_trends_dict)
 ```
+
 [[Back to Model list]](../README.md#documentation-for-models) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to README]](../README.md)
-
-

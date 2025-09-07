@@ -1,14 +1,13 @@
 # TenantSummarySeats
 
-
 ## Properties
 
 Name | Type | Description | Notes
 ------------ | ------------- | ------------- | -------------
-**total** | **int** | Total seats in subscription | 
-**free** | **int** | Number of free/available seats | 
-**reserved** | **int** | Number of reserved seats | 
-**assigned** | **int** | Number of assigned seats | 
+**total** | **int** | Total seats in subscription |
+**free** | **int** | Number of free/available seats |
+**reserved** | **int** | Number of reserved seats |
+**assigned** | **int** | Number of assigned seats |
 
 ## Example
 
@@ -27,6 +26,5 @@ tenant_summary_seats_dict = tenant_summary_seats_instance.to_dict()
 # create an instance of TenantSummarySeats from a dict
 tenant_summary_seats_from_dict = TenantSummarySeats.from_dict(tenant_summary_seats_dict)
 ```
+
 [[Back to Model list]](../README.md#documentation-for-models) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to README]](../README.md)
-
-

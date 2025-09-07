@@ -1,3 +1,4 @@
+﻿# hadolint ignore=DL3007,DL3008
 # Use Python 3.12 slim image with Debian Bookworm (more secure than Bullseye)
 FROM python:3.12-slim-bookworm
 

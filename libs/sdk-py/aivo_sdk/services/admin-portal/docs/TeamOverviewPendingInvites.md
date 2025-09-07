@@ -1,13 +1,12 @@
 # TeamOverviewPendingInvites
 
-
 ## Properties
 
 Name | Type | Description | Notes
 ------------ | ------------- | ------------- | -------------
-**total** | **int** | Total pending invitations | 
-**by_role** | [**TeamOverviewPendingInvitesByRole**](TeamOverviewPendingInvitesByRole.md) |  | 
-**oldest_invite** | **datetime** | Date of oldest pending invite | [optional] 
+**total** | **int** | Total pending invitations |
+**by_role** | [**TeamOverviewPendingInvitesByRole**](TeamOverviewPendingInvitesByRole.md) |  |
+**oldest_invite** | **datetime** | Date of oldest pending invite | [optional]
 
 ## Example
 
@@ -26,6 +25,5 @@ team_overview_pending_invites_dict = team_overview_pending_invites_instance.to_d
 # create an instance of TeamOverviewPendingInvites from a dict
 team_overview_pending_invites_from_dict = TeamOverviewPendingInvites.from_dict(team_overview_pending_invites_dict)
 ```
+
 [[Back to Model list]](../README.md#documentation-for-models) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to README]](../README.md)
-
-

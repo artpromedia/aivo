@@ -1,14 +1,14 @@
 # aivo_sdk.ProgressApi
 
-All URIs are relative to *https://api.aivo.com/enrollment/v1*
+All URIs are relative to *<https://api.aivo.com/enrollment/v1>*
 
 Method | HTTP request | Description
 ------------- | ------------- | -------------
 [**get_enrollment_progress**](ProgressApi.md#get_enrollment_progress) | **GET** /enrollments/{enrollmentId}/progress | Get enrollment progress
 [**update_enrollment_progress**](ProgressApi.md#update_enrollment_progress) | **PUT** /enrollments/{enrollmentId}/progress | Update enrollment progress
 
-
 # **get_enrollment_progress**
+>
 > EnrollmentProgress get_enrollment_progress(enrollment_id)
 
 Get enrollment progress
@@ -54,14 +54,11 @@ with aivo_sdk.ApiClient(configuration) as api_client:
         print("Exception when calling ProgressApi->get_enrollment_progress: %s\n" % e)
 ```
 
-
-
 ### Parameters
-
 
 Name | Type | Description  | Notes
 ------------- | ------------- | ------------- | -------------
- **enrollment_id** | **str**|  | 
+ **enrollment_id** | **str**|  |
 
 ### Return type
 
@@ -73,8 +70,8 @@ Name | Type | Description  | Notes
 
 ### HTTP request headers
 
- - **Content-Type**: Not defined
- - **Accept**: application/json
+* **Content-Type**: Not defined
+* **Accept**: application/json
 
 ### HTTP response details
 
@@ -87,6 +84,7 @@ Name | Type | Description  | Notes
 [[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
 
 # **update_enrollment_progress**
+>
 > EnrollmentProgress update_enrollment_progress(enrollment_id, update_progress_request)
 
 Update enrollment progress
@@ -134,15 +132,12 @@ with aivo_sdk.ApiClient(configuration) as api_client:
         print("Exception when calling ProgressApi->update_enrollment_progress: %s\n" % e)
 ```
 
-
-
 ### Parameters
-
 
 Name | Type | Description  | Notes
 ------------- | ------------- | ------------- | -------------
- **enrollment_id** | **str**|  | 
- **update_progress_request** | [**UpdateProgressRequest**](UpdateProgressRequest.md)|  | 
+ **enrollment_id** | **str**|  |
+ **update_progress_request** | [**UpdateProgressRequest**](UpdateProgressRequest.md)|  |
 
 ### Return type
 
@@ -154,8 +149,8 @@ Name | Type | Description  | Notes
 
 ### HTTP request headers
 
- - **Content-Type**: application/json
- - **Accept**: application/json
+* **Content-Type**: application/json
+* **Accept**: application/json
 
 ### HTTP response details
 
@@ -167,4 +162,3 @@ Name | Type | Description  | Notes
 **404** | Enrollment not found |  -  |
 
 [[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
-

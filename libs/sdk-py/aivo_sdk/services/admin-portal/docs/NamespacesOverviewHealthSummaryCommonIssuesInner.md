@@ -1,13 +1,12 @@
 # NamespacesOverviewHealthSummaryCommonIssuesInner
 
-
 ## Properties
 
 Name | Type | Description | Notes
 ------------ | ------------- | ------------- | -------------
-**issue** | **str** |  | [optional] 
-**count** | **int** |  | [optional] 
-**severity** | **str** |  | [optional] 
+**issue** | **str** |  | [optional]
+**count** | **int** |  | [optional]
+**severity** | **str** |  | [optional]
 
 ## Example
 
@@ -26,6 +25,5 @@ namespaces_overview_health_summary_common_issues_inner_dict = namespaces_overvie
 # create an instance of NamespacesOverviewHealthSummaryCommonIssuesInner from a dict
 namespaces_overview_health_summary_common_issues_inner_from_dict = NamespacesOverviewHealthSummaryCommonIssuesInner.from_dict(namespaces_overview_health_summary_common_issues_inner_dict)
 ```
+
 [[Back to Model list]](../README.md#documentation-for-models) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to README]](../README.md)
-
-

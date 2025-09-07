@@ -1,20 +1,19 @@
 # CreateLearnerRequest
 
-
 ## Properties
 
 Name | Type | Description | Notes
 ------------ | ------------- | ------------- | -------------
-**tenant_id** | **str** |  | 
-**email** | **str** |  | 
-**first_name** | **str** |  | 
-**last_name** | **str** |  | 
-**timezone** | **str** |  | [optional] 
-**language** | **str** |  | [optional] 
-**department** | **str** |  | [optional] 
-**job_title** | **str** |  | [optional] 
-**manager** | **str** |  | [optional] 
-**metadata** | **Dict[str, object]** |  | [optional] 
+**tenant_id** | **str** |  |
+**email** | **str** |  |
+**first_name** | **str** |  |
+**last_name** | **str** |  |
+**timezone** | **str** |  | [optional]
+**language** | **str** |  | [optional]
+**department** | **str** |  | [optional]
+**job_title** | **str** |  | [optional]
+**manager** | **str** |  | [optional]
+**metadata** | **Dict[str, object]** |  | [optional]
 
 ## Example
 
@@ -33,6 +32,5 @@ create_learner_request_dict = create_learner_request_instance.to_dict()
 # create an instance of CreateLearnerRequest from a dict
 create_learner_request_from_dict = CreateLearnerRequest.from_dict(create_learner_request_dict)
 ```
+
 [[Back to Model list]](../README.md#documentation-for-models) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to README]](../README.md)
-
-

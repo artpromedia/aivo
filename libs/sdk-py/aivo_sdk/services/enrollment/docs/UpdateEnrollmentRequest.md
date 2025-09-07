@@ -1,13 +1,12 @@
 # UpdateEnrollmentRequest
 
-
 ## Properties
 
 Name | Type | Description | Notes
 ------------ | ------------- | ------------- | -------------
-**status** | **str** |  | [optional] 
-**expires_at** | **datetime** |  | [optional] 
-**metadata** | **Dict[str, object]** |  | [optional] 
+**status** | **str** |  | [optional]
+**expires_at** | **datetime** |  | [optional]
+**metadata** | **Dict[str, object]** |  | [optional]
 
 ## Example
 
@@ -26,6 +25,5 @@ update_enrollment_request_dict = update_enrollment_request_instance.to_dict()
 # create an instance of UpdateEnrollmentRequest from a dict
 update_enrollment_request_from_dict = UpdateEnrollmentRequest.from_dict(update_enrollment_request_dict)
 ```
+
 [[Back to Model list]](../README.md#documentation-for-models) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to README]](../README.md)
-
-

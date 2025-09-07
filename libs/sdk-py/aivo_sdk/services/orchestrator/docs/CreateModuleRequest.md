@@ -1,20 +1,19 @@
 # CreateModuleRequest
 
-
 ## Properties
 
 Name | Type | Description | Notes
 ------------ | ------------- | ------------- | -------------
-**title** | **str** |  | 
-**description** | **str** |  | [optional] 
-**type** | **str** |  | 
-**order** | **int** |  | 
-**estimated_duration** | **int** |  | [optional] 
-**content_url** | **str** |  | [optional] 
-**transcript_url** | **str** |  | [optional] 
+**title** | **str** |  |
+**description** | **str** |  | [optional]
+**type** | **str** |  |
+**order** | **int** |  |
+**estimated_duration** | **int** |  | [optional]
+**content_url** | **str** |  | [optional]
+**transcript_url** | **str** |  | [optional]
 **is_optional** | **bool** |  | [optional] [default to False]
-**prerequisites** | **List[str]** |  | [optional] 
-**metadata** | **Dict[str, object]** |  | [optional] 
+**prerequisites** | **List[str]** |  | [optional]
+**metadata** | **Dict[str, object]** |  | [optional]
 
 ## Example
 
@@ -33,6 +32,5 @@ create_module_request_dict = create_module_request_instance.to_dict()
 # create an instance of CreateModuleRequest from a dict
 create_module_request_from_dict = CreateModuleRequest.from_dict(create_module_request_dict)
 ```
+
 [[Back to Model list]](../README.md#documentation-for-models) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to README]](../README.md)
-
-

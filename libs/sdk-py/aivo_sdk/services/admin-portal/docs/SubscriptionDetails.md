@@ -1,19 +1,18 @@
 # SubscriptionDetails
 
-
 ## Properties
 
 Name | Type | Description | Notes
 ------------ | ------------- | ------------- | -------------
-**tenant_id** | **str** |  | 
-**plan** | [**SubscriptionDetailsPlan**](SubscriptionDetailsPlan.md) |  | 
-**seats** | [**SubscriptionDetailsSeats**](SubscriptionDetailsSeats.md) |  | 
-**renewal** | [**SubscriptionDetailsRenewal**](SubscriptionDetailsRenewal.md) |  | 
-**status** | **str** |  | 
-**coupons** | [**List[SubscriptionDetailsCouponsInner]**](SubscriptionDetailsCouponsInner.md) |  | [optional] 
-**discounts** | [**List[SubscriptionDetailsDiscountsInner]**](SubscriptionDetailsDiscountsInner.md) |  | [optional] 
-**trial_info** | [**SubscriptionDetailsTrialInfo**](SubscriptionDetailsTrialInfo.md) |  | [optional] 
-**last_updated** | **datetime** |  | 
+**tenant_id** | **str** |  |
+**plan** | [**SubscriptionDetailsPlan**](SubscriptionDetailsPlan.md) |  |
+**seats** | [**SubscriptionDetailsSeats**](SubscriptionDetailsSeats.md) |  |
+**renewal** | [**SubscriptionDetailsRenewal**](SubscriptionDetailsRenewal.md) |  |
+**status** | **str** |  |
+**coupons** | [**List[SubscriptionDetailsCouponsInner]**](SubscriptionDetailsCouponsInner.md) |  | [optional]
+**discounts** | [**List[SubscriptionDetailsDiscountsInner]**](SubscriptionDetailsDiscountsInner.md) |  | [optional]
+**trial_info** | [**SubscriptionDetailsTrialInfo**](SubscriptionDetailsTrialInfo.md) |  | [optional]
+**last_updated** | **datetime** |  |
 
 ## Example
 
@@ -32,6 +31,5 @@ subscription_details_dict = subscription_details_instance.to_dict()
 # create an instance of SubscriptionDetails from a dict
 subscription_details_from_dict = SubscriptionDetails.from_dict(subscription_details_dict)
 ```
+
 [[Back to Model list]](../README.md#documentation-for-models) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to README]](../README.md)
-
-

@@ -1,11 +1,10 @@
 # RefreshTokenRequest
 
-
 ## Properties
 
 Name | Type | Description | Notes
 ------------ | ------------- | ------------- | -------------
-**refresh_token** | **str** |  | 
+**refresh_token** | **str** |  |
 
 ## Example
 
@@ -24,6 +23,5 @@ refresh_token_request_dict = refresh_token_request_instance.to_dict()
 # create an instance of RefreshTokenRequest from a dict
 refresh_token_request_from_dict = RefreshTokenRequest.from_dict(refresh_token_request_dict)
 ```
+
 [[Back to Model list]](../README.md#documentation-for-models) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to README]](../README.md)
-
-

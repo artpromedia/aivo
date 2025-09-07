@@ -1,14 +1,14 @@
 # aivo_sdk.AssessmentsApi
 
-All URIs are relative to *https://api.aivo.com/orchestrator/v1*
+All URIs are relative to *<https://api.aivo.com/orchestrator/v1>*
 
 Method | HTTP request | Description
 ------------- | ------------- | -------------
 [**list_assessments**](AssessmentsApi.md#list_assessments) | **GET** /assessments | List assessments
 [**submit_assessment**](AssessmentsApi.md#submit_assessment) | **POST** /assessments/{assessmentId}/submit | Submit assessment
 
-
 # **list_assessments**
+>
 > ListAssessments200Response list_assessments(course_id=course_id, module_id=module_id, type=type, limit=limit, offset=offset)
 
 List assessments
@@ -58,16 +58,13 @@ with aivo_sdk.ApiClient(configuration) as api_client:
         print("Exception when calling AssessmentsApi->list_assessments: %s\n" % e)
 ```
 
-
-
 ### Parameters
-
 
 Name | Type | Description  | Notes
 ------------- | ------------- | ------------- | -------------
- **course_id** | **str**|  | [optional] 
- **module_id** | **str**|  | [optional] 
- **type** | **str**|  | [optional] 
+ **course_id** | **str**|  | [optional]
+ **module_id** | **str**|  | [optional]
+ **type** | **str**|  | [optional]
  **limit** | **int**|  | [optional] [default to 20]
  **offset** | **int**|  | [optional] [default to 0]
 
@@ -81,8 +78,8 @@ Name | Type | Description  | Notes
 
 ### HTTP request headers
 
- - **Content-Type**: Not defined
- - **Accept**: application/json
+* **Content-Type**: Not defined
+* **Accept**: application/json
 
 ### HTTP response details
 
@@ -94,6 +91,7 @@ Name | Type | Description  | Notes
 [[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
 
 # **submit_assessment**
+>
 > AssessmentResult submit_assessment(assessment_id, submit_assessment_request)
 
 Submit assessment
@@ -141,15 +139,12 @@ with aivo_sdk.ApiClient(configuration) as api_client:
         print("Exception when calling AssessmentsApi->submit_assessment: %s\n" % e)
 ```
 
-
-
 ### Parameters
-
 
 Name | Type | Description  | Notes
 ------------- | ------------- | ------------- | -------------
- **assessment_id** | **str**|  | 
- **submit_assessment_request** | [**SubmitAssessmentRequest**](SubmitAssessmentRequest.md)|  | 
+ **assessment_id** | **str**|  |
+ **submit_assessment_request** | [**SubmitAssessmentRequest**](SubmitAssessmentRequest.md)|  |
 
 ### Return type
 
@@ -161,8 +156,8 @@ Name | Type | Description  | Notes
 
 ### HTTP request headers
 
- - **Content-Type**: application/json
- - **Accept**: application/json
+* **Content-Type**: application/json
+* **Accept**: application/json
 
 ### HTTP response details
 
@@ -174,4 +169,3 @@ Name | Type | Description  | Notes
 **404** | Assessment not found |  -  |
 
 [[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
-

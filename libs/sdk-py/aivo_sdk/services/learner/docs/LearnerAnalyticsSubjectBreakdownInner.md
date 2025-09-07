@@ -1,13 +1,12 @@
 # LearnerAnalyticsSubjectBreakdownInner
 
-
 ## Properties
 
 Name | Type | Description | Notes
 ------------ | ------------- | ------------- | -------------
-**subject** | **str** |  | [optional] 
-**minutes_learned** | **int** |  | [optional] 
-**percentage** | **float** |  | [optional] 
+**subject** | **str** |  | [optional]
+**minutes_learned** | **int** |  | [optional]
+**percentage** | **float** |  | [optional]
 
 ## Example
 
@@ -26,6 +25,5 @@ learner_analytics_subject_breakdown_inner_dict = learner_analytics_subject_break
 # create an instance of LearnerAnalyticsSubjectBreakdownInner from a dict
 learner_analytics_subject_breakdown_inner_from_dict = LearnerAnalyticsSubjectBreakdownInner.from_dict(learner_analytics_subject_breakdown_inner_dict)
 ```
+
 [[Back to Model list]](../README.md#documentation-for-models) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to README]](../README.md)
-
-

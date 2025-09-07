@@ -1,14 +1,13 @@
 # SubscriptionDetailsDiscountsInner
 
-
 ## Properties
 
 Name | Type | Description | Notes
 ------------ | ------------- | ------------- | -------------
-**name** | **str** |  | [optional] 
-**type** | **str** |  | [optional] 
-**value** | **float** |  | [optional] 
-**description** | **str** |  | [optional] 
+**name** | **str** |  | [optional]
+**type** | **str** |  | [optional]
+**value** | **float** |  | [optional]
+**description** | **str** |  | [optional]
 
 ## Example
 
@@ -27,6 +26,5 @@ subscription_details_discounts_inner_dict = subscription_details_discounts_inner
 # create an instance of SubscriptionDetailsDiscountsInner from a dict
 subscription_details_discounts_inner_from_dict = SubscriptionDetailsDiscountsInner.from_dict(subscription_details_discounts_inner_dict)
 ```
+
 [[Back to Model list]](../README.md#documentation-for-models) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to README]](../README.md)
-
-

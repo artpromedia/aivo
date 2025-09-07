@@ -1,6 +1,6 @@
 # aivo_sdk.SubscriptionsApi
 
-All URIs are relative to *https://api.aivo.com/payments/v1*
+All URIs are relative to *<https://api.aivo.com/payments/v1>*
 
 Method | HTTP request | Description
 ------------- | ------------- | -------------
@@ -10,8 +10,8 @@ Method | HTTP request | Description
 [**list_subscriptions**](SubscriptionsApi.md#list_subscriptions) | **GET** /subscriptions | List subscriptions
 [**update_subscription**](SubscriptionsApi.md#update_subscription) | **PUT** /subscriptions/{subscriptionId} | Update subscription
 
-
 # **cancel_subscription**
+>
 > Subscription cancel_subscription(subscription_id, cancel_subscription_request=cancel_subscription_request)
 
 Cancel subscription
@@ -59,15 +59,12 @@ with aivo_sdk.ApiClient(configuration) as api_client:
         print("Exception when calling SubscriptionsApi->cancel_subscription: %s\n" % e)
 ```
 
-
-
 ### Parameters
-
 
 Name | Type | Description  | Notes
 ------------- | ------------- | ------------- | -------------
- **subscription_id** | **str**|  | 
- **cancel_subscription_request** | [**CancelSubscriptionRequest**](CancelSubscriptionRequest.md)|  | [optional] 
+ **subscription_id** | **str**|  |
+ **cancel_subscription_request** | [**CancelSubscriptionRequest**](CancelSubscriptionRequest.md)|  | [optional]
 
 ### Return type
 
@@ -79,8 +76,8 @@ Name | Type | Description  | Notes
 
 ### HTTP request headers
 
- - **Content-Type**: application/json
- - **Accept**: application/json
+* **Content-Type**: application/json
+* **Accept**: application/json
 
 ### HTTP response details
 
@@ -94,6 +91,7 @@ Name | Type | Description  | Notes
 [[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
 
 # **create_subscription**
+>
 > Subscription create_subscription(create_subscription_request)
 
 Create new subscription
@@ -140,14 +138,11 @@ with aivo_sdk.ApiClient(configuration) as api_client:
         print("Exception when calling SubscriptionsApi->create_subscription: %s\n" % e)
 ```
 
-
-
 ### Parameters
-
 
 Name | Type | Description  | Notes
 ------------- | ------------- | ------------- | -------------
- **create_subscription_request** | [**CreateSubscriptionRequest**](CreateSubscriptionRequest.md)|  | 
+ **create_subscription_request** | [**CreateSubscriptionRequest**](CreateSubscriptionRequest.md)|  |
 
 ### Return type
 
@@ -159,8 +154,8 @@ Name | Type | Description  | Notes
 
 ### HTTP request headers
 
- - **Content-Type**: application/json
- - **Accept**: application/json
+* **Content-Type**: application/json
+* **Accept**: application/json
 
 ### HTTP response details
 
@@ -174,6 +169,7 @@ Name | Type | Description  | Notes
 [[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
 
 # **get_subscription**
+>
 > Subscription get_subscription(subscription_id)
 
 Get subscription by ID
@@ -219,14 +215,11 @@ with aivo_sdk.ApiClient(configuration) as api_client:
         print("Exception when calling SubscriptionsApi->get_subscription: %s\n" % e)
 ```
 
-
-
 ### Parameters
-
 
 Name | Type | Description  | Notes
 ------------- | ------------- | ------------- | -------------
- **subscription_id** | **str**|  | 
+ **subscription_id** | **str**|  |
 
 ### Return type
 
@@ -238,8 +231,8 @@ Name | Type | Description  | Notes
 
 ### HTTP request headers
 
- - **Content-Type**: Not defined
- - **Accept**: application/json
+* **Content-Type**: Not defined
+* **Accept**: application/json
 
 ### HTTP response details
 
@@ -252,6 +245,7 @@ Name | Type | Description  | Notes
 [[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
 
 # **list_subscriptions**
+>
 > ListSubscriptions200Response list_subscriptions(tenant_id=tenant_id, status=status, limit=limit, offset=offset)
 
 List subscriptions
@@ -300,15 +294,12 @@ with aivo_sdk.ApiClient(configuration) as api_client:
         print("Exception when calling SubscriptionsApi->list_subscriptions: %s\n" % e)
 ```
 
-
-
 ### Parameters
-
 
 Name | Type | Description  | Notes
 ------------- | ------------- | ------------- | -------------
- **tenant_id** | **str**|  | [optional] 
- **status** | **str**|  | [optional] 
+ **tenant_id** | **str**|  | [optional]
+ **status** | **str**|  | [optional]
  **limit** | **int**|  | [optional] [default to 20]
  **offset** | **int**|  | [optional] [default to 0]
 
@@ -322,8 +313,8 @@ Name | Type | Description  | Notes
 
 ### HTTP request headers
 
- - **Content-Type**: Not defined
- - **Accept**: application/json
+* **Content-Type**: Not defined
+* **Accept**: application/json
 
 ### HTTP response details
 
@@ -335,6 +326,7 @@ Name | Type | Description  | Notes
 [[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
 
 # **update_subscription**
+>
 > Subscription update_subscription(subscription_id, update_subscription_request)
 
 Update subscription
@@ -382,15 +374,12 @@ with aivo_sdk.ApiClient(configuration) as api_client:
         print("Exception when calling SubscriptionsApi->update_subscription: %s\n" % e)
 ```
 
-
-
 ### Parameters
-
 
 Name | Type | Description  | Notes
 ------------- | ------------- | ------------- | -------------
- **subscription_id** | **str**|  | 
- **update_subscription_request** | [**UpdateSubscriptionRequest**](UpdateSubscriptionRequest.md)|  | 
+ **subscription_id** | **str**|  |
+ **update_subscription_request** | [**UpdateSubscriptionRequest**](UpdateSubscriptionRequest.md)|  |
 
 ### Return type
 
@@ -402,8 +391,8 @@ Name | Type | Description  | Notes
 
 ### HTTP request headers
 
- - **Content-Type**: application/json
- - **Accept**: application/json
+* **Content-Type**: application/json
+* **Accept**: application/json
 
 ### HTTP response details
 
@@ -415,4 +404,3 @@ Name | Type | Description  | Notes
 **404** | Subscription not found |  -  |
 
 [[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
-

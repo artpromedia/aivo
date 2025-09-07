@@ -16,7 +16,8 @@ If you discover a security vulnerability in this project, please report it to ou
 **Please do not report security vulnerabilities through public GitHub issues.**
 
 Instead, please report security vulnerabilities by emailing:
-- security@example.com
+
+- <security@example.com>
 
 You should receive a response within 48 hours. If for some reason you do not, please follow up via email to ensure we received your original message.
 

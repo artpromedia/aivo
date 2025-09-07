@@ -1,15 +1,14 @@
 # UpdateTenantRequest
 
-
 ## Properties
 
 Name | Type | Description | Notes
 ------------ | ------------- | ------------- | -------------
-**name** | **str** |  | [optional] 
-**description** | **str** |  | [optional] 
-**logo** | **str** |  | [optional] 
-**website** | **str** |  | [optional] 
-**status** | **str** |  | [optional] 
+**name** | **str** |  | [optional]
+**description** | **str** |  | [optional]
+**logo** | **str** |  | [optional]
+**website** | **str** |  | [optional]
+**status** | **str** |  | [optional]
 
 ## Example
 
@@ -28,6 +27,5 @@ update_tenant_request_dict = update_tenant_request_instance.to_dict()
 # create an instance of UpdateTenantRequest from a dict
 update_tenant_request_from_dict = UpdateTenantRequest.from_dict(update_tenant_request_dict)
 ```
+
 [[Back to Model list]](../README.md#documentation-for-models) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to README]](../README.md)
-
-

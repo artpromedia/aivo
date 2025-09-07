@@ -1,16 +1,15 @@
 # TeamOverviewTopUsersInner
 
-
 ## Properties
 
 Name | Type | Description | Notes
 ------------ | ------------- | ------------- | -------------
-**user_id** | **str** |  | [optional] 
-**name** | **str** |  | [optional] 
-**email** | **str** |  | [optional] 
-**role** | **str** |  | [optional] 
-**last_active** | **datetime** |  | [optional] 
-**enrollments** | **int** |  | [optional] 
+**user_id** | **str** |  | [optional]
+**name** | **str** |  | [optional]
+**email** | **str** |  | [optional]
+**role** | **str** |  | [optional]
+**last_active** | **datetime** |  | [optional]
+**enrollments** | **int** |  | [optional]
 
 ## Example
 
@@ -29,6 +28,5 @@ team_overview_top_users_inner_dict = team_overview_top_users_inner_instance.to_d
 # create an instance of TeamOverviewTopUsersInner from a dict
 team_overview_top_users_inner_from_dict = TeamOverviewTopUsersInner.from_dict(team_overview_top_users_inner_dict)
 ```
+
 [[Back to Model list]](../README.md#documentation-for-models) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to README]](../README.md)
-
-

@@ -1,13 +1,12 @@
 # Error
 
-
 ## Properties
 
 Name | Type | Description | Notes
 ------------ | ------------- | ------------- | -------------
-**error** | **str** |  | 
-**message** | **str** |  | 
-**details** | **Dict[str, object]** |  | [optional] 
+**error** | **str** |  |
+**message** | **str** |  |
+**details** | **Dict[str, object]** |  | [optional]
 
 ## Example
 
@@ -26,6 +25,5 @@ error_dict = error_instance.to_dict()
 # create an instance of Error from a dict
 error_from_dict = Error.from_dict(error_dict)
 ```
+
 [[Back to Model list]](../README.md#documentation-for-models) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to README]](../README.md)
-
-

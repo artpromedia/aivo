@@ -1,14 +1,14 @@
 # aivo_sdk.LearnerProfileApi
 
-All URIs are relative to *https://api.aivo.com/learner/v1*
+All URIs are relative to *<https://api.aivo.com/learner/v1>*
 
 Method | HTTP request | Description
 ------------- | ------------- | -------------
 [**get_learner_profile**](LearnerProfileApi.md#get_learner_profile) | **GET** /learners/{learnerId}/profile | Get learner profile
 [**update_learner_profile**](LearnerProfileApi.md#update_learner_profile) | **PUT** /learners/{learnerId}/profile | Update learner profile
 
-
 # **get_learner_profile**
+>
 > LearnerProfile get_learner_profile(learner_id)
 
 Get learner profile
@@ -54,14 +54,11 @@ with aivo_sdk.ApiClient(configuration) as api_client:
         print("Exception when calling LearnerProfileApi->get_learner_profile: %s\n" % e)
 ```
 
-
-
 ### Parameters
-
 
 Name | Type | Description  | Notes
 ------------- | ------------- | ------------- | -------------
- **learner_id** | **str**|  | 
+ **learner_id** | **str**|  |
 
 ### Return type
 
@@ -73,8 +70,8 @@ Name | Type | Description  | Notes
 
 ### HTTP request headers
 
- - **Content-Type**: Not defined
- - **Accept**: application/json
+* **Content-Type**: Not defined
+* **Accept**: application/json
 
 ### HTTP response details
 
@@ -87,6 +84,7 @@ Name | Type | Description  | Notes
 [[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
 
 # **update_learner_profile**
+>
 > LearnerProfile update_learner_profile(learner_id, update_learner_profile_request)
 
 Update learner profile
@@ -134,15 +132,12 @@ with aivo_sdk.ApiClient(configuration) as api_client:
         print("Exception when calling LearnerProfileApi->update_learner_profile: %s\n" % e)
 ```
 
-
-
 ### Parameters
-
 
 Name | Type | Description  | Notes
 ------------- | ------------- | ------------- | -------------
- **learner_id** | **str**|  | 
- **update_learner_profile_request** | [**UpdateLearnerProfileRequest**](UpdateLearnerProfileRequest.md)|  | 
+ **learner_id** | **str**|  |
+ **update_learner_profile_request** | [**UpdateLearnerProfileRequest**](UpdateLearnerProfileRequest.md)|  |
 
 ### Return type
 
@@ -154,8 +149,8 @@ Name | Type | Description  | Notes
 
 ### HTTP request headers
 
- - **Content-Type**: application/json
- - **Accept**: application/json
+* **Content-Type**: application/json
+* **Accept**: application/json
 
 ### HTTP response details
 
@@ -167,4 +162,3 @@ Name | Type | Description  | Notes
 **404** | Learner not found |  -  |
 
 [[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
-

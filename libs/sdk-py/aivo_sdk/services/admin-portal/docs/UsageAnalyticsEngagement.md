@@ -1,12 +1,11 @@
 # UsageAnalyticsEngagement
 
-
 ## Properties
 
 Name | Type | Description | Notes
 ------------ | ------------- | ------------- | -------------
-**average_streak_days** | **float** |  | [optional] 
-**return_rate** | **float** | Percentage of learners who return within 7 days | [optional] 
+**average_streak_days** | **float** |  | [optional]
+**return_rate** | **float** | Percentage of learners who return within 7 days | [optional]
 
 ## Example
 
@@ -25,6 +24,5 @@ usage_analytics_engagement_dict = usage_analytics_engagement_instance.to_dict()
 # create an instance of UsageAnalyticsEngagement from a dict
 usage_analytics_engagement_from_dict = UsageAnalyticsEngagement.from_dict(usage_analytics_engagement_dict)
 ```
+
 [[Back to Model list]](../README.md#documentation-for-models) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to README]](../README.md)
-
-

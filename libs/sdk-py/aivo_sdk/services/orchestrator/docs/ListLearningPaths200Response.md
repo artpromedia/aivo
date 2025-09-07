@@ -1,14 +1,13 @@
 # ListLearningPaths200Response
 
-
 ## Properties
 
 Name | Type | Description | Notes
 ------------ | ------------- | ------------- | -------------
-**data** | [**List[LearningPath]**](LearningPath.md) |  | 
-**total** | **int** |  | 
-**limit** | **int** |  | 
-**offset** | **int** |  | 
+**data** | [**List[LearningPath]**](LearningPath.md) |  |
+**total** | **int** |  |
+**limit** | **int** |  |
+**offset** | **int** |  |
 
 ## Example
 
@@ -27,6 +26,5 @@ list_learning_paths200_response_dict = list_learning_paths200_response_instance.
 # create an instance of ListLearningPaths200Response from a dict
 list_learning_paths200_response_from_dict = ListLearningPaths200Response.from_dict(list_learning_paths200_response_dict)
 ```
+
 [[Back to Model list]](../README.md#documentation-for-models) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to README]](../README.md)
-
-

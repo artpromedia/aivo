@@ -1,12 +1,11 @@
 # UsageAnalyticsTrendsPeakHoursInner
 
-
 ## Properties
 
 Name | Type | Description | Notes
 ------------ | ------------- | ------------- | -------------
-**hour** | **int** |  | [optional] 
-**sessions** | **int** |  | [optional] 
+**hour** | **int** |  | [optional]
+**sessions** | **int** |  | [optional]
 
 ## Example
 
@@ -25,6 +24,5 @@ usage_analytics_trends_peak_hours_inner_dict = usage_analytics_trends_peak_hours
 # create an instance of UsageAnalyticsTrendsPeakHoursInner from a dict
 usage_analytics_trends_peak_hours_inner_from_dict = UsageAnalyticsTrendsPeakHoursInner.from_dict(usage_analytics_trends_peak_hours_inner_dict)
 ```
+
 [[Back to Model list]](../README.md#documentation-for-models) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to README]](../README.md)
-
-

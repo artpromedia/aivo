@@ -1,17 +1,16 @@
 # AwardAchievementRequest
 
-
 ## Properties
 
 Name | Type | Description | Notes
 ------------ | ------------- | ------------- | -------------
-**type** | **str** |  | 
-**title** | **str** |  | 
-**description** | **str** |  | 
-**icon_url** | **str** |  | [optional] 
-**badge_url** | **str** |  | [optional] 
+**type** | **str** |  |
+**title** | **str** |  |
+**description** | **str** |  |
+**icon_url** | **str** |  | [optional]
+**badge_url** | **str** |  | [optional]
 **points** | **int** |  | [optional] [default to 0]
-**metadata** | **Dict[str, object]** |  | [optional] 
+**metadata** | **Dict[str, object]** |  | [optional]
 
 ## Example
 
@@ -30,6 +29,5 @@ award_achievement_request_dict = award_achievement_request_instance.to_dict()
 # create an instance of AwardAchievementRequest from a dict
 award_achievement_request_from_dict = AwardAchievementRequest.from_dict(award_achievement_request_dict)
 ```
+
 [[Back to Model list]](../README.md#documentation-for-models) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to README]](../README.md)
-
-

@@ -1,13 +1,13 @@
 # aivo_sdk.AnalyticsApi
 
-All URIs are relative to *https://api.aivo.com/admin/v1*
+All URIs are relative to *<https://api.aivo.com/admin/v1>*
 
 Method | HTTP request | Description
 ------------- | ------------- | -------------
 [**get_tenant_usage**](AnalyticsApi.md#get_tenant_usage) | **GET** /usage | Get tenant usage analytics
 
-
 # **get_tenant_usage**
+>
 > UsageAnalytics get_tenant_usage(tenant_id, range=range)
 
 Get tenant usage analytics
@@ -54,14 +54,11 @@ with aivo_sdk.ApiClient(configuration) as api_client:
         print("Exception when calling AnalyticsApi->get_tenant_usage: %s\n" % e)
 ```
 
-
-
 ### Parameters
-
 
 Name | Type | Description  | Notes
 ------------- | ------------- | ------------- | -------------
- **tenant_id** | **str**| Tenant ID to get usage for | 
+ **tenant_id** | **str**| Tenant ID to get usage for |
  **range** | **str**| Time range for usage analytics | [optional] [default to 30d]
 
 ### Return type
@@ -74,8 +71,8 @@ Name | Type | Description  | Notes
 
 ### HTTP request headers
 
- - **Content-Type**: Not defined
- - **Accept**: application/json
+* **Content-Type**: Not defined
+* **Accept**: application/json
 
 ### HTTP response details
 
@@ -87,4 +84,3 @@ Name | Type | Description  | Notes
 **404** | Tenant not found |  -  |
 
 [[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
-

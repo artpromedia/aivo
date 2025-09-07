@@ -1,12 +1,11 @@
 # ValidationErrorValidationErrorsInner
 
-
 ## Properties
 
 Name | Type | Description | Notes
 ------------ | ------------- | ------------- | -------------
-**var_field** | **str** |  | 
-**message** | **str** |  | 
+**var_field** | **str** |  |
+**message** | **str** |  |
 
 ## Example
 
@@ -25,6 +24,5 @@ validation_error_validation_errors_inner_dict = validation_error_validation_erro
 # create an instance of ValidationErrorValidationErrorsInner from a dict
 validation_error_validation_errors_inner_from_dict = ValidationErrorValidationErrorsInner.from_dict(validation_error_validation_errors_inner_dict)
 ```
+
 [[Back to Model list]](../README.md#documentation-for-models) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to README]](../README.md)
-
-

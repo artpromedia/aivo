@@ -1,14 +1,13 @@
 # ListInvoices200Response
 
-
 ## Properties
 
 Name | Type | Description | Notes
 ------------ | ------------- | ------------- | -------------
-**data** | [**List[Invoice]**](Invoice.md) |  | 
-**total** | **int** |  | 
-**limit** | **int** |  | 
-**offset** | **int** |  | 
+**data** | [**List[Invoice]**](Invoice.md) |  |
+**total** | **int** |  |
+**limit** | **int** |  |
+**offset** | **int** |  |
 
 ## Example
 
@@ -27,6 +26,5 @@ list_invoices200_response_dict = list_invoices200_response_instance.to_dict()
 # create an instance of ListInvoices200Response from a dict
 list_invoices200_response_from_dict = ListInvoices200Response.from_dict(list_invoices200_response_dict)
 ```
+
 [[Back to Model list]](../README.md#documentation-for-models) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to README]](../README.md)
-
-

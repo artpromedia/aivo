@@ -1,14 +1,13 @@
 # UsageAnalyticsSubjectMixInner
 
-
 ## Properties
 
 Name | Type | Description | Notes
 ------------ | ------------- | ------------- | -------------
-**subject** | **str** | Subject or course category | 
-**minutes_learned** | **int** | Minutes learned in this subject | 
-**percentage** | **float** | Percentage of total learning time | 
-**learner_count** | **int** | Number of learners who studied this subject | 
+**subject** | **str** | Subject or course category |
+**minutes_learned** | **int** | Minutes learned in this subject |
+**percentage** | **float** | Percentage of total learning time |
+**learner_count** | **int** | Number of learners who studied this subject |
 
 ## Example
 
@@ -27,6 +26,5 @@ usage_analytics_subject_mix_inner_dict = usage_analytics_subject_mix_inner_insta
 # create an instance of UsageAnalyticsSubjectMixInner from a dict
 usage_analytics_subject_mix_inner_from_dict = UsageAnalyticsSubjectMixInner.from_dict(usage_analytics_subject_mix_inner_dict)
 ```
+
 [[Back to Model list]](../README.md#documentation-for-models) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to README]](../README.md)
-
-

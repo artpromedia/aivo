@@ -1,14 +1,13 @@
 # UsageAnalyticsTrendsDailyActivityInner
 
-
 ## Properties
 
 Name | Type | Description | Notes
 ------------ | ------------- | ------------- | -------------
-**var_date** | **date** |  | [optional] 
-**minutes_learned** | **int** |  | [optional] 
-**active_learners** | **int** |  | [optional] 
-**sessions_started** | **int** |  | [optional] 
+**var_date** | **date** |  | [optional]
+**minutes_learned** | **int** |  | [optional]
+**active_learners** | **int** |  | [optional]
+**sessions_started** | **int** |  | [optional]
 
 ## Example
 
@@ -27,6 +26,5 @@ usage_analytics_trends_daily_activity_inner_dict = usage_analytics_trends_daily_
 # create an instance of UsageAnalyticsTrendsDailyActivityInner from a dict
 usage_analytics_trends_daily_activity_inner_from_dict = UsageAnalyticsTrendsDailyActivityInner.from_dict(usage_analytics_trends_daily_activity_inner_dict)
 ```
+
 [[Back to Model list]](../README.md#documentation-for-models) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to README]](../README.md)
-
-

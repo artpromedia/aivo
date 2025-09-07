@@ -1,11 +1,10 @@
 # CancelSubscriptionRequest
 
-
 ## Properties
 
 Name | Type | Description | Notes
 ------------ | ------------- | ------------- | -------------
-**reason** | **str** |  | [optional] 
+**reason** | **str** |  | [optional]
 **cancel_at_period_end** | **bool** |  | [optional] [default to True]
 
 ## Example
@@ -25,6 +24,5 @@ cancel_subscription_request_dict = cancel_subscription_request_instance.to_dict(
 # create an instance of CancelSubscriptionRequest from a dict
 cancel_subscription_request_from_dict = CancelSubscriptionRequest.from_dict(cancel_subscription_request_dict)
 ```
+
 [[Back to Model list]](../README.md#documentation-for-models) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to README]](../README.md)
-
-

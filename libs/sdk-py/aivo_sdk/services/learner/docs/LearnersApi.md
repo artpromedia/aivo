@@ -1,6 +1,6 @@
 # aivo_sdk.LearnersApi
 
-All URIs are relative to *https://api.aivo.com/learner/v1*
+All URIs are relative to *<https://api.aivo.com/learner/v1>*
 
 Method | HTTP request | Description
 ------------- | ------------- | -------------
@@ -10,8 +10,8 @@ Method | HTTP request | Description
 [**list_learners**](LearnersApi.md#list_learners) | **GET** /learners | List learners
 [**update_learner**](LearnersApi.md#update_learner) | **PUT** /learners/{learnerId} | Update learner
 
-
 # **create_learner**
+>
 > Learner create_learner(create_learner_request)
 
 Create new learner
@@ -58,14 +58,11 @@ with aivo_sdk.ApiClient(configuration) as api_client:
         print("Exception when calling LearnersApi->create_learner: %s\n" % e)
 ```
 
-
-
 ### Parameters
-
 
 Name | Type | Description  | Notes
 ------------- | ------------- | ------------- | -------------
- **create_learner_request** | [**CreateLearnerRequest**](CreateLearnerRequest.md)|  | 
+ **create_learner_request** | [**CreateLearnerRequest**](CreateLearnerRequest.md)|  |
 
 ### Return type
 
@@ -77,8 +74,8 @@ Name | Type | Description  | Notes
 
 ### HTTP request headers
 
- - **Content-Type**: application/json
- - **Accept**: application/json
+* **Content-Type**: application/json
+* **Accept**: application/json
 
 ### HTTP response details
 
@@ -93,6 +90,7 @@ Name | Type | Description  | Notes
 [[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
 
 # **delete_learner**
+>
 > delete_learner(learner_id)
 
 Delete learner
@@ -135,14 +133,11 @@ with aivo_sdk.ApiClient(configuration) as api_client:
         print("Exception when calling LearnersApi->delete_learner: %s\n" % e)
 ```
 
-
-
 ### Parameters
-
 
 Name | Type | Description  | Notes
 ------------- | ------------- | ------------- | -------------
- **learner_id** | **str**|  | 
+ **learner_id** | **str**|  |
 
 ### Return type
 
@@ -154,8 +149,8 @@ void (empty response body)
 
 ### HTTP request headers
 
- - **Content-Type**: Not defined
- - **Accept**: application/json
+* **Content-Type**: Not defined
+* **Accept**: application/json
 
 ### HTTP response details
 
@@ -168,6 +163,7 @@ void (empty response body)
 [[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
 
 # **get_learner**
+>
 > Learner get_learner(learner_id)
 
 Get learner by ID
@@ -213,14 +209,11 @@ with aivo_sdk.ApiClient(configuration) as api_client:
         print("Exception when calling LearnersApi->get_learner: %s\n" % e)
 ```
 
-
-
 ### Parameters
-
 
 Name | Type | Description  | Notes
 ------------- | ------------- | ------------- | -------------
- **learner_id** | **str**|  | 
+ **learner_id** | **str**|  |
 
 ### Return type
 
@@ -232,8 +225,8 @@ Name | Type | Description  | Notes
 
 ### HTTP request headers
 
- - **Content-Type**: Not defined
- - **Accept**: application/json
+* **Content-Type**: Not defined
+* **Accept**: application/json
 
 ### HTTP response details
 
@@ -246,6 +239,7 @@ Name | Type | Description  | Notes
 [[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
 
 # **list_learners**
+>
 > ListLearners200Response list_learners(tenant_id, status=status, search=search, limit=limit, offset=offset)
 
 List learners
@@ -295,16 +289,13 @@ with aivo_sdk.ApiClient(configuration) as api_client:
         print("Exception when calling LearnersApi->list_learners: %s\n" % e)
 ```
 
-
-
 ### Parameters
-
 
 Name | Type | Description  | Notes
 ------------- | ------------- | ------------- | -------------
- **tenant_id** | **str**|  | 
- **status** | **str**|  | [optional] 
- **search** | **str**|  | [optional] 
+ **tenant_id** | **str**|  |
+ **status** | **str**|  | [optional]
+ **search** | **str**|  | [optional]
  **limit** | **int**|  | [optional] [default to 20]
  **offset** | **int**|  | [optional] [default to 0]
 
@@ -318,8 +309,8 @@ Name | Type | Description  | Notes
 
 ### HTTP request headers
 
- - **Content-Type**: Not defined
- - **Accept**: application/json
+* **Content-Type**: Not defined
+* **Accept**: application/json
 
 ### HTTP response details
 
@@ -331,6 +322,7 @@ Name | Type | Description  | Notes
 [[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
 
 # **update_learner**
+>
 > Learner update_learner(learner_id, update_learner_request)
 
 Update learner
@@ -378,15 +370,12 @@ with aivo_sdk.ApiClient(configuration) as api_client:
         print("Exception when calling LearnersApi->update_learner: %s\n" % e)
 ```
 
-
-
 ### Parameters
-
 
 Name | Type | Description  | Notes
 ------------- | ------------- | ------------- | -------------
- **learner_id** | **str**|  | 
- **update_learner_request** | [**UpdateLearnerRequest**](UpdateLearnerRequest.md)|  | 
+ **learner_id** | **str**|  |
+ **update_learner_request** | [**UpdateLearnerRequest**](UpdateLearnerRequest.md)|  |
 
 ### Return type
 
@@ -398,8 +387,8 @@ Name | Type | Description  | Notes
 
 ### HTTP request headers
 
- - **Content-Type**: application/json
- - **Accept**: application/json
+* **Content-Type**: application/json
+* **Accept**: application/json
 
 ### HTTP response details
 
@@ -411,4 +400,3 @@ Name | Type | Description  | Notes
 **404** | Learner not found |  -  |
 
 [[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
-

@@ -1,14 +1,13 @@
 # SubscriptionDetailsPlan
 
-
 ## Properties
 
 Name | Type | Description | Notes
 ------------ | ------------- | ------------- | -------------
-**name** | **str** | Plan name | 
-**tier** | **str** |  | 
-**features** | **List[str]** |  | 
-**price_per_seat** | **float** | Price per seat per month | [optional] 
+**name** | **str** | Plan name |
+**tier** | **str** |  |
+**features** | **List[str]** |  |
+**price_per_seat** | **float** | Price per seat per month | [optional]
 
 ## Example
 
@@ -27,6 +26,5 @@ subscription_details_plan_dict = subscription_details_plan_instance.to_dict()
 # create an instance of SubscriptionDetailsPlan from a dict
 subscription_details_plan_from_dict = SubscriptionDetailsPlan.from_dict(subscription_details_plan_dict)
 ```
+
 [[Back to Model list]](../README.md#documentation-for-models) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to README]](../README.md)
-
-

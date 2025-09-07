@@ -1,15 +1,14 @@
 # SubscriptionDetailsRenewal
 
-
 ## Properties
 
 Name | Type | Description | Notes
 ------------ | ------------- | ------------- | -------------
-**next_billing_date** | **date** |  | 
-**amount** | **float** | Next billing amount | 
-**currency** | **str** |  | [optional] 
-**auto_renew** | **bool** |  | 
-**days_until_renewal** | **int** |  | [optional] 
+**next_billing_date** | **date** |  |
+**amount** | **float** | Next billing amount |
+**currency** | **str** |  | [optional]
+**auto_renew** | **bool** |  |
+**days_until_renewal** | **int** |  | [optional]
 
 ## Example
 
@@ -28,6 +27,5 @@ subscription_details_renewal_dict = subscription_details_renewal_instance.to_dic
 # create an instance of SubscriptionDetailsRenewal from a dict
 subscription_details_renewal_from_dict = SubscriptionDetailsRenewal.from_dict(subscription_details_renewal_dict)
 ```
+
 [[Back to Model list]](../README.md#documentation-for-models) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to README]](../README.md)
-
-

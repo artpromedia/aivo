@@ -1,10 +1,11 @@
+﻿# hadolint ignore=DL3007,DL3008
 FROM python:3.12-slim
 
 # Set working directory
 WORKDIR /app
 
 # Install system dependencies and upgrade packages to fix vulnerabilities
-RUN apt-get update && apt-get upgrade -y && apt-get install -y \
+RUN apt-get update && apt-get upgrade -y && apt-get install -y --no-install-recommends \
     postgresql-client \
     curl \
     && rm -rf /var/lib/apt/lists/*

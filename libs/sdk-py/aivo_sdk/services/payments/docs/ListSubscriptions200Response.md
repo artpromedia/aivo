@@ -1,14 +1,13 @@
 # ListSubscriptions200Response
 
-
 ## Properties
 
 Name | Type | Description | Notes
 ------------ | ------------- | ------------- | -------------
-**data** | [**List[Subscription]**](Subscription.md) |  | 
-**total** | **int** |  | 
-**limit** | **int** |  | 
-**offset** | **int** |  | 
+**data** | [**List[Subscription]**](Subscription.md) |  |
+**total** | **int** |  |
+**limit** | **int** |  |
+**offset** | **int** |  |
 
 ## Example
 
@@ -27,6 +26,5 @@ list_subscriptions200_response_dict = list_subscriptions200_response_instance.to
 # create an instance of ListSubscriptions200Response from a dict
 list_subscriptions200_response_from_dict = ListSubscriptions200Response.from_dict(list_subscriptions200_response_dict)
 ```
+
 [[Back to Model list]](../README.md#documentation-for-models) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to README]](../README.md)
-
-

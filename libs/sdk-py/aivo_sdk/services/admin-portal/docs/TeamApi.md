@@ -1,13 +1,13 @@
 # aivo_sdk.TeamApi
 
-All URIs are relative to *https://api.aivo.com/admin/v1*
+All URIs are relative to *<https://api.aivo.com/admin/v1>*
 
 Method | HTTP request | Description
 ------------- | ------------- | -------------
 [**get_tenant_team**](TeamApi.md#get_tenant_team) | **GET** /team | Get tenant team overview
 
-
 # **get_tenant_team**
+>
 > TeamOverview get_tenant_team(tenant_id)
 
 Get tenant team overview
@@ -53,14 +53,11 @@ with aivo_sdk.ApiClient(configuration) as api_client:
         print("Exception when calling TeamApi->get_tenant_team: %s\n" % e)
 ```
 
-
-
 ### Parameters
-
 
 Name | Type | Description  | Notes
 ------------- | ------------- | ------------- | -------------
- **tenant_id** | **str**| Tenant ID to get team overview for | 
+ **tenant_id** | **str**| Tenant ID to get team overview for |
 
 ### Return type
 
@@ -72,8 +69,8 @@ Name | Type | Description  | Notes
 
 ### HTTP request headers
 
- - **Content-Type**: Not defined
- - **Accept**: application/json
+* **Content-Type**: Not defined
+* **Accept**: application/json
 
 ### HTTP response details
 
@@ -85,4 +82,3 @@ Name | Type | Description  | Notes
 **404** | Tenant not found |  -  |
 
 [[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
-

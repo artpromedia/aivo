@@ -1,17 +1,16 @@
 # CreateSubscriptionRequest
 
-
 ## Properties
 
 Name | Type | Description | Notes
 ------------ | ------------- | ------------- | -------------
-**tenant_id** | **str** |  | 
-**plan_id** | **str** |  | 
+**tenant_id** | **str** |  |
+**plan_id** | **str** |  |
 **quantity** | **int** |  | [optional] [default to 1]
-**trial_period_days** | **int** |  | [optional] 
-**coupon_code** | **str** |  | [optional] 
-**payment_method_id** | **str** |  | [optional] 
-**metadata** | **Dict[str, object]** |  | [optional] 
+**trial_period_days** | **int** |  | [optional]
+**coupon_code** | **str** |  | [optional]
+**payment_method_id** | **str** |  | [optional]
+**metadata** | **Dict[str, object]** |  | [optional]
 
 ## Example
 
@@ -30,6 +29,5 @@ create_subscription_request_dict = create_subscription_request_instance.to_dict(
 # create an instance of CreateSubscriptionRequest from a dict
 create_subscription_request_from_dict = CreateSubscriptionRequest.from_dict(create_subscription_request_dict)
 ```
+
 [[Back to Model list]](../README.md#documentation-for-models) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to README]](../README.md)
-
-

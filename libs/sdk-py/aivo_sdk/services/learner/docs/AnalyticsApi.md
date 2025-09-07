@@ -1,13 +1,13 @@
 # aivo_sdk.AnalyticsApi
 
-All URIs are relative to *https://api.aivo.com/learner/v1*
+All URIs are relative to *<https://api.aivo.com/learner/v1>*
 
 Method | HTTP request | Description
 ------------- | ------------- | -------------
 [**get_learner_analytics**](AnalyticsApi.md#get_learner_analytics) | **GET** /learners/{learnerId}/analytics | Get learner analytics
 
-
 # **get_learner_analytics**
+>
 > LearnerAnalytics get_learner_analytics(learner_id, range=range)
 
 Get learner analytics
@@ -54,14 +54,11 @@ with aivo_sdk.ApiClient(configuration) as api_client:
         print("Exception when calling AnalyticsApi->get_learner_analytics: %s\n" % e)
 ```
 
-
-
 ### Parameters
-
 
 Name | Type | Description  | Notes
 ------------- | ------------- | ------------- | -------------
- **learner_id** | **str**|  | 
+ **learner_id** | **str**|  |
  **range** | **str**|  | [optional] [default to 30d]
 
 ### Return type
@@ -74,8 +71,8 @@ Name | Type | Description  | Notes
 
 ### HTTP request headers
 
- - **Content-Type**: Not defined
- - **Accept**: application/json
+* **Content-Type**: Not defined
+* **Accept**: application/json
 
 ### HTTP response details
 
@@ -86,4 +83,3 @@ Name | Type | Description  | Notes
 **404** | Learner not found |  -  |
 
 [[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
-

@@ -1,6 +1,6 @@
 # aivo_sdk.AuthenticationApi
 
-All URIs are relative to *https://api.aivo.com/auth/v1*
+All URIs are relative to *<https://api.aivo.com/auth/v1>*
 
 Method | HTTP request | Description
 ------------- | ------------- | -------------
@@ -8,14 +8,13 @@ Method | HTTP request | Description
 [**logout**](AuthenticationApi.md#logout) | **POST** /logout | Logout user
 [**refresh_token**](AuthenticationApi.md#refresh_token) | **POST** /refresh | Refresh access token
 
-
 # **login**
+>
 > AuthResponse login(login_request)
 
 Authenticate user
 
 ### Example
-
 
 ```python
 import aivo_sdk
@@ -46,14 +45,11 @@ with aivo_sdk.ApiClient(configuration) as api_client:
         print("Exception when calling AuthenticationApi->login: %s\n" % e)
 ```
 
-
-
 ### Parameters
-
 
 Name | Type | Description  | Notes
 ------------- | ------------- | ------------- | -------------
- **login_request** | [**LoginRequest**](LoginRequest.md)|  | 
+ **login_request** | [**LoginRequest**](LoginRequest.md)|  |
 
 ### Return type
 
@@ -65,8 +61,8 @@ No authorization required
 
 ### HTTP request headers
 
- - **Content-Type**: application/json
- - **Accept**: application/json
+- **Content-Type**: application/json
+- **Accept**: application/json
 
 ### HTTP response details
 
@@ -79,13 +75,14 @@ No authorization required
 [[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
 
 # **logout**
+>
 > logout()
 
 Logout user
 
 ### Example
 
-* Bearer (JWT) Authentication (bearerAuth):
+- Bearer (JWT) Authentication (bearerAuth):
 
 ```python
 import aivo_sdk
@@ -120,8 +117,6 @@ with aivo_sdk.ApiClient(configuration) as api_client:
         print("Exception when calling AuthenticationApi->logout: %s\n" % e)
 ```
 
-
-
 ### Parameters
 
 This endpoint does not need any parameter.
@@ -136,8 +131,8 @@ void (empty response body)
 
 ### HTTP request headers
 
- - **Content-Type**: Not defined
- - **Accept**: application/json
+- **Content-Type**: Not defined
+- **Accept**: application/json
 
 ### HTTP response details
 
@@ -149,13 +144,14 @@ void (empty response body)
 [[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
 
 # **refresh_token**
+>
 > AuthResponse refresh_token(refresh_token_request)
 
 Refresh access token
 
 ### Example
 
-* Bearer (JWT) Authentication (bearerAuth):
+- Bearer (JWT) Authentication (bearerAuth):
 
 ```python
 import aivo_sdk
@@ -195,14 +191,11 @@ with aivo_sdk.ApiClient(configuration) as api_client:
         print("Exception when calling AuthenticationApi->refresh_token: %s\n" % e)
 ```
 
-
-
 ### Parameters
-
 
 Name | Type | Description  | Notes
 ------------- | ------------- | ------------- | -------------
- **refresh_token_request** | [**RefreshTokenRequest**](RefreshTokenRequest.md)|  | 
+ **refresh_token_request** | [**RefreshTokenRequest**](RefreshTokenRequest.md)|  |
 
 ### Return type
 
@@ -214,8 +207,8 @@ Name | Type | Description  | Notes
 
 ### HTTP request headers
 
- - **Content-Type**: application/json
- - **Accept**: application/json
+- **Content-Type**: application/json
+- **Accept**: application/json
 
 ### HTTP response details
 
@@ -225,4 +218,3 @@ Name | Type | Description  | Notes
 **401** | Invalid refresh token |  -  |
 
 [[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
-

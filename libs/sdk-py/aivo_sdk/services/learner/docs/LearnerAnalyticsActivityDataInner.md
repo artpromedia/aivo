@@ -1,13 +1,12 @@
 # LearnerAnalyticsActivityDataInner
 
-
 ## Properties
 
 Name | Type | Description | Notes
 ------------ | ------------- | ------------- | -------------
-**var_date** | **date** |  | [optional] 
-**minutes_learned** | **int** |  | [optional] 
-**sessions_count** | **int** |  | [optional] 
+**var_date** | **date** |  | [optional]
+**minutes_learned** | **int** |  | [optional]
+**sessions_count** | **int** |  | [optional]
 
 ## Example
 
@@ -26,6 +25,5 @@ learner_analytics_activity_data_inner_dict = learner_analytics_activity_data_inn
 # create an instance of LearnerAnalyticsActivityDataInner from a dict
 learner_analytics_activity_data_inner_from_dict = LearnerAnalyticsActivityDataInner.from_dict(learner_analytics_activity_data_inner_dict)
 ```
+
 [[Back to Model list]](../README.md#documentation-for-models) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to README]](../README.md)
-
-

@@ -1,14 +1,14 @@
 # aivo_sdk.AchievementsApi
 
-All URIs are relative to *https://api.aivo.com/learner/v1*
+All URIs are relative to *<https://api.aivo.com/learner/v1>*
 
 Method | HTTP request | Description
 ------------- | ------------- | -------------
 [**award_achievement**](AchievementsApi.md#award_achievement) | **POST** /learners/{learnerId}/achievements | Award achievement to learner
 [**get_learner_achievements**](AchievementsApi.md#get_learner_achievements) | **GET** /learners/{learnerId}/achievements | Get learner achievements
 
-
 # **award_achievement**
+>
 > Achievement award_achievement(learner_id, award_achievement_request)
 
 Award achievement to learner
@@ -56,15 +56,12 @@ with aivo_sdk.ApiClient(configuration) as api_client:
         print("Exception when calling AchievementsApi->award_achievement: %s\n" % e)
 ```
 
-
-
 ### Parameters
-
 
 Name | Type | Description  | Notes
 ------------- | ------------- | ------------- | -------------
- **learner_id** | **str**|  | 
- **award_achievement_request** | [**AwardAchievementRequest**](AwardAchievementRequest.md)|  | 
+ **learner_id** | **str**|  |
+ **award_achievement_request** | [**AwardAchievementRequest**](AwardAchievementRequest.md)|  |
 
 ### Return type
 
@@ -76,8 +73,8 @@ Name | Type | Description  | Notes
 
 ### HTTP request headers
 
- - **Content-Type**: application/json
- - **Accept**: application/json
+* **Content-Type**: application/json
+* **Accept**: application/json
 
 ### HTTP response details
 
@@ -91,6 +88,7 @@ Name | Type | Description  | Notes
 [[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
 
 # **get_learner_achievements**
+>
 > List[Achievement] get_learner_achievements(learner_id)
 
 Get learner achievements
@@ -136,14 +134,11 @@ with aivo_sdk.ApiClient(configuration) as api_client:
         print("Exception when calling AchievementsApi->get_learner_achievements: %s\n" % e)
 ```
 
-
-
 ### Parameters
-
 
 Name | Type | Description  | Notes
 ------------- | ------------- | ------------- | -------------
- **learner_id** | **str**|  | 
+ **learner_id** | **str**|  |
 
 ### Return type
 
@@ -155,8 +150,8 @@ Name | Type | Description  | Notes
 
 ### HTTP request headers
 
- - **Content-Type**: Not defined
- - **Accept**: application/json
+* **Content-Type**: Not defined
+* **Accept**: application/json
 
 ### HTTP response details
 
@@ -167,4 +162,3 @@ Name | Type | Description  | Notes
 **404** | Learner not found |  -  |
 
 [[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
-

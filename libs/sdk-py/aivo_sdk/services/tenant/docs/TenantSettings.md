@@ -1,14 +1,13 @@
 # TenantSettings
 
-
 ## Properties
 
 Name | Type | Description | Notes
 ------------ | ------------- | ------------- | -------------
-**tenant_id** | **str** |  | 
-**features** | [**TenantSettingsFeatures**](TenantSettingsFeatures.md) |  | 
-**branding** | [**TenantSettingsBranding**](TenantSettingsBranding.md) |  | 
-**notifications** | [**TenantSettingsNotifications**](TenantSettingsNotifications.md) |  | 
+**tenant_id** | **str** |  |
+**features** | [**TenantSettingsFeatures**](TenantSettingsFeatures.md) |  |
+**branding** | [**TenantSettingsBranding**](TenantSettingsBranding.md) |  |
+**notifications** | [**TenantSettingsNotifications**](TenantSettingsNotifications.md) |  |
 
 ## Example
 
@@ -27,6 +26,5 @@ tenant_settings_dict = tenant_settings_instance.to_dict()
 # create an instance of TenantSettings from a dict
 tenant_settings_from_dict = TenantSettings.from_dict(tenant_settings_dict)
 ```
+
 [[Back to Model list]](../README.md#documentation-for-models) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to README]](../README.md)
-
-

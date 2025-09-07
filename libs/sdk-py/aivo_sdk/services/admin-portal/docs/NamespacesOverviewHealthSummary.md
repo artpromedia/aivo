@@ -1,12 +1,11 @@
 # NamespacesOverviewHealthSummary
 
-
 ## Properties
 
 Name | Type | Description | Notes
 ------------ | ------------- | ------------- | -------------
-**health_score** | **float** | Overall health score of all namespaces | [optional] 
-**common_issues** | [**List[NamespacesOverviewHealthSummaryCommonIssuesInner]**](NamespacesOverviewHealthSummaryCommonIssuesInner.md) |  | [optional] 
+**health_score** | **float** | Overall health score of all namespaces | [optional]
+**common_issues** | [**List[NamespacesOverviewHealthSummaryCommonIssuesInner]**](NamespacesOverviewHealthSummaryCommonIssuesInner.md) |  | [optional]
 
 ## Example
 
@@ -25,6 +24,5 @@ namespaces_overview_health_summary_dict = namespaces_overview_health_summary_ins
 # create an instance of NamespacesOverviewHealthSummary from a dict
 namespaces_overview_health_summary_from_dict = NamespacesOverviewHealthSummary.from_dict(namespaces_overview_health_summary_dict)
 ```
+
 [[Back to Model list]](../README.md#documentation-for-models) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to README]](../README.md)
-
-

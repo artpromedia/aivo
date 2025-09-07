@@ -1,32 +1,40 @@
-version: '3.8'
+# No version needed for modern Docker Compose v2
+# Or use 'version: "3.8"' for compatibility
 
 services:
-  kong:
-    image: kong:3.4.0
-    container_name: kong-gateway
+  kong-database:
+    image: postgres:16-alpine
     environment:
-      KONG_DATABASE: "off"
-      KONG_DECLARATIVE_CONFIG: /kong/kong.yml
-      KONG_PROXY_ACCESS_LOG: /dev/stdout
-      KONG_ADMIN_ACCESS_LOG: /dev/stdout
-      KONG_PROXY_ERROR_LOG: /dev/stderr
-      KONG_ADMIN_ERROR_LOG: /dev/stderr
-      KONG_ADMIN_LISTEN: "0.0.0.0:8001"
-      KONG_PROXY_LISTEN: "0.0.0.0:8000"
-    ports:
-      - "8000:8000"  # Gateway proxy port
-      - "8001:8001"  # Admin API port
+      POSTGRES_USER: kong
+      POSTGRES_DB: kong
+      POSTGRES_PASSWORD: ${KONG_PG_PASSWORD}
     volumes:
-      - ./kong.yml:/kong/kong.yml:ro
-    networks:
-      - monorepo_infra
+      - kong-db-data:/var/lib/postgresql/data
     healthcheck:
-      test: ["CMD", "kong", "health"]
+      test: ["CMD-SHELL", "pg_isready -U kong"]
       interval: 10s
-      timeout: 10s
+      timeout: 5s
       retries: 5
-      start_period: 30s
 
-networks:
-  monorepo_infra:
-    external: true
+  kong:
+    image: kong:3.7-alpine
+    depends_on:
+      kong-database:
+        condition: service_healthy
+    environment:
+      KONG_DATABASE: postgres
+      KONG_PG_HOST: kong-database
+      KONG_PG_USER: kong
+      KONG_PG_PASSWORD: ${KONG_PG_PASSWORD}
+    ports:
+      - "8000:8000"
+      - "8001:8001"
+    deploy:
+      resources:
+        limits:
+          memory: 2G
+        reservations:
+          memory: 512M
+
+volumes:
+  kong-db-data:

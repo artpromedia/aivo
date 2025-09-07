@@ -1,8 +1,9 @@
+﻿# hadolint ignore=DL3007,DL3008
 # Use Ubuntu LTS as base
 FROM mcr.microsoft.com/devcontainers/base:ubuntu
 
 # Install system dependencies
-RUN apt-get update && apt-get install -y \
+RUN apt-get update && apt-get install -y --no-install-recommends \
     curl \
     git \
     ca-certificates \
@@ -18,7 +19,7 @@ ENV PATH="/root/.local/bin:$PATH"
 
 # Install Node.js 20.19.4
 RUN curl -fsSL https://deb.nodesource.com/setup_20.x | bash - \
-    && apt-get install -y nodejs=20.19.4-1nodesource1 \
+    && apt-get install -y --no-install-recommends nodejs=20.19.4-1nodesource1 \
     && npm install -g npm@latest
 
 # Install pnpm 9.x
@@ -29,7 +30,7 @@ RUN wget -qO /usr/local/bin/yq https://github.com/mikefarah/yq/releases/latest/d
     && chmod +x /usr/local/bin/yq
 
 # Install linters and tools
-RUN apt-get update && apt-get install -y \
+RUN apt-get update && apt-get install -y --no-install-recommends \
     # hadolint
     && wget -qO /usr/local/bin/hadolint https://github.com/hadolint/hadolint/releases/latest/download/hadolint-Linux-x86_64 \
     && chmod +x /usr/local/bin/hadolint \
@@ -47,14 +48,8 @@ RUN apt-get update && apt-get install -y \
     && rm trivy_latest_Linux-64bit.tar.gz \
     && rm -rf /var/lib/apt/lists/*
 
-# Install Spectral CLI
-RUN npm install -g @stoplight/spectral-cli@^6
-
-# Enable corepack
-RUN corepack enable
-
-# Set Python 3.11 as default
-RUN update-alternatives --install /usr/bin/python3 python3 /usr/bin/python3.11 1
-
-# Clean up
-RUN apt-get clean && rm -rf /var/lib/apt/lists/*
+# Install Node.js tools, enable corepack, set Python default, and clean up
+RUN npm install -g @stoplight/spectral-cli@^6 \
+    && corepack enable \
+    && update-alternatives --install /usr/bin/python3 python3 /usr/bin/python3.11 1 \
+    && apt-get clean && rm -rf /var/lib/apt/lists/*

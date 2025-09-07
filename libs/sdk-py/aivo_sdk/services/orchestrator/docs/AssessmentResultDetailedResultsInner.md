@@ -1,14 +1,13 @@
 # AssessmentResultDetailedResultsInner
 
-
 ## Properties
 
 Name | Type | Description | Notes
 ------------ | ------------- | ------------- | -------------
-**question_id** | **str** |  | [optional] 
-**correct** | **bool** |  | [optional] 
-**points** | **float** |  | [optional] 
-**feedback** | **str** |  | [optional] 
+**question_id** | **str** |  | [optional]
+**correct** | **bool** |  | [optional]
+**points** | **float** |  | [optional]
+**feedback** | **str** |  | [optional]
 
 ## Example
 
@@ -27,6 +26,5 @@ assessment_result_detailed_results_inner_dict = assessment_result_detailed_resul
 # create an instance of AssessmentResultDetailedResultsInner from a dict
 assessment_result_detailed_results_inner_from_dict = AssessmentResultDetailedResultsInner.from_dict(assessment_result_detailed_results_inner_dict)
 ```
+
 [[Back to Model list]](../README.md#documentation-for-models) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to README]](../README.md)
-
-

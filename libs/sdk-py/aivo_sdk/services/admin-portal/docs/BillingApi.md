@@ -1,13 +1,13 @@
 # aivo_sdk.BillingApi
 
-All URIs are relative to *https://api.aivo.com/admin/v1*
+All URIs are relative to *<https://api.aivo.com/admin/v1>*
 
 Method | HTTP request | Description
 ------------- | ------------- | -------------
 [**get_tenant_billing_history**](BillingApi.md#get_tenant_billing_history) | **GET** /billing-history | Get tenant billing history
 
-
 # **get_tenant_billing_history**
+>
 > BillingHistory get_tenant_billing_history(tenant_id, limit=limit)
 
 Get tenant billing history
@@ -54,14 +54,11 @@ with aivo_sdk.ApiClient(configuration) as api_client:
         print("Exception when calling BillingApi->get_tenant_billing_history: %s\n" % e)
 ```
 
-
-
 ### Parameters
-
 
 Name | Type | Description  | Notes
 ------------- | ------------- | ------------- | -------------
- **tenant_id** | **str**| Tenant ID to get billing history for | 
+ **tenant_id** | **str**| Tenant ID to get billing history for |
  **limit** | **int**| Number of recent invoices to return | [optional] [default to 10]
 
 ### Return type
@@ -74,8 +71,8 @@ Name | Type | Description  | Notes
 
 ### HTTP request headers
 
- - **Content-Type**: Not defined
- - **Accept**: application/json
+* **Content-Type**: Not defined
+* **Accept**: application/json
 
 ### HTTP response details
 
@@ -87,4 +84,3 @@ Name | Type | Description  | Notes
 **404** | Tenant not found |  -  |
 
 [[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
-

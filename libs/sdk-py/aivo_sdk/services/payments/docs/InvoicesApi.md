@@ -1,14 +1,14 @@
 # aivo_sdk.InvoicesApi
 
-All URIs are relative to *https://api.aivo.com/payments/v1*
+All URIs are relative to *<https://api.aivo.com/payments/v1>*
 
 Method | HTTP request | Description
 ------------- | ------------- | -------------
 [**get_invoice**](InvoicesApi.md#get_invoice) | **GET** /invoices/{invoiceId} | Get invoice by ID
 [**list_invoices**](InvoicesApi.md#list_invoices) | **GET** /invoices | List invoices
 
-
 # **get_invoice**
+>
 > Invoice get_invoice(invoice_id)
 
 Get invoice by ID
@@ -54,14 +54,11 @@ with aivo_sdk.ApiClient(configuration) as api_client:
         print("Exception when calling InvoicesApi->get_invoice: %s\n" % e)
 ```
 
-
-
 ### Parameters
-
 
 Name | Type | Description  | Notes
 ------------- | ------------- | ------------- | -------------
- **invoice_id** | **str**|  | 
+ **invoice_id** | **str**|  |
 
 ### Return type
 
@@ -73,8 +70,8 @@ Name | Type | Description  | Notes
 
 ### HTTP request headers
 
- - **Content-Type**: Not defined
- - **Accept**: application/json
+* **Content-Type**: Not defined
+* **Accept**: application/json
 
 ### HTTP response details
 
@@ -87,6 +84,7 @@ Name | Type | Description  | Notes
 [[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
 
 # **list_invoices**
+>
 > ListInvoices200Response list_invoices(tenant_id=tenant_id, subscription_id=subscription_id, status=status, limit=limit, offset=offset)
 
 List invoices
@@ -136,16 +134,13 @@ with aivo_sdk.ApiClient(configuration) as api_client:
         print("Exception when calling InvoicesApi->list_invoices: %s\n" % e)
 ```
 
-
-
 ### Parameters
-
 
 Name | Type | Description  | Notes
 ------------- | ------------- | ------------- | -------------
- **tenant_id** | **str**|  | [optional] 
- **subscription_id** | **str**|  | [optional] 
- **status** | **str**|  | [optional] 
+ **tenant_id** | **str**|  | [optional]
+ **subscription_id** | **str**|  | [optional]
+ **status** | **str**|  | [optional]
  **limit** | **int**|  | [optional] [default to 20]
  **offset** | **int**|  | [optional] [default to 0]
 
@@ -159,8 +154,8 @@ Name | Type | Description  | Notes
 
 ### HTTP request headers
 
- - **Content-Type**: Not defined
- - **Accept**: application/json
+* **Content-Type**: Not defined
+* **Accept**: application/json
 
 ### HTTP response details
 
@@ -170,4 +165,3 @@ Name | Type | Description  | Notes
 **401** | Unauthorized |  -  |
 
 [[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
-

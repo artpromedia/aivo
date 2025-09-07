@@ -1,12 +1,11 @@
 # UsageAnalyticsActiveLearners
 
-
 ## Properties
 
 Name | Type | Description | Notes
 ------------ | ------------- | ------------- | -------------
-**count** | **int** | Number of active learners in range | 
-**percentage** | **float** | Percentage of total learners who were active | 
+**count** | **int** | Number of active learners in range |
+**percentage** | **float** | Percentage of total learners who were active |
 
 ## Example
 
@@ -25,6 +24,5 @@ usage_analytics_active_learners_dict = usage_analytics_active_learners_instance.
 # create an instance of UsageAnalyticsActiveLearners from a dict
 usage_analytics_active_learners_from_dict = UsageAnalyticsActiveLearners.from_dict(usage_analytics_active_learners_dict)
 ```
+
 [[Back to Model list]](../README.md#documentation-for-models) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to README]](../README.md)
-
-

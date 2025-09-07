@@ -6,7 +6,15 @@ export default {
   '**/Dockerfile*': [
     'hadolint',
   ],
-  '*.md': [
-    'markdownlint --fix --ignore-path .gitignore',
-  ],
+  '*.md': (files) => {
+    // Filter out SDK files and docs
+    const filteredFiles = files.filter(file => 
+      !file.includes('/docs/') && 
+      !file.includes('libs/sdk-py/') && 
+      !file.includes('libs/sdk-web/')
+    );
+    return filteredFiles.length > 0 ? 
+      `markdownlint --fix ${filteredFiles.join(' ')}` : 
+      [];
+  },
 };
