@@ -22,7 +22,7 @@ async def wait_for_service(url: str, timeout: int = 30) -> bool:
                 response = await client.get(f"{url}/health")
                 if response.status_code == 200:
                     return True
-        except Exception:
+        except (httpx.RequestError, httpx.HTTPStatusError):
             pass
 
         await asyncio.sleep(1)
@@ -30,16 +30,16 @@ async def wait_for_service(url: str, timeout: int = 30) -> bool:
     return False
 
 
-async def run_provider_verification(service_name: str) -> bool:
+async def run_provider_verification(provider_service_name: str) -> bool:
     """Run Pact provider verification for a Python service."""
-    service_dir = Path(f"services/{service_name}")
+    service_dir = Path(f"services/{provider_service_name}")
 
     if not service_dir.exists():
         print(f"Service directory {service_dir} does not exist")
         return False
 
     # Start the service
-    print(f"Starting {service_name}...")
+    print(f"Starting {provider_service_name}...")
     process = subprocess.Popen(
         [sys.executable, "-m", "app.main"],
         cwd=service_dir,
@@ -56,16 +56,20 @@ async def run_provider_verification(service_name: str) -> bool:
         service_ready = await wait_for_service("http://localhost:8080")
 
         if not service_ready:
-            print(f"Service {service_name} failed to start")
+            print(f"Service {provider_service_name} failed to start")
             return False
 
-        print(f"Service {service_name} is ready")
+        print(f"Service {provider_service_name} is ready")
 
         # Run Pact verification
         pact_result = subprocess.run(
             ["pnpm", "test:providers"],
             cwd="pact",
-            env={"PROVIDER_NAME": service_name, "PROVIDER_URL": "http://localhost:8080"},
+            env={
+                "PROVIDER_NAME": provider_service_name,
+                "PROVIDER_URL": "http://localhost:8080",
+            },
+            check=False,
         )
 
         return pact_result.returncode == 0
