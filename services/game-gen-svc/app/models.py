@@ -1,7 +1,7 @@
 """Game Generation Service models."""
 
 import uuid
-from datetime import datetime
+from datetime import UTC, datetime
 from enum import Enum
 from typing import Any
 
@@ -11,7 +11,7 @@ from pydantic import BaseModel, Field
 class HealthResponse(BaseModel):
     """Health check response model."""
     status: str
-    service: str 
+    service: str
     version: str
     timestamp: float
 
@@ -28,7 +28,7 @@ class PerformanceStats(BaseModel):
 
 class SubjectType(str, Enum):
     """Subject types supported by the game generation system."""
-    
+
     MATH = "math"
     ENGLISH = "english"
     SCIENCE = "science"
@@ -40,7 +40,7 @@ class SubjectType(str, Enum):
 
 class GameType(str, Enum):
     """Types of mini-games that can be generated."""
-    
+
     PUZZLE = "puzzle"
     QUIZ = "quiz"
     MATCHING = "matching"
@@ -55,7 +55,7 @@ class GameType(str, Enum):
 
 class DifficultyLevel(str, Enum):
     """Game difficulty levels."""
-    
+
     BEGINNER = "beginner"
     INTERMEDIATE = "intermediate"
     ADVANCED = "advanced"
@@ -64,7 +64,7 @@ class DifficultyLevel(str, Enum):
 
 class AccessibilitySettings(BaseModel):
     """Accessibility configuration for games."""
-    
+
     reduced_motion: bool = Field(
         default=False,
         description="Reduce or eliminate animations and motion effects"
@@ -93,9 +93,11 @@ class AccessibilitySettings(BaseModel):
 
 class GameAsset(BaseModel):
     """Game asset definition."""
-    
+
     asset_id: str = Field(description="Unique asset identifier")
-    asset_type: str = Field(description="Type of asset (image, audio, video, model)")
+    asset_type: str = Field(
+        description="Type of asset (image, audio, video, model)"
+    )
     url: str = Field(description="URL to the asset")
     alt_text: str | None = Field(
         default=None,
@@ -113,7 +115,7 @@ class GameAsset(BaseModel):
 
 class GameScene(BaseModel):
     """Game scene definition."""
-    
+
     scene_id: str = Field(description="Unique scene identifier")
     name: str = Field(description="Scene display name")
     description: str = Field(description="Scene description")
@@ -138,7 +140,7 @@ class GameScene(BaseModel):
 
 class ScoringConfig(BaseModel):
     """Game scoring configuration."""
-    
+
     max_points: int = Field(description="Maximum points possible")
     time_bonus: bool = Field(
         default=True,
@@ -164,33 +166,33 @@ class ScoringConfig(BaseModel):
 
 class GameManifest(BaseModel):
     """Complete game manifest with scenes, assets, and configuration."""
-    
+
     manifest_id: str = Field(
         default_factory=lambda: str(uuid.uuid4()),
         description="Unique manifest identifier"
     )
     learner_id: str = Field(description="Target learner identifier")
     subject: SubjectType = Field(description="Subject area")
-    grade_level: int = Field(description="Grade level (K-12)")
+    grade: int = Field(description="Grade level (K-12)")
     game_type: GameType = Field(description="Type of mini-game")
     difficulty: DifficultyLevel = Field(description="Game difficulty level")
-    estimated_minutes: int = Field(description="Estimated playtime in minutes")
-    
+    duration_minutes: int = Field(description="Estimated playtime in minutes")
+
     # Game content
     title: str = Field(description="Game title")
     description: str = Field(description="Game description")
     scenes: list[GameScene] = Field(description="Game scenes in order")
     scoring: ScoringConfig = Field(description="Scoring configuration")
-    
+
     # Accessibility
     accessibility: AccessibilitySettings = Field(
         default_factory=AccessibilitySettings,
         description="Accessibility configuration"
     )
-    
+
     # Metadata
     created_at: float = Field(
-        default_factory=lambda: datetime.utcnow().timestamp(),
+        default_factory=lambda: datetime.now(UTC).timestamp(),
         description="Manifest creation timestamp (Unix timestamp)"
     )
     template_id: str | None = Field(
@@ -209,15 +211,15 @@ class GameManifest(BaseModel):
 
 class ManifestRequest(BaseModel):
     """Request to generate a game manifest."""
-    
+
     learner_id: str = Field(description="Target learner identifier")
     subject: SubjectType = Field(description="Subject area")
-    minutes: int = Field(
+    duration_minutes: int = Field(
         ge=1,
         le=60,
         description="Desired game duration in minutes"
     )
-    grade_level: int | None = Field(
+    grade: int | None = Field(
         default=None,
         ge=0,
         le=12,
@@ -243,9 +245,11 @@ class ManifestRequest(BaseModel):
 
 class ManifestResponse(BaseModel):
     """Response containing the generated game manifest."""
-    
+
     manifest: GameManifest = Field(description="Generated game manifest")
-    generation_time_ms: int = Field(description="Time taken to generate manifest")
+    generation_time_ms: int = Field(
+        description="Time taken to generate manifest"
+    )
     cache_hit: bool = Field(description="Whether result came from cache")
     recommendations: list[str] = Field(
         default_factory=list,
@@ -255,7 +259,7 @@ class ManifestResponse(BaseModel):
 
 class TemplateInfo(BaseModel):
     """Information about a game template."""
-    
+
     template_id: str = Field(description="Template identifier")
     name: str = Field(description="Template name")
     description: str = Field(description="Template description")
@@ -272,14 +276,10 @@ class TemplateInfo(BaseModel):
 
 class CacheStats(BaseModel):
     """Cache performance statistics."""
-    
-    total_requests: int = Field(description="Total manifest requests")
-    cache_hits: int = Field(description="Number of cache hits")
-    cache_misses: int = Field(description="Number of cache misses")
+
+    hit_count: int = Field(description="Number of cache hits")
+    miss_count: int = Field(description="Number of cache misses")
     hit_rate: float = Field(description="Cache hit rate percentage")
-    average_generation_time_ms: int = Field(
-        description="Average generation time for cache misses"
-    )
-    average_cache_retrieval_time_ms: int = Field(
-        description="Average cache retrieval time"
-    )
+    size_bytes: int = Field(description="Cache size in bytes")
+    num_entries: int = Field(description="Number of cache entries")
+    redis_connected: bool = Field(description="Redis connection status")

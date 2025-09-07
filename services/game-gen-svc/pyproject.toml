@@ -18,3 +18,13 @@ markers = [
     "integration: marks tests as integration tests",
     "unit: marks tests as unit tests"
 ]
+
+[tool.pylint.MASTER]
+init-hook = "import sys; sys.path.append('.')"
+
+[tool.pylint.MESSAGES_CONTROL]
+disable = [
+    "missing-module-docstring",
+    "missing-class-docstring", 
+    "missing-function-docstring"
+]

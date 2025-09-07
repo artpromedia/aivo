@@ -1,0 +1,479 @@
+openapi: 3.0.0
+info:
+  title: Search Service API
+  description: Unified search service with OpenSearch, RBAC filtering, and PII masking
+  version: 1.0.0
+  contact:
+    name: Search Service Team
+
+servers:
+  - url: http://localhost:8000
+    description: Local development server
+  - url: https://api.example.com/search
+    description: Production server
+
+security:
+  - bearerAuth: []
+
+paths:
+  /health:
+    get:
+      summary: Health check
+      description: Check the health status of the search service and its dependencies
+      operationId: healthCheck
+      tags:
+        - Health
+      responses:
+        '200':
+          description: Service health status
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HealthStatus'
+        '503':
+          description: Service unavailable
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+  /search:
+    get:
+      summary: Search content
+      description: Search across lessons, coursework, and learner profiles with RBAC filtering and PII masking
+      operationId: search
+      tags:
+        - Search
+      parameters:
+        - name: q
+          in: query
+          required: true
+          description: Search query string
+          schema:
+            type: string
+            minLength: 1
+            maxLength: 500
+            example: "fractions math"
+        - name: scope
+          in: query
+          required: false
+          description: Search scope to limit results
+          schema:
+            $ref: '#/components/schemas/SearchScope'
+        - name: size
+          in: query
+          required: false
+          description: Number of results to return
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 100
+            default: 20
+        - name: from
+          in: query
+          required: false
+          description: Offset for pagination
+          schema:
+            type: integer
+            minimum: 0
+            default: 0
+        - name: user_id
+          in: query
+          required: true
+          description: User identifier for RBAC
+          schema:
+            type: string
+        - name: role
+          in: query
+          required: true
+          description: User role for RBAC
+          schema:
+            $ref: '#/components/schemas/UserRole'
+        - name: district_id
+          in: query
+          required: false
+          description: District identifier
+          schema:
+            type: string
+        - name: school_id
+          in: query
+          required: false
+          description: School identifier
+          schema:
+            type: string
+        - name: class_ids
+          in: query
+          required: false
+          description: Comma-separated class identifiers
+          schema:
+            type: string
+        - name: learner_ids
+          in: query
+          required: false
+          description: Comma-separated learner identifiers
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Search results
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SearchResponse'
+        '400':
+          description: Invalid request parameters
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+  /suggest:
+    get:
+      summary: Get search suggestions
+      description: Get search suggestions based on partial query
+      operationId: suggest
+      tags:
+        - Search
+      parameters:
+        - name: q
+          in: query
+          required: true
+          description: Partial query for suggestions
+          schema:
+            type: string
+            minLength: 1
+            example: "frac"
+        - name: size
+          in: query
+          required: false
+          description: Number of suggestions to return
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 10
+            default: 5
+        - name: scope
+          in: query
+          required: false
+          description: Suggestion scope
+          schema:
+            $ref: '#/components/schemas/SearchScope'
+        - name: user_id
+          in: query
+          required: true
+          description: User identifier
+          schema:
+            type: string
+        - name: role
+          in: query
+          required: true
+          description: User role
+          schema:
+            $ref: '#/components/schemas/UserRole'
+      responses:
+        '200':
+          description: Search suggestions
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SuggestionResponse'
+        '400':
+          description: Invalid request parameters
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+  /index:
+    post:
+      summary: Index a document
+      description: Index a single document (admin only)
+      operationId: indexDocument
+      tags:
+        - Document Management
+      parameters:
+        - name: user_id
+          in: query
+          required: true
+          description: User identifier
+          schema:
+            type: string
+        - name: role
+          in: query
+          required: true
+          description: User role (must be admin)
+          schema:
+            $ref: '#/components/schemas/UserRole'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/IndexRequest'
+      responses:
+        '200':
+          description: Document indexed successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  result:
+                    type: string
+                  _id:
+                    type: string
+        '403':
+          description: Insufficient permissions
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+  /bulk-index:
+    post:
+      summary: Bulk index documents
+      description: Index multiple documents (admin only)
+      operationId: bulkIndexDocuments
+      tags:
+        - Document Management
+      parameters:
+        - name: user_id
+          in: query
+          required: true
+          description: User identifier
+          schema:
+            type: string
+        - name: role
+          in: query
+          required: true
+          description: User role (must be admin)
+          schema:
+            $ref: '#/components/schemas/UserRole'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/BulkIndexRequest'
+      responses:
+        '200':
+          description: Documents indexed successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  indexed:
+                    type: integer
+                  errors:
+                    type: array
+                    items:
+                      type: object
+                  took:
+                    type: integer
+        '403':
+          description: Insufficient permissions
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+
+  schemas:
+    SearchScope:
+      type: string
+      enum:
+        - lessons
+        - coursework
+        - learners
+        - all
+      default: all
+
+    UserRole:
+      type: string
+      enum:
+        - learner
+        - guardian
+        - teacher
+        - district_admin
+        - system_admin
+
+    SearchResponse:
+      type: object
+      properties:
+        hits:
+          type: array
+          items:
+            $ref: '#/components/schemas/SearchHit'
+        total:
+          type: integer
+          description: Total number of matches
+        took:
+          type: integer
+          description: Query execution time in milliseconds
+        aggregations:
+          type: object
+          additionalProperties: true
+
+    SearchHit:
+      type: object
+      properties:
+        id:
+          type: string
+        type:
+          type: string
+        title:
+          type: string
+        content:
+          type: string
+          description: PII-masked content snippet
+        score:
+          type: number
+        metadata:
+          type: object
+          additionalProperties: true
+        highlighted:
+          type: object
+          additionalProperties:
+            type: array
+            items:
+              type: string
+
+    SuggestionResponse:
+      type: object
+      properties:
+        suggestions:
+          type: array
+          items:
+            $ref: '#/components/schemas/SuggestionItem'
+        took:
+          type: integer
+
+    SuggestionItem:
+      type: object
+      properties:
+        text:
+          type: string
+        score:
+          type: number
+        type:
+          type: string
+
+    IndexRequest:
+      type: object
+      properties:
+        index:
+          type: string
+          description: Target index name
+        document:
+          $ref: '#/components/schemas/IndexDocument'
+        refresh:
+          type: boolean
+          default: false
+
+    BulkIndexRequest:
+      type: object
+      properties:
+        index:
+          type: string
+          description: Target index name
+        documents:
+          type: array
+          items:
+            $ref: '#/components/schemas/IndexDocument'
+        refresh:
+          type: boolean
+          default: false
+
+    IndexDocument:
+      type: object
+      properties:
+        id:
+          type: string
+        type:
+          type: string
+        title:
+          type: string
+        content:
+          type: string
+        created_at:
+          type: string
+          format: date-time
+        updated_at:
+          type: string
+          format: date-time
+        metadata:
+          type: object
+          additionalProperties: true
+      required:
+        - id
+        - type
+        - title
+        - content
+        - created_at
+        - updated_at
+
+    HealthStatus:
+      type: object
+      properties:
+        status:
+          type: string
+          enum: [healthy, degraded, unhealthy]
+        opensearch_status:
+          type: string
+        redis_status:
+          type: string
+        indices_status:
+          type: object
+          additionalProperties:
+            type: string
+        timestamp:
+          type: string
+          format: date-time
+
+    Error:
+      type: object
+      properties:
+        detail:
+          type: string
+          description: Error message
+      required:
+        - detail
+
+tags:
+  - name: Health
+    description: Health check operations
+  - name: Search
+    description: Search and suggestion operations
+  - name: Document Management
+    description: Document indexing operations (admin only)

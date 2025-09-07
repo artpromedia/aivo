@@ -1,18 +1,18 @@
 """
 Pytest configuration for notification service tests.
 """
-import pytest
+
 import asyncio
-from pathlib import Path
-import tempfile
 import shutil
+import tempfile
 from unittest.mock import patch
 
+import pytest
 from app.config import Settings
 
 
 @pytest.fixture(scope="session")
-def event_loop():
+def event_loop() -> asyncio.AbstractEventLoop:
     """Create an instance of the default event loop for the test session."""
     policy = asyncio.get_event_loop_policy()
     loop = policy.new_event_loop()
@@ -43,15 +43,15 @@ def mock_settings(temp_email_dir):
         from_email="noreply@testapp.com",
         from_name="Test App",
         allowed_origins=["*"],
-        max_recipients_per_request=100
+        max_recipients_per_request=100,
     )
-    
-    with patch('app.config.get_settings', return_value=test_settings):
-        with patch('app.main.get_settings', return_value=test_settings):
-            with patch('app.template_service.get_settings', return_value=test_settings):
-                with patch('app.email_service.get_settings', return_value=test_settings):
+
+    with patch("app.config.get_settings", return_value=test_settings):
+        with patch("app.main.get_settings", return_value=test_settings):
+            with patch("app.template_service.get_settings", return_value=test_settings):
+                with patch("app.email_service.get_settings", return_value=test_settings):
                     yield test_settings
 
 
 # Configure pytest async
-pytest_plugins = ('pytest_asyncio',)
+pytest_plugins = ("pytest_asyncio",)

@@ -1,0 +1,255 @@
+openapi: 3.0.0
+info:
+  title: Notification Service API
+  version: 1.0.0
+  description: Real-time notification delivery with WebSocket, Push, and SMS
+
+servers:
+  - url: http://localhost:8000
+    description: Development server
+  - url: https://api.example.com/notify
+    description: Production server
+
+paths:
+  /ws/notify:
+    get:
+      summary: WebSocket connection for real-time notifications
+      parameters:
+        - name: token
+          in: query
+          required: true
+          schema:
+            type: string
+          description: JWT authentication token
+        - name: replay_id
+          in: query
+          required: false
+          schema:
+            type: string
+          description: Last received message ID for replay
+      responses:
+        '101':
+          description: Switching to WebSocket protocol
+        '401':
+          description: Unauthorized - Invalid token
+        '1008':
+          description: Policy Violation - Missing token
+
+  /push/subscribe:
+    post:
+      summary: Subscribe to push notifications
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PushSubscription'
+      responses:
+        '200':
+          description: Subscription successful
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                  message:
+                    type: string
+        '401':
+          description: Unauthorized
+
+  /push/unsubscribe:
+    post:
+      summary: Unsubscribe from push notifications
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - endpoint
+              properties:
+                endpoint:
+                  type: string
+                  description: Push subscription endpoint
+      responses:
+        '200':
+          description: Unsubscription successful
+        '401':
+          description: Unauthorized
+
+  /notify:
+    post:
+      summary: Send notification through available channels
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/NotificationRequest'
+      responses:
+        '200':
+          description: Notification sent
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/NotificationResponse'
+        '400':
+          description: Bad request
+        '500':
+          description: Internal server error
+
+  /health:
+    get:
+      summary: Health check endpoint
+      responses:
+        '200':
+          description: Service is healthy
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                  timestamp:
+                    type: string
+                    format: date-time
+                  connections:
+                    type: integer
+
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+
+  schemas:
+    PushSubscription:
+      type: object
+      required:
+        - endpoint
+        - keys
+      properties:
+        endpoint:
+          type: string
+          description: Push service endpoint URL
+        keys:
+          type: object
+          required:
+            - p256dh
+            - auth
+          properties:
+            p256dh:
+              type: string
+              description: P256DH key for encryption
+            auth:
+              type: string
+              description: Auth secret for authentication
+        expirationTime:
+          type: string
+          format: date-time
+          nullable: true
+
+    NotificationRequest:
+      type: object
+      required:
+        - user_id
+        - notification_type
+        - channels
+        - template_id
+        - data
+      properties:
+        user_id:
+          type: string
+          description: Target user ID
+        notification_type:
+          type: string
+          enum:
+            - iep_reminder
+            - meeting_alert
+            - document_update
+            - system_message
+            - urgent_alert
+        channels:
+          type: array
+          items:
+            type: string
+            enum:
+              - websocket
+              - push
+              - sms
+              - email
+        template_id:
+          type: string
+          description: Notification template ID
+        data:
+          type: object
+          description: Template variables
+        locale:
+          type: string
+          default: en
+          description: Language locale
+        priority:
+          type: string
+          enum:
+            - low
+            - medium
+            - high
+            - critical
+          default: medium
+        phone_number:
+          type: string
+          nullable: true
+          description: Phone number for SMS fallback
+        queue_if_offline:
+          type: boolean
+          default: true
+          description: Queue notification if user is offline
+        ttl:
+          type: integer
+          default: 86400
+          description: Time to live in seconds
+
+    NotificationResponse:
+      type: object
+      properties:
+        notification_id:
+          type: string
+          description: Unique notification ID
+        channels:
+          type: object
+          additionalProperties:
+            type: string
+          description: Delivery status per channel
+        queued:
+          type: boolean
+          description: Whether notification was queued
+
+    WebSocketMessage:
+      type: object
+      properties:
+        id:
+          type: string
+          description: Message ID
+        type:
+          type: string
+          description: Message type (notification, heartbeat, etc.)
+        timestamp:
+          type: string
+          format: date-time
+        data:
+          type: object
+          description: Message payload
+        metadata:
+          type: object
+          nullable: true

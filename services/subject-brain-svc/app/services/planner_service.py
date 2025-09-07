@@ -8,8 +8,8 @@ import logging
 from datetime import datetime, timedelta
 from typing import Any
 
-from app.config import settings
-from app.models import (
+from ..config import settings
+from ..models import (
     ActivityPlan,
     ActivityType,
     CourseworkTopic,
@@ -37,8 +37,9 @@ class SubjectBrainPlanner:
     ) -> ActivityPlan:
         """Create a personalized activity plan for a learner."""
         logger.info(
-            f"Creating plan for learner {planner_input.learner_id} "
-            f"in {planner_input.subject}"
+            "Creating plan for learner %s in %s",
+            planner_input.learner_id,
+            planner_input.subject
         )
 
         # Analyze learner baseline and mastery levels
@@ -75,7 +76,7 @@ class SubjectBrainPlanner:
         )
 
         logger.info(
-            f"Created plan {plan.plan_id} with {len(activities)} activities"
+            "Created plan %s with %d activities", plan.plan_id, len(activities)
         )
         return plan
 

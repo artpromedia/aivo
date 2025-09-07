@@ -1,20 +1,28 @@
 """Test configuration for Game Generation Service."""
 
+import sys
+from pathlib import Path
+
 import pytest
 from fastapi.testclient import TestClient
 
-from app.main import app
-from app.models import SubjectType, AccessibilitySettings
+# Add the project root to Python path for proper imports
+project_root = Path(__file__).parent.parent
+if str(project_root) not in sys.path:
+    sys.path.insert(0, str(project_root))
+
+from app.main import app  # noqa: E402
+from app.models import AccessibilitySettings, SubjectType  # noqa: E402
 
 
 @pytest.fixture
-def client():
+def client() -> TestClient:
     """Test client fixture."""
     return TestClient(app)
 
 
 @pytest.fixture
-def sample_manifest_request():
+def sample_manifest_request() -> dict:
     """Sample manifest request for testing."""
     return {
         "learner_id": "test-learner-123",
@@ -26,7 +34,7 @@ def sample_manifest_request():
 
 
 @pytest.fixture
-def accessibility_request():
+def accessibility_request() -> dict:
     """Accessibility-focused manifest request."""
     return {
         "learner_id": "test-learner-a11y",

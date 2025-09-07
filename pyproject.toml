@@ -6,7 +6,10 @@ ignore = ["E501"]  # line too long, handled by black
 
 [tool.ruff.per-file-ignores]
 "__init__.py" = ["F401"]
-"test_*.py" = ["ANN201"]
+"test_*.py" = ["ANN001", "ANN201"]
+"tests/*.py" = ["ANN001", "ANN201"]
+"**/test_*.py" = ["ANN001", "ANN201"]
+"**/tests/*.py" = ["ANN001", "ANN201"]
 
 [tool.mypy]
 python_version = "3.11"
