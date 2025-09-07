@@ -1,0 +1,348 @@
+{
+  "consumer": {
+    "name": "admin-app"
+  },
+  "interactions": [
+    {
+      "description": "a request for dashboard summary",
+      "providerStates": [
+        {
+          "name": "tenant exists with id tenant_123"
+        }
+      ],
+      "request": {
+        "headers": {
+          "Authorization": "Bearer valid-jwt-token",
+          "Content-Type": "application/json"
+        },
+        "matchingRules": {
+          "header": {
+            "Authorization": {
+              "combine": "AND",
+              "matchers": [
+                {
+                  "match": "regex",
+                  "regex": "^Bearer .+"
+                }
+              ]
+            }
+          },
+          "query": {}
+        },
+        "method": "GET",
+        "path": "/admin-portal/v1/dashboard/summary",
+        "query": {
+          "tenant_id": ["tenant_123"]
+        }
+      },
+      "response": {
+        "body": {
+          "active_users_30d": 38,
+          "health_score": 92.5,
+          "last_activity": "2024-09-02T10:30:00Z",
+          "monthly_spend": "89.50",
+          "pending_approvals": 3,
+          "status": "active",
+          "subscription_tier": "professional",
+          "tenant_id": "tenant_123",
+          "tenant_name": "Acme Corporation",
+          "total_documents": 1250,
+          "total_users": 45,
+          "usage_alerts": 1
+        },
+        "headers": {
+          "Content-Type": "application/json"
+        },
+        "matchingRules": {
+          "body": {
+            "$": {
+              "combine": "AND",
+              "matchers": [
+                {
+                  "match": "type"
+                }
+              ]
+            }
+          },
+          "header": {},
+          "status": {}
+        },
+        "status": 200
+      }
+    },
+    {
+      "description": "a request for team information",
+      "providerStates": [
+        {
+          "name": "tenant exists with team members"
+        }
+      ],
+      "request": {
+        "headers": {
+          "Authorization": "Bearer valid-jwt-token",
+          "Content-Type": "application/json"
+        },
+        "matchingRules": {
+          "header": {
+            "Authorization": {
+              "combine": "AND",
+              "matchers": [
+                {
+                  "match": "regex",
+                  "regex": "^Bearer .+"
+                }
+              ]
+            }
+          },
+          "query": {}
+        },
+        "method": "GET",
+        "path": "/admin-portal/v1/team",
+        "query": {
+          "tenant_id": ["tenant_123"]
+        }
+      },
+      "response": {
+        "body": {
+          "active_members": 11,
+          "members": [
+            {
+              "email": "admin@acme.com",
+              "invite_status": null,
+              "last_login": "2024-09-02T09:15:00Z",
+              "name": "John Smith",
+              "permissions": ["admin", "billing", "team_management"],
+              "role": "admin",
+              "status": "active",
+              "user_id": "user_001"
+            }
+          ],
+          "pending_invites": 2,
+          "recent_activity": [
+            {
+              "action": "document_approved",
+              "details": "Approved IEP for Student A",
+              "timestamp": "2024-09-02T08:45:00Z",
+              "user_id": "user_001"
+            }
+          ],
+          "role_distribution": {
+            "admin": 2,
+            "parent": 2,
+            "teacher": 8
+          },
+          "tenant_id": "tenant_123",
+          "total_members": 12
+        },
+        "headers": {
+          "Content-Type": "application/json"
+        },
+        "matchingRules": {
+          "body": {
+            "$": {
+              "combine": "AND",
+              "matchers": [
+                {
+                  "match": "type"
+                }
+              ]
+            },
+            "$.members": {
+              "combine": "AND",
+              "matchers": [
+                {
+                  "match": "type",
+                  "min": 1
+                }
+              ]
+            },
+            "$.recent_activity": {
+              "combine": "AND",
+              "matchers": [
+                {
+                  "match": "type",
+                  "min": 1
+                }
+              ]
+            },
+            "$.role_distribution": {
+              "combine": "AND",
+              "matchers": [
+                {
+                  "match": "type"
+                }
+              ]
+            }
+          },
+          "header": {},
+          "status": {}
+        },
+        "status": 200
+      }
+    },
+    {
+      "description": "a request for usage metrics",
+      "providerStates": [
+        {
+          "name": "tenant has usage data"
+        }
+      ],
+      "request": {
+        "headers": {
+          "Authorization": "Bearer valid-jwt-token",
+          "Content-Type": "application/json"
+        },
+        "matchingRules": {
+          "header": {
+            "Authorization": {
+              "combine": "AND",
+              "matchers": [
+                {
+                  "match": "regex",
+                  "regex": "^Bearer .+"
+                }
+              ]
+            }
+          },
+          "query": {}
+        },
+        "method": "GET",
+        "path": "/admin-portal/v1/usage",
+        "query": {
+          "tenant_id": ["tenant_123"]
+        }
+      },
+      "response": {
+        "body": {
+          "bandwidth_gb": 8.5,
+          "billing_period_end": "2024-09-30T23:59:59Z",
+          "billing_period_start": "2024-09-01T00:00:00Z",
+          "cost_breakdown": {
+            "api_calls": "45.00",
+            "bandwidth": "8.75",
+            "storage": "15.25",
+            "support": "20.50"
+          },
+          "metrics": [
+            {
+              "current_value": 75000,
+              "limit_value": 100000,
+              "metric_name": "API Calls",
+              "percentage_used": 75,
+              "unit": "requests"
+            }
+          ],
+          "projected_monthly_cost": "89.50",
+          "tenant_id": "tenant_123",
+          "total_api_calls": 75000,
+          "total_storage_gb": 15.2,
+          "usage_trends": {
+            "api_calls_trend": "increasing",
+            "cost_trend": "increasing",
+            "storage_trend": "stable"
+          }
+        },
+        "headers": {
+          "Content-Type": "application/json"
+        },
+        "matchingRules": {
+          "body": {
+            "$": {
+              "combine": "AND",
+              "matchers": [
+                {
+                  "match": "type"
+                }
+              ]
+            },
+            "$.cost_breakdown": {
+              "combine": "AND",
+              "matchers": [
+                {
+                  "match": "type"
+                }
+              ]
+            },
+            "$.metrics": {
+              "combine": "AND",
+              "matchers": [
+                {
+                  "match": "type",
+                  "min": 1
+                }
+              ]
+            },
+            "$.usage_trends": {
+              "combine": "AND",
+              "matchers": [
+                {
+                  "match": "type"
+                }
+              ]
+            }
+          },
+          "header": {},
+          "status": {}
+        },
+        "status": 200
+      }
+    },
+    {
+      "description": "a request without valid authorization",
+      "providerStates": [
+        {
+          "name": "user is not authenticated"
+        }
+      ],
+      "request": {
+        "headers": {
+          "Content-Type": "application/json"
+        },
+        "method": "GET",
+        "path": "/admin-portal/v1/dashboard/summary",
+        "query": {
+          "tenant_id": ["tenant_123"]
+        }
+      },
+      "response": {
+        "body": {
+          "error": "Unauthorized",
+          "message": "Valid authentication required"
+        },
+        "headers": {
+          "Content-Type": "application/json"
+        },
+        "matchingRules": {
+          "body": {
+            "$": {
+              "combine": "AND",
+              "matchers": [
+                {
+                  "match": "type"
+                }
+              ]
+            }
+          },
+          "header": {},
+          "status": {}
+        },
+        "status": 401
+      }
+    }
+  ],
+  "metadata": {
+    "pact-js": {
+      "version": "15.0.1"
+    },
+    "pactRust": {
+      "ffi": "0.4.22",
+      "models": "1.2.3"
+    },
+    "pactSpecification": {
+      "version": "3.0.0"
+    }
+  },
+  "provider": {
+    "name": "admin-portal-svc"
+  }
+}
