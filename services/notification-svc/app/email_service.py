@@ -31,10 +31,14 @@ class EmailService:
             # Ensure dev email directory exists
             self.dev_email_path.mkdir(exist_ok=True)
             logger.info(
-                f"Email service in development mode - emails will be saved to {self.dev_email_path}"
+                "Email service in development mode - emails saved to %s",
+                self.dev_email_path
             )
         else:
-            logger.info("Email service in production mode - emails will be sent via SMTP")
+            logger.info(
+                "Email service in production mode - "
+                "emails will be sent via SMTP"
+            )
 
     async def send_email(
         self,
@@ -94,39 +98,52 @@ class EmailService:
                     results["successful"].append(email)
                     results["total_sent"] += 1
                 else:
-                    results["failed"].append(
-                        {"email": email, "error": result.get("error", "Unknown error")}
-                    )
+                    results["failed"].append({
+                        "email": email,
+                        "error": result.get("error", "Unknown error")
+                    })
 
-            except Exception as e:
-                logger.error(f"Failed to send email to {email}: {e}")
+            except (smtplib.SMTPException, OSError, ValueError) as e:
+                logger.error("Failed to send email to %s: %s", email, e)
                 results["failed"].append({"email": email, "error": str(e)})
 
         return results
 
-    async def _save_dev_email(self, email_data: dict[str, Any]) -> dict[str, Any]:
+    async def _save_dev_email(
+        self, email_data: dict[str, Any]
+    ) -> dict[str, Any]:
         """Save email to file system for development."""
         try:
             # Generate filename with timestamp
             timestamp = datetime.utcnow().strftime("%Y%m%d_%H%M%S_%f")
-            filename = (
-                f"email_{timestamp}_{email_data['to'].replace('@', '_at_').replace('.', '_')}.json"
+            safe_email = (
+                email_data['to'].replace('@', '_at_').replace('.', '_')
             )
+            filename = f"email_{timestamp}_{safe_email}.json"
             filepath = self.dev_email_path / filename
 
             # Save email data as JSON
             async with aiofiles.open(filepath, "w") as f:
                 await f.write(json.dumps(email_data, indent=2))
 
-            logger.info(f"Development email saved: {filepath}")
+            logger.info("Development email saved: %s", filepath)
 
-            return {"success": True, "message_id": f"dev_{timestamp}", "filepath": str(filepath)}
+            return {
+                "success": True,
+                "message_id": f"dev_{timestamp}",
+                "filepath": str(filepath)
+            }
 
-        except Exception as e:
-            logger.error(f"Failed to save development email: {e}")
-            return {"success": False, "error": f"Failed to save development email: {e}"}
+        except (OSError, ValueError, json.JSONDecodeError) as e:
+            logger.error("Failed to save development email: %s", e)
+            return {
+                "success": False,
+                "error": "Failed to save development email: " + str(e)
+            }
 
-    async def _send_smtp_email(self, email_data: dict[str, Any]) -> dict[str, Any]:
+    async def _send_smtp_email(
+        self, email_data: dict[str, Any]
+    ) -> dict[str, Any]:
         """Send email via SMTP."""
         try:
             if not self.settings.smtp_server:
@@ -135,7 +152,9 @@ class EmailService:
             # Create message
             msg = MIMEMultipart("alternative")
             msg["Subject"] = email_data["subject"]
-            msg["From"] = f"{email_data['from_name']} <{email_data['from_email']}>"
+            msg["From"] = (
+                f"{email_data['from_name']} <{email_data['from_email']}>"
+            )
             msg["To"] = email_data["to"]
 
             # Attach HTML content
@@ -143,25 +162,33 @@ class EmailService:
             msg.attach(html_part)
 
             # Send email
-            with smtplib.SMTP(self.settings.smtp_server, self.settings.smtp_port) as server:
+            smtp_server = self.settings.smtp_server
+            smtp_port = self.settings.smtp_port
+            with smtplib.SMTP(smtp_server, smtp_port) as server:
                 if self.settings.smtp_use_tls:
                     server.starttls()
 
-                if self.settings.smtp_username and self.settings.smtp_password:
-                    server.login(self.settings.smtp_username, self.settings.smtp_password)
+                smtp_user = self.settings.smtp_username
+                smtp_pass = self.settings.smtp_password
+                if smtp_user and smtp_pass:
+                    server.login(smtp_user, smtp_pass)
 
                 server.send_message(msg)
 
-            logger.info(f"Email sent successfully to {email_data['to']}")
+            logger.info("Email sent successfully to %s", email_data['to'])
 
+            timestamp = datetime.utcnow().strftime('%Y%m%d_%H%M%S_%f')
             return {
                 "success": True,
-                "message_id": f"smtp_{datetime.utcnow().strftime('%Y%m%d_%H%M%S_%f')}",
+                "message_id": f"smtp_{timestamp}",
             }
 
-        except Exception as e:
-            logger.error(f"Failed to send SMTP email: {e}")
-            return {"success": False, "error": f"Failed to send email: {e}"}
+        except (smtplib.SMTPException, OSError, ValueError) as e:
+            logger.error("Failed to send SMTP email: %s", e)
+            return {
+                "success": False,
+                "error": "Failed to send email: " + str(e)
+            }
 
     def is_configured(self) -> bool:
         """Check if email service is properly configured."""
@@ -189,8 +216,8 @@ class EmailService:
                     email_data = json.loads(content)
                     emails.append(email_data)
 
-        except Exception as e:
-            logger.error(f"Failed to load development emails: {e}")
+        except (OSError, json.JSONDecodeError) as e:
+            logger.error("Failed to load development emails: %s", e)
 
         return emails
 

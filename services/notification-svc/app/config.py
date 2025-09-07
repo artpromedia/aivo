@@ -42,11 +42,12 @@ class Settings(BaseSettings):
 
     # Logging
     LOG_LEVEL: str = "INFO"
-    
+
     # Development
     DEVELOPMENT_MODE: bool = Field(False, env="DEVELOPMENT_MODE")
 
     class Config:
+        """Pydantic configuration class."""
         env_file = ".env"
         case_sensitive = True
 

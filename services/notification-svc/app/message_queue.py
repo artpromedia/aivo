@@ -60,7 +60,7 @@ class MessageQueue:
         score = datetime.now(UTC).timestamp()
         await self.redis.zadd(queue_key, score, notification_id)
 
-        logger.info(f"Queued notification {notification_id} for {user_id}")
+        logger.info("Queued notification %s for %s", notification_id, user_id)
 
         return notification_id
 
@@ -106,7 +106,9 @@ class MessageQueue:
                 notification = json.loads(data)
                 messages.append(notification)
 
-        logger.info(f"Retrieved {len(messages)} missed messages for {user_id}")
+        logger.info(
+            "Retrieved %s missed messages for %s", len(messages), user_id
+        )
 
         return messages
 
@@ -124,7 +126,7 @@ class MessageQueue:
         key = f"notification_queue:{user_id}:{notification_id}"
         await self.redis.delete(key)
 
-        logger.info(f"Marked {notification_id} as delivered for {user_id}")
+        logger.info("Marked %s as delivered for %s", notification_id, user_id)
 
     async def retry_failed(
         self,
@@ -141,14 +143,16 @@ class MessageQueue:
         notification = json.loads(data)
         retry_count = notification.get("retry_count", 0)
 
-        if retry_count >= len(self.retry_intervals):
+        if retry_count >= len(self.retry_delays):
             # Max retries exceeded
-            logger.warning(f"Max retries exceeded for {notification_id} ({user_id})")
+            logger.warning(
+                "Max retries exceeded for %s (%s)", notification_id, user_id
+            )
             await self.mark_delivered(user_id, notification_id)
             return False
 
         # Schedule retry
-        retry_delay = self.retry_intervals[retry_count]
+        retry_delay = self.retry_delays[retry_count]
         notification["retry_count"] = retry_count + 1
         notification["next_retry"] = (
             datetime.now(UTC) + timedelta(seconds=retry_delay)
@@ -161,7 +165,10 @@ class MessageQueue:
             json.dumps(notification),
         )
 
-        logger.info(f"Scheduled retry {retry_count + 1} for {notification_id} in {retry_delay}s")
+        logger.info(
+            "Scheduled retry %s for %s in %ss",
+            retry_count + 1, notification_id, retry_delay
+        )
 
         return True
 
@@ -195,11 +202,15 @@ class MessageQueue:
                                 retry_time = datetime.fromisoformat(next_retry)
                                 if retry_time <= datetime.now(UTC):
                                     # Trigger retry
-                                    logger.info(f"Retrying {notification_id} for {user_id}")
-                                    # TODO: Trigger actual delivery attempt
+                                    logger.info(
+                                        "Retrying %s for %s",
+                                        notification_id, user_id
+                                    )
+                                    # FUTURE: Implement actual delivery attempt
+                                    # Integrate with notification service
 
                 await asyncio.sleep(30)  # Check every 30 seconds
 
-            except Exception as e:
-                logger.error(f"Retry queue processing error: {e}")
+            except (redis.RedisError, OSError, ValueError) as e:
+                logger.error("Retry queue processing error: %s", e)
                 await asyncio.sleep(60)

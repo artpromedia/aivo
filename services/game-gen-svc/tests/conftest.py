@@ -6,13 +6,16 @@ from pathlib import Path
 import pytest
 from fastapi.testclient import TestClient
 
-# Add the project root to Python path for proper imports
-project_root = Path(__file__).parent.parent
-if str(project_root) not in sys.path:
-    sys.path.insert(0, str(project_root))
-
-from app.main import app  # noqa: E402
-from app.models import AccessibilitySettings, SubjectType  # noqa: E402
+try:
+    from app.main import app
+    from app.models import AccessibilitySettings, SubjectType
+except ImportError:
+    # Add the project root to Python path for proper imports
+    project_root = Path(__file__).parent.parent
+    if str(project_root) not in sys.path:
+        sys.path.insert(0, str(project_root))
+    from app.main import app
+    from app.models import AccessibilitySettings, SubjectType
 
 
 @pytest.fixture

@@ -1,6 +1,7 @@
 """Template engine for localized notifications."""
 
 import logging
+import re
 from typing import Any
 
 import jinja2
@@ -62,9 +63,12 @@ class TemplateEngine:
                 "en": {
                     "title": "Document Updated",
                     "body": (
-                        "{{document_name}} has been updated by {{updated_by}}. {{update_summary}}"
+                        "{{document_name}} has been updated by "
+                        "{{updated_by}}. {{update_summary}}"
                     ),
-                    "sms": ("Doc Update: {{document_name}} updated. Check portal."),
+                    "sms": (
+                        "Doc Update: {{document_name}} updated. Check portal."
+                    ),
                 },
                 "es": {
                     "title": "Documento Actualizado",
@@ -72,7 +76,10 @@ class TemplateEngine:
                         "{{document_name}} ha sido actualizado por "
                         "{{updated_by}}. {{update_summary}}"
                     ),
-                    "sms": ("Actualización: {{document_name}} actualizado. Revise el portal."),
+                    "sms": (
+                        "Actualización: {{document_name}} actualizado. "
+                        "Revise el portal."
+                    ),
                 },
             },
         }
@@ -91,7 +98,9 @@ class TemplateEngine:
 
         # Fallback to English if locale not found
         if locale not in template["locales"]:
-            logger.warning(f"Locale {locale} not found for {template_id}, using en")
+            logger.warning(
+                "Locale %s not found for %s, using en", locale, template_id
+            )
             locale = "en"
 
         locale_templates = template["locales"][locale]
@@ -101,8 +110,8 @@ class TemplateEngine:
             try:
                 jinja_template = Template(template_str)
                 result[key] = jinja_template.render(**data)
-            except Exception as e:
-                logger.error(f"Template render error: {e}")
+            except (jinja2.TemplateError, ValueError) as e:
+                logger.error("Template render error: %s", e)
                 result[key] = template_str
 
         # Add metadata
@@ -144,15 +153,13 @@ class TemplateEngine:
         for locale_data in template["locales"].values():
             for template_str in locale_data.values():
                 # Simple variable extraction
-                import re
-
                 vars_found = re.findall(r"\{\{(\w+)\}\}", template_str)
                 required_vars.update(vars_found)
 
         # Check if all required variables are in data
         missing = required_vars - set(data.keys())
         if missing:
-            logger.warning(f"Missing template variables: {missing}")
+            logger.warning("Missing template variables: %s", missing)
             return False
 
         return True

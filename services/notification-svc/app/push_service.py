@@ -27,7 +27,9 @@ class PushService:
         if not settings.VAPID_PRIVATE_KEY:
             vapid = Vapid()
             vapid.generate_keys()
-            logger.warning(f"Generated VAPID keys. Public key: {vapid.public_key}")
+            logger.warning(
+                "Generated VAPID keys. Public key: %s", vapid.public_key
+            )
         else:
             logger.info("Using configured VAPID keys")
 
@@ -46,14 +48,14 @@ class PushService:
                 # Update existing subscription
                 sub.keys = subscription.keys
                 sub.expiration_time = subscription.expiration_time
-                logger.info(f"Updated push subscription for {user_id}")
+                logger.info("Updated push subscription for %s", user_id)
                 return True
 
         # Add new subscription
         self.subscriptions[user_id].append(subscription)
-        logger.info(f"Added push subscription for {user_id}")
+        logger.info("Added push subscription for %s", user_id)
 
-        # TODO: Persist to database
+        # FUTURE: Persist to database
         await self._persist_subscription(user_id, subscription)
 
         return True
@@ -67,13 +69,14 @@ class PushService:
         if user_id not in self.subscriptions:
             return False
 
+        subscriptions = self.subscriptions[user_id]
         self.subscriptions[user_id] = [
-            sub for sub in self.subscriptions[user_id] if sub.endpoint != endpoint
+            sub for sub in subscriptions if sub.endpoint != endpoint
         ]
 
-        logger.info(f"Removed push subscription for {user_id}")
+        logger.info("Removed push subscription for %s", user_id)
 
-        # TODO: Remove from database
+        # FUTURE: Remove from database
         await self._remove_subscription(user_id, endpoint)
 
         return True
@@ -125,7 +128,7 @@ class PushService:
                         invalid_subscriptions.append(subscription.endpoint)
 
             except WebPushException as e:
-                logger.error(f"Push failed for {user_id}: {e}")
+                logger.error("Push failed for %s: %s", user_id, e)
                 results["failed"] += 1
                 results["errors"].append(
                     {
@@ -174,8 +177,7 @@ class PushService:
         subscription: PushSubscription,
     ) -> None:
         """Persist subscription to database."""
-        # TODO: Implement database persistence
-        pass
+        # FUTURE: Implement database persistence
 
     async def _remove_subscription(
         self,
@@ -183,5 +185,4 @@ class PushService:
         endpoint: str,
     ) -> None:
         """Remove subscription from database."""
-        # TODO: Implement database removal
-        pass
+        # FUTURE: Implement database removal

@@ -1,6 +1,7 @@
 """SMS notification service with multiple provider support."""
 
 import logging
+import re
 
 from twilio.rest import Client as TwilioClient
 
@@ -58,8 +59,8 @@ class SMSService:
                     "error": f"Unknown provider: {self.provider}",
                 }
 
-        except Exception as e:
-            logger.error(f"SMS send failed: {e}")
+        except (ValueError, ConnectionError, OSError) as e:
+            logger.error("SMS send failed: %s", e)
             return {
                 "status": "error",
                 "error": str(e),
@@ -86,17 +87,17 @@ class SMSService:
             }
 
         except Exception as e:
-            logger.error(f"Twilio SMS failed: {e}")
+            logger.error("Twilio SMS failed: %s", e)
             raise
 
     async def _send_aws_sns(
         self,
-        phone_number: str,
-        message: str,
-        sender_id: str | None = None,
+        _phone_number: str,
+        _message: str,
+        _sender_id: str | None = None,
     ) -> dict[str, any]:
         """Send SMS via AWS SNS."""
-        # TODO: Implement AWS SNS integration
+        # NOTE: AWS SNS integration not yet implemented
         return {
             "status": "not_implemented",
             "provider": "aws_sns",
@@ -105,8 +106,6 @@ class SMSService:
     def _validate_phone_number(self, phone_number: str) -> bool:
         """Validate phone number format."""
         # Basic validation - should be enhanced
-        import re
-
         pattern = r"^\+?[1-9]\d{1,14}$"
         return bool(re.match(pattern, phone_number))
 

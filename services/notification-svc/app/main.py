@@ -77,7 +77,7 @@ class ConnectionManager:
             "token": token,
         }
 
-        logger.info(f"User {user_id} connected via WebSocket")
+        logger.info("User %s connected via WebSocket", user_id)
 
     async def disconnect(self, websocket: WebSocket) -> None:
         """Remove WebSocket connection."""
@@ -92,7 +92,7 @@ class ConnectionManager:
         if websocket in self.connection_metadata:
             del self.connection_metadata[websocket]
 
-        logger.info(f"User {user_id} disconnected from WebSocket")
+        logger.info("User %s disconnected from WebSocket", user_id)
 
     async def send_personal_message(
         self,
@@ -114,8 +114,8 @@ class ConnectionManager:
                             "data": message,
                         }
                     )
-                except Exception as e:
-                    logger.error(f"Failed to send to {user_id}: {e}")
+                except (WebSocketDisconnect, ConnectionResetError) as e:
+                    logger.error("Failed to send to %s: %s", user_id, e)
                     disconnected.append(connection)
 
             # Clean up disconnected connections
@@ -140,8 +140,8 @@ class ConnectionManager:
                         "data": message,
                     }
                 )
-            except Exception as e:
-                logger.error(f"Broadcast failed: {e}")
+            except (WebSocketDisconnect, ConnectionResetError) as e:
+                logger.error("Broadcast failed: %s", e)
 
 
 manager = ConnectionManager()
@@ -183,7 +183,7 @@ async def verify_jwt_token(token: str) -> dict[str, Any]:
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
             detail=f"Invalid token: {str(e)}",
-        )
+        ) from e
 
 
 @app.websocket("/ws/notify")
@@ -244,7 +244,7 @@ async def websocket_endpoint(
                             "timestamp": datetime.now(UTC).isoformat(),
                         }
                     )
-                except Exception:
+                except (WebSocketDisconnect, ConnectionResetError, OSError):
                     break
 
         heartbeat_task = asyncio.create_task(heartbeat())
@@ -259,16 +259,16 @@ async def websocket_endpoint(
                     continue
 
                 # Handle other message types
-                logger.info(f"Received from {user_id}: {data}")
+                logger.info("Received from %s: %s", user_id, data)
 
         except WebSocketDisconnect:
-            logger.info(f"WebSocket disconnected for {user_id}")
+            logger.info("WebSocket disconnected for %s", user_id)
         finally:
             heartbeat_task.cancel()
             await manager.disconnect(websocket)
 
-    except Exception as e:
-        logger.error(f"WebSocket error: {e}")
+    except Exception as e:  # pylint: disable=broad-exception-caught
+        logger.error("WebSocket error: %s", e)
         await websocket.close(code=1011, reason=str(e))
 
 
@@ -286,12 +286,12 @@ async def subscribe_push(
             "status": "success",
             "message": "Push subscription registered",
         }
-    except Exception as e:
-        logger.error(f"Push subscription failed: {e}")
+    except Exception as e:  # pylint: disable=broad-exception-caught
+        logger.error("Push subscription failed: %s", e)
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail=str(e),
-        )
+        ) from e
 
 
 @app.post("/push/unsubscribe")
@@ -308,18 +308,18 @@ async def unsubscribe_push(
             "status": "success",
             "message": "Push subscription removed",
         }
-    except Exception as e:
-        logger.error(f"Push unsubscribe failed: {e}")
+    except Exception as e:  # pylint: disable=broad-exception-caught
+        logger.error("Push unsubscribe failed: %s", e)
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail=str(e),
-        )
+        ) from e
 
 
 @app.post("/notify")
 async def send_notification(
     request: NotificationRequest,
-    current_user: dict | None = None,
+    current_user: dict | None = None,  # pylint: disable=unused-argument
 ) -> dict:
     """Send notification through available channels."""
     try:
@@ -356,7 +356,8 @@ async def send_notification(
             results["channels"]["push"] = push_result
 
         # SMS fallback for critical notifications
-        if NotificationChannel.SMS in request.channels and request.priority == "critical":
+        if (NotificationChannel.SMS in request.channels and
+                request.priority == "critical"):
             if request.phone_number:
                 sms_result = await sms_service.send(
                     request.phone_number,
@@ -377,19 +378,20 @@ async def send_notification(
 
         return results
 
-    except Exception as e:
-        logger.error(f"Notification failed: {e}")
+    except Exception as e:  # pylint: disable=broad-exception-caught
+        logger.error("Notification failed: %s", e)
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail=str(e),
-        )
+        ) from e
 
 
 @app.get("/health")
 async def health_check() -> dict:
     """Health check endpoint."""
+    active_connections = manager.active_connections.values()
     return {
         "status": "healthy",
         "timestamp": datetime.now(UTC).isoformat(),
-        "connections": sum(len(conns) for conns in manager.active_connections.values()),
+        "connections": sum(len(conns) for conns in active_connections),
     }

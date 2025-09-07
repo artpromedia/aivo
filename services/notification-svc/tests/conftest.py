@@ -12,7 +12,7 @@ from app.config import Settings
 
 
 @pytest.fixture(scope="session")
-def event_loop() -> asyncio.AbstractEventLoop:
+def event_loop():
     """Create an instance of the default event loop for the test session."""
     policy = asyncio.get_event_loop_policy()
     loop = policy.new_event_loop()
@@ -21,7 +21,7 @@ def event_loop() -> asyncio.AbstractEventLoop:
 
 
 @pytest.fixture(scope="function")
-def temp_email_dir():
+def email_storage_dir():
     """Create a temporary directory for email storage during tests."""
     temp_dir = tempfile.mkdtemp()
     yield temp_dir
@@ -29,11 +29,11 @@ def temp_email_dir():
 
 
 @pytest.fixture(autouse=True)
-def mock_settings(temp_email_dir):
+def mock_settings(email_storage_dir):  # pylint: disable=redefined-outer-name
     """Mock settings for testing."""
     test_settings = Settings(
         dev_mode=True,
-        dev_email_dump_path=temp_email_dir,
+        dev_email_dump_path=email_storage_dir,
         app_name="TestApp",
         templates_path="templates",
         smtp_server="localhost",
@@ -48,8 +48,10 @@ def mock_settings(temp_email_dir):
 
     with patch("app.config.get_settings", return_value=test_settings):
         with patch("app.main.get_settings", return_value=test_settings):
-            with patch("app.template_service.get_settings", return_value=test_settings):
-                with patch("app.email_service.get_settings", return_value=test_settings):
+            with patch("app.template_service.get_settings",
+                       return_value=test_settings):
+                with patch("app.email_service.get_settings",
+                           return_value=test_settings):
                     yield test_settings
 
 
