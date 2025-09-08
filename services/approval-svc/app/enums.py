@@ -1,11 +1,13 @@
 """
 Core enumerations for the Approval Service.
 """
+
 from enum import Enum
 
 
 class ApprovalStatus(str, Enum):
     """Status of an approval request."""
+
     PENDING = "pending"
     APPROVED = "approved"
     REJECTED = "rejected"
@@ -15,6 +17,7 @@ class ApprovalStatus(str, Enum):
 
 class ParticipantRole(str, Enum):
     """Roles for approval participants."""
+
     GUARDIAN = "guardian"
     TEACHER = "teacher"
     ADMINISTRATOR = "administrator"
@@ -24,12 +27,14 @@ class ParticipantRole(str, Enum):
 
 class DecisionType(str, Enum):
     """Types of decisions participants can make."""
+
     APPROVE = "approve"
     REJECT = "reject"
 
 
 class ApprovalType(str, Enum):
     """Types of approval workflows."""
+
     IEP_DOCUMENT = "iep_document"
     ASSESSMENT_PLAN = "assessment_plan"
     PLACEMENT_CHANGE = "placement_change"
@@ -39,6 +44,7 @@ class ApprovalType(str, Enum):
 
 class NotificationChannel(str, Enum):
     """Channels for sending notifications."""
+
     EMAIL = "email"
     SMS = "sms"
     WEBHOOK = "webhook"
@@ -47,6 +53,7 @@ class NotificationChannel(str, Enum):
 
 class Priority(str, Enum):
     """Priority levels for approval requests."""
+
     LOW = "low"
     NORMAL = "normal"
     HIGH = "high"
@@ -55,6 +62,7 @@ class Priority(str, Enum):
 
 class WebhookEventType(str, Enum):
     """Types of webhook events."""
+
     APPROVAL_REQUESTED = "approval_requested"
     DECISION_MADE = "decision_made"
     APPROVAL_COMPLETED = "approval_completed"

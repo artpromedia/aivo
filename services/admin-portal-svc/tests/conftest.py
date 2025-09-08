@@ -1,10 +1,11 @@
 """
 Conftest for pytest configuration and shared fixtures.
 """
-import pytest
+
 import asyncio
 from unittest.mock import AsyncMock, Mock
-import redis.asyncio as redis
+
+import pytest
 
 
 @pytest.fixture(scope="session")
@@ -30,7 +31,7 @@ async def mock_redis():
 def mock_settings():
     """Mock settings for testing."""
     from app.config import Settings
-    
+
     settings = Settings()
     settings.redis_url = "redis://localhost:6379/0"
     settings.cache_ttl = 30
@@ -39,5 +40,5 @@ def mock_settings():
     settings.approval_service_url = "http://localhost:8003"
     settings.notification_service_url = "http://localhost:8004"
     settings.environment = "test"
-    
+
     return settings

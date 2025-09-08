@@ -12,8 +12,7 @@ class Settings(BaseSettings):
     debug: bool = False
 
     # Database
-    database_url: str = ("postgresql+asyncpg://postgres:postgres@localhost"
-                         ":5432/lesson_registry")
+    database_url: str = "postgresql+asyncpg://postgres:postgres@localhost:5432/lesson_registry"
 
     # AWS/MinIO settings
     aws_access_key_id: str | None = None
@@ -39,6 +38,7 @@ class Settings(BaseSettings):
 
     class Config:
         """Pydantic configuration."""
+
         env_file = ".env"
         case_sensitive = False
 

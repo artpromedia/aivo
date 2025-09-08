@@ -19,47 +19,75 @@ class Settings(BaseSettings):
 
     # OpenSearch config
     opensearch_host: str = Field(
-        default="localhost", description="OpenSearch host"
+        default="localhost",
+        description="OpenSearch host"
     )
-    opensearch_port: int = Field(default=9200, description="OpenSearch port")
+    opensearch_port: int = Field(
+        default=9200,
+        description="OpenSearch port"
+    )
     opensearch_use_ssl: bool = Field(
-        default=False, description="Use SSL for OpenSearch"
+        default=False,
+        description="Use SSL for OpenSearch"
     )
     opensearch_verify_certs: bool = Field(
-        default=False, description="Verify SSL certificates"
+        default=False,
+        description="Verify SSL certificates"
     )
     opensearch_username: str = Field(
-        default="", description="OpenSearch username"
+        default="",
+        description="OpenSearch username"
     )
     opensearch_password: str = Field(
-        default="", description="OpenSearch password"
+        default="",
+        description="OpenSearch password"
     )
 
     # Index settings
     lessons_index: str = Field(
-        default="lessons", description="Lessons index name"
+        default="lessons",
+        description="Lessons index name"
     )
     coursework_index: str = Field(
-        default="coursework", description="Coursework index name"
+        default="coursework",
+        description="Coursework index name"
     )
     learners_index: str = Field(
-        default="learners", description="Learners index name"
+        default="learners",
+        description="Learners index name"
     )
 
     # Redis config (for caching)
-    redis_host: str = Field(default="localhost", description="Redis host")
-    redis_port: int = Field(default=6379, description="Redis port")
-    redis_db: int = Field(default=0, description="Redis database")
-    redis_password: str = Field(default="", description="Redis password")
+    redis_host: str = Field(
+        default="localhost",
+        description="Redis host"
+    )
+    redis_port: int = Field(
+        default=6379,
+        description="Redis port"
+    )
+    redis_db: int = Field(
+        default=0,
+        description="Redis database"
+    )
+    redis_password: str = Field(
+        default="",
+        description="Redis password"
+    )
 
     # RBAC settings
     enable_rbac: bool = Field(
-        default=True, description="Enable RBAC filtering"
+        default=True,
+        description="Enable RBAC filtering"
     )
     jwt_secret_key: str = Field(
-        default="your-secret-key", description="JWT secret key"
+        default="your-secret-key",
+        description="JWT secret key"
     )
-    jwt_algorithm: str = Field(default="HS256", description="JWT algorithm")
+    jwt_algorithm: str = Field(
+        default="HS256",
+        description="JWT algorithm"
+    )
 
     # PII masking settings
     enable_pii_masking: bool = Field(

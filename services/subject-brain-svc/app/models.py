@@ -9,6 +9,7 @@ from pydantic import BaseModel, Field
 
 class SubjectType(str, Enum):
     """Subject types supported by the brain."""
+
     MATHEMATICS = "mathematics"
     SCIENCE = "science"
     LANGUAGE_ARTS = "language_arts"
@@ -18,6 +19,7 @@ class SubjectType(str, Enum):
 
 class MasteryLevel(str, Enum):
     """Mastery levels for learning objectives."""
+
     NOT_STARTED = "not_started"
     BEGINNING = "beginning"
     DEVELOPING = "developing"
@@ -27,6 +29,7 @@ class MasteryLevel(str, Enum):
 
 class ActivityType(str, Enum):
     """Types of learning activities."""
+
     LESSON = "lesson"
     PRACTICE = "practice"
     ASSESSMENT = "assessment"
@@ -36,6 +39,7 @@ class ActivityType(str, Enum):
 
 class RuntimeStatus(str, Enum):
     """Status of per-learner-subject runtime pods."""
+
     PENDING = "pending"
     RUNNING = "running"
     SCALING = "scaling"
@@ -46,6 +50,7 @@ class RuntimeStatus(str, Enum):
 
 class LearnerBaseline(BaseModel):
     """Baseline assessment data for a learner in a subject."""
+
     learner_id: str
     subject: SubjectType
     grade_level: int
@@ -59,6 +64,7 @@ class LearnerBaseline(BaseModel):
 
 class CourseworkTopic(BaseModel):
     """Topic from current coursework."""
+
     topic_id: str
     name: str
     subject: SubjectType
@@ -71,12 +77,11 @@ class CourseworkTopic(BaseModel):
 
 class TeacherConstraints(BaseModel):
     """Teacher-defined constraints for activity planning."""
+
     teacher_id: str
     subject: SubjectType
     max_activity_duration_minutes: int = 60
-    preferred_activity_types: list[ActivityType] = Field(
-        default_factory=list
-    )
+    preferred_activity_types: list[ActivityType] = Field(default_factory=list)
     blocked_topics: list[str] = Field(default_factory=list)
     required_topics: list[str] = Field(default_factory=list)
     assessment_frequency_days: int = 7
@@ -85,6 +90,7 @@ class TeacherConstraints(BaseModel):
 
 class PlannerInput(BaseModel):
     """Input for the subject-brain planner."""
+
     request_id: str = Field(default_factory=lambda: str(uuid4()))
     learner_id: str
     subject: SubjectType
@@ -97,6 +103,7 @@ class PlannerInput(BaseModel):
 
 class PlannedActivity(BaseModel):
     """A planned learning activity."""
+
     activity_id: str = Field(default_factory=lambda: str(uuid4()))
     type: ActivityType
     topic: CourseworkTopic
@@ -111,6 +118,7 @@ class PlannedActivity(BaseModel):
 
 class ActivityPlan(BaseModel):
     """Complete activity plan for a learner session."""
+
     plan_id: str = Field(default_factory=lambda: str(uuid4()))
     learner_id: str
     subject: SubjectType
@@ -123,6 +131,7 @@ class ActivityPlan(BaseModel):
 
 class RuntimeRequest(BaseModel):
     """Request to start a per-learner-subject runtime."""
+
     runtime_id: str = Field(default_factory=lambda: str(uuid4()))
     learner_id: str
     subject: SubjectType
@@ -136,6 +145,7 @@ class RuntimeRequest(BaseModel):
 
 class RuntimeMetrics(BaseModel):
     """Metrics for runtime monitoring and autoscaling."""
+
     runtime_id: str
     gpu_queue_depth: int = 0
     gpu_utilization_percent: float = 0.0
@@ -143,13 +153,12 @@ class RuntimeMetrics(BaseModel):
     cpu_utilization_percent: float = 0.0
     active_learners: int = 0
     pending_requests: int = 0
-    last_activity_timestamp: datetime = Field(
-        default_factory=datetime.utcnow
-    )
+    last_activity_timestamp: datetime = Field(default_factory=datetime.utcnow)
 
 
 class RuntimePod(BaseModel):
     """Kubernetes pod runtime for per-learner-subject processing."""
+
     runtime_id: str
     learner_id: str
     subject: SubjectType
@@ -167,6 +176,7 @@ class RuntimePod(BaseModel):
 
 class ScalingDecision(BaseModel):
     """HPA scaling decision based on metrics."""
+
     decision_id: str = Field(default_factory=lambda: str(uuid4()))
     timestamp: datetime = Field(default_factory=datetime.utcnow)
     current_replicas: int
@@ -181,6 +191,7 @@ class ScalingDecision(BaseModel):
 
 class PlannerRequest(BaseModel):
     """API request to the planner service."""
+
     learner_id: str
     subject: SubjectType
     session_duration_minutes: int = 30
@@ -189,6 +200,7 @@ class PlannerRequest(BaseModel):
 
 class PlannerResponse(BaseModel):
     """API response from the planner service."""
+
     success: bool
     plan: ActivityPlan | None = None
     runtime_request: RuntimeRequest | None = None
@@ -198,6 +210,7 @@ class PlannerResponse(BaseModel):
 
 class RuntimeStatusResponse(BaseModel):
     """Status response for runtime queries."""
+
     runtime_id: str
     status: RuntimeStatus
     metrics: RuntimeMetrics

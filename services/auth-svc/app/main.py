@@ -1,26 +1,25 @@
 """
 Main FastAPI application for auth service.
 """
+
 import os
 from contextlib import asynccontextmanager
 from typing import AsyncGenerator
 
-from fastapi import FastAPI, Request, HTTPException
+from fastapi import FastAPI, HTTPException, Request
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.middleware.trustedhost import TrustedHostMiddleware
 from fastapi.responses import JSONResponse
-from sqlalchemy.ext.asyncio import AsyncSession, create_async_engine, async_sessionmaker
 from sqlalchemy.exc import SQLAlchemyError
+from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker, create_async_engine
 
 from .models import Base
 from .routes import router as auth_router
 from .schemas import ErrorResponse
 
-
 # Database configuration
 DATABASE_URL = os.getenv(
-    "DATABASE_URL", 
-    "postgresql+asyncpg://auth_user:auth_password@localhost:5432/auth_db"
+    "DATABASE_URL", "postgresql+asyncpg://auth_user:auth_password@localhost:5432/auth_db"
 )
 
 # Create async engine with conditional pool arguments
@@ -30,19 +29,17 @@ engine_kwargs = {
 
 # Only add pool arguments for non-SQLite databases
 if not DATABASE_URL.startswith("sqlite"):
-    engine_kwargs.update({
-        "pool_size": int(os.getenv("DATABASE_POOL_SIZE", "10")),
-        "max_overflow": int(os.getenv("DATABASE_MAX_OVERFLOW", "20")),
-    })
+    engine_kwargs.update(
+        {
+            "pool_size": int(os.getenv("DATABASE_POOL_SIZE", "10")),
+            "max_overflow": int(os.getenv("DATABASE_MAX_OVERFLOW", "20")),
+        }
+    )
 
 engine = create_async_engine(DATABASE_URL, **engine_kwargs)
 
 # Create session factory
-async_session_factory = async_sessionmaker(
-    engine,
-    class_=AsyncSession,
-    expire_on_commit=False
-)
+async_session_factory = async_sessionmaker(engine, class_=AsyncSession, expire_on_commit=False)
 
 
 @asynccontextmanager
@@ -51,9 +48,9 @@ async def lifespan(app: FastAPI) -> AsyncGenerator[None, None]:
     # Create database tables
     async with engine.begin() as conn:
         await conn.run_sync(Base.metadata.create_all)
-    
+
     yield
-    
+
     # Close database connections
     await engine.dispose()
 
@@ -102,6 +99,7 @@ app.include_router(auth_router, prefix="/api/v1/auth", tags=["auth"])
 
 # Override the dependency in the app after including the router
 from .routes import get_db_dependency
+
 app.dependency_overrides[get_db_dependency] = get_db
 
 
@@ -147,11 +145,7 @@ async def general_exception_handler(request: Request, exc: Exception) -> JSONRes
 @app.get("/health")
 async def health_check() -> dict:
     """Health check endpoint."""
-    return {
-        "status": "healthy",
-        "service": "auth-svc",
-        "version": "1.0.0"
-    }
+    return {"status": "healthy", "service": "auth-svc", "version": "1.0.0"}
 
 
 # Root endpoint
@@ -161,13 +155,13 @@ async def root() -> dict:
     return {
         "message": "Auth Service API",
         "version": "1.0.0",
-        "docs": "/docs" if os.getenv("ENVIRONMENT", "development") == "development" else "disabled"
+        "docs": "/docs" if os.getenv("ENVIRONMENT", "development") == "development" else "disabled",
     }
 
 
 if __name__ == "__main__":
     import uvicorn
-    
+
     uvicorn.run(
         "app.main:app",
         host=os.getenv("HOST", "0.0.0.0"),

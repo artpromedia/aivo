@@ -18,7 +18,7 @@ from .services.runtime_manager import runtime_manager
 # Configure logging
 logging.basicConfig(
     level=getattr(logging, settings.log_level),
-    format="%(asctime)s - %(name)s - %(levelname)s - %(message)s"
+    format="%(asctime)s - %(name)s - %(levelname)s - %(message)s",
 )
 logger = logging.getLogger(__name__)
 
@@ -43,10 +43,11 @@ async def lifespan(_app: FastAPI) -> AsyncGenerator[None, None]:
 app = FastAPI(
     title="Subject-Brain Service",
     description=(
-        "AI-powered planner and runtime for per-learner-subject GPU pods"
+        "AI-powered planner and runtime for "
+        "per-learner-subject GPU pods"
     ),
     version=settings.service_version,
-    lifespan=lifespan
+    lifespan=lifespan,
 )
 
 # Add CORS middleware
@@ -65,7 +66,7 @@ async def health_check() -> dict[str, str]:
     return {
         "status": "healthy",
         "service": "subject-brain-svc",
-        "version": settings.service_version
+        "version": settings.service_version,
     }
 
 
@@ -79,12 +80,13 @@ async def get_metrics() -> dict[str, dict[str, int] | dict[str, int]]:
                 "active_runtimes": len(runtime_manager.active_runtimes),
                 "total_pods": scaling_metrics["active_runtimes"],
             },
-            "scaling_metrics": scaling_metrics
+            "scaling_metrics": scaling_metrics,
         }
     except Exception as e:  # pylint: disable=broad-exception-caught
         logger.error("Failed to get metrics: %s", e)
         raise HTTPException(
-            status_code=500, detail="Failed to get metrics"
+            status_code=500,
+            detail="Failed to get metrics"
         ) from e
 
 
@@ -95,7 +97,7 @@ async def create_activity_plan(request: PlannerRequest) -> PlannerResponse:
         logger.info(
             "Creating plan for learner %s in %s",
             request.learner_id,
-            request.subject
+            request.subject,
         )
 
         # TODO: In a real implementation, we would:  # pylint: disable=fixme
@@ -107,7 +109,9 @@ async def create_activity_plan(request: PlannerRequest) -> PlannerResponse:
         # This would be replaced with actual service calls
         raise HTTPException(
             status_code=501,
-            detail="Plan creation requires integration with other services"
+            detail=(
+                "Plan creation requires integration with other services"
+            ),
         )
 
     except HTTPException:
@@ -139,7 +143,7 @@ async def get_runtime_status(runtime_id: str) -> RuntimeStatusResponse:
             # pylint: disable-next=fixme
             estimated_completion_minutes=None,  # TODO: Calculate based on plan
             # pylint: disable-next=fixme
-            current_activity=None  # TODO: Get from runtime pod
+            current_activity=None,  # TODO: Get from runtime pod
         )
 
     except HTTPException:
@@ -160,15 +164,14 @@ async def terminate_runtime(runtime_id: str) -> dict[str, str]:
 
         if not runtime_pod:
             raise HTTPException(
-                status_code=404,
-                detail=f"Runtime {runtime_id} not found"
+                status_code=404, detail=f"Runtime {runtime_id} not found"
             )
 
         await runtime_manager.terminate_runtime(runtime_id)
 
         return {
             "message": f"Runtime {runtime_id} termination initiated",
-            "status": "terminating"
+            "status": "terminating",
         }
 
     except HTTPException:
@@ -190,7 +193,7 @@ async def cleanup_idle_runtimes() -> dict[str, str | list[str] | int]:
         return {
             "message": "Cleanup completed",
             "cleaned_up_runtimes": cleaned_up,
-            "count": len(cleaned_up)
+            "count": len(cleaned_up),
         }
 
     except Exception as e:  # pylint: disable=broad-exception-caught
@@ -216,16 +219,17 @@ async def root() -> dict[str, str | dict[str, str]]:
             "create_plan": "POST /plan",
             "get_runtime": "GET /runtime/{runtime_id}",
             "terminate_runtime": "DELETE /runtime/{runtime_id}",
-            "cleanup": "POST /cleanup"
-        }
+            "cleanup": "POST /cleanup",
+        },
     }
 
 
 if __name__ == "__main__":
     import uvicorn
+
     uvicorn.run(
         "app.main:app",
         host=settings.host,
         port=settings.port,
-        reload=settings.debug
+        reload=settings.debug,
     )

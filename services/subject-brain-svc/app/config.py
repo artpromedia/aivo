@@ -23,7 +23,7 @@ class Settings(BaseSettings):
     # Database Configuration
     database_url: str = Field(
         default="postgresql://user:pass@localhost:5432/subject_brain",
-        description="PostgreSQL database URL"
+        description="PostgreSQL database URL",
     )
     redis_url: str = Field(
         default="redis://localhost:6379/0",
@@ -85,13 +85,14 @@ class Settings(BaseSettings):
     api_key_header: str = "X-API-Key"
     jwt_secret_key: str = Field(
         default="your-secret-key-change-in-production",
-        description="JWT secret key for token validation"
+        description="JWT secret key for token validation",
     )
     jwt_algorithm: str = "HS256"
     jwt_expiration_hours: int = 24
 
     class Config:
         """Pydantic configuration."""
+
         env_file = ".env"
         env_prefix = "SUBJECT_BRAIN_"
         case_sensitive = False

@@ -2,14 +2,15 @@
 CRDT (Conflict-free Replicated Data Type) document manager for IEP documents.
 Handles collaborative editing and conflict resolution.
 """
+
 import json
 import logging
 from datetime import datetime
-from typing import Dict, List, Any, Optional, Tuple
+from typing import Any
 from uuid import uuid4
 
 from .enums import IepStatus
-from .schema import IepDoc, Goal, Accommodation, CrdtOperation
+from .schema import Accommodation, CrdtOperation, Goal, IepDoc
 
 logger = logging.getLogger(__name__)
 
@@ -19,20 +20,20 @@ class CrdtDocumentManager:
     Manages CRDT operations for IEP documents to support collaborative editing.
     Uses a combination of vector clocks and operation-based CRDT.
     """
-    
-    def __init__(self):
+
+    def __init__(self) -> None:
         """Initialize the CRDT document manager."""
-        self.documents: Dict[str, IepDoc] = {}
-        self.operation_logs: Dict[str, List[Dict[str, Any]]] = {}
-    
-    def create_document(self, iep_data: Dict[str, Any], author_id: str) -> IepDoc:
+        self.documents: dict[str, IepDoc] = {}
+        self.operation_logs: dict[str, list[dict[str, Any]]] = {}
+
+    def create_document(self, iep_data: dict[str, Any], author_id: str) -> IepDoc:
         """Create a new IEP document with CRDT metadata."""
         doc_id = str(uuid4())
         now = datetime.utcnow()
-        
+
         # Initialize vector clock
         vector_clock = {author_id: 1}
-        
+
         # Create the document
         iep_doc = IepDoc(
             id=doc_id,
@@ -58,77 +59,85 @@ class CrdtDocumentManager:
             updated_by=author_id,
             version=1,
             vector_clock=vector_clock,
-            operation_log=[]
+            operation_log=[],
         )
-        
+
         # Store document
         self.documents[doc_id] = iep_doc
         self.operation_logs[doc_id] = []
-        
+
         # Log creation operation
-        self._log_operation(doc_id, {
-            "operation_type": "create",
-            "path": "",
-            "value": None,
-            "author": author_id,
-            "timestamp": now.isoformat(),
-            "vector_clock": vector_clock.copy()
-        })
-        
+        self._log_operation(
+            doc_id,
+            {
+                "operation_type": "create",
+                "path": "",
+                "value": None,
+                "author": author_id,
+                "timestamp": now.isoformat(),
+                "vector_clock": vector_clock.copy(),
+            },
+        )
+
         logger.info(f"Created new IEP document: {doc_id}")
         return iep_doc
-    
-    def apply_operation(self, doc_id: str, operation: CrdtOperation) -> Tuple[bool, Optional[str]]:
+
+    def apply_operation(self, doc_id: str, operation: CrdtOperation) -> tuple[bool, str | None]:
         """
         Apply a CRDT operation to a document.
         Returns (success, error_message).
         """
         if doc_id not in self.documents:
             return False, f"Document {doc_id} not found"
-        
+
         doc = self.documents[doc_id]
         author_id = operation.author
-        
+
         try:
             # Update vector clock
             if author_id not in doc.vector_clock:
                 doc.vector_clock[author_id] = 0
             doc.vector_clock[author_id] += 1
-            
+
             # Apply the operation based on type
             success, error = self._apply_operation_by_type(doc, operation)
-            
+
             if success:
                 # Update document metadata
                 doc.updated_at = operation.timestamp
                 doc.updated_by = author_id
                 doc.version += 1
-                
+
                 # Log the operation
-                self._log_operation(doc_id, {
-                    "operation_type": operation.operation_type,
-                    "path": operation.path,
-                    "value": operation.value,
-                    "position": operation.position,
-                    "author": author_id,
-                    "timestamp": operation.timestamp.isoformat(),
-                    "vector_clock": doc.vector_clock.copy()
-                })
-                
+                self._log_operation(
+                    doc_id,
+                    {
+                        "operation_type": operation.operation_type,
+                        "path": operation.path,
+                        "value": operation.value,
+                        "position": operation.position,
+                        "author": author_id,
+                        "timestamp": operation.timestamp.isoformat(),
+                        "vector_clock": doc.vector_clock.copy(),
+                    },
+                )
+
                 logger.info(f"Applied operation {operation.operation_type} to {doc_id}")
-            
+
             return success, error
-            
+
         except Exception as e:
             logger.error(f"Error applying operation to {doc_id}: {e}")
             return False, str(e)
-    
-    def _apply_operation_by_type(self, doc: IepDoc, operation: CrdtOperation) -> Tuple[bool, Optional[str]]:
+
+    def _apply_operation_by_type(
+        self, doc: IepDoc, operation: CrdtOperation
+    ) -> tuple[bool, str | None]:
         """Apply operation based on its type."""
         op_type = operation.operation_type
         path = operation.path
         value = operation.value
-        
+
         if op_type == "update":
             return self._apply_update_operation(doc, path, value)
         elif op_type == "insert":
@@ -137,8 +146,10 @@ class CrdtDocumentManager:
             return self._apply_delete_operation(doc, path, operation.position)
         else:
             return False, f"Unknown operation type: {op_type}"
-    
-    def _apply_update_operation(self, doc: IepDoc, path: str, value: str) -> Tuple[bool, Optional[str]]:
+
+    def _apply_update_operation(
+        self, doc: IepDoc, path: str, value: str
+    ) -> tuple[bool, str | None]:
         """Apply an update operation to a document field."""
         try:
             # Parse the path and update the field
@@ -180,13 +191,15 @@ class CrdtDocumentManager:
                         return False, f"Accommodation index {acc_index} out of range"
             else:
                 return False, f"Unknown update path: {path}"
-            
+
             return True, None
-            
+
         except Exception as e:
             return False, str(e)
-    
-    def _apply_insert_operation(self, doc: IepDoc, path: str, value: str, position: Optional[int]) -> Tuple[bool, Optional[str]]:
+
+    def _apply_insert_operation(
+        self, doc: IepDoc, path: str, value: str, position: int | None
+    ) -> tuple[bool, str | None]:
         """Apply an insert operation (e.g., adding goals, accommodations)."""
         try:
             if path == "goals":
@@ -200,7 +213,9 @@ class CrdtDocumentManager:
             elif path == "accommodations":
                 # Insert a new accommodation
                 acc_data = json.loads(value)
-                accommodation = self._create_accommodation_from_data(doc.id, acc_data, doc.updated_by)
+                accommodation = self._create_accommodation_from_data(
+                    doc.id, acc_data, doc.updated_by
+                )
                 if position is not None and 0 <= position <= len(doc.accommodations):
                     doc.accommodations.insert(position, accommodation)
                 else:
@@ -213,13 +228,15 @@ class CrdtDocumentManager:
                     doc.special_factors.append(value)
             else:
                 return False, f"Unknown insert path: {path}"
-            
+
             return True, None
-            
+
         except Exception as e:
             return False, str(e)
-    
-    def _apply_delete_operation(self, doc: IepDoc, path: str, position: Optional[int]) -> Tuple[bool, Optional[str]]:
+
+    def _apply_delete_operation(
+        self, doc: IepDoc, path: str, position: int | None
+    ) -> tuple[bool, str | None]:
         """Apply a delete operation."""
         try:
             if path == "goals" and position is not None:
@@ -239,13 +256,15 @@ class CrdtDocumentManager:
                     return False, f"Special factor position {position} out of range"
             else:
                 return False, f"Unknown delete path: {path}"
-            
+
             return True, None
-            
+
         except Exception as e:
             return False, str(e)
-    
-    def _create_goal_from_data(self, iep_id: str, goal_data: Dict[str, Any], author_id: str) -> Goal:
+
+    def _create_goal_from_data(
+        self, iep_id: str, goal_data: dict[str, Any], author_id: str
+    ) -> Goal:
         """Create a Goal object from data dictionary."""
         now = datetime.utcnow()
         return Goal(
@@ -265,10 +284,12 @@ class CrdtDocumentManager:
             created_by=author_id,
             updated_by=author_id,
             version=1,
-            vector_clock={author_id: 1}
+            vector_clock={author_id: 1},
         )
-    
-    def _create_accommodation_from_data(self, iep_id: str, acc_data: Dict[str, Any], author_id: str) -> Accommodation:
+
+    def _create_accommodation_from_data(
+        self, iep_id: str, acc_data: dict[str, Any], author_id: str
+    ) -> Accommodation:
         """Create an Accommodation object from data dictionary."""
         now = datetime.utcnow()
         return Accommodation(
@@ -287,51 +308,51 @@ class CrdtDocumentManager:
             created_by=author_id,
             updated_by=author_id,
             version=1,
-            vector_clock={author_id: 1}
+            vector_clock={author_id: 1},
         )
-    
-    def _log_operation(self, doc_id: str, operation: Dict[str, Any]) -> None:
+
+    def _log_operation(self, doc_id: str, operation: dict[str, Any]) -> None:
         """Log an operation for the document."""
         if doc_id not in self.operation_logs:
             self.operation_logs[doc_id] = []
-        
+
         self.operation_logs[doc_id].append(operation)
-        
+
         # Keep only the last 1000 operations to prevent memory issues
         if len(self.operation_logs[doc_id]) > 1000:
             self.operation_logs[doc_id] = self.operation_logs[doc_id][-1000:]
-    
-    def get_document(self, doc_id: str) -> Optional[IepDoc]:
+
+    def get_document(self, doc_id: str) -> IepDoc | None:
         """Get a document by ID."""
         return self.documents.get(doc_id)
-    
-    def list_documents(self, student_id: Optional[str] = None) -> List[IepDoc]:
+
+    def list_documents(self, student_id: str | None = None) -> list[IepDoc]:
         """List documents, optionally filtered by student ID."""
         docs = list(self.documents.values())
         if student_id:
             docs = [doc for doc in docs if doc.student_id == student_id]
         return docs
-    
-    def sync_documents(self, remote_operations: List[Dict[str, Any]]) -> List[str]:
+
+    def sync_documents(self, remote_operations: list[dict[str, Any]]) -> list[str]:
         """
         Sync with remote operations (for distributed CRDT).
         Returns list of document IDs that were updated.
         """
         updated_docs = []
-        
+
         for op_data in remote_operations:
             doc_id = op_data.get("doc_id")
             if not doc_id or doc_id not in self.documents:
                 continue
-            
+
             # Check if we already have this operation
             existing_ops = self.operation_logs.get(doc_id, [])
             op_exists = any(
-                existing_op.get("timestamp") == op_data.get("timestamp") and
-                existing_op.get("author") == op_data.get("author")
+                existing_op.get("timestamp") == op_data.get("timestamp")
+                and existing_op.get("author") == op_data.get("author")
                 for existing_op in existing_ops
             )
-            
+
             if not op_exists:
                 # Apply the remote operation
                 operation = CrdtOperation(
@@ -340,17 +361,17 @@ class CrdtDocumentManager:
                     value=op_data.get("value"),
                     position=op_data.get("position"),
                     author=op_data["author"],
-                    timestamp=datetime.fromisoformat(op_data["timestamp"])
+                    timestamp=datetime.fromisoformat(op_data["timestamp"]),
                 )
-                
+
                 success, error = self.apply_operation(doc_id, operation)
                 if success and doc_id not in updated_docs:
                     updated_docs.append(doc_id)
                 elif error:
                     logger.error(f"Failed to sync operation for {doc_id}: {error}")
-        
+
         return updated_docs
-    
+
     def resolve_conflicts(self, doc_id: str) -> bool:
         """
         Resolve conflicts using last-write-wins strategy.
@@ -358,19 +379,19 @@ class CrdtDocumentManager:
         """
         if doc_id not in self.documents:
             return False
-        
+
         # For now, we use operation ordering based on vector clocks
         # and timestamp for conflict resolution
         # This is a simplified approach - production systems might need
         # more sophisticated conflict resolution strategies
-        
+
         operations = self.operation_logs.get(doc_id, [])
         if len(operations) <= 1:
             return True
-        
+
         # Sort operations by timestamp for last-write-wins
         sorted_ops = sorted(operations, key=lambda op: op["timestamp"])
-        
+
         # Rebuild document from sorted operations
         # This ensures consistent state across all replicas
         logger.info(f"Resolved conflicts for document {doc_id} using {len(sorted_ops)} operations")

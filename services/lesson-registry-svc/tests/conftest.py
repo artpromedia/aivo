@@ -6,12 +6,6 @@ from collections.abc import AsyncGenerator, Generator
 from uuid import UUID
 
 import pytest
-from sqlalchemy.ext.asyncio import (
-    AsyncSession,
-    async_sessionmaker,
-    create_async_engine,
-)
-from sqlalchemy.pool import StaticPool
 
 # pylint: disable=import-error,no-name-in-module
 from app.auth import User
@@ -24,6 +18,12 @@ from app.models import (
     LessonAsset,
     LessonVersion,
 )
+from sqlalchemy.ext.asyncio import (
+    AsyncSession,
+    async_sessionmaker,
+    create_async_engine,
+)
+from sqlalchemy.pool import StaticPool
 
 # Test database URL (in-memory SQLite)
 TEST_DATABASE_URL = "sqlite+aiosqlite:///:memory:"

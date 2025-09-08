@@ -62,7 +62,8 @@ class RBACService:
             return {"bool": {"must_not": {"match_all": {}}}}
 
     def _build_district_filter(
-        self, user_context: UserContext
+        self,
+        user_context: UserContext
     ) -> dict[str, Any]:
         """Build filter for district admin access."""
         if not user_context.district_id:
@@ -71,34 +72,37 @@ class RBACService:
         return {"term": {"district_id": user_context.district_id}}
 
     def _build_teacher_filter(
-        self, user_context: UserContext
+        self,
+        user_context: UserContext
     ) -> dict[str, Any]:
         """Build filter for teacher access."""
         should_clauses = []
 
         # Teacher can access their own content
-        should_clauses.append({"term": {"teacher_id": user_context.user_id}})
+        should_clauses.append(
+            {"term": {"teacher_id": user_context.user_id}}
+        )
 
         # Teacher can access content in their classes
         if user_context.class_ids:
-            should_clauses.append({
-                "terms": {"class_id": user_context.class_ids}
-            })
-            should_clauses.append({
-                "terms": {"class_ids": user_context.class_ids}
-            })
+            should_clauses.append(
+                {"terms": {"class_id": user_context.class_ids}}
+            )
+            should_clauses.append(
+                {"terms": {"class_ids": user_context.class_ids}}
+            )
 
         # Teacher can access content in their school
         if user_context.school_id:
-            should_clauses.append({
-                "term": {"school_id": user_context.school_id}
-            })
+            should_clauses.append(
+                {"term": {"school_id": user_context.school_id}}
+            )
 
         # District level access if specified
         if user_context.district_id:
-            should_clauses.append({
-                "term": {"district_id": user_context.district_id}
-            })
+            should_clauses.append(
+                {"term": {"district_id": user_context.district_id}}
+            )
 
         return {"bool": {"should": should_clauses, "minimum_should_match": 1}}
 
@@ -111,14 +115,12 @@ class RBACService:
         # Guardian can access content related to their learners
         if user_context.learner_ids:
             # Direct learner access
-            should_clauses.append({
-                "terms": {"id": user_context.learner_ids}
-            })
+            should_clauses.append({"terms": {"id": user_context.learner_ids}})
 
             # Access to content where guardian is listed
-            should_clauses.append({
-                "terms": {"guardian_ids": [user_context.user_id]}
-            })
+            should_clauses.append(
+                {"terms": {"guardian_ids": [user_context.user_id]}}
+            )
 
             # Access to coursework/lessons for learner's classes
             # This would require additional context about learner's classes
@@ -141,20 +143,26 @@ class RBACService:
 
         # Learner can access content in their classes
         if user_context.class_ids:
-            should_clauses.append({
-                "terms": {"class_id": user_context.class_ids}
-            })
+            should_clauses.append(
+                {"terms": {"class_id": user_context.class_ids}}
+            )
 
         # Learner can access general lessons in their district/school
         if user_context.district_id:
-            should_clauses.append({
-                "bool": {
-                    "must": [
-                        {"term": {"type": "lesson"}},
-                        {"term": {"district_id": user_context.district_id}},
-                    ]
+            should_clauses.append(
+                {
+                    "bool": {
+                        "must": [
+                            {"term": {"type": "lesson"}},
+                            {
+                                "term": {
+                                    "district_id": user_context.district_id
+                                }
+                            },
+                        ]
+                    }
                 }
-            })
+            )
 
         if not should_clauses:
             return {"bool": {"must_not": {"match_all": {}}}}

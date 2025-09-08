@@ -1,17 +1,18 @@
 """
 Test configuration and fixtures for private brain orchestrator tests.
 """
-import asyncio
+
 import pytest
 import pytest_asyncio
-from httpx import AsyncClient, ASGITransport
-from sqlalchemy.ext.asyncio import AsyncSession, create_async_engine, async_sessionmaker
-from sqlalchemy.pool import StaticPool
-
-from app.main import app
 from app.database import get_db
 from app.models import Base
-
+from httpx import ASGITransport, AsyncClient
+from sqlalchemy.ext.asyncio import (
+    AsyncSession,
+    async_sessionmaker,
+    create_async_engine,
+)
+from sqlalchemy.pool import StaticPool
 
 # Test database engine
 test_engine = create_async_engine(
@@ -23,8 +24,8 @@ test_engine = create_async_engine(
 
 # Test session factory
 TestSessionLocal = async_sessionmaker(
-    test_engine, 
-    class_=AsyncSession, 
+    test_engine,
+    class_=AsyncSession,
     expire_on_commit=False
 )
 
@@ -44,11 +45,11 @@ async def db_session():
     # Create tables
     async with test_engine.begin() as conn:
         await conn.run_sync(Base.metadata.create_all)
-    
+
     # Create session
     async with TestSessionLocal() as session:
         yield session
-    
+
     # Drop tables after test
     async with test_engine.begin() as conn:
         await conn.run_sync(Base.metadata.drop_all)
@@ -58,8 +59,7 @@ async def db_session():
 async def app(db_session):
     """Create FastAPI app for testing."""
     from app.main import app
-    from app.database import get_db
-    
+
     # Override the database dependency
     app.dependency_overrides[get_db] = lambda: db_session
     yield app
@@ -70,7 +70,9 @@ async def app(db_session):
 @pytest_asyncio.fixture
 async def client(app):
     """Create test client"""
-    async with AsyncClient(transport=ASGITransport(app=app), base_url="http://test") as ac:
+    async with AsyncClient(
+        transport=ASGITransport(app=app), base_url="http://test"
+    ) as ac:
         yield ac
 
 
@@ -86,5 +88,5 @@ def sample_request_data(sample_learner_id):
     return {
         "learner_id": sample_learner_id,
         "request_source": "learner-svc",
-        "request_id": "test-request-123"
+        "request_id": "test-request-123",
     }

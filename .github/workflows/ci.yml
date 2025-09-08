@@ -28,6 +28,33 @@ jobs:
       - name: Run lint verification
         run: pnpm verify-all
 
+  python-lint:
+    name: Python Lint & Format
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4.2.2
+
+      - name: Set up Python
+        uses: actions/setup-python@v5.3.0
+        with:
+          python-version: '3.11'
+
+      - name: Install Ruff
+        run: pip install ruff>=0.6.0
+
+      - name: Run Python linting and formatting
+        run: make py-fix
+
+      - name: Check for changes
+        run: |
+          if ! git diff --exit-code; then
+            echo "❌ Python code formatting issues found. Run 'make py-fix' locally."
+            exit 1
+          else
+            echo "✅ Python code is properly formatted."
+          fi
+
   contracts:
     name: Contracts
     runs-on: ubuntu-latest

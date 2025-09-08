@@ -167,9 +167,9 @@ class KafkaEventConsumer:
                     # Commit offsets for successfully processed messages
                     if valid_messages:
                         last_message = valid_messages[-1]
-                        await self.consumer.commit({
-                            topic_partition: last_message.offset + 1
-                        })
+                        await self.consumer.commit(
+                            {topic_partition: last_message.offset + 1}
+                        )
 
                     # Update metrics
                     self._metrics["messages_consumed"] += len(valid_messages)

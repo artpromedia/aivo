@@ -3,26 +3,43 @@ FastAPI application for learner service.
 """
 import logging
 from contextlib import asynccontextmanager
-from datetime import datetime, timezone
-from typing import List, Optional, Dict, Any
+from datetime import UTC, datetime
 
-from fastapi import FastAPI, Depends, HTTPException, status, BackgroundTasks
+from fastapi import (
+    BackgroundTasks,
+    Depends,
+    FastAPI,
+    HTTPException,
+    Request,
+    status,
+)
 from fastapi.middleware.cors import CORSMiddleware
-from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select
+from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import selectinload
 
-from .database import get_db, create_tables
-from .services import LearnerService, GuardianService, TeacherService, TenantService
+from .database import create_tables, get_db
 from .schemas import (
-    Learner, LearnerCreate, LearnerUpdate,
-    Guardian, GuardianCreate, GuardianUpdate,
-    Teacher, TeacherCreate, TeacherUpdate,
-    Tenant, TenantCreate, TenantUpdate,
-    LearnerTeacherAssignment, LearnerTeacherBulkAssignment,
-    LearnerResponse, GuardianResponse, TeacherResponse, TenantResponse,
-    TeacherAssignment, BulkTeacherAssignment,
-    HealthResponse, ErrorResponse
+    ErrorResponse,
+    Guardian,
+    GuardianCreate,
+    HealthResponse,
+    Learner,
+    LearnerCreate,
+    LearnerResponse,
+    LearnerTeacherBulkAssignment,
+    LearnerUpdate,
+    Teacher,
+    TeacherAssignment,
+    TeacherCreate,
+    Tenant,
+    TenantCreate,
+)
+from .services import (
+    GuardianService,
+    LearnerService,
+    TeacherService,
+    TenantService,
 )
 
 # Configure logging
@@ -31,7 +48,7 @@ logger = logging.getLogger(__name__)
 
 
 @asynccontextmanager
-async def lifespan(app: FastAPI):
+async def lifespan(_app: FastAPI):
     """Application lifespan manager."""
     # Startup
     logger.info("Starting learner service...")
@@ -44,7 +61,10 @@ async def lifespan(app: FastAPI):
 # Create FastAPI app
 app = FastAPI(
     title="Learner Service",
-    description="Manages learners with guardian-first approach and teacher relationships",
+    description=(
+        "Manages learners with guardian-first approach "
+        "and teacher relationships"
+    ),
     version="1.0.0",
     lifespan=lifespan
 )
@@ -67,12 +87,14 @@ async def health_check():
         status="healthy",
         service="learner-svc",
         version="1.0.0",
-        timestamp=datetime.now(timezone.utc)
+        timestamp=datetime.now(UTC)
     )
 
 
 # Guardian endpoints
-@app.post("/guardians", response_model=Guardian, status_code=status.HTTP_201_CREATED)
+@app.post(
+    "/guardians", response_model=Guardian, status_code=status.HTTP_201_CREATED
+)
 async def create_guardian(
     guardian_data: GuardianCreate,
     db: AsyncSession = Depends(get_db)
@@ -98,18 +120,20 @@ async def get_guardian(
     """Get guardian by ID."""
     service = GuardianService(db)
     guardian = await service.get_guardian(guardian_id)
-    
+
     if not guardian:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
             detail=f"Guardian with ID {guardian_id} not found"
         )
-    
+
     return guardian
 
 
 # Tenant endpoints
-@app.post("/tenants", response_model=Tenant, status_code=status.HTTP_201_CREATED)
+@app.post(
+    "/tenants", response_model=Tenant, status_code=status.HTTP_201_CREATED
+)
 async def create_tenant(
     tenant_data: TenantCreate,
     db: AsyncSession = Depends(get_db)
@@ -135,18 +159,20 @@ async def get_tenant(
     """Get tenant by ID."""
     service = TenantService(db)
     tenant = await service.get_tenant(tenant_id)
-    
+
     if not tenant:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
             detail=f"Tenant with ID {tenant_id} not found"
         )
-    
+
     return tenant
 
 
 # Teacher endpoints
-@app.post("/teachers", response_model=Teacher, status_code=status.HTTP_201_CREATED)
+@app.post(
+    "/teachers", response_model=Teacher, status_code=status.HTTP_201_CREATED
+)
 async def create_teacher(
     teacher_data: TeacherCreate,
     db: AsyncSession = Depends(get_db)
@@ -172,32 +198,36 @@ async def get_teacher(
     """Get teacher by ID."""
     service = TeacherService(db)
     teacher = await service.get_teacher(teacher_id)
-    
+
     if not teacher:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
             detail=f"Teacher with ID {teacher_id} not found"
         )
-    
+
     return teacher
 
 
 # Learner endpoints
-@app.post("/learners", response_model=Learner, status_code=status.HTTP_201_CREATED)
+@app.post(
+    "/learners", response_model=Learner, status_code=status.HTTP_201_CREATED
+)
 async def create_learner(
     learner_data: LearnerCreate,
-    background_tasks: BackgroundTasks,
+    _background_tasks: BackgroundTasks,
     db: AsyncSession = Depends(get_db)
 ):
     """Create a new learner with guardian-first approach."""
     try:
         service = LearnerService(db)
         learner = await service.create_learner(learner_data)
-        
+
         # Return learner with full relations
-        learner_with_relations = await service.get_learner(learner.id, include_relations=True)
+        learner_with_relations = await service.get_learner(
+            learner.id, include_relations=True
+        )
         return learner_with_relations
-        
+
     except ValueError as e:
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
@@ -219,18 +249,20 @@ async def get_learner(
 ):
     """Get learner by ID."""
     service = LearnerService(db)
-    learner = await service.get_learner(learner_id, include_relations=include_relations)
-    
+    learner = await service.get_learner(
+        learner_id, include_relations=include_relations
+    )
+
     if not learner:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
             detail=f"Learner with ID {learner_id} not found"
         )
-    
+
     return learner
 
 
-@app.get("/guardians/{guardian_id}/learners", response_model=List[Learner])
+@app.get("/guardians/{guardian_id}/learners", response_model=list[Learner])
 async def get_learners_by_guardian(
     guardian_id: int,
     db: AsyncSession = Depends(get_db)
@@ -259,17 +291,17 @@ async def update_learner(
             .where(Learner.id == learner_id)
         )
         learner = result.scalar_one_or_none()
-        
+
         if not learner:
             raise HTTPException(status_code=404, detail="Learner not found")
-        
+
         # Update fields
         for field, value in update_data.model_dump(exclude_unset=True).items():
             setattr(learner, field, value)
-        
+
         await db.commit()
         await db.refresh(learner)
-        
+
         # Reload with relationships
         result = await db.execute(
             select(Learner)
@@ -281,9 +313,9 @@ async def update_learner(
             .where(Learner.id == learner_id)
         )
         updated_learner = result.scalar_one()
-        
+
         return updated_learner
-        
+
     except HTTPException:
         raise
     except Exception as e:
@@ -301,15 +333,20 @@ async def assign_teacher_to_learner(
 ):
     """Assign a teacher to a learner."""
     learner_service = LearnerService(db)
-    
+
     try:
         await learner_service.assign_teacher(
             learner_id=learner_id,
             teacher_id=assignment.teacher_id,
             assigned_by=assignment.assigned_by
         )
-        return {"message": f"Teacher {assignment.teacher_id} assigned to learner {learner_id}"}
-    
+        return {
+            "message": (
+                f"Teacher {assignment.teacher_id} assigned to "
+                f"learner {learner_id}"
+            )
+        }
+
     except ValueError as e:
         error_msg = str(e)
         if "already assigned" in error_msg:
@@ -323,7 +360,10 @@ async def assign_teacher_to_learner(
         raise HTTPException(status_code=500, detail="Failed to assign teacher")
 
 
-@app.post("/learners/{learner_id}/teachers/bulk", status_code=status.HTTP_201_CREATED)
+@app.post(
+    "/learners/{learner_id}/teachers/bulk",
+    status_code=status.HTTP_201_CREATED
+)
 async def assign_multiple_teachers_to_learner(
     learner_id: int,
     assignment: LearnerTeacherBulkAssignment,
@@ -337,18 +377,24 @@ async def assign_multiple_teachers_to_learner(
             assignment.teacher_ids,
             assignment.assigned_by
         )
-        
-        successful_assignments = [tid for tid, success in results.items() if success]
-        failed_assignments = [tid for tid, success in results.items() if not success]
-        
+
+        successful_assignments = [
+            tid for tid, success in results.items() if success
+        ]
+        failed_assignments = [
+            tid for tid, success in results.items() if not success
+        ]
+
         return {
-            "message": f"Teacher assignment completed for learner {learner_id}",
+            "message": (
+                f"Teacher assignment completed for learner {learner_id}"
+            ),
             "successful_assignments": successful_assignments,
             "failed_assignments": failed_assignments,
             "total_requested": len(assignment.teacher_ids),
             "total_successful": len(successful_assignments)
         }
-        
+
     except Exception as e:
         logger.error(f"Failed to assign teachers: {e}")
         raise HTTPException(
@@ -357,7 +403,10 @@ async def assign_multiple_teachers_to_learner(
         )
 
 
-@app.delete("/learners/{learner_id}/teachers/{teacher_id}", status_code=status.HTTP_204_NO_CONTENT)
+@app.delete(
+    "/learners/{learner_id}/teachers/{teacher_id}",
+    status_code=status.HTTP_204_NO_CONTENT
+)
 async def remove_teacher_from_learner(
     learner_id: int,
     teacher_id: int,
@@ -367,13 +416,16 @@ async def remove_teacher_from_learner(
     try:
         service = LearnerService(db)
         success = await service.remove_teacher(learner_id, teacher_id)
-        
+
         if not success:
             raise HTTPException(
                 status_code=status.HTTP_404_NOT_FOUND,
-                detail=f"No assignment found between teacher {teacher_id} and learner {learner_id}"
+                detail=(
+                    f"No assignment found between teacher {teacher_id} "
+                    f"and learner {learner_id}"
+                )
             )
-        
+
     except Exception as e:
         logger.error(f"Failed to remove teacher assignment: {e}")
         raise HTTPException(
@@ -384,7 +436,9 @@ async def remove_teacher_from_learner(
 
 # Error handlers
 @app.exception_handler(ValueError)
-async def value_error_handler(request, exc):
+async def value_error_handler(
+    _request: Request, exc: ValueError
+) -> ErrorResponse:
     """Handle ValueError exceptions."""
     return ErrorResponse(
         error="Validation Error",
@@ -394,13 +448,15 @@ async def value_error_handler(request, exc):
 
 
 @app.exception_handler(Exception)
-async def general_exception_handler(request, exc):
+async def general_exception_handler(
+    _request: Request, exc: Exception
+) -> ErrorResponse:
     """Handle general exceptions."""
     logger.error(f"Unhandled exception: {exc}")
     return ErrorResponse(
         error="Server Error",
         message=f"An unexpected error occurred: {exc}",
-        timestamp=datetime.now(timezone.utc)
+        timestamp=datetime.now(UTC)
     )
 
 

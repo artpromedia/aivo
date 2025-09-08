@@ -55,7 +55,7 @@ class EventCollectorApp:
             logger.info(
                 "HTTP server starting",
                 host=settings.http_host,
-                port=settings.http_port
+                port=settings.http_port,
             )
 
             # Create tasks for both servers
@@ -88,8 +88,7 @@ class EventCollectorApp:
 
         except Exception as e:
             logger.error(
-                "Error starting Event Collector service",
-                error=str(e)
+                "Error starting Event Collector service", error=str(e)
             )
             raise
 
@@ -111,8 +110,7 @@ class EventCollectorApp:
 
         except Exception as e:
             logger.error(
-                "Error stopping Event Collector service",
-                error=str(e)
+                "Error stopping Event Collector service", error=str(e)
             )
             raise
 

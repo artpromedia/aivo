@@ -32,10 +32,7 @@ class LessonService:
         self.db = db
 
     async def create_lesson(
-        self,
-        lesson_data: LessonCreate,
-        created_by: UUID,
-        tenant_id: UUID
+        self, lesson_data: LessonCreate, created_by: UUID, tenant_id: UUID
     ) -> Lesson:
         """Create a new lesson."""
         lesson = Lesson(
@@ -56,17 +53,11 @@ class LessonService:
         logger.info("Created lesson %s by user %s", lesson.id, created_by)
         return lesson
 
-    async def get_lesson(
-        self, lesson_id: UUID, tenant_id: UUID
-    ) -> Lesson | None:
+    async def get_lesson(self, lesson_id: UUID, tenant_id: UUID) -> Lesson | None:
         """Get a lesson by ID."""
         stmt = (
             select(Lesson)
-            .options(
-                selectinload(Lesson.versions).selectinload(
-                    LessonVersion.assets
-                )
-            )
+            .options(selectinload(Lesson.versions).selectinload(LessonVersion.assets))
             .where(and_(Lesson.id == lesson_id, Lesson.tenant_id == tenant_id))
         )
 
@@ -80,15 +71,10 @@ class LessonService:
         return lesson
 
     async def update_lesson(
-        self,
-        lesson_id: UUID,
-        lesson_data: LessonUpdate,
-        tenant_id: UUID
+        self, lesson_id: UUID, lesson_data: LessonUpdate, tenant_id: UUID
     ) -> Lesson | None:
         """Update a lesson."""
-        stmt = select(Lesson).where(
-            and_(Lesson.id == lesson_id, Lesson.tenant_id == tenant_id)
-        )
+        stmt = select(Lesson).where(and_(Lesson.id == lesson_id, Lesson.tenant_id == tenant_id))
         result = await self.db.execute(stmt)
         lesson = result.scalar_one_or_none()
 
@@ -107,9 +93,7 @@ class LessonService:
 
     async def delete_lesson(self, lesson_id: UUID, tenant_id: UUID) -> bool:
         """Delete a lesson and all its versions."""
-        stmt = select(Lesson).where(
-            and_(Lesson.id == lesson_id, Lesson.tenant_id == tenant_id)
-        )
+        stmt = select(Lesson).where(and_(Lesson.id == lesson_id, Lesson.tenant_id == tenant_id))
         result = await self.db.execute(stmt)
         lesson = result.scalar_one_or_none()
 
@@ -126,10 +110,7 @@ class LessonService:
         return True
 
     async def create_version(
-        self,
-        lesson_id: UUID,
-        version_data: LessonVersionCreate,
-        tenant_id: UUID
+        self, lesson_id: UUID, version_data: LessonVersionCreate, tenant_id: UUID
     ) -> LessonVersion | None:
         """Create a new version of a lesson."""
         # Check if lesson exists and belongs to tenant
@@ -138,9 +119,8 @@ class LessonService:
             return None
 
         # Get next version number
-        stmt = (
-            select(sql_max(LessonVersion.version_number))
-            .where(LessonVersion.lesson_id == lesson_id)
+        stmt = select(sql_max(LessonVersion.version_number)).where(
+            LessonVersion.lesson_id == lesson_id
         )
         result = await self.db.execute(stmt)
         max_version = result.scalar() or 0
@@ -158,17 +138,11 @@ class LessonService:
         await self.db.commit()
         await self.db.refresh(version)
 
-        logger.info(
-            "Created version %s for lesson %s",
-            version.version_number, lesson_id
-        )
+        logger.info("Created version %s for lesson %s", version.version_number, lesson_id)
         return version
 
     async def update_version(
-        self,
-        version_id: UUID,
-        version_data: LessonVersionUpdate,
-        tenant_id: UUID
+        self, version_id: UUID, version_data: LessonVersionUpdate, tenant_id: UUID
     ) -> LessonVersion | None:
         """Update a lesson version."""
         stmt = (
@@ -178,7 +152,7 @@ class LessonService:
                 and_(
                     LessonVersion.id == version_id,
                     Lesson.tenant_id == tenant_id,
-                    LessonVersion.state == LessonState.DRAFT
+                    LessonVersion.state == LessonState.DRAFT,
                 )
             )
         )
@@ -200,10 +174,7 @@ class LessonService:
         return version
 
     async def publish_version(
-        self,
-        version_id: UUID,
-        published_by: UUID,
-        tenant_id: UUID
+        self, version_id: UUID, published_by: UUID, tenant_id: UUID
     ) -> LessonVersion | None:
         """Publish a lesson version."""
         stmt = (
@@ -213,7 +184,7 @@ class LessonService:
                 and_(
                     LessonVersion.id == version_id,
                     Lesson.tenant_id == tenant_id,
-                    LessonVersion.state == LessonState.DRAFT
+                    LessonVersion.state == LessonState.DRAFT,
                 )
             )
         )
@@ -231,28 +202,18 @@ class LessonService:
         await self.db.commit()
         await self.db.refresh(version)
 
-        logger.info(
-            "Published version %s by user %s", version_id, published_by
-        )
+        logger.info("Published version %s by user %s", version_id, published_by)
         return version
 
     async def add_asset(
-        self,
-        version_id: UUID,
-        asset_data: AssetCreate,
-        tenant_id: UUID
+        self, version_id: UUID, asset_data: AssetCreate, tenant_id: UUID
     ) -> LessonAsset | None:
         """Add an asset to a lesson version."""
         # Check if version exists and belongs to tenant
         stmt = (
             select(LessonVersion)
             .join(Lesson)
-            .where(
-                and_(
-                    LessonVersion.id == version_id,
-                    Lesson.tenant_id == tenant_id
-                )
-            )
+            .where(and_(LessonVersion.id == version_id, Lesson.tenant_id == tenant_id))
         )
         result = await self.db.execute(stmt)
         version = result.scalar_one_or_none()
@@ -261,9 +222,7 @@ class LessonService:
             return None
 
         # Generate S3 key
-        s3_key = cdn_service.generate_asset_key(
-            version.lesson_id, version_id, asset_data.name
-        )
+        s3_key = cdn_service.generate_asset_key(version.lesson_id, version_id, asset_data.name)
 
         asset = LessonAsset(
             version_id=version_id,
@@ -286,9 +245,7 @@ class LessonService:
         return asset
 
     async def search_lessons(
-        self,
-        search_params: SearchParams,
-        tenant_id: UUID
+        self, search_params: SearchParams, tenant_id: UUID
     ) -> tuple[list[Lesson], int]:
         """Search lessons with filters and pagination."""
         # Base query
@@ -301,39 +258,27 @@ class LessonService:
                 or_(
                     Lesson.title.ilike(search_term),
                     Lesson.description.ilike(search_term),
-                    Lesson.keywords.op("@>")(f'["{search_params.q}"]')
+                    Lesson.keywords.op("@>")(f'["{search_params.q}"]'),
                 )
             )
 
         # Apply filters
         if search_params.filters:
             if search_params.filters.subject:
-                stmt = stmt.where(
-                    Lesson.subject == search_params.filters.subject
-                )
+                stmt = stmt.where(Lesson.subject == search_params.filters.subject)
 
             if search_params.filters.grade_band:
-                stmt = stmt.where(
-                    Lesson.grade_band == search_params.filters.grade_band
-                )
+                stmt = stmt.where(Lesson.grade_band == search_params.filters.grade_band)
 
             if search_params.filters.keywords:
                 for keyword in search_params.filters.keywords:
-                    stmt = stmt.where(
-                        Lesson.keywords.op("@>")(f'["{keyword}"]')
-                    )
+                    stmt = stmt.where(Lesson.keywords.op("@>")(f'["{keyword}"]'))
 
             if search_params.filters.created_by:
-                stmt = stmt.where(
-                    Lesson.created_by == search_params.filters.created_by
-                )
+                stmt = stmt.where(Lesson.created_by == search_params.filters.created_by)
 
         # Get total count by counting rows from the base query
-        count_result = await self.db.execute(
-            select(count()).select_from(
-                stmt.subquery()
-            )
-        )
+        count_result = await self.db.execute(select(count()).select_from(stmt.subquery()))
         total = count_result.scalar()
 
         # Apply sorting
@@ -356,9 +301,7 @@ class LessonService:
         stmt = stmt.offset(offset).limit(search_params.page_size)
 
         # Load with relationships
-        stmt = stmt.options(
-            selectinload(Lesson.versions).selectinload(LessonVersion.assets)
-        )
+        stmt = stmt.options(selectinload(Lesson.versions).selectinload(LessonVersion.assets))
 
         result = await self.db.execute(stmt)
         lessons = result.scalars().all()
@@ -374,19 +317,13 @@ class LessonService:
         for version in lesson.versions:
             for asset in version.assets:
                 if asset.s3_key:
-                    signed_url = await cdn_service.generate_presigned_url(
-                        asset.s3_key
-                    )
+                    signed_url = await cdn_service.generate_presigned_url(asset.s3_key)
                     asset.signed_url = signed_url
 
     async def _cleanup_lesson_assets(self, lesson_id: UUID) -> None:
         """Clean up S3 assets for a lesson."""
         # Get all versions and their assets
-        stmt = (
-            select(LessonAsset)
-            .join(LessonVersion)
-            .where(LessonVersion.lesson_id == lesson_id)
-        )
+        stmt = select(LessonAsset).join(LessonVersion).where(LessonVersion.lesson_id == lesson_id)
         result = await self.db.execute(stmt)
         assets = result.scalars().all()
 
@@ -395,9 +332,7 @@ class LessonService:
             if asset.s3_key:
                 await cdn_service.delete_object(asset.s3_key)
 
-        logger.info(
-            "Cleaned up %s assets for lesson %s", len(assets), lesson_id
-        )
+        logger.info("Cleaned up %s assets for lesson %s", len(assets), lesson_id)
 
 
 def get_lesson_service(db: AsyncSession) -> LessonService:

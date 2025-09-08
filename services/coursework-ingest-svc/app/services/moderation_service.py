@@ -86,16 +86,27 @@ class ModerationService:
         for i, pattern in enumerate(self.compiled_patterns):
             matches = pattern.findall(text)
             if matches:
-                flags.append({
-                    "pattern_id": i,
-                    "pattern": self.inappropriate_patterns[i],
-                    "matches": matches,
-                })
+                flags.append(
+                    {
+                        "pattern_id": i,
+                        "pattern": self.inappropriate_patterns[i],
+                        "matches": matches,
+                    }
+                )
 
         # Check for excessive profanity (simple word list)
         profanity_words = [
-            "damn", "shit", "fuck", "bitch", "ass", "hell",
-            "crap", "piss", "bastard", "slut", "whore"
+            "damn",
+            "shit",
+            "fuck",
+            "bitch",
+            "ass",
+            "hell",
+            "crap",
+            "piss",
+            "bastard",
+            "slut",
+            "whore",
         ]
         profanity_count = sum(
             text_lower.count(word) for word in profanity_words
@@ -104,11 +115,13 @@ class ModerationService:
         profanity_ratio = profanity_count / max(total_words, 1)
 
         if profanity_ratio > 0.1:  # More than 10% profanity
-            flags.append({
-                "type": "excessive_profanity",
-                "ratio": profanity_ratio,
-                "count": profanity_count,
-            })
+            flags.append(
+                {
+                    "type": "excessive_profanity",
+                    "ratio": profanity_ratio,
+                    "count": profanity_count,
+                }
+            )
 
         # Calculate score based on flags
         if not flags:

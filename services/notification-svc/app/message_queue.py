@@ -167,7 +167,9 @@ class MessageQueue:
 
         logger.info(
             "Scheduled retry %s for %s in %ss",
-            retry_count + 1, notification_id, retry_delay
+            retry_count + 1,
+            notification_id,
+            retry_delay,
         )
 
         return True
@@ -204,7 +206,8 @@ class MessageQueue:
                                     # Trigger retry
                                     logger.info(
                                         "Retrying %s for %s",
-                                        notification_id, user_id
+                                        notification_id,
+                                        user_id,
                                     )
                                     # FUTURE: Implement actual delivery attempt
                                     # Integrate with notification service

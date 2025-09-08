@@ -1,18 +1,17 @@
 """
 Test configuration and fixtures for the Approval Service.
 """
-import pytest
-import asyncio
-from datetime import datetime, timezone, timedelta
-from typing import AsyncGenerator
-from uuid import uuid4
-from sqlalchemy.ext.asyncio import AsyncSession, create_async_engine, async_sessionmaker
-from fastapi.testclient import TestClient
 
-from app.main import app
+import asyncio
+from collections.abc import AsyncGenerator
+
+import pytest
 from app.database import get_db
+from app.enums import ApprovalType, ParticipantRole, Priority
+from app.main import app
 from app.models import Base
-from app.enums import ParticipantRole, ApprovalType, Priority
+from fastapi.testclient import TestClient
+from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker, create_async_engine
 
 # Test database URL (use in-memory SQLite for tests)
 TEST_DATABASE_URL = "sqlite+aiosqlite:///:memory:"
@@ -35,10 +34,10 @@ async def db_session() -> AsyncGenerator[AsyncSession, None]:
     """Create a test database session."""
     async with test_engine.begin() as conn:
         await conn.run_sync(Base.metadata.create_all)
-    
+
     async with TestSessionLocal() as session:
         yield session
-    
+
     async with test_engine.begin() as conn:
         await conn.run_sync(Base.metadata.drop_all)
 
@@ -46,12 +45,13 @@ async def db_session() -> AsyncGenerator[AsyncSession, None]:
 @pytest.fixture
 def client(db_session: AsyncSession):
     """Create a test client with database dependency override."""
+
     def override_get_db():
         try:
             yield db_session
         finally:
             pass
-    
+
     app.dependency_overrides[get_db] = override_get_db
     client = TestClient(app)
     yield client
@@ -77,19 +77,19 @@ def sample_approval_data():
                 "email": "parent@example.com",
                 "role": ParticipantRole.GUARDIAN,
                 "display_name": "Jane Doe",
-                "is_required": True
+                "is_required": True,
             },
             {
                 "user_id": "teacher_123",
                 "email": "teacher@school.edu",
                 "role": ParticipantRole.TEACHER,
                 "display_name": "Ms. Smith",
-                "is_required": True
-            }
+                "is_required": True,
+            },
         ],
         "webhook_url": None,  # Disabled for testing
         "webhook_events": ["approval_requested", "approval_completed"],
-        "callback_data": {"source": "test"}
+        "callback_data": {"source": "test"},
     }
 
 
@@ -101,7 +101,7 @@ def sample_participant_data():
         "email": "user@example.com",
         "role": ParticipantRole.ADMINISTRATOR,
         "display_name": "Admin User",
-        "is_required": True
+        "is_required": True,
     }
 
 

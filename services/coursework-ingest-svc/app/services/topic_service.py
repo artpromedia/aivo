@@ -109,7 +109,10 @@ class TopicExtractionService:
             return structured_topics
 
         except (
-            ValueError, AttributeError, TypeError, json.JSONDecodeError
+            ValueError,
+            AttributeError,
+            TypeError,
+            json.JSONDecodeError,
         ) as e:
             logger.error("OpenAI topic extraction error: %s", e)
             return await self._fallback_topic_extraction(text)
@@ -119,29 +122,84 @@ class TopicExtractionService:
         # Define subject-specific keywords
         subject_keywords = {
             "mathematics": [
-                "equation", "algebra", "geometry", "calculus", "trigonometry",
-                "statistics", "probability", "function", "derivative",
-                "integral", "matrix", "vector", "polynomial", "theorem",
+                "equation",
+                "algebra",
+                "geometry",
+                "calculus",
+                "trigonometry",
+                "statistics",
+                "probability",
+                "function",
+                "derivative",
+                "integral",
+                "matrix",
+                "vector",
+                "polynomial",
+                "theorem",
             ],
             "science": [
-                "experiment", "hypothesis", "theory", "molecule", "atom",
-                "chemical", "biology", "physics", "chemistry", "DNA", "cell",
-                "evolution", "energy", "force", "gravity",
+                "experiment",
+                "hypothesis",
+                "theory",
+                "molecule",
+                "atom",
+                "chemical",
+                "biology",
+                "physics",
+                "chemistry",
+                "DNA",
+                "cell",
+                "evolution",
+                "energy",
+                "force",
+                "gravity",
             ],
             "english": [
-                "literature", "grammar", "vocabulary", "essay", "paragraph",
-                "metaphor", "simile", "character", "plot", "theme", "analysis",
-                "poetry", "prose", "narrative",
+                "literature",
+                "grammar",
+                "vocabulary",
+                "essay",
+                "paragraph",
+                "metaphor",
+                "simile",
+                "character",
+                "plot",
+                "theme",
+                "analysis",
+                "poetry",
+                "prose",
+                "narrative",
             ],
             "history": [
-                "historical", "century", "war", "revolution", "government",
-                "political", "democracy", "constitution", "empire",
-                "civilization", "culture", "society", "timeline",
+                "historical",
+                "century",
+                "war",
+                "revolution",
+                "government",
+                "political",
+                "democracy",
+                "constitution",
+                "empire",
+                "civilization",
+                "culture",
+                "society",
+                "timeline",
             ],
             "geography": [
-                "continent", "country", "climate", "population", "mountain",
-                "ocean", "river", "city", "capital", "border", "latitude",
-                "longitude", "map", "region",
+                "continent",
+                "country",
+                "climate",
+                "population",
+                "mountain",
+                "ocean",
+                "river",
+                "city",
+                "capital",
+                "border",
+                "latitude",
+                "longitude",
+                "map",
+                "region",
             ],
         }
 
@@ -156,18 +214,40 @@ class TopicExtractionService:
                 subject_scores[subject] = score
 
         # Extract general topics using noun phrases
-        words = re.findall(r'\b[a-zA-Z]{3,}\b', text)
+        words = re.findall(r"\b[a-zA-Z]{3,}\b", text)
         word_counts = Counter(word.lower() for word in words)
 
         # Filter common words
         stop_words = {
-            "the", "and", "that", "have", "for", "not", "with", "you",
-            "this", "but", "his", "from", "they", "she", "her", "been",
-            "than", "its", "who", "oil", "sit", "now", "into", "can",
+            "the",
+            "and",
+            "that",
+            "have",
+            "for",
+            "not",
+            "with",
+            "you",
+            "this",
+            "but",
+            "his",
+            "from",
+            "they",
+            "she",
+            "her",
+            "been",
+            "than",
+            "its",
+            "who",
+            "oil",
+            "sit",
+            "now",
+            "into",
+            "can",
         }
 
         significant_words = [
-            word for word, count in word_counts.most_common(20)
+            word
+            for word, count in word_counts.most_common(20)
             if count >= 2 and word not in stop_words and len(word) > 3
         ]
 

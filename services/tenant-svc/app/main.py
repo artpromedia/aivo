@@ -1,11 +1,12 @@
 """
 Main FastAPI application for tenant service.
 """
-import os
-from contextlib import asynccontextmanager
-from typing import AsyncGenerator
 
-from fastapi import FastAPI, Request, HTTPException
+import os
+from collections.abc import AsyncGenerator
+from contextlib import asynccontextmanager
+
+from fastapi import FastAPI, HTTPException, Request
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.middleware.trustedhost import TrustedHostMiddleware
 from fastapi.responses import JSONResponse
@@ -28,9 +29,9 @@ async def lifespan(app: FastAPI) -> AsyncGenerator[None, None]:
     except Exception as e:
         print(f"Failed to create database tables: {e}")
         raise
-    
+
     yield
-    
+
     # Shutdown
     print("Tenant service shutting down")
 
@@ -58,7 +59,7 @@ app.add_middleware(
 if os.getenv("ENVIRONMENT") == "production":
     app.add_middleware(
         TrustedHostMiddleware,
-        allowed_hosts=["*"]  # Configure with actual domains in production
+        allowed_hosts=["*"],  # Configure with actual domains in production
     )
 
 # Include routers
@@ -72,9 +73,8 @@ async def sqlalchemy_exception_handler(request: Request, exc: SQLAlchemyError):
     return JSONResponse(
         status_code=500,
         content=ErrorResponse(
-            detail="Database error occurred",
-            error_code="DATABASE_ERROR"
-        ).model_dump()
+            detail="Database error occurred", error_code="DATABASE_ERROR"
+        ).model_dump(),
     )
 
 
@@ -83,10 +83,7 @@ async def value_error_handler(request: Request, exc: ValueError):
     """Handle validation errors."""
     return JSONResponse(
         status_code=400,
-        content=ErrorResponse(
-            detail=str(exc),
-            error_code="VALIDATION_ERROR"
-        ).model_dump()
+        content=ErrorResponse(detail=str(exc), error_code="VALIDATION_ERROR").model_dump(),
     )
 
 
@@ -95,10 +92,7 @@ async def http_exception_handler(request: Request, exc: HTTPException):
     """Handle HTTP exceptions."""
     return JSONResponse(
         status_code=exc.status_code,
-        content=ErrorResponse(
-            detail=exc.detail,
-            error_code="HTTP_ERROR"
-        ).model_dump()
+        content=ErrorResponse(detail=exc.detail, error_code="HTTP_ERROR").model_dump(),
     )
 
 
@@ -108,9 +102,8 @@ async def general_exception_handler(request: Request, exc: Exception):
     return JSONResponse(
         status_code=500,
         content=ErrorResponse(
-            detail="Internal server error",
-            error_code="INTERNAL_ERROR"
-        ).model_dump()
+            detail="Internal server error", error_code="INTERNAL_ERROR"
+        ).model_dump(),
     )
 
 
@@ -118,11 +111,7 @@ async def general_exception_handler(request: Request, exc: Exception):
 @app.get("/")
 async def root():
     """Root endpoint."""
-    return {
-        "service": "tenant-svc",
-        "status": "running",
-        "version": "1.0.0"
-    }
+    return {"service": "tenant-svc", "status": "running", "version": "1.0.0"}
 
 
 # Health check endpoint
@@ -134,9 +123,5 @@ async def health():
 
 if __name__ == "__main__":
     import uvicorn
-    uvicorn.run(
-        "app.main:app",
-        host="0.0.0.0",
-        port=int(os.getenv("PORT", "8001")),
-        reload=True
-    )
+
+    uvicorn.run("app.main:app", host="0.0.0.0", port=int(os.getenv("PORT", "8001")), reload=True)

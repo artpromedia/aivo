@@ -9,5 +9,5 @@ __all__ = [
     "OpenSearchService",
     "PIIMaskingService",
     "RBACService",
-    "SearchService"
+    "SearchService",
 ]

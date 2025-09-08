@@ -61,8 +61,8 @@ class EventBuffer:
                 # Check if we need a new file
                 if (
                     self._current_file is None
-                    or self._current_file_size + len(serialized) >
-                    settings.max_event_size_bytes
+                    or self._current_file_size + len(serialized)
+                    > settings.max_event_size_bytes
                 ):
                     await self._rotate_file()
 
@@ -215,11 +215,15 @@ class EventBuffer:
                                     timestamp = datetime.fromisoformat(
                                         timestamp_str.replace("Z", "+00:00")
                                     )
-                                    if (oldest_event is None or
-                                            timestamp < oldest_event):
+                                    if (
+                                        oldest_event is None
+                                        or timestamp < oldest_event
+                                    ):
                                         oldest_event = timestamp
-                                    if (newest_event is None or
-                                            timestamp > newest_event):
+                                    if (
+                                        newest_event is None
+                                        or timestamp > newest_event
+                                    ):
                                         newest_event = timestamp
                             # pylint: disable=broad-exception-caught
                             except Exception:
@@ -263,8 +267,9 @@ class EventBuffer:
         self._current_file = self.buffer_dir / filename
         self._current_file_size = 0
 
-        logger.debug("Rotated to new buffer file",
-                     file=str(self._current_file))
+        logger.debug(
+            "Rotated to new buffer file", file=str(self._current_file)
+        )
 
     async def _cleanup_old_files(self) -> None:
         """Clean up files older than retention period."""
@@ -279,8 +284,9 @@ class EventBuffer:
                 if file_time < cutoff_time.naive:
                     file_path.unlink()
                     removed_count += 1
-                    logger.debug("Removed old buffer file",
-                                 file=str(file_path))
+                    logger.debug(
+                        "Removed old buffer file", file=str(file_path)
+                    )
 
             except Exception as e:  # pylint: disable=broad-exception-caught
                 logger.warning(
@@ -312,8 +318,9 @@ class EventBuffer:
                 if self._current_file:
                     try:
                         stat = self._current_file.stat()
-                        file_age = (datetime.utcnow() -
-                                   datetime.fromtimestamp(stat.st_mtime))
+                        file_age = datetime.utcnow() - datetime.fromtimestamp(
+                            stat.st_mtime
+                        )
 
                         if file_age.total_seconds() > 300:  # 5 minutes
                             async with self._lock:

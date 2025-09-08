@@ -1,7 +1,7 @@
 """
 Learner Service
 
-A service that manages learners with guardian-first approach, 
+A service that manages learners with guardian-first approach,
 grade calculation based on DOB, and teacher multi-attach functionality.
 """
 

@@ -1,23 +1,23 @@
 """
 FastAPI application for IEP Service with Strawberry GraphQL.
 """
+
 import logging
 from datetime import datetime
-from typing import Dict, Any
 
 from fastapi import FastAPI, HTTPException, Request
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
 from strawberry.fastapi import GraphQLRouter
 
+from .approval_service import approval_service
 from .config import settings
 from .resolvers import schema
-from .approval_service import approval_service
 
 # Configure logging
 logging.basicConfig(
     level=getattr(logging, settings.log_level.upper()),
-    format="%(asctime)s - %(name)s - %(levelname)s - %(message)s"
+    format="%(asctime)s - %(name)s - %(levelname)s - %(message)s",
 )
 logger = logging.getLogger(__name__)
 
@@ -27,7 +27,7 @@ app = FastAPI(
     description="IEP document management with GraphQL and dual approval workflow",
     version="1.0.0",
     docs_url="/docs",
-    redoc_url="/redoc"
+    redoc_url="/redoc",
 )
 
 # Add CORS middleware
@@ -55,10 +55,7 @@ async def general_exception_handler(request: Request, exc: Exception):
     logger.error(f"Unhandled exception: {exc}", exc_info=True)
     return JSONResponse(
         status_code=500,
-        content={
-            "error": "INTERNAL_ERROR",
-            "message": "An internal error occurred"
-        }
+        content={"error": "INTERNAL_ERROR", "message": "An internal error occurred"},
     )
 
 
@@ -70,7 +67,7 @@ async def health_check():
         "timestamp": datetime.utcnow().isoformat(),
         "service": "iep-svc",
         "version": "1.0.0",
-        "graphql_endpoint": settings.graphql_path
+        "graphql_endpoint": settings.graphql_path,
     }
 
 
@@ -82,16 +79,18 @@ async def approval_webhook(request: Request):
     try:
         webhook_data = await request.json()
         logger.info(f"Received approval webhook: {webhook_data.get('event_type')}")
-        
+
         # Process the webhook
         result = await approval_service.process_approval_webhook(webhook_data)
-        
+
         if result["success"]:
             return {"status": "processed", "message": result.get("message", "Webhook processed")}
         else:
             logger.error(f"Webhook processing failed: {result.get('error')}")
-            raise HTTPException(status_code=400, detail=result.get("error", "Webhook processing failed"))
-            
+            raise HTTPException(
+                status_code=400, detail=result.get("error", "Webhook processing failed")
+            )
+
     except Exception as e:
         logger.error(f"Error processing approval webhook: {e}")
         raise HTTPException(status_code=500, detail="Internal server error")
@@ -109,15 +108,15 @@ async def root():
             "graphiql": f"{settings.graphql_path}" if settings.graphiql_enabled else None,
             "health": "/health",
             "approval_webhook": "/webhooks/approval",
-            "docs": "/docs"
+            "docs": "/docs",
         },
         "features": [
             "GraphQL API with Strawberry",
             "CRDT collaborative editing",
             "Dual approval workflow",
             "Event publishing",
-            "Real-time synchronization"
-        ]
+            "Real-time synchronization",
+        ],
     }
 
 
@@ -127,16 +126,17 @@ async def get_graphql_schema():
     return {
         "schema": schema.as_str(),
         "endpoint": settings.graphql_path,
-        "introspection": settings.graphiql_enabled
+        "introspection": settings.graphiql_enabled,
     }
 
 
 if __name__ == "__main__":
     import uvicorn
+
     uvicorn.run(
         "app.main:app",
         host=settings.host,
         port=settings.port,
         reload=settings.debug,
-        log_level=settings.log_level.lower()
+        log_level=settings.log_level.lower(),
     )

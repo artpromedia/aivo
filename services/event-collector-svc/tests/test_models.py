@@ -19,16 +19,26 @@ class TestLearnerEvent:
         assert sample_event.event_type == "lesson_started"
         assert sample_event.event_data == {"duration": 300, "score": 85}
         assert sample_event.session_id == "test_session_abc"
-        assert sample_event.metadata == {"device": "mobile", "app_version": "1.0.0"}
+        assert sample_event.metadata == {
+            "device": "mobile",
+            "app_version": "1.0.0",
+        }
 
     def test_required_fields(self):
         """Test that required fields are enforced."""
         with pytest.raises(ValidationError) as exc_info:
             LearnerEvent()
-        
+
         errors = exc_info.value.errors()
         required_fields = {error["loc"][0] for error in errors}
-        expected_fields = {"learner_id", "course_id", "lesson_id", "event_type", "event_data", "timestamp"}
+        expected_fields = {
+            "learner_id",
+            "course_id",
+            "lesson_id",
+            "event_type",
+            "event_data",
+            "timestamp",
+        }
         assert required_fields >= expected_fields
 
     def test_optional_fields(self):
@@ -39,9 +49,9 @@ class TestLearnerEvent:
             lesson_id="lesson789",
             event_type="lesson_started",
             event_data={"key": "value"},
-            timestamp="2024-01-15T10:30:00Z"
+            timestamp="2024-01-15T10:30:00Z",
         )
-        
+
         assert event.session_id is None
         assert event.metadata == {}
 
@@ -54,7 +64,7 @@ class TestLearnerEvent:
             lesson_id="lesson789",
             event_type="lesson_started",
             event_data={"key": "value"},
-            timestamp="2024-01-15T10:30:00Z"
+            timestamp="2024-01-15T10:30:00Z",
         )
         assert isinstance(event.timestamp, datetime)
 
@@ -66,7 +76,7 @@ class TestLearnerEvent:
                 lesson_id="lesson789",
                 event_type="lesson_started",
                 event_data={"key": "value"},
-                timestamp="invalid-timestamp"
+                timestamp="invalid-timestamp",
             )
 
     def test_event_data_types(self):
@@ -77,7 +87,7 @@ class TestLearnerEvent:
             {"list": [1, 2, 3]},
             {},
         ]
-        
+
         for event_data in valid_data_types:
             event = LearnerEvent(
                 learner_id="learner123",
@@ -85,7 +95,7 @@ class TestLearnerEvent:
                 lesson_id="lesson789",
                 event_type="lesson_started",
                 event_data=event_data,
-                timestamp="2024-01-15T10:30:00Z"
+                timestamp="2024-01-15T10:30:00Z",
             )
             assert event.event_data == event_data
 
@@ -107,7 +117,6 @@ class TestEventBatch:
     def test_batch_metadata(self, sample_events: list[LearnerEvent]):
         """Test batch with metadata."""
         batch = EventBatch(
-            events=sample_events,
-            metadata={"source": "test", "version": "1.0"}
+            events=sample_events, metadata={"source": "test", "version": "1.0"}
         )
         assert batch.metadata == {"source": "test", "version": "1.0"}

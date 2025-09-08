@@ -129,8 +129,8 @@ class PolicyEngine:
                 moderation_threshold=0.5,
                 provider_config={"model": "gpt-4", "temperature": 0.8},
                 description=(
-                    "Creative subjects use OpenAI with higher "
-                    "creativity settings"
+                    "Creative subjects use OpenAI with "
+                    "higher creativity settings"
                 ),
             )
         )
@@ -199,37 +199,32 @@ class PolicyEngine:
             moderation_threshold=matching_rule.moderation_threshold,
             provider_config=matching_rule.provider_config.copy(),
             routing_reason=matching_rule.description,
-            cache_ttl_seconds=self.config.cache_ttl_seconds
-            if self.config
-            else 3600,
+            cache_ttl_seconds=(
+                self.config.cache_ttl_seconds if self.config else 3600
+            ),
             request_id=request.request_id,
         )
 
         # Apply regional adjustments
-        response = await self._apply_regional_adjustments(
-            request, response
-        )
+        response = await self._apply_regional_adjustments(request, response)
 
         # Update statistics
         async with self._lock:
             provider_key = response.provider.value
             self.stats["provider_distribution"][provider_key] = (
-                self.stats["provider_distribution"].get(provider_key, 0)
-                + 1
+                self.stats["provider_distribution"].get(provider_key, 0) + 1
             )
 
             response_time = (time.time() - start_time) * 1000
             self.stats["response_times"].append(response_time)
             if len(self.stats["response_times"]) > 1000:
-                self.stats["response_times"] = self.stats[
-                    "response_times"
-                ][-1000:]
+                self.stats["response_times"] = self.stats["response_times"][
+                    -1000:
+                ]
 
         return response
 
-    async def _find_matching_rule(
-        self, request: PolicyRequest
-    ) -> RouteRule:
+    async def _find_matching_rule(self, request: PolicyRequest) -> RouteRule:
         """Find the highest priority matching rule."""
         if not self.config or not self.config.rules:
             # Return a default rule if no configuration
@@ -256,9 +251,7 @@ class PolicyEngine:
                 return rule
 
         # If no rules match, return the lowest priority rule as fallback
-        return (
-            sorted_rules[-1] if sorted_rules else self._get_default_rule()
-        )
+        return sorted_rules[-1] if sorted_rules else self._get_default_rule()
 
     async def _rule_matches(
         self, rule: RouteRule, request: PolicyRequest
@@ -343,9 +336,7 @@ class PolicyEngine:
     async def add_teacher_override(self, override: TeacherOverride) -> str:
         """Add a teacher override."""
         override_id = f"override_{override.teacher_id}_{int(time.time())}"
-        expires_at = datetime.now() + timedelta(
-            hours=override.duration_hours
-        )
+        expires_at = datetime.now() + timedelta(hours=override.duration_hours)
 
         override_data = {
             "teacher_id": override.teacher_id,
@@ -383,9 +374,7 @@ class PolicyEngine:
                     "region_distribution"
                 ].copy(),
                 "average_response_time_ms": avg_response_time,
-                "rules_count": len(self.config.rules)
-                if self.config
-                else 0,
+                "rules_count": len(self.config.rules) if self.config else 0,
                 "last_updated": self.stats["last_updated"],
             }
 

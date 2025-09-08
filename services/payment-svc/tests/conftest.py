@@ -1,16 +1,16 @@
 """
 Test configuration and fixtures for payment service.
 """
-import os
+
 import asyncio
-from decimal import Decimal
-from typing import AsyncGenerator, Generator
-from unittest.mock import Mock, AsyncMock
+import os
+from collections.abc import AsyncGenerator, Generator
+from unittest.mock import AsyncMock, Mock
 
 import pytest
 import pytest_asyncio
-from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker, create_async_engine
 from httpx import AsyncClient
+from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker, create_async_engine
 
 # Set test environment variables before importing app
 os.environ["STRIPE_API_KEY"] = "sk_test_fake_key_for_testing"
@@ -18,11 +18,9 @@ os.environ["STRIPE_WEBHOOK_SECRET"] = "whsec_fake_secret_for_testing"
 
 from app.database import Base, get_db
 from app.main import app
-from app.models import PlanType, SubscriptionStatus, InvoiceStatus, DiscountType
-from app.services import StripeService, SubscriptionService, WebhookService, PricingService
-# Import all models to ensure they're registered with Base
-from app.models import Subscription, Invoice, PaymentMethod, WebhookEvent, DiscountRule
 
+# Import all models to ensure they're registered with Base
+from app.services import PricingService, StripeService, SubscriptionService, WebhookService
 
 # Test database URL - using SQLite for testing
 TEST_DATABASE_URL = "sqlite+aiosqlite:///:memory:"
@@ -54,9 +52,9 @@ async def setup_database():
     """Set up test database."""
     async with test_engine.begin() as conn:
         await conn.run_sync(Base.metadata.create_all)
-    
+
     yield
-    
+
     async with test_engine.begin() as conn:
         await conn.run_sync(Base.metadata.drop_all)
 
@@ -68,7 +66,7 @@ async def db_session(setup_database) -> AsyncGenerator[AsyncSession, None]:
         yield session
         # Clean up all data after each test
         await session.rollback()
-        
+
         # Delete all data from all tables
         for table in reversed(Base.metadata.sorted_tables):
             await session.execute(table.delete())
@@ -78,17 +76,19 @@ async def db_session(setup_database) -> AsyncGenerator[AsyncSession, None]:
 @pytest_asyncio.fixture
 async def client(db_session: AsyncSession) -> AsyncGenerator[AsyncClient, None]:
     """Create a test client."""
+
     # Override the get_db dependency
     async def get_test_db():
         yield db_session
-    
+
     app.dependency_overrides[get_db] = get_test_db
-    
+
     from httpx import ASGITransport
+
     transport = ASGITransport(app=app)
     async with AsyncClient(transport=transport, base_url="http://test") as client:
         yield client
-    
+
     # Clean up
     app.dependency_overrides.clear()
 
@@ -97,35 +97,33 @@ async def client(db_session: AsyncSession) -> AsyncGenerator[AsyncClient, None]:
 def mock_stripe_service():
     """Create a mock Stripe service."""
     service = Mock(spec=StripeService)
-    
+
     # Mock customer creation
     service.create_customer = AsyncMock(return_value=Mock(id="cus_test123"))
-    
+
     # Mock price creation
     service.create_price = AsyncMock(return_value=Mock(id="price_test123"))
-    
+
     # Mock checkout session creation
-    service.create_checkout_session = AsyncMock(return_value=Mock(
-        id="cs_test123",
-        url="https://checkout.stripe.com/pay/cs_test123"
-    ))
-    
+    service.create_checkout_session = AsyncMock(
+        return_value=Mock(id="cs_test123", url="https://checkout.stripe.com/pay/cs_test123")
+    )
+
     # Mock subscription operations
-    service.retrieve_subscription = AsyncMock(return_value=Mock(
-        id="sub_test123",
-        status="active",
-        current_period_start=1640995200,  # 2022-01-01
-        current_period_end=1643673600,   # 2022-02-01
-        trial_start=None,
-        trial_end=None,
-        canceled_at=None
-    ))
-    
-    service.cancel_subscription = AsyncMock(return_value=Mock(
-        id="sub_test123",
-        status="canceled"
-    ))
-    
+    service.retrieve_subscription = AsyncMock(
+        return_value=Mock(
+            id="sub_test123",
+            status="active",
+            current_period_start=1640995200,  # 2022-01-01
+            current_period_end=1643673600,  # 2022-02-01
+            trial_start=None,
+            trial_end=None,
+            canceled_at=None,
+        )
+    )
+
+    service.cancel_subscription = AsyncMock(return_value=Mock(id="sub_test123", status="canceled"))
+
     return service
 
 
@@ -157,27 +155,20 @@ def sample_checkout_request():
         "seats": 5,
         "success_url": "https://example.com/success",
         "cancel_url": "https://example.com/cancel",
-        "has_sibling_discount": False
+        "has_sibling_discount": False,
     }
 
 
 @pytest.fixture
 def sample_trial_request():
     """Sample trial start request."""
-    return {
-        "tenant_id": 1,
-        "seats": 3
-    }
+    return {"tenant_id": 1, "seats": 3}
 
 
 @pytest.fixture
 def sample_pricing_request():
     """Sample pricing calculation request."""
-    return {
-        "plan_type": "yearly",
-        "seats": 10,
-        "has_sibling_discount": True
-    }
+    return {"plan_type": "yearly", "seats": 10, "has_sibling_discount": True}
 
 
 @pytest.fixture
@@ -191,13 +182,9 @@ def sample_stripe_webhook_event():
                 "id": "cs_test123",
                 "customer": "cus_test123",
                 "subscription": "sub_test123",
-                "metadata": {
-                    "tenant_id": "1",
-                    "plan_type": "monthly",
-                    "seats": "5"
-                }
+                "metadata": {"tenant_id": "1", "plan_type": "monthly", "seats": "5"},
             }
         },
         "created": 1640995200,
-        "livemode": False
+        "livemode": False,
     }

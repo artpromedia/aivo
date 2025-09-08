@@ -26,8 +26,8 @@ def test_generate_manifest_success(client: TestClient):
             "large_text": False,
             "audio_cues": True,
             "simplified_ui": False,
-            "color_blind_friendly": False
-        }
+            "color_blind_friendly": False,
+        },
     }
 
     response = client.post("/manifest", json=request_data)
@@ -58,8 +58,8 @@ def test_generate_manifest_accessibility(client: TestClient):
             "large_text": True,
             "audio_cues": True,
             "simplified_ui": True,
-            "color_blind_friendly": True
-        }
+            "color_blind_friendly": True,
+        },
     }
 
     response = client.post("/manifest", json=request_data)
@@ -82,7 +82,7 @@ def test_generate_manifest_validation_error(client: TestClient):
         "learner_id": "test-learner-invalid",
         "subject": "invalid_subject",
         "grade": -1,
-        "duration_minutes": 0
+        "duration_minutes": 0,
     }
 
     response = client.post("/manifest", json=request_data)
@@ -147,22 +147,20 @@ def test_clear_cache(client: TestClient):
     assert "cleared" in data["message"].lower()
 
 
-@pytest.mark.parametrize("subject,grade", [
-    ("math", 1),
-    ("english", 3),
-    ("science", 5),
-    ("art", 2),
-    ("music", 4)
-])
+@pytest.mark.parametrize(
+    "subject,grade",
+    [("math", 1), ("english", 3), ("science", 5), ("art", 2), ("music", 4)]
+)
 def test_generate_manifest_all_subjects(
-        client: TestClient, subject: str, grade: int):
+    client: TestClient, subject: str, grade: int
+):
     """Test manifest generation for all supported subjects."""
     request_data = {
         "learner_id": f"test-learner-{subject}",
         "subject": subject,
         "grade": grade,
         "duration_minutes": 10,
-        "accessibility": {}
+        "accessibility": {},
     }
 
     response = client.post("/manifest", json=request_data)
@@ -181,7 +179,7 @@ def test_performance_target_met(client: TestClient):
         "subject": "math",
         "grade": 3,
         "duration_minutes": 5,
-        "accessibility": {}
+        "accessibility": {},
     }
 
     response = client.post("/manifest", json=request_data)

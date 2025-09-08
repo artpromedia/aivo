@@ -1,6 +1,7 @@
-# Stage-1 Docker Compose Setup
+# Stage-1 & Stage-2 Docker Compose Setup
 
-Complete Docker Compose configuration for running all Stage-1 services locally.
+Complete Docker Compose configuration for running all Stage-1 services and
+Stage-2 pipeline locally.
 
 ## Services Included
 
@@ -28,6 +29,16 @@ Complete Docker Compose configuration for running all Stage-1 services locally.
 - **admin-portal-svc** - Admin dashboard API (port 8091)
 - **private-fm-orchestrator** - Workflow orchestration (port 8092)
 
+### S2 Pipeline Services (upload → ocr → topics → index → planner → game)
+
+- **coursework-ingest-svc** - Content upload and processing (port 8093)
+- **subject-brain-svc** - OCR and content extraction (port 8094)
+- **search-svc** - Content indexing and topic extraction (port 8095)
+- **lesson-registry-svc** - Lesson planning and curriculum (port 8096)
+- **game-gen-svc** - Educational game generation (port 8097)
+- **analytics-svc** - Pipeline analytics and monitoring (port 8098)
+- **event-collector-svc** - Event tracking and logging (port 8099)
+
 ## Quick Start
 
 ### Start All Services
@@ -39,6 +50,8 @@ docker compose -f infra/compose/local.yml up -d
 
 ### Run Golden Path Verification
 
+#### Stage-1 Verification
+
 ```bash
 # Option 1: PowerShell (Windows)
 ./scripts/verify-stage1.ps1
@@ -48,6 +61,19 @@ docker compose -f infra/compose/local.yml up -d
 
 # Option 3: Node.js directly
 node scripts/verify-stage1.js
+
+# Option 4: Using Makefile
+make stage0-verify
+```
+
+#### Stage-2 Pipeline Verification
+
+```bash
+# TypeScript verifier with analytics visibility
+tsx scripts/verify-stage2.ts
+
+# Using Makefile
+make stage2-verify
 ```
 
 ### Stop All Services

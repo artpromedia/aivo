@@ -434,6 +434,237 @@ services:
       start_period: 30s
     restart: unless-stopped
 
+  # Stage-2 Pipeline Services: upload → ocr → topics → index → planner → game
+  
+  # 1. Upload Service (coursework-ingest-svc)
+  coursework-ingest-svc:
+    build:
+      context: ../../services/coursework-ingest-svc
+      dockerfile: Dockerfile
+    container_name: monorepo_coursework_ingest_svc
+    environment:
+      DATABASE_URL: "postgresql://postgres:password@postgres:5432/monorepo"
+      REDIS_URL: "redis://redis:6379"
+      KAFKA_BROKERS: "redpanda:9092"
+      MINIO_ENDPOINT: "minio:9000"
+      MINIO_ACCESS_KEY: "minioadmin"
+      MINIO_SECRET_KEY: "minioadmin"
+      PORT: "8093"
+    ports:
+      - "8093:8093"
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+      redpanda:
+        condition: service_healthy
+      minio:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8093/health"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+      start_period: 30s
+    restart: unless-stopped
+
+  # 2. OCR Service (subject-brain-svc handles content processing)
+  subject-brain-svc:
+    build:
+      context: ../../services/subject-brain-svc
+      dockerfile: Dockerfile
+    container_name: monorepo_subject_brain_svc
+    environment:
+      DATABASE_URL: "postgresql://postgres:password@postgres:5432/monorepo"
+      REDIS_URL: "redis://redis:6379"
+      KAFKA_BROKERS: "redpanda:9092"
+      MINIO_ENDPOINT: "minio:9000"
+      MINIO_ACCESS_KEY: "minioadmin"
+      MINIO_SECRET_KEY: "minioadmin"
+      INFERENCE_GATEWAY_URL: "http://inference-gateway-svc:8086"
+      PORT: "8094"
+    ports:
+      - "8094:8094"
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+      redpanda:
+        condition: service_healthy
+      minio:
+        condition: service_healthy
+      coursework-ingest-svc:
+        condition: service_healthy
+      inference-gateway-svc:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8094/health"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+      start_period: 30s
+    restart: unless-stopped
+
+  # 3. Topics/Indexing Service (search-svc handles content indexing)
+  search-svc:
+    build:
+      context: ../../services/search-svc
+      dockerfile: Dockerfile
+    container_name: monorepo_search_svc
+    environment:
+      DATABASE_URL: "postgresql://postgres:password@postgres:5432/monorepo"
+      REDIS_URL: "redis://redis:6379"
+      KAFKA_BROKERS: "redpanda:9092"
+      PORT: "8095"
+    ports:
+      - "8095:8095"
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+      redpanda:
+        condition: service_healthy
+      subject-brain-svc:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8095/health"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+      start_period: 30s
+    restart: unless-stopped
+
+  # 4. Lesson Planning Service (lesson-registry-svc)
+  lesson-registry-svc:
+    build:
+      context: ../../services/lesson-registry-svc
+      dockerfile: Dockerfile
+    container_name: monorepo_lesson_registry_svc
+    environment:
+      DATABASE_URL: "postgresql://postgres:password@postgres:5432/monorepo"
+      REDIS_URL: "redis://redis:6379"
+      KAFKA_BROKERS: "redpanda:9092"
+      SEARCH_SERVICE_URL: "http://search-svc:8095"
+      PORT: "8096"
+    ports:
+      - "8096:8096"
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+      redpanda:
+        condition: service_healthy
+      search-svc:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8096/health"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+      start_period: 30s
+    restart: unless-stopped
+
+  # 5. Game Generation Service (game-gen-svc)
+  game-gen-svc:
+    build:
+      context: ../../services/game-gen-svc
+      dockerfile: Dockerfile
+    container_name: monorepo_game_gen_svc
+    environment:
+      DATABASE_URL: "postgresql://postgres:password@postgres:5432/monorepo"
+      REDIS_URL: "redis://redis:6379"
+      KAFKA_BROKERS: "redpanda:9092"
+      MINIO_ENDPOINT: "minio:9000"
+      MINIO_ACCESS_KEY: "minioadmin"
+      MINIO_SECRET_KEY: "minioadmin"
+      LESSON_REGISTRY_URL: "http://lesson-registry-svc:8096"
+      INFERENCE_GATEWAY_URL: "http://inference-gateway-svc:8086"
+      PORT: "8097"
+    ports:
+      - "8097:8097"
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+      redpanda:
+        condition: service_healthy
+      minio:
+        condition: service_healthy
+      lesson-registry-svc:
+        condition: service_healthy
+      inference-gateway-svc:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8097/health"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+      start_period: 30s
+    restart: unless-stopped
+
+  # Supporting S2 Services
+  
+  # Analytics Service (for pipeline monitoring and visibility)
+  analytics-svc:
+    build:
+      context: ../../services/analytics-svc
+      dockerfile: Dockerfile
+    container_name: monorepo_analytics_svc
+    environment:
+      DATABASE_URL: "postgresql://postgres:password@postgres:5432/monorepo"
+      REDIS_URL: "redis://redis:6379"
+      KAFKA_BROKERS: "redpanda:9092"
+      PORT: "8098"
+    ports:
+      - "8098:8098"
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+      redpanda:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8098/health"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+      start_period: 30s
+    restart: unless-stopped
+
+  # Event Collector Service (for tracking pipeline events)
+  event-collector-svc:
+    build:
+      context: ../../services/event-collector-svc
+      dockerfile: Dockerfile
+    container_name: monorepo_event_collector_svc
+    environment:
+      DATABASE_URL: "postgresql://postgres:password@postgres:5432/monorepo"
+      REDIS_URL: "redis://redis:6379"
+      KAFKA_BROKERS: "redpanda:9092"
+      PORT: "8099"
+    ports:
+      - "8099:8099"
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+      redpanda:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8099/health"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+      start_period: 30s
+    restart: unless-stopped
+
   # Development Tools
   mailhog:
     image: mailhog/mailhog:v1.0.1

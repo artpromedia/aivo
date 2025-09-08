@@ -18,6 +18,7 @@ security = HTTPBearer()
 
 class TokenData(BaseModel):
     """Token data model."""
+
     user_id: UUID
     tenant_id: UUID
     email: str
@@ -27,6 +28,7 @@ class TokenData(BaseModel):
 
 class User(BaseModel):
     """User model for authentication."""
+
     id: UUID
     tenant_id: UUID
     email: str
@@ -34,26 +36,21 @@ class User(BaseModel):
     is_active: bool = True
 
 
-def create_access_token(data: dict,
-                        expires_delta: timedelta | None = None) -> str:
+def create_access_token(data: dict, expires_delta: timedelta | None = None) -> str:
     """Create access token."""
     to_encode = data.copy()
 
     if expires_delta:
         expire = datetime.utcnow() + expires_delta
     else:
-        expire = (datetime.utcnow() +
-                  timedelta(minutes=settings.access_token_expire_minutes))
+        expire = datetime.utcnow() + timedelta(minutes=settings.access_token_expire_minutes)
 
     to_encode.update({"exp": expire})
-    encoded_jwt = jwt.encode(to_encode, settings.jwt_secret_key,
-                             algorithm=settings.jwt_algorithm)
+    encoded_jwt = jwt.encode(to_encode, settings.jwt_secret_key, algorithm=settings.jwt_algorithm)
     return encoded_jwt
 
 
-async def verify_token(
-    credentials: HTTPAuthorizationCredentials = Depends(security)
-) -> TokenData:
+async def verify_token(credentials: HTTPAuthorizationCredentials = Depends(security)) -> TokenData:
     """Verify JWT token and return token data."""
     credentials_exception = HTTPException(
         status_code=status.HTTP_401_UNAUTHORIZED,
@@ -63,9 +60,7 @@ async def verify_token(
 
     try:
         payload = jwt.decode(
-            credentials.credentials,
-            settings.jwt_secret_key,
-            algorithms=[settings.jwt_algorithm]
+            credentials.credentials, settings.jwt_secret_key, algorithms=[settings.jwt_algorithm]
         )
 
         user_id: str = payload.get("user_id")
@@ -90,7 +85,7 @@ async def verify_token(
             tenant_id=UUID(tenant_id),
             email=email,
             roles=roles,
-            exp=datetime.fromtimestamp(exp) if exp else datetime.utcnow()
+            exp=datetime.fromtimestamp(exp) if exp else datetime.utcnow(),
         )
 
         return token_data
@@ -103,15 +98,13 @@ async def verify_token(
         raise credentials_exception from e
 
 
-async def get_current_user(
-    token_data: TokenData = Depends(verify_token)
-) -> User:
+async def get_current_user(token_data: TokenData = Depends(verify_token)) -> User:
     """Get current user from token."""
     return User(
         id=token_data.user_id,
         tenant_id=token_data.tenant_id,
         email=token_data.email,
-        roles=token_data.roles
+        roles=token_data.roles,
     )
 
 
@@ -122,11 +115,9 @@ class RoleChecker:
         self.allowed_roles = allowed_roles
 
     def __call__(self, current_user: User = Depends(get_current_user)) -> User:
-        if not any(role in current_user.roles
-                   for role in self.allowed_roles):
+        if not any(role in current_user.roles for role in self.allowed_roles):
             raise HTTPException(
-                status_code=status.HTTP_403_FORBIDDEN,
-                detail="Insufficient permissions"
+                status_code=status.HTTP_403_FORBIDDEN, detail="Insufficient permissions"
             )
         return current_user
 
@@ -137,8 +128,7 @@ require_teacher = RoleChecker(settings.teacher_roles + settings.admin_roles)
 require_teacher_only = RoleChecker(settings.teacher_roles)
 
 
-def can_edit_lesson(current_user: User, lesson_created_by: UUID,
-                    lesson_tenant_id: UUID) -> bool:
+def can_edit_lesson(current_user: User, lesson_created_by: UUID, lesson_tenant_id: UUID) -> bool:
     """Check if user can edit a lesson."""
     # Admin can edit any lesson in their tenant
     if any(role in current_user.roles for role in settings.admin_roles):
@@ -146,8 +136,7 @@ def can_edit_lesson(current_user: User, lesson_created_by: UUID,
 
     # Teacher can only edit their own lessons
     if any(role in current_user.roles for role in settings.teacher_roles):
-        return (current_user.id == lesson_created_by and
-                current_user.tenant_id == lesson_tenant_id)
+        return current_user.id == lesson_created_by and current_user.tenant_id == lesson_tenant_id
 
     return False
 

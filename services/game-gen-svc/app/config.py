@@ -59,26 +59,15 @@ class Settings(BaseSettings):
     database_url: str = "postgresql://localhost/game_gen"
 
     # Subject-specific settings
-    math_game_types: list[str] = [
-        "number_line", "puzzle", "sorting", "quiz"
-    ]
+    math_game_types: list[str] = ["number_line", "puzzle", "sorting", "quiz"]
     english_game_types: list[str] = [
         "word_builder", "matching", "quiz", "drag_drop"
     ]
-    science_game_types: list[str] = [
-        "quiz", "matching", "sorting", "puzzle"
-    ]
-    art_game_types: list[str] = [
-        "drawing", "matching", "memory", "puzzle"
-    ]
-    music_game_types: list[str] = [
-        "rhythm", "memory", "matching", "quiz"
-    ]
+    science_game_types: list[str] = ["quiz", "matching", "sorting", "puzzle"]
+    art_game_types: list[str] = ["drawing", "matching", "memory", "puzzle"]
+    music_game_types: list[str] = ["rhythm", "memory", "matching", "quiz"]
 
-    model_config = ConfigDict(
-        env_prefix="GAME_GEN_",
-        case_sensitive=False
-    )
+    model_config = ConfigDict(env_prefix="GAME_GEN_", case_sensitive=False)
 
 
 # Global settings instance

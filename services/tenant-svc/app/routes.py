@@ -1,18 +1,27 @@
 """
 API routes for tenant service.
 """
-from typing import List
-from fastapi import APIRouter, Depends, HTTPException, status, Header
+
+from fastapi import APIRouter, Depends, Header, HTTPException, status
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from .database import get_database
-from .services import TenantService, SeatService, UserRoleService
 from .schemas import (
-    Tenant, TenantWithChildren, TenantCreate, TenantUpdate,
-    Seat, SeatCreate, SeatAllocate, SeatReclaim, SeatSummary,
-    UserTenantRole, UserTenantRoleCreate,
-    DistrictCreate, SchoolCreate, MessageResponse, ErrorResponse
+    DistrictCreate,
+    MessageResponse,
+    SchoolCreate,
+    Seat,
+    SeatAllocate,
+    SeatCreate,
+    SeatReclaim,
+    SeatSummary,
+    Tenant,
+    TenantUpdate,
+    TenantWithChildren,
+    UserTenantRole,
+    UserTenantRoleCreate,
 )
+from .services import SeatService, TenantService, UserRoleService
 
 router = APIRouter()
 
@@ -21,8 +30,7 @@ def get_current_user_id(x_user_id: str = Header(..., description="Current user I
     """Get current user ID from headers (simplified for this implementation)."""
     if not x_user_id:
         raise HTTPException(
-            status_code=status.HTTP_401_UNAUTHORIZED,
-            detail="User ID header required"
+            status_code=status.HTTP_401_UNAUTHORIZED, detail="User ID header required"
         )
     return x_user_id
 
@@ -32,7 +40,7 @@ def get_current_user_id(x_user_id: str = Header(..., description="Current user I
 async def create_district(
     district_data: DistrictCreate,
     db: AsyncSession = Depends(get_database),
-    current_user: str = Depends(get_current_user_id)
+    current_user: str = Depends(get_current_user_id),
 ):
     """Create a new district."""
     try:
@@ -41,7 +49,7 @@ async def create_district(
     except Exception as e:
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail=f"Failed to create district: {str(e)}"
+            detail=f"Failed to create district: {str(e)}",
         )
 
 
@@ -49,24 +57,23 @@ async def create_district(
 async def get_district(
     district_id: int,
     db: AsyncSession = Depends(get_database),
-    current_user: str = Depends(get_current_user_id)
+    current_user: str = Depends(get_current_user_id),
 ):
     """Get a district with its schools."""
     district = await TenantService.get_district_with_schools(db, district_id)
     if not district:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail="District not found"
-        )
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="District not found")
     return district
 
 
-@router.post("/district/{district_id}/schools", response_model=Tenant, status_code=status.HTTP_201_CREATED)
+@router.post(
+    "/district/{district_id}/schools", response_model=Tenant, status_code=status.HTTP_201_CREATED
+)
 async def create_school(
     district_id: int,
     school_data: SchoolCreate,
     db: AsyncSession = Depends(get_database),
-    current_user: str = Depends(get_current_user_id)
+    current_user: str = Depends(get_current_user_id),
 ):
     """Create a new school under a district."""
     try:
@@ -77,7 +84,7 @@ async def create_school(
     except Exception as e:
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail=f"Failed to create school: {str(e)}"
+            detail=f"Failed to create school: {str(e)}",
         )
 
 
@@ -86,15 +93,12 @@ async def create_school(
 async def get_tenant(
     tenant_id: int,
     db: AsyncSession = Depends(get_database),
-    current_user: str = Depends(get_current_user_id)
+    current_user: str = Depends(get_current_user_id),
 ):
     """Get tenant by ID."""
     tenant = await TenantService.get_tenant_by_id(db, tenant_id)
     if not tenant:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail="Tenant not found"
-        )
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Tenant not found")
     return tenant
 
 
@@ -103,24 +107,21 @@ async def update_tenant(
     tenant_id: int,
     tenant_data: TenantUpdate,
     db: AsyncSession = Depends(get_database),
-    current_user: str = Depends(get_current_user_id)
+    current_user: str = Depends(get_current_user_id),
 ):
     """Update tenant information."""
     tenant = await TenantService.update_tenant(db, tenant_id, tenant_data)
     if not tenant:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail="Tenant not found"
-        )
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Tenant not found")
     return tenant
 
 
 # Seat routes
-@router.post("/seats/purchase", response_model=List[Seat], status_code=status.HTTP_201_CREATED)
+@router.post("/seats/purchase", response_model=list[Seat], status_code=status.HTTP_201_CREATED)
 async def purchase_seats(
     seat_data: SeatCreate,
     db: AsyncSession = Depends(get_database),
-    current_user: str = Depends(get_current_user_id)
+    current_user: str = Depends(get_current_user_id),
 ):
     """Purchase (create) seats for a tenant."""
     try:
@@ -131,7 +132,7 @@ async def purchase_seats(
     except Exception as e:
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail=f"Failed to purchase seats: {str(e)}"
+            detail=f"Failed to purchase seats: {str(e)}",
         )
 
 
@@ -139,7 +140,7 @@ async def purchase_seats(
 async def allocate_seat(
     allocation_data: SeatAllocate,
     db: AsyncSession = Depends(get_database),
-    current_user: str = Depends(get_current_user_id)
+    current_user: str = Depends(get_current_user_id),
 ):
     """Allocate a seat to a learner."""
     try:
@@ -150,7 +151,7 @@ async def allocate_seat(
     except Exception as e:
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail=f"Failed to allocate seat: {str(e)}"
+            detail=f"Failed to allocate seat: {str(e)}",
         )
 
 
@@ -158,7 +159,7 @@ async def allocate_seat(
 async def reclaim_seat(
     reclaim_data: SeatReclaim,
     db: AsyncSession = Depends(get_database),
-    current_user: str = Depends(get_current_user_id)
+    current_user: str = Depends(get_current_user_id),
 ):
     """Reclaim a seat from a learner."""
     try:
@@ -169,7 +170,7 @@ async def reclaim_seat(
     except Exception as e:
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail=f"Failed to reclaim seat: {str(e)}"
+            detail=f"Failed to reclaim seat: {str(e)}",
         )
 
 
@@ -177,15 +178,12 @@ async def reclaim_seat(
 async def get_seat_summary(
     tenantId: int,
     db: AsyncSession = Depends(get_database),
-    current_user: str = Depends(get_current_user_id)
+    current_user: str = Depends(get_current_user_id),
 ):
     """Get seat allocation summary for a tenant."""
     summary = await SeatService.get_seat_summary(db, tenantId)
     if not summary:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail="Tenant not found"
-        )
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Tenant not found")
     return summary
 
 
@@ -193,15 +191,12 @@ async def get_seat_summary(
 async def get_seat(
     seat_id: int,
     db: AsyncSession = Depends(get_database),
-    current_user: str = Depends(get_current_user_id)
+    current_user: str = Depends(get_current_user_id),
 ):
     """Get seat by ID."""
     seat = await SeatService.get_seat_by_id(db, seat_id)
     if not seat:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail="Seat not found"
-        )
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Seat not found")
     return seat
 
 
@@ -210,7 +205,7 @@ async def get_seat(
 async def assign_user_role(
     role_data: UserTenantRoleCreate,
     db: AsyncSession = Depends(get_database),
-    current_user: str = Depends(get_current_user_id)
+    current_user: str = Depends(get_current_user_id),
 ):
     """Assign a role to a user within a tenant."""
     try:
@@ -221,15 +216,15 @@ async def assign_user_role(
     except Exception as e:
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail=f"Failed to assign role: {str(e)}"
+            detail=f"Failed to assign role: {str(e)}",
         )
 
 
-@router.get("/users/{user_id}/tenants", response_model=List[UserTenantRole])
+@router.get("/users/{user_id}/tenants", response_model=list[UserTenantRole])
 async def get_user_tenants(
     user_id: str,
     db: AsyncSession = Depends(get_database),
-    current_user: str = Depends(get_current_user_id)
+    current_user: str = Depends(get_current_user_id),
 ):
     """Get all tenants where user has roles."""
     user_roles = await UserRoleService.get_user_tenants(db, user_id)

@@ -16,8 +16,7 @@ from .schemas import HealthCheck
 
 # Configure logging
 logging.basicConfig(
-    level=logging.INFO,
-    format="%(asctime)s - %(name)s - %(levelname)s - %(message)s"
+    level=logging.INFO, format="%(asctime)s - %(name)s - %(levelname)s - %(message)s"
 )
 logger = logging.getLogger(__name__)
 
@@ -68,11 +67,7 @@ app.include_router(router)
 @app.get("/")
 async def root() -> dict[str, str]:
     """Root endpoint."""
-    return {
-        "service": "lesson-registry-svc",
-        "version": settings.version,
-        "status": "running"
-    }
+    return {"service": "lesson-registry-svc", "version": settings.version, "status": "running"}
 
 
 @app.get("/healthz", response_model=HealthCheck)
@@ -95,8 +90,7 @@ async def health_check() -> HealthCheck:
 
     if not overall_healthy:
         raise HTTPException(
-            status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
-            detail="Service unhealthy"
+            status_code=status.HTTP_503_SERVICE_UNAVAILABLE, detail="Service unhealthy"
         )
 
     return HealthCheck(
@@ -123,6 +117,7 @@ async def metrics() -> dict[str, str]:
 
 if __name__ == "__main__":
     import uvicorn
+
     uvicorn.run(
         "app.main:app",
         host="0.0.0.0",

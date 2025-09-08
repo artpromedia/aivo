@@ -34,9 +34,7 @@ class TestLessonService:
             keywords=["science", "test"],
         )
 
-        lesson = await service.create_lesson(
-            lesson_data, test_user.id, test_user.tenant_id
-        )
+        lesson = await service.create_lesson(lesson_data, test_user.id, test_user.tenant_id)
 
         assert lesson.title == "New Lesson"
         assert lesson.subject == "Science"
@@ -77,9 +75,7 @@ class TestLessonService:
             duration_minutes=45,
         )
 
-        version = await service.create_version(
-            test_lesson.id, version_data, test_user.tenant_id
-        )
+        version = await service.create_version(test_lesson.id, version_data, test_user.tenant_id)
 
         assert version is not None
         assert version.lesson_id == test_lesson.id
@@ -115,9 +111,7 @@ class TestLessonService:
             alt_text="Test video",
         )
 
-        asset = await service.add_asset(
-            test_version.id, asset_data, test_user.tenant_id
-        )
+        asset = await service.add_asset(test_version.id, asset_data, test_user.tenant_id)
 
         assert asset is not None
         assert asset.name == "test-video.mp4"
@@ -139,9 +133,7 @@ class TestLessonService:
             keywords=["physics", "science"],
         )
 
-        await service.create_lesson(
-            lesson_data_2, test_user.id, test_user.tenant_id
-        )
+        await service.create_lesson(lesson_data_2, test_user.id, test_user.tenant_id)
 
         # Search by subject
         search_params = SearchParams(
@@ -150,9 +142,7 @@ class TestLessonService:
             page_size=10,
         )
 
-        lessons, total = await service.search_lessons(
-            search_params, test_user.tenant_id
-        )
+        lessons, total = await service.search_lessons(search_params, test_user.tenant_id)
 
         assert total == 1
         assert len(lessons) == 1
@@ -165,23 +155,18 @@ class TestLessonService:
             page_size=10,
         )
 
-        lessons, total = await service.search_lessons(
-            search_params, test_user.tenant_id
-        )
+        lessons, total = await service.search_lessons(search_params, test_user.tenant_id)
 
         assert total == 1
         assert len(lessons) == 1
-        assert ("physics" in lessons[0].title.lower() or
-                "physics" in lessons[0].keywords)
+        assert "physics" in lessons[0].title.lower() or "physics" in lessons[0].keywords
 
     @pytest.mark.asyncio
     async def test_delete_lesson(self, db_session, test_lesson, test_user):
         """Test deleting a lesson."""
         service = LessonService(db_session)
 
-        success = await service.delete_lesson(
-            test_lesson.id, test_user.tenant_id
-        )
+        success = await service.delete_lesson(test_lesson.id, test_user.tenant_id)
         assert success is True
 
         # Verify lesson is deleted

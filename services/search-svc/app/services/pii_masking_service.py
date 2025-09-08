@@ -19,23 +19,25 @@ class PIIMaskingService:
         # Common PII patterns
         self.patterns = {
             "email": re.compile(
-                r'\b[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Z|a-z]{2,}\b'
+                r"\b[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\."
+                r"[A-Z|a-z]{2,}\b"
             ),
             "phone": re.compile(
-                r'\b(?:\+?1[-.\s]?)?\(?([0-9]{3})\)?[-.\s]?'
-                r'([0-9]{3})[-.\s]?([0-9]{4})\b'
+                r"\b(?:\+?1[-.\s]?)?\(?([0-9]{3})\)?[-.\s]?"
+                r"([0-9]{3})[-.\s]?([0-9]{4})\b"
             ),
             "ssn": re.compile(
-                r'\b(?!000|666|9\d{2})\d{3}[-.]?'
-                r'(?!00)\d{2}[-.]?(?!0000)\d{4}\b'
+                r"\b(?!000|666|9\d{2})\d{3}[-.]?"
+                r"(?!00)\d{2}[-.]?(?!0000)\d{4}\b"
             ),
             "credit_card": re.compile(
-                r'\b(?:4[0-9]{12}(?:[0-9]{3})?|5[1-5][0-9]{14}|'
-                r'3[47][0-9]{13}|3[0-9]{13}|6(?:011|5[0-9]{2})[0-9]{12})\b'
+                r"\b(?:4[0-9]{12}(?:[0-9]{3})?|5[1-5][0-9]{14}|"
+                r"3[47][0-9]{13}|3[0-9]{13}|"
+                r"6(?:011|5[0-9]{2})[0-9]{12})\b"
             ),
             "student_id": re.compile(
-                r'\b(?:student|learner|id)[-\s:]?([A-Z0-9]{6,12})\b',
-                re.IGNORECASE
+                r"\b(?:student|learner|id)[-\s:]?([A-Z0-9]{6,12})\b",
+                re.IGNORECASE,
             ),
         }
 
@@ -174,7 +176,7 @@ class PIIMaskingService:
             if pattern_name in settings.pii_masking.patterns_to_mask:
                 masked_content = pattern.sub(
                     lambda m, pn=pattern_name: self._mask_match(m.group(), pn),
-                    masked_content
+                    masked_content,
                 )
 
         # Mask names if enabled
@@ -222,12 +224,12 @@ class PIIMaskingService:
     async def _mask_names_in_text(
         self,
         content: str,
-        user_context: UserContext  # pylint: disable=unused-argument
+        user_context: UserContext,  # pylint: disable=unused-argument
     ) -> str:
         """Mask names in text content."""
         # Simple name pattern - this could be more sophisticated
         name_pattern = re.compile(
-            r'\b[A-Z][a-z]+ [A-Z][a-z]+\b'  # First Last name pattern
+            r"\b[A-Z][a-z]+ [A-Z][a-z]+\b"  # First Last name pattern
         )
 
         def mask_name(match: re.Match[str]) -> str:
@@ -258,20 +260,20 @@ class PIIMaskingService:
             # Mask email: show first char and domain
             if "@" in match_text:
                 username, domain = match_text.split("@", 1)
-                masked_username = (
-                    username[0] + self.mask_char * (len(username) - 1)
+                masked_username = username[0] + self.mask_char * (
+                    len(username) - 1
                 )
                 return f"{masked_username}@{domain}"
 
         elif pattern_name == "phone":
             # Mask phone: show area code, mask middle digits
-            digits = re.sub(r'[^\d]', '', match_text)
+            digits = re.sub(r"[^\d]", "", match_text)
             if len(digits) >= 10:
                 return f"({digits[:3]}) {self.mask_char * 3}-{digits[-4:]}"
 
         elif pattern_name == "ssn":
             # Mask SSN: show last 4 digits
-            digits = re.sub(r'[^\d]', '', match_text)
+            digits = re.sub(r"[^\d]", "", match_text)
             if len(digits) == 9:
                 return (
                     f"{self.mask_char * 3}-{self.mask_char * 2}-{digits[-4:]}"
@@ -279,7 +281,7 @@ class PIIMaskingService:
 
         elif pattern_name == "credit_card":
             # Mask credit card: show last 4 digits
-            digits = re.sub(r'[^\d]', '', match_text)
+            digits = re.sub(r"[^\d]", "", match_text)
             return self.mask_char * (len(digits) - 4) + digits[-4:]
 
         # Default masking: partial mask
@@ -288,17 +290,26 @@ class PIIMaskingService:
         else:
             # Show first and last character, mask middle
             return (
-                match_text[0] +
-                self.mask_char * (len(match_text) - 2) +
-                match_text[-1]
+                match_text[0]
+                + self.mask_char * (len(match_text) - 2)
+                + match_text[-1]
             )
 
     def _should_mask_field(self, field_name: str) -> bool:
         """Check if a field should be masked based on its name."""
         sensitive_fields = {
-            "name", "full_name", "first_name", "last_name",
-            "email", "phone", "address", "ssn", "student_id",
-            "parent_name", "guardian_name", "emergency_contact"
+            "name",
+            "full_name",
+            "first_name",
+            "last_name",
+            "email",
+            "phone",
+            "address",
+            "ssn",
+            "student_id",
+            "parent_name",
+            "guardian_name",
+            "emergency_contact",
         }
 
         return field_name.lower() in sensitive_fields

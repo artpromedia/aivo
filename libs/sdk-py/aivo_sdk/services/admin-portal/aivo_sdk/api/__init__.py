@@ -7,4 +7,3 @@ from aivo_sdk.api.dashboard_api import DashboardApi
 from aivo_sdk.api.namespaces_api import NamespacesApi
 from aivo_sdk.api.subscription_api import SubscriptionApi
 from aivo_sdk.api.team_api import TeamApi
-

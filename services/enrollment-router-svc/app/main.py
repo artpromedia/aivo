@@ -1,24 +1,27 @@
 """
 FastAPI application for enrollment router service.
 """
+
 import logging
 from contextlib import asynccontextmanager
-from typing import List, Union
 
-from fastapi import FastAPI, Depends, HTTPException, status
+from fastapi import Depends, FastAPI, HTTPException, status
 from fastapi.middleware.cors import CORSMiddleware
-from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select
+from sqlalchemy.ext.asyncio import AsyncSession
 
-from .database import get_db, create_tables
+from .database import create_tables, get_db
 from .models import DistrictSeatAllocation, EnrollmentDecision
 from .schemas import (
-    EnrollmentRequest, EnrollmentDecisionResponse,
-    DistrictSeatAllocationCreate, DistrictSeatAllocationUpdate, 
-    DistrictSeatAllocationResponse, DistrictEnrollmentResult,
-    ParentEnrollmentResult
+    DistrictEnrollmentResult,
+    DistrictSeatAllocationCreate,
+    DistrictSeatAllocationResponse,
+    DistrictSeatAllocationUpdate,
+    EnrollmentDecisionResponse,
+    EnrollmentRequest,
+    ParentEnrollmentResult,
 )
-from .services import EnrollmentRouterService, DistrictSeatService
+from .services import DistrictSeatService, EnrollmentRouterService
 
 # Configure logging
 logging.basicConfig(level=logging.INFO)
@@ -26,7 +29,7 @@ logger = logging.getLogger(__name__)
 
 
 @asynccontextmanager
-async def lifespan(app: FastAPI):
+async def lifespan(_app: FastAPI):
     """Application lifespan events."""
     # Startup
     await create_tables()
@@ -39,9 +42,11 @@ async def lifespan(app: FastAPI):
 # Create FastAPI app
 app = FastAPI(
     title="Enrollment Router Service",
-    description="Routes learner enrollments between district and parent provisioning",
+    description=(
+        "Routes learner enrollments between district and parent provisioning"
+    ),
     version="1.0.0",
-    lifespan=lifespan
+    lifespan=lifespan,
 )
 
 # Add CORS middleware
@@ -64,49 +69,53 @@ async def health_check():
     return {"status": "healthy", "service": "enrollment-router"}
 
 
-@app.post("/enroll", response_model=Union[DistrictEnrollmentResult, ParentEnrollmentResult])
+@app.post(
+    "/enroll", response_model=DistrictEnrollmentResult | ParentEnrollmentResult
+)
 async def enroll_learner(
-    request: EnrollmentRequest,
-    db: AsyncSession = Depends(get_db)
+    request: EnrollmentRequest, db: AsyncSession = Depends(get_db)
 ):
     """
     Route learner enrollment based on context and availability.
-    
-    - If context.tenant_id & FREE seats → reserve, set provision_source='district'
+
+    - If context.tenant_id & FREE seats → reserve,
+      set provision_source='district'
     - Else → provision_source='parent' + return checkout URL
     """
     try:
         result = await enrollment_service.route_enrollment(db, request)
         logger.info(
-            f"Enrollment routed: {request.learner_profile.email} -> "
-            f"{result.provision_source.value}"
+            "Enrollment routed: %s -> %s",
+            request.learner_profile.email,
+            result.provision_source.value,
         )
         return result
     except Exception as e:
-        logger.error(f"Enrollment routing failed: {e}")
+        logger.error("Enrollment routing failed: %s", e)
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail=f"Enrollment routing failed: {str(e)}"
-        )
+            detail=f"Enrollment routing failed: {str(e)}",
+        ) from e
 
 
-@app.get("/enrollments/{decision_id}", response_model=EnrollmentDecisionResponse)
+@app.get(
+    "/enrollments/{decision_id}", response_model=EnrollmentDecisionResponse
+)
 async def get_enrollment_decision(
-    decision_id: int,
-    db: AsyncSession = Depends(get_db)
+    decision_id: int, db: AsyncSession = Depends(get_db)
 ):
     """Get enrollment decision by ID."""
     result = await db.execute(
         select(EnrollmentDecision).where(EnrollmentDecision.id == decision_id)
     )
     decision = result.scalar_one_or_none()
-    
+
     if not decision:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
-            detail="Enrollment decision not found"
+            detail="Enrollment decision not found",
         )
-    
+
     return EnrollmentDecisionResponse(
         decision_id=decision.id,
         provision_source=decision.provision_source,
@@ -120,31 +129,35 @@ async def get_enrollment_decision(
         checkout_session_id=decision.checkout_session_id,
         checkout_url=decision.checkout_url,
         created_at=decision.created_at,
-        message=decision.error_message or "Success"
+        message=decision.error_message or "Success",
     )
 
 
-@app.get("/enrollments", response_model=List[EnrollmentDecisionResponse])
+@app.get("/enrollments", response_model=list[EnrollmentDecisionResponse])
 async def list_enrollment_decisions(
     tenant_id: int = None,
     guardian_id: str = None,
     limit: int = 100,
     offset: int = 0,
-    db: AsyncSession = Depends(get_db)
+    db: AsyncSession = Depends(get_db),
 ):
     """List enrollment decisions with optional filtering."""
     query = select(EnrollmentDecision)
-    
+
     if tenant_id:
         query = query.where(EnrollmentDecision.tenant_id == tenant_id)
     if guardian_id:
         query = query.where(EnrollmentDecision.guardian_id == guardian_id)
-    
-    query = query.offset(offset).limit(limit).order_by(EnrollmentDecision.created_at.desc())
-    
+
+    query = (
+        query.offset(offset)
+        .limit(limit)
+        .order_by(EnrollmentDecision.created_at.desc())
+    )
+
     result = await db.execute(query)
     decisions = result.scalars().all()
-    
+
     return [
         EnrollmentDecisionResponse(
             decision_id=decision.id,
@@ -159,7 +172,7 @@ async def list_enrollment_decisions(
             checkout_session_id=decision.checkout_session_id,
             checkout_url=decision.checkout_url,
             created_at=decision.created_at,
-            message=decision.error_message or "Success"
+            message=decision.error_message or "Success",
         )
         for decision in decisions
     ]
@@ -169,7 +182,7 @@ async def list_enrollment_decisions(
 @app.post("/districts/seats", response_model=DistrictSeatAllocationResponse)
 async def create_district_allocation(
     allocation: DistrictSeatAllocationCreate,
-    db: AsyncSession = Depends(get_db)
+    db: AsyncSession = Depends(get_db),
 ):
     """Create district seat allocation."""
     try:
@@ -178,62 +191,66 @@ async def create_district_allocation(
         )
         return result
     except Exception as e:
-        logger.error(f"Failed to create district allocation: {e}")
+        logger.error("Failed to create district allocation: %s", e)
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail=f"Failed to create allocation: {str(e)}"
-        )
+            detail=f"Failed to create allocation: {str(e)}",
+        ) from e
 
 
-@app.get("/districts/{tenant_id}/seats", response_model=DistrictSeatAllocationResponse)
+@app.get(
+    "/districts/{tenant_id}/seats",
+    response_model=DistrictSeatAllocationResponse,
+)
 async def get_district_allocation(
-    tenant_id: int,
-    db: AsyncSession = Depends(get_db)
+    tenant_id: int, db: AsyncSession = Depends(get_db)
 ):
     """Get district seat allocation."""
     allocation = await district_service.get_allocation(db, tenant_id)
     if not allocation:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
-            detail="District allocation not found"
+            detail="District allocation not found",
         )
     return allocation
 
 
-@app.put("/districts/{tenant_id}/seats", response_model=DistrictSeatAllocationResponse)
+@app.put(
+    "/districts/{tenant_id}/seats",
+    response_model=DistrictSeatAllocationResponse,
+)
 async def update_district_allocation(
     tenant_id: int,
     update: DistrictSeatAllocationUpdate,
-    db: AsyncSession = Depends(get_db)
+    db: AsyncSession = Depends(get_db),
 ):
     """Update district seat allocation."""
     allocation = await district_service.get_allocation(db, tenant_id)
     if not allocation:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
-            detail="District allocation not found"
+            detail="District allocation not found",
         )
-    
+
     if update.total_seats is not None:
         allocation.total_seats = update.total_seats
     if update.is_active is not None:
         allocation.is_active = update.is_active
-    
+
     await db.commit()
     await db.refresh(allocation)
     return allocation
 
 
-@app.get("/districts", response_model=List[DistrictSeatAllocationResponse])
+@app.get("/districts", response_model=list[DistrictSeatAllocationResponse])
 async def list_district_allocations(
-    active_only: bool = True,
-    db: AsyncSession = Depends(get_db)
+    active_only: bool = True, db: AsyncSession = Depends(get_db)
 ):
     """List all district seat allocations."""
     query = select(DistrictSeatAllocation)
     if active_only:
-        query = query.where(DistrictSeatAllocation.is_active == True)
-    
+        query = query.where(DistrictSeatAllocation.is_active)
+
     result = await db.execute(query)
     allocations = result.scalars().all()
     return allocations
@@ -241,4 +258,5 @@ async def list_district_allocations(
 
 if __name__ == "__main__":
     import uvicorn
+
     uvicorn.run(app, host="0.0.0.0", port=8002)

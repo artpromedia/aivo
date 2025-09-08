@@ -32,7 +32,7 @@ def sample_manifest_request() -> dict:
         "subject": SubjectType.MATH,
         "grade": 3,
         "duration_minutes": 10,
-        "accessibility": AccessibilitySettings()
+        "accessibility": AccessibilitySettings(),
     }
 
 
@@ -49,5 +49,5 @@ def accessibility_request() -> dict:
             high_contrast=True,
             large_text=True,
             audio_cues=True
-        )
+        ),
     }

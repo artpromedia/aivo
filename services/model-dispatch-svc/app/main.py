@@ -198,9 +198,11 @@ async def reload_config() -> dict[str, Any]:
         success = await policy_engine.reload_config()
         return {
             "success": success,
-            "message": "Configuration reloaded successfully"
-            if success
-            else "Reload failed",
+            "message": (
+                "Configuration reloaded successfully"
+                if success
+                else "Reload failed"
+            ),
             "timestamp": time.time(),
         }
 

@@ -45,6 +45,12 @@ lint: ## Run all linting (JS/TS, Python, YAML, Markdown, Docker)
 	pnpm run lint:md
 	pnpm run lint:docker
 
+py-fix: ## Fix Python code formatting and linting issues
+	@echo "🐍 Fixing Python code with Ruff..."
+	ruff check --fix .
+	ruff format .
+	@echo "✅ Python code formatting complete"
+
 format-check: ## Check code formatting
 	@echo "🎨 Checking code formatting..."
 	pnpm run format:check
@@ -117,6 +123,12 @@ compose-logs: ## Show Docker Compose logs
 stage0-verify: ## Comprehensive Stage-0 verification script
 	@echo "🎯 Running Stage-0 Completion Verification..."
 	@./scripts/verify-stage0.sh
+
+# Stage-2 pipeline verifier
+stage2-verify: ## Comprehensive Stage-2 pipeline verification
+	@echo "🎯 Running Stage-2 Pipeline Verification..."
+	@echo "Testing upload → ocr → topics → index → planner → game workflow..."
+	tsx scripts/verify-stage2.ts
 
 # Quick development workflow
 dev-setup: install verify ## Complete development setup and verification

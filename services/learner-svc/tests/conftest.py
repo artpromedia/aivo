@@ -1,17 +1,16 @@
 """
 Test configuration and fixtures for learner service.
 """
-import pytest
-from datetime import datetime, date
-from typing import AsyncGenerator
-from sqlalchemy.ext.asyncio import AsyncSession, create_async_engine, async_sessionmaker
-from sqlalchemy.pool import StaticPool
-from httpx import AsyncClient, ASGITransport
 
+from collections.abc import AsyncGenerator
+
+import pytest
 from app.database import Base, get_db
 from app.main import app
-from app.models import Guardian, Teacher, Tenant, ProvisionSource
-
+from app.models import Guardian, Teacher, Tenant
+from httpx import ASGITransport, AsyncClient
+from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker, create_async_engine
+from sqlalchemy.pool import StaticPool
 
 # Test database URL (in-memory SQLite)
 TEST_DATABASE_URL = "sqlite+aiosqlite:///:memory:"
@@ -38,11 +37,11 @@ async def db_session() -> AsyncGenerator[AsyncSession, None]:
     # Create tables
     async with test_engine.begin() as conn:
         await conn.run_sync(Base.metadata.create_all)
-    
+
     # Create session
     async with TestSessionLocal() as session:
         yield session
-    
+
     # Drop tables
     async with test_engine.begin() as conn:
         await conn.run_sync(Base.metadata.drop_all)
@@ -53,13 +52,10 @@ async def client(db_session: AsyncSession) -> AsyncGenerator[AsyncClient, None]:
     """Create a test client."""
     # Override the dependency
     app.dependency_overrides[get_db] = lambda: db_session
-    
-    async with AsyncClient(
-        transport=ASGITransport(app=app), 
-        base_url="http://test"
-    ) as client:
+
+    async with AsyncClient(transport=ASGITransport(app=app), base_url="http://test") as client:
         yield client
-    
+
     # Clean up
     app.dependency_overrides.clear()
 
@@ -68,10 +64,7 @@ async def client(db_session: AsyncSession) -> AsyncGenerator[AsyncClient, None]:
 async def sample_guardian(db_session: AsyncSession) -> Guardian:
     """Create a sample guardian for testing."""
     guardian = Guardian(
-        first_name="John",
-        last_name="Doe",
-        email="john.doe@example.com",
-        phone="555-0123"
+        first_name="John", last_name="Doe", email="john.doe@example.com", phone="555-0123"
     )
     db_session.add(guardian)
     await db_session.commit()
@@ -86,7 +79,7 @@ async def sample_tenant(db_session: AsyncSession) -> Tenant:
         name="Springfield Elementary",
         type="school",
         contact_email="admin@springfield.edu",
-        contact_phone="555-0456"
+        contact_phone="555-0456",
     )
     db_session.add(tenant)
     await db_session.commit()
@@ -102,7 +95,7 @@ async def sample_teacher(db_session: AsyncSession, sample_tenant: Tenant) -> Tea
         last_name="Smith",
         email="jane.smith@springfield.edu",
         subject="Mathematics",
-        tenant_id=sample_tenant.id
+        tenant_id=sample_tenant.id,
     )
     db_session.add(teacher)
     await db_session.commit()
@@ -118,7 +111,7 @@ async def second_teacher(db_session: AsyncSession, sample_tenant: Tenant) -> Tea
         last_name="Wilson",
         email="bob.wilson@springfield.edu",
         subject="Science",
-        tenant_id=sample_tenant.id
+        tenant_id=sample_tenant.id,
     )
     db_session.add(teacher)
     await db_session.commit()
@@ -134,5 +127,5 @@ def sample_learner_data():
         "last_name": "Johnson",
         "email": "alice.johnson@example.com",
         "dob": "2015-06-15",  # Should be ~8 years old, grade 2-3
-        "provision_source": "parent"
+        "provision_source": "parent",
     }

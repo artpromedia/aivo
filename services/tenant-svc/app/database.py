@@ -1,18 +1,18 @@
 """
 Database configuration and session management.
 """
-import os
-from typing import AsyncGenerator
 
-from sqlalchemy.ext.asyncio import AsyncSession, create_async_engine, async_sessionmaker
+import os
+from collections.abc import AsyncGenerator
+
+from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker, create_async_engine
 from sqlalchemy.pool import NullPool
 
 from .models import Base
 
 # Database URL from environment variable
 DATABASE_URL = os.getenv(
-    "DATABASE_URL", 
-    "postgresql+asyncpg://tenant_user:tenant_pass@localhost:5432/tenant_db"
+    "DATABASE_URL", "postgresql+asyncpg://tenant_user:tenant_pass@localhost:5432/tenant_db"
 )
 
 # Create async engine
@@ -23,9 +23,7 @@ engine = create_async_engine(
 )
 
 # Create async session maker
-AsyncSessionLocal = async_sessionmaker(
-    engine, class_=AsyncSession, expire_on_commit=False
-)
+AsyncSessionLocal = async_sessionmaker(engine, class_=AsyncSession, expire_on_commit=False)
 
 
 async def get_database() -> AsyncGenerator[AsyncSession, None]:
@@ -39,7 +37,7 @@ async def get_database() -> AsyncGenerator[AsyncSession, None]:
             await session.close()
 
 
-async def create_tables():
+async def create_tables() -> None:
     """
     Create all database tables.
     """

@@ -11,6 +11,7 @@ try:
     import pytesseract
     from pdf2image import convert_from_bytes
     from PIL import Image, ImageEnhance
+
     OCR_DEPENDENCIES_AVAILABLE = True
     IMPORT_ERROR = ""
 except ImportError as e:
@@ -36,12 +37,12 @@ class OCRService:
         """Initialize OCR service."""
         if not OCR_DEPENDENCIES_AVAILABLE:
             error_msg = getattr(
-                globals(), 'IMPORT_ERROR', 'Unknown import error'
+                globals(), "IMPORT_ERROR", "Unknown import error"
             )
             logger.error(
                 "OCR dependencies not available. Install: pip install "
                 "opencv-python pytesseract pdf2image Pillow. Error: %s",
-                error_msg
+                error_msg,
             )
             return
 
@@ -94,8 +95,8 @@ class OCRService:
                 if page_text:
                     all_text.append(" ".join(page_text))
                     if page_confidences:
-                        avg_page_conf = (
-                            sum(page_confidences) / len(page_confidences)
+                        avg_page_conf = sum(page_confidences) / len(
+                            page_confidences
                         )
                         total_confidence += avg_page_conf
                         page_count += 1

@@ -1,16 +1,16 @@
 """
 Database configuration and utilities.
 """
+
 import os
 from typing import AsyncGenerator
-from sqlalchemy.ext.asyncio import AsyncSession, create_async_engine, async_sessionmaker
-from sqlalchemy.orm import declarative_base
 
+from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker, create_async_engine
+from sqlalchemy.orm import declarative_base
 
 # Database configuration
 DATABASE_URL = os.getenv(
-    "DATABASE_URL", 
-    "postgresql+asyncpg://auth_user:auth_password@localhost:5432/auth_db"
+    "DATABASE_URL", "postgresql+asyncpg://auth_user:auth_password@localhost:5432/auth_db"
 )
 
 # Create async engine
@@ -22,11 +22,7 @@ engine = create_async_engine(
 )
 
 # Create session factory
-AsyncSessionLocal = async_sessionmaker(
-    engine,
-    class_=AsyncSession,
-    expire_on_commit=False
-)
+AsyncSessionLocal = async_sessionmaker(engine, class_=AsyncSession, expire_on_commit=False)
 
 # Base class for models
 Base = declarative_base()

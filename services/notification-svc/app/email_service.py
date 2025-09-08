@@ -32,7 +32,7 @@ class EmailService:
             self.dev_email_path.mkdir(exist_ok=True)
             logger.info(
                 "Email service in development mode - emails saved to %s",
-                self.dev_email_path
+                self.dev_email_path,
             )
         else:
             logger.info(
@@ -98,10 +98,12 @@ class EmailService:
                     results["successful"].append(email)
                     results["total_sent"] += 1
                 else:
-                    results["failed"].append({
-                        "email": email,
-                        "error": result.get("error", "Unknown error")
-                    })
+                    results["failed"].append(
+                        {
+                            "email": email,
+                            "error": result.get("error", "Unknown error"),
+                        }
+                    )
 
             except (smtplib.SMTPException, OSError, ValueError) as e:
                 logger.error("Failed to send email to %s: %s", email, e)
@@ -117,7 +119,7 @@ class EmailService:
             # Generate filename with timestamp
             timestamp = datetime.utcnow().strftime("%Y%m%d_%H%M%S_%f")
             safe_email = (
-                email_data['to'].replace('@', '_at_').replace('.', '_')
+                email_data["to"].replace("@", "_at_").replace(".", "_")
             )
             filename = f"email_{timestamp}_{safe_email}.json"
             filepath = self.dev_email_path / filename
@@ -131,14 +133,14 @@ class EmailService:
             return {
                 "success": True,
                 "message_id": f"dev_{timestamp}",
-                "filepath": str(filepath)
+                "filepath": str(filepath),
             }
 
         except (OSError, ValueError, json.JSONDecodeError) as e:
             logger.error("Failed to save development email: %s", e)
             return {
                 "success": False,
-                "error": "Failed to save development email: " + str(e)
+                "error": "Failed to save development email: " + str(e),
             }
 
     async def _send_smtp_email(
@@ -175,9 +177,9 @@ class EmailService:
 
                 server.send_message(msg)
 
-            logger.info("Email sent successfully to %s", email_data['to'])
+            logger.info("Email sent successfully to %s", email_data["to"])
 
-            timestamp = datetime.utcnow().strftime('%Y%m%d_%H%M%S_%f')
+            timestamp = datetime.utcnow().strftime("%Y%m%d_%H%M%S_%f")
             return {
                 "success": True,
                 "message_id": f"smtp_{timestamp}",
@@ -187,7 +189,7 @@ class EmailService:
             logger.error("Failed to send SMTP email: %s", e)
             return {
                 "success": False,
-                "error": "Failed to send email: " + str(e)
+                "error": "Failed to send email: " + str(e),
             }
 
     def is_configured(self) -> bool:

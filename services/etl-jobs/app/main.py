@@ -47,7 +47,9 @@ class ETLProcessor:
                 signal.signal(sig, self._signal_handler)
 
     def _signal_handler(
-        self, signum: int, _frame: object  # pylint: disable=unused-argument
+        self,
+        signum: int,
+        _frame: object,  # pylint: disable=unused-argument
     ) -> None:
         """Handle shutdown signals."""
         logger.info("Received shutdown signal", signal=signum)
@@ -108,7 +110,7 @@ class ETLProcessor:
                 "Processing event batch",
                 event_count=len(events),
                 first_event_time=events[0].timestamp.isoformat(),
-                last_event_time=events[-1].timestamp.isoformat()
+                last_event_time=events[-1].timestamp.isoformat(),
             )
 
             # Write events to S3 as Parquet
@@ -123,22 +125,21 @@ class ETLProcessor:
                 logger.info(
                     "Successfully processed event batch",
                     event_count=len(events),
-                    s3_key=s3_key
+                    s3_key=s3_key,
                 )
                 return True
-            else:
-                logger.error(
-                    "Failed to write events to S3",
-                    event_count=len(events)
-                )
-                self._metrics["processing_errors"] += 1
-                return False
+
+            logger.error(
+                "Failed to write events to S3", event_count=len(events)
+            )
+            self._metrics["processing_errors"] += 1
+            return False
 
         except Exception as e:  # pylint: disable=broad-exception-caught
             logger.error(
                 "Error processing event batch",
                 error=str(e),
-                event_count=len(events)
+                event_count=len(events),
             )
             self._metrics["processing_errors"] += 1
             return False
@@ -151,7 +152,8 @@ class ETLProcessor:
             "metrics": self._metrics.copy(),
             "uptime_seconds": (
                 (datetime.now() - self._metrics["start_time"]).total_seconds()
-                if self._metrics["start_time"] else 0
+                if self._metrics["start_time"]
+                else 0
             ),
         }
 
@@ -167,9 +169,11 @@ class ETLProcessor:
         }
 
         # Overall health depends on all components
-        if (not kafka_health.get("kafka_connected") or
-                not s3_health.get("s3_connected") or
-                not scheduler_health.get("running")):
+        if (
+            not kafka_health.get("kafka_connected")
+            or not s3_health.get("s3_connected")
+            or not scheduler_health.get("running")
+        ):
             health["status"] = "unhealthy"
 
         return health
@@ -197,7 +201,7 @@ async def main() -> None:
             "snowflake_database": settings.snowflake_database,
             "batch_size": settings.batch_size,
             "flush_interval": settings.flush_interval_seconds,
-        }
+        },
     )
 
     processor = ETLProcessor()

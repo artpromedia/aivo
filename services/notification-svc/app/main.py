@@ -356,8 +356,10 @@ async def send_notification(
             results["channels"]["push"] = push_result
 
         # SMS fallback for critical notifications
-        if (NotificationChannel.SMS in request.channels and
-                request.priority == "critical"):
+        if (
+            NotificationChannel.SMS in request.channels
+            and request.priority == "critical"
+        ):
             if request.phone_number:
                 sms_result = await sms_service.send(
                     request.phone_number,

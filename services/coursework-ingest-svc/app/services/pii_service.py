@@ -74,7 +74,8 @@ class PIIService:
 
         # Filter by confidence threshold
         high_confidence_results = [
-            result for result in analyzer_results
+            result
+            for result in analyzer_results
             if result.score >= 0.7  # High confidence threshold
         ]
 
@@ -92,13 +93,15 @@ class PIIService:
         # Convert results to serializable format
         entities = []
         for result in high_confidence_results:
-            entities.append({
-                "entity_type": result.entity_type,
-                "start": result.start,
-                "end": result.end,
-                "score": result.score,
-                "text": text[result.start:result.end],
-            })
+            entities.append(
+                {
+                    "entity_type": result.entity_type,
+                    "start": result.start,
+                    "end": result.end,
+                    "score": result.score,
+                    "text": text[result.start : result.end],
+                }
+            )
 
         # Calculate overall confidence
         if entities:
@@ -143,13 +146,15 @@ class PIIService:
         for entity_type, pattern in patterns.items():
             matches = re.finditer(pattern, text, re.IGNORECASE)
             for match in matches:
-                entities.append({
-                    "entity_type": entity_type,
-                    "start": match.start(),
-                    "end": match.end(),
-                    "score": 0.8,  # Default confidence for regex matches
-                    "text": match.group(),
-                })
+                entities.append(
+                    {
+                        "entity_type": entity_type,
+                        "start": match.start(),
+                        "end": match.end(),
+                        "score": 0.8,  # Default confidence for regex matches
+                        "text": match.group(),
+                    }
+                )
 
                 # Mask the detected PII
                 mask_char = "*"
@@ -166,9 +171,9 @@ class PIIService:
                     replacement = mask_char * mask_length
 
                 masked_text = (
-                    masked_text[:match.start()] +
-                    replacement +
-                    masked_text[match.end():]
+                    masked_text[: match.start()]
+                    + replacement
+                    + masked_text[match.end() :]
                 )
 
         pii_detected = len(entities) > 0

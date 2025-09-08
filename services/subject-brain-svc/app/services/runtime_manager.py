@@ -14,6 +14,7 @@ try:
         V1PodSpec,
         V1ResourceRequirements,
     )
+
     KUBERNETES_AVAILABLE = True
 except ImportError:
     # Kubernetes client not available in development environment
@@ -90,14 +91,14 @@ class KubernetesRuntimeManager:
         logger.info(
             "Creating runtime %s for learner %s",
             runtime_request.runtime_id,
-            runtime_request.learner_id
+            runtime_request.learner_id,
         )
 
         # Generate pod name
         pod_name = self._generate_pod_name(
             runtime_request.learner_id,
             runtime_request.subject,
-            runtime_request.runtime_id
+            runtime_request.runtime_id,
         )
 
         # Create pod specification
@@ -113,7 +114,7 @@ class KubernetesRuntimeManager:
                     "learner-id": runtime_request.learner_id,
                     "subject": runtime_request.subject.value,
                     "runtime-id": runtime_request.runtime_id,
-                    "component": "per-learner-subject"
+                    "component": "per-learner-subject",
                 },
                 annotations={
                     "subject-brain/created-at": datetime.utcnow().isoformat(),
@@ -122,17 +123,14 @@ class KubernetesRuntimeManager:
                     ),
                     "subject-brain/max-runtime-minutes": str(
                         runtime_request.max_runtime_minutes
-                    )
-                }
+                    ),
+                },
             ),
-            spec=pod_spec
+            spec=pod_spec,
         )
 
         try:
-            self.v1.create_namespaced_pod(
-                namespace=self.namespace,
-                body=pod
-            )
+            self.v1.create_namespaced_pod(namespace=self.namespace, body=pod)
             logger.info("Created pod %s", pod_name)
         except Exception as e:  # pylint: disable=broad-exception-caught
             logger.error("Failed to create pod %s: %s", pod_name, e)
@@ -146,7 +144,7 @@ class KubernetesRuntimeManager:
             pod_name=pod_name,
             namespace=self.namespace,
             status=RuntimeStatus.PENDING,
-            metrics=RuntimeMetrics(runtime_id=runtime_request.runtime_id)
+            metrics=RuntimeMetrics(runtime_id=runtime_request.runtime_id),
         )
 
         # Track the runtime
@@ -176,7 +174,7 @@ class KubernetesRuntimeManager:
             limits={
                 "memory": f"{runtime_request.memory_mb * 2}Mi",
                 "cpu": str(runtime_request.cpu_cores * 2),
-            }
+            },
         )
 
         # Add GPU resources if required
@@ -195,24 +193,24 @@ class KubernetesRuntimeManager:
                 {"name": "RUNTIME_ID", "value": runtime_request.runtime_id},
                 {
                     "name": "ACTIVITY_PLAN",
-                    "value": runtime_request.activity_plan.model_dump_json()
+                    "value": runtime_request.activity_plan.model_dump_json(),
                 },
                 {
                     "name": "MAX_RUNTIME_MINUTES",
-                    "value": str(runtime_request.max_runtime_minutes)
+                    "value": str(runtime_request.max_runtime_minutes),
                 },
             ],
             resources=resources,
             readiness_probe={
                 "httpGet": {"path": "/health", "port": 8080},
                 "initialDelaySeconds": 10,
-                "periodSeconds": 5
+                "periodSeconds": 5,
             },
             liveness_probe={
                 "httpGet": {"path": "/health", "port": 8080},
                 "initialDelaySeconds": 30,
-                "periodSeconds": 10
-            }
+                "periodSeconds": 10,
+            },
         )
 
         # Pod specification
@@ -221,7 +219,7 @@ class KubernetesRuntimeManager:
             service_account_name=self.service_account,
             restart_policy="Never",  # One-time execution
             active_deadline_seconds=runtime_request.max_runtime_minutes * 60,
-            termination_grace_period_seconds=30
+            termination_grace_period_seconds=30,
         )
 
         # Add node selector for GPU nodes if required
@@ -240,8 +238,7 @@ class KubernetesRuntimeManager:
         try:
             # Get pod status from Kubernetes
             pod = self.v1.read_namespaced_pod(
-                name=runtime_pod.pod_name,
-                namespace=self.namespace
+                name=runtime_pod.pod_name, namespace=self.namespace
             )
 
             # Update runtime status
@@ -271,7 +268,7 @@ class KubernetesRuntimeManager:
             "Running": RuntimeStatus.RUNNING,
             "Succeeded": RuntimeStatus.TERMINATED,
             "Failed": RuntimeStatus.TERMINATED,
-            "Unknown": RuntimeStatus.TERMINATED
+            "Unknown": RuntimeStatus.TERMINATED,
         }
         return mapping.get(phase, RuntimeStatus.TERMINATED)
 
@@ -297,7 +294,8 @@ class KubernetesRuntimeManager:
             # Keep only recent metrics (last hour)
             cutoff = datetime.utcnow() - timedelta(hours=1)
             self.metrics_history[runtime_pod.runtime_id] = [
-                m for m in self.metrics_history[runtime_pod.runtime_id]
+                m
+                for m in self.metrics_history[runtime_pod.runtime_id]
                 if m.last_activity_timestamp > cutoff
             ]
 
@@ -329,8 +327,7 @@ class KubernetesRuntimeManager:
         try:
             # Delete the pod
             self.v1.delete_namespaced_pod(
-                name=runtime_pod.pod_name,
-                namespace=self.namespace
+                name=runtime_pod.pod_name, namespace=self.namespace
             )
 
             # Update status
@@ -350,15 +347,12 @@ class KubernetesRuntimeManager:
 
         # HPA specification
         hpa = V1HorizontalPodAutoscaler(
-            metadata=V1ObjectMeta(
-                name=hpa_name,
-                namespace=self.namespace
-            ),
+            metadata=V1ObjectMeta(name=hpa_name, namespace=self.namespace),
             spec={
                 "scaleTargetRef": {
                     "apiVersion": "apps/v1",
                     "kind": "Deployment",
-                    "name": "subject-brain-svc"
+                    "name": "subject-brain-svc",
                 },
                 "minReplicas": settings.hpa_min_replicas,
                 "maxReplicas": settings.hpa_max_replicas,
@@ -371,9 +365,9 @@ class KubernetesRuntimeManager:
                                 "type": "Utilization",
                                 "averageUtilization": (
                                     settings.hpa_target_cpu_utilization
-                                )
-                            }
-                        }
+                                ),
+                            },
+                        },
                     },
                     {
                         "type": "Resource",
@@ -383,24 +377,22 @@ class KubernetesRuntimeManager:
                                 "type": "Utilization",
                                 "averageUtilization": (
                                     settings.hpa_target_memory_utilization
-                                )
-                            }
-                        }
+                                ),
+                            },
+                        },
                     },
                     {
                         "type": "Pods",
                         "pods": {
-                            "metric": {
-                                "name": "gpu_queue_depth"
-                            },
+                            "metric": {"name": "gpu_queue_depth"},
                             "target": {
                                 "type": "AverageValue",
                                 "averageValue": str(
                                     settings.hpa_target_gpu_queue_depth
-                                )
-                            }
-                        }
-                    }
+                                ),
+                            },
+                        },
+                    },
                 ],
                 "behavior": {
                     "scaleUp": {
@@ -412,15 +404,14 @@ class KubernetesRuntimeManager:
                         "stabilizationWindowSeconds": (
                             settings.hpa_scale_down_delay_seconds
                         )
-                    }
-                }
-            }
+                    },
+                },
+            },
         )
 
         try:
             self.autoscaling_v2.create_namespaced_horizontal_pod_autoscaler(
-                namespace=self.namespace,
-                body=hpa
+                namespace=self.namespace, body=hpa
             )
             logger.info("Created HPA %s", hpa_name)
         except Exception as e:  # pylint: disable=broad-exception-caught
@@ -451,7 +442,7 @@ class KubernetesRuntimeManager:
             "pending_requests": sum(
                 runtime.metrics.pending_requests
                 for runtime in self.active_runtimes.values()
-            )
+            ),
         }
 
 

@@ -57,7 +57,9 @@ class OpenSearchService:
             return {"status": "error", "error": str(e)}
 
     async def create_index(
-        self, index_name: str, mapping: dict[str, Any] | None = None
+        self,
+        index_name: str,
+        mapping: dict[str, Any] | None = None
     ) -> bool:
         """Create an index with optional mapping."""
         try:
@@ -115,7 +117,9 @@ class OpenSearchService:
             return self.client.indices.exists(index=index_name)
         except Exception as e:  # pylint: disable=broad-exception-caught
             logger.error(
-                "Failed to check index existence %s: %s", index_name, str(e)
+                "Failed to check index existence %s: %s",
+                index_name,
+                str(e)
             )
             return False
 
@@ -144,7 +148,8 @@ class OpenSearchService:
             raise
 
     async def bulk_index_documents(
-        self, request: BulkIndexRequest
+        self,
+        request: BulkIndexRequest
     ) -> dict[str, Any]:
         """Bulk index multiple documents."""
         try:
@@ -161,9 +166,7 @@ class OpenSearchService:
             if request.refresh:
                 params["refresh"] = "true"
 
-            response = self.client.bulk(
-                body=actions, params=params
-            )
+            response = self.client.bulk(body=actions, params=params)
 
             # Check for errors
             errors = []
@@ -291,19 +294,23 @@ class OpenSearchService:
 
             # Process title suggestions
             for option in response["suggest"]["title_suggest"][0]["options"]:
-                suggestions.append({
-                    "text": option["text"],
-                    "score": option["_score"],
-                    "type": "title",
-                })
+                suggestions.append(
+                    {
+                        "text": option["text"],
+                        "score": option["_score"],
+                        "type": "title",
+                    }
+                )
 
             # Process content suggestions
             for option in response["suggest"]["content_suggest"][0]["options"]:
-                suggestions.append({
-                    "text": option["text"],
-                    "score": option["_score"],
-                    "type": "content",
-                })
+                suggestions.append(
+                    {
+                        "text": option["text"],
+                        "score": option["_score"],
+                        "type": "content",
+                    }
+                )
 
             # Sort by score and remove duplicates
             unique_suggestions = {}
@@ -319,7 +326,7 @@ class OpenSearchService:
                 unique_suggestions.values(),
                 key=lambda x: x["score"],
                 reverse=True,
-            )[:request.size]
+            )[: request.size]
 
             return SuggestionResponse(
                 suggestions=sorted_suggestions,
@@ -363,8 +370,8 @@ class OpenSearchService:
             "coursework": settings.opensearch.coursework_index,
             "learners": settings.opensearch.learners_index,
             "all": f"{settings.opensearch.lessons_index},"
-                   f"{settings.opensearch.coursework_index},"
-                   f"{settings.opensearch.learners_index}",
+            f"{settings.opensearch.coursework_index},"
+            f"{settings.opensearch.learners_index}",
         }
         return index_map.get(scope, index_map["all"])
 

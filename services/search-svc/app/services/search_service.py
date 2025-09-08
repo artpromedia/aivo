@@ -18,8 +18,8 @@ from app.models import (
     UserContext,
 )
 from app.services.opensearch_service import OpenSearchService
-from app.services.rbac_service import RBACService
 from app.services.pii_masking_service import PIIMaskingService
+from app.services.rbac_service import RBACService
 
 logger = logging.getLogger(__name__)
 
@@ -42,13 +42,9 @@ class SearchService:
             await self.opensearch_service.initialize()
             if settings.REDIS_URL:
                 self.redis_client = redis.from_url(
-                    settings.REDIS_URL,
-                    encoding="utf-8",
-                    decode_responses=True
+                    settings.REDIS_URL, encoding="utf-8", decode_responses=True
                 )
-            logger.info(
-                "SearchService dependencies initialized successfully"
-            )
+            logger.info("SearchService dependencies initialized successfully")
         except Exception as e:  # pylint: disable=broad-exception-caught
             logger.error("Failed to initialize SearchService: %s", str(e))
             raise
@@ -65,13 +61,16 @@ class SearchService:
             if self.redis_client:
                 try:
                     await self.redis_client.ping()
-                except Exception as e:  # pylint: disable=broad-exception-caught  # noqa: E501
+                except (
+                    Exception
+                ) as e:  # pylint: disable=broad-exception-caught  # noqa: E501
                     logger.warning("Redis health check failed: %s", str(e))
                     redis_healthy = False
 
             overall_status = (
-                "healthy" if opensearch_health.status == "healthy"
-                and redis_healthy else "unhealthy"
+                "healthy"
+                if opensearch_health.status == "healthy" and redis_healthy
+                else "unhealthy"
             )
 
             return HealthStatus(
@@ -79,14 +78,11 @@ class SearchService:
                 details={
                     "opensearch": opensearch_health.details,
                     "redis": "healthy" if redis_healthy else "unhealthy",
-                }
+                },
             )
         except Exception as e:  # pylint: disable=broad-exception-caught
             logger.error("Health check failed: %s", str(e))
-            return HealthStatus(
-                status="unhealthy",
-                details={"error": str(e)}
-            )
+            return HealthStatus(status="unhealthy", details={"error": str(e)})
 
     async def search(
         self,
@@ -101,16 +97,14 @@ class SearchService:
                 cache_key = self._generate_cache_key(request, user_context)
                 cached_result = await self._get_cached_result(cache_key)
                 if cached_result:
-                    logger.debug(
-                        "Cache hit for user %s",
-                        user_context.user_id
-                    )
+                    logger.debug("Cache hit for user %s", user_context.user_id)
                     return SearchResponse(**cached_result)
 
             # Apply RBAC filtering
             # pylint: disable=no-member
             filtered_request = await self.rbac_service.filter_search_request(
-                request, user_context
+                request,
+                user_context
             )
 
             # Perform search
@@ -153,8 +147,11 @@ class SearchService:
         try:
             # Apply RBAC filtering to suggestion request
             # pylint: disable=no-member
-            filtered_request = await self.rbac_service.filter_suggestion_request(  # noqa: E501
-                request, user_context
+            filtered_request = (
+                await self.rbac_service.filter_suggestion_request(
+                    request,
+                    user_context
+                )
             )
 
             # Get suggestions from OpenSearch
@@ -202,7 +199,7 @@ class SearchService:
             masked_request = IndexRequest(
                 index=request.index,
                 document=masked_document,
-                document_id=request.document_id
+                document_id=request.document_id,
             )
 
             # Index the document
@@ -255,8 +252,7 @@ class SearchService:
 
             # Create masked request
             masked_request = BulkIndexRequest(
-                index=request.index,
-                documents=masked_documents
+                index=request.index, documents=masked_documents
             )
 
             # Bulk index the documents
@@ -283,9 +279,7 @@ class SearchService:
             raise
 
     def _generate_cache_key(
-        self,
-        request: SearchRequest,
-        user_context: UserContext
+        self, request: SearchRequest, user_context: UserContext
     ) -> str:
         """Generate a cache key for the search request."""
         key_data = {
@@ -311,9 +305,7 @@ class SearchService:
             return None
 
     async def _cache_result(
-        self,
-        cache_key: str,
-        result: SearchResponse
+        self, cache_key: str, result: SearchResponse
     ) -> None:
         """Cache search result."""
         try:
@@ -323,9 +315,7 @@ class SearchService:
             # Convert to dict for caching
             result_dict = result.dict()
             await self.redis_client.setex(
-                cache_key,
-                settings.CACHE_TTL_SECONDS,
-                json.dumps(result_dict)
+                cache_key, settings.CACHE_TTL_SECONDS, json.dumps(result_dict)
             )
         except Exception as e:  # pylint: disable=broad-exception-caught
             logger.warning("Failed to cache result: %s", str(e))

@@ -1,51 +1,38 @@
 """
 Test configuration and fixtures.
 """
+
+from unittest.mock import Mock
+
 import pytest
 import pytest_asyncio
-from unittest.mock import Mock, AsyncMock
-from httpx import AsyncClient, ASGITransport
-
 from app.main import app
-from app.config import settings
+from httpx import ASGITransport, AsyncClient
 
 
 @pytest.fixture
 def mock_openai_client():
     """Mock OpenAI client for testing."""
     client = Mock()
-    
+
     # Mock completions
     completion_response = Mock()
     completion_response.id = "test-completion-id"
     completion_response.created = 1634567890
     completion_response.model = "gpt-3.5-turbo"
     completion_response.choices = [
-        Mock(
-            text="This is a test response.",
-            finish_reason="stop",
-            logprobs=None
-        )
+        Mock(text="This is a test response.", finish_reason="stop", logprobs=None)
     ]
-    completion_response.usage = Mock(
-        prompt_tokens=10,
-        completion_tokens=5,
-        total_tokens=15
-    )
+    completion_response.usage = Mock(prompt_tokens=10, completion_tokens=5, total_tokens=15)
     client.completions.create.return_value = completion_response
-    
+
     # Mock embeddings
     embedding_response = Mock()
     embedding_response.model = "text-embedding-ada-002"
-    embedding_response.data = [
-        Mock(embedding=[0.1, 0.2, 0.3, 0.4, 0.5])
-    ]
-    embedding_response.usage = Mock(
-        prompt_tokens=5,
-        total_tokens=5
-    )
+    embedding_response.data = [Mock(embedding=[0.1, 0.2, 0.3, 0.4, 0.5])]
+    embedding_response.usage = Mock(prompt_tokens=5, total_tokens=5)
     client.embeddings.create.return_value = embedding_response
-    
+
     # Mock moderation
     moderation_response = Mock()
     moderation_response.id = "test-moderation-id"
@@ -64,7 +51,7 @@ def mock_openai_client():
         "sexual": False,
         "sexual/minors": False,
         "violence": False,
-        "violence/graphic": False
+        "violence/graphic": False,
     }
     moderation_result.category_scores = Mock()
     moderation_result.category_scores.__dict__ = {
@@ -78,16 +65,16 @@ def mock_openai_client():
         "sexual": 0.01,
         "sexual/minors": 0.01,
         "violence": 0.01,
-        "violence/graphic": 0.01
+        "violence/graphic": 0.01,
     }
     moderation_response.results = [moderation_result]
     client.moderations.create.return_value = moderation_response
-    
+
     # Mock models list for health check
     models_response = Mock()
     models_response.data = [Mock(id="gpt-3.5-turbo")]
     client.models.list.return_value = models_response
-    
+
     return client
 
 
@@ -95,7 +82,7 @@ def mock_openai_client():
 def mock_flagged_moderation():
     """Mock OpenAI client that returns flagged content."""
     client = Mock()
-    
+
     moderation_response = Mock()
     moderation_response.id = "test-moderation-id"
     moderation_response.model = "text-moderation-latest"
@@ -115,7 +102,7 @@ def mock_flagged_moderation():
     }
     moderation_response.results = [moderation_result]
     client.moderations.create.return_value = moderation_response
-    
+
     return client
 
 
@@ -137,8 +124,8 @@ def sample_generate_request():
         "context": {
             "subject": "Science",
             "grade_level": "5th",
-            "learning_objective": "Understand basic photosynthesis process"
-        }
+            "learning_objective": "Understand basic photosynthesis process",
+        },
     }
 
 
@@ -148,20 +135,14 @@ def sample_embedding_request():
     return {
         "input": "What is photosynthesis?",
         "model": "text-embedding-ada-002",
-        "context": {
-            "subject": "Science",
-            "grade_level": "5th"
-        }
+        "context": {"subject": "Science", "grade_level": "5th"},
     }
 
 
 @pytest.fixture
 def sample_moderation_request():
     """Sample moderation request data."""
-    return {
-        "input": "This is a test message for moderation",
-        "threshold": 0.8
-    }
+    return {"input": "This is a test message for moderation", "threshold": 0.8}
 
 
 @pytest.fixture

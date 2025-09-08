@@ -74,10 +74,14 @@ class ETLScheduler:
             try:
                 # Check if it's time to run daily jobs (4 AM UTC)
                 now = datetime.utcnow()
-                if (now.hour == 4 and now.minute < 5 and
-                    (self._metrics["last_run_time"] is None or
-                     self._metrics["last_run_time"].date() < now.date())):
-
+                if (
+                    now.hour == 4
+                    and now.minute < 5
+                    and (
+                        self._metrics["last_run_time"] is None
+                        or self._metrics["last_run_time"].date() < now.date()
+                    )
+                ):
                     await self._run_daily_jobs()
 
                 # Sleep for 5 minutes before next check
@@ -122,7 +126,7 @@ class ETLScheduler:
                     "Daily ETL jobs completed successfully",
                     target_date=target_date,
                     results=results,
-                    validation=validation_results
+                    validation=validation_results,
                 )
             else:
                 self._metrics["jobs_failed"] += 1
@@ -130,7 +134,7 @@ class ETLScheduler:
                     "Daily ETL jobs completed with validation failures",
                     target_date=target_date,
                     results=results,
-                    validation=validation_results
+                    validation=validation_results,
                 )
 
             self._metrics["last_run_time"] = datetime.utcnow()
@@ -138,9 +142,7 @@ class ETLScheduler:
         except Exception as e:  # pylint: disable=broad-exception-caught
             self._metrics["jobs_failed"] += 1
             logger.error(
-                "Daily ETL jobs failed",
-                target_date=target_date,
-                error=str(e)
+                "Daily ETL jobs failed", target_date=target_date, error=str(e)
             )
 
     async def run_manual_job(
@@ -172,14 +174,12 @@ class ETLScheduler:
                 "target_date": target_date.isoformat(),
                 "transformations": results,
                 "validation": validation_results,
-                "all_checks_passed": all(validation_results.values())
+                "all_checks_passed": all(validation_results.values()),
             }
 
         except (ConnectionError, RuntimeError, ValueError) as e:
             logger.error(
-                "Manual ETL job failed",
-                target_date=target_date,
-                error=str(e)
+                "Manual ETL job failed", target_date=target_date, error=str(e)
             )
             return {
                 "status": "failed",
@@ -192,9 +192,7 @@ class ETLScheduler:
     ) -> dict[str, Any]:
         """Backfill data for a date range."""
         logger.info(
-            "Starting data backfill",
-            start_date=start_date,
-            end_date=end_date
+            "Starting data backfill", start_date=start_date, end_date=end_date
         )
 
         if not self.snowflake_service.is_connected():
@@ -228,9 +226,7 @@ class ETLScheduler:
 
             except Exception as e:  # pylint: disable=broad-exception-caught
                 logger.error(
-                    "Backfill failed for date",
-                    date=current_date,
-                    error=str(e)
+                    "Backfill failed for date", date=current_date, error=str(e)
                 )
                 results.append({
                     "date": current_date.isoformat(),
@@ -247,14 +243,14 @@ class ETLScheduler:
             total_days=len(results),
             successful_days=len(
                 [r for r in results if r["status"] == "success"]
-            )
+            ),
         )
 
         return {
             "status": "completed",
             "start_date": start_date.isoformat(),
             "end_date": end_date.isoformat(),
-            "results": results
+            "results": results,
         }
 
     async def health_check(self) -> dict[str, Any]:

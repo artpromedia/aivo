@@ -48,14 +48,14 @@ class S3ParquetWriter:
                 aws_secret_access_key=settings.aws_secret_access_key,
                 region_name=settings.aws_region,
             )
-            self.s3_client = self._session.client('s3')
+            self.s3_client = self._session.client("s3")
             logger.info("S3 client initialized", region=settings.aws_region)
         except NoCredentialsError:
             logger.warning(
                 "AWS credentials not found, using default provider chain"
             )
             self.s3_client = boto3.client(
-                's3', region_name=settings.aws_region
+                "s3", region_name=settings.aws_region
             )
         except Exception as e:
             logger.error("Failed to initialize S3 client", error=str(e))
@@ -76,8 +76,8 @@ class S3ParquetWriter:
         try:
             # Generate S3 key with partitioning
             partition_date = (
-                events[0].partition_date or
-                datetime.now().strftime("%Y-%m-%d")
+                events[0].partition_date
+                or datetime.now().strftime("%Y-%m-%d")
             )
             batch_id = str(uuid.uuid4())
             timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
@@ -120,7 +120,7 @@ class S3ParquetWriter:
                 settings.s3_bucket_raw_events,
                 s3_key,
                 parquet_buffer.getvalue(),
-                file_size
+                file_size,
             )
 
             # Update metrics
@@ -134,7 +134,7 @@ class S3ParquetWriter:
                 s3_key=s3_key,
                 event_count=len(events),
                 file_size_bytes=file_size,
-                bucket=settings.s3_bucket_raw_events
+                bucket=settings.s3_bucket_raw_events,
             )
 
             return s3_key
@@ -158,13 +158,13 @@ class S3ParquetWriter:
                 Bucket=bucket,
                 Key=key,
                 Body=data,
-                ContentType='application/octet-stream',
+                ContentType="application/octet-stream",
                 Metadata={
-                    'source': 'etl-jobs',
-                    'format': 'parquet',
-                    'compression': settings.parquet_compression,
-                    'size_bytes': str(size),
-                }
+                    "source": "etl-jobs",
+                    "format": "parquet",
+                    "compression": settings.parquet_compression,
+                    "size_bytes": str(size),
+                },
             )
         except ClientError as e:
             logger.error(
@@ -179,24 +179,24 @@ class S3ParquetWriter:
     def _optimize_dataframe(self, df: pd.DataFrame) -> pd.DataFrame:
         """Optimize DataFrame for Parquet storage."""
         # Convert timestamp columns to proper datetime
-        if 'timestamp' in df.columns:
-            df['timestamp'] = pd.to_datetime(df['timestamp'])
-        if 'processed_at' in df.columns:
-            df['processed_at'] = pd.to_datetime(df['processed_at'])
+        if "timestamp" in df.columns:
+            df["timestamp"] = pd.to_datetime(df["timestamp"])
+        if "processed_at" in df.columns:
+            df["processed_at"] = pd.to_datetime(df["processed_at"])
 
         # Convert string columns to category where appropriate
-        categorical_columns = ['event_type', 'version', 'partition_date']
+        categorical_columns = ["event_type", "version", "partition_date"]
         for col in categorical_columns:
             if col in df.columns:
-                df[col] = df[col].astype('category')
+                df[col] = df[col].astype("category")
 
         # Ensure consistent data types
-        if 'learner_id' in df.columns:
-            df['learner_id'] = df['learner_id'].astype('string')
-        if 'event_id' in df.columns:
-            df['event_id'] = df['event_id'].astype('string')
-        if 'session_id' in df.columns:
-            df['session_id'] = df['session_id'].astype('string')
+        if "learner_id" in df.columns:
+            df["learner_id"] = df["learner_id"].astype("string")
+        if "event_id" in df.columns:
+            df["event_id"] = df["event_id"].astype("string")
+        if "session_id" in df.columns:
+            df["session_id"] = df["session_id"].astype("string")
 
         return df
 
@@ -207,9 +207,8 @@ class S3ParquetWriter:
             await asyncio.get_event_loop().run_in_executor(
                 None,
                 lambda: self.s3_client.list_objects_v2(
-                    Bucket=settings.s3_bucket_raw_events,
-                    MaxKeys=1
-                )
+                    Bucket=settings.s3_bucket_raw_events, MaxKeys=1
+                ),
             )
 
             return {

@@ -26,9 +26,12 @@ class GameGenerationService:
         self.total_generation_time = 0.0
 
     async def generate_manifest(
-        self, learner_id: str, subject: SubjectType,
-        grade: int, duration_minutes: int,
-        accessibility: AccessibilitySettings
+        self,
+        learner_id: str,
+        subject: SubjectType,
+        grade: int,
+        duration_minutes: int,
+        accessibility: AccessibilitySettings,
     ) -> GameManifest:
         """Generate a complete game manifest for learner."""
         start_time = time.time()
@@ -46,8 +49,12 @@ class GameGenerationService:
 
             for scene_index in range(num_scenes):
                 scene = await self._generate_scene(
-                    subject, game_type, difficulty, scene_index,
-                    accessibility, duration_minutes
+                    subject,
+                    game_type,
+                    difficulty,
+                    scene_index,
+                    accessibility,
+                    duration_minutes
                 )
                 scenes.append(scene)
 
@@ -73,12 +80,12 @@ class GameGenerationService:
                     f"{subject.value.title()} {game_type.value.title()} Game"
                 ),
                 description=(
-                    f"A {difficulty.value} level {subject.value} "
-                    f"game for grade {grade}"
+                    f"A {difficulty.value} level {subject.value} game "
+                    f"for grade {grade}"
                 ),
                 scenes=scenes,
                 scoring=scoring,
-                accessibility=accessibility
+                accessibility=accessibility,
             )
 
             # Update performance metrics
@@ -109,7 +116,7 @@ class GameGenerationService:
             ],
             SubjectType.MUSIC: [
                 GameType.RHYTHM, GameType.MEMORY, GameType.MATCHING
-            ]
+            ],
         }
 
         available_games = subject_games.get(subject, [GameType.QUIZ])
@@ -154,10 +161,13 @@ class GameGenerationService:
             return min(base_scenes, settings.max_scenes_per_game)
 
     async def _generate_scene(
-        self, subject: SubjectType, game_type: GameType,
-        difficulty: DifficultyLevel, scene_index: int,
+        self,
+        subject: SubjectType,
+        game_type: GameType,
+        difficulty: DifficultyLevel,
+        scene_index: int,
         accessibility: AccessibilitySettings,
-        duration_minutes: int
+        duration_minutes: int,
     ) -> GameScene:
         """Generate a single game scene."""
         scene_id = f"scene_{scene_index + 1}"
@@ -184,57 +194,63 @@ class GameGenerationService:
             assets=assets,
             interactions=[],  # Will be populated by frontend
             learning_objectives=[],  # Could be enhanced later
-            accessibility_adaptations={}
+            accessibility_adaptations={},
         )
 
     def _generate_scene_content(
-        self, subject: SubjectType, game_type: GameType,
+        self,
+        subject: SubjectType,
+        game_type: GameType,
         difficulty: DifficultyLevel,  # pylint: disable=unused-argument
-        scene_index: int  # pylint: disable=unused-argument
+        scene_index: int,  # pylint: disable=unused-argument
     ) -> tuple[str, str]:
         """Generate scene title and instructions."""
         content_templates = {
             (SubjectType.MATH, GameType.PUZZLE): (
                 f"Math Puzzle {scene_index + 1}",
-                "Solve the puzzle by arranging the numbers correctly."
+                "Solve the puzzle by arranging the numbers correctly.",
             ),
             (SubjectType.MATH, GameType.QUIZ): (
                 f"Math Challenge {scene_index + 1}",
                 "Answer the math questions as quickly and accurately "
-                "as possible."
+                "as possible.",
             ),
             (SubjectType.ENGLISH, GameType.WORD_BUILDER): (
                 f"Word Builder {scene_index + 1}",
-                "Build words by connecting the letter tiles."
+                "Build words by connecting the letter tiles.",
             ),
             (SubjectType.ENGLISH, GameType.MATCHING): (
                 f"Word Matching {scene_index + 1}",
-                "Match words with their correct definitions or images."
+                "Match words with their correct definitions or images.",
             ),
             (SubjectType.SCIENCE, GameType.QUIZ): (
                 f"Science Explorer {scene_index + 1}",
-                "Test your knowledge of science concepts."
+                "Test your knowledge of science concepts.",
             ),
             (SubjectType.ART, GameType.DRAWING): (
                 f"Art Creation {scene_index + 1}",
-                "Use the tools to create your artwork following the theme."
+                "Use the tools to create your artwork following the theme.",
             ),
             (SubjectType.MUSIC, GameType.RHYTHM): (
                 f"Rhythm Master {scene_index + 1}",
-                "Follow the rhythm pattern and tap at the right time."
-            )
+                "Follow the rhythm pattern and tap at the right time.",
+            ),
         }
 
         return content_templates.get(
             (subject, game_type),
-            (f"Challenge {scene_index + 1}",
-             "Complete the challenge to proceed.")
+            (
+                f"Challenge {scene_index + 1}",
+                "Complete the challenge to proceed."
+            ),
         )
 
     def _generate_scene_assets(
-        self, subject: SubjectType, game_type: GameType,
+        self,
+        subject: SubjectType,
+        game_type: GameType,
         difficulty: DifficultyLevel,  # pylint: disable=unused-argument
-        accessibility: AccessibilitySettings
+        accessibility: AccessibilitySettings,
     ) -> list[GameAsset]:
         """Generate assets for a scene."""
         assets = []
@@ -249,7 +265,7 @@ class GameGenerationService:
             ),
             alt_text=f"{subject.value} themed background",
             width=1920,
-            height=1080
+            height=1080,
         )
         assets.append(bg_asset)
 
@@ -265,7 +281,7 @@ class GameGenerationService:
                     ),
                     alt_text=f"Puzzle piece {i + 1}",
                     width=100,
-                    height=100
+                    height=100,
                 )
                 assets.append(piece_asset)
 
@@ -279,7 +295,7 @@ class GameGenerationService:
                         f"{settings.assets_base_url}/audio/"
                         f"{subject.value}_question.mp3"
                     ),
-                    alt_text="Question audio narration"
+                    alt_text="Question audio narration",
                 )
                 assets.append(audio_asset)
 
@@ -294,7 +310,7 @@ class GameGenerationService:
                     ),
                     alt_text=f"Matching card {i + 1}",
                     width=150,
-                    height=200
+                    height=200,
                 )
                 assets.append(card_asset)
 
@@ -305,15 +321,15 @@ class GameGenerationService:
                 asset_id="high_contrast_overlay",
                 asset_type="css",
                 url=f"{settings.assets_base_url}/styles/high_contrast.css",
-                alt_text="High contrast styling"
+                alt_text="High contrast styling",
             )
             assets.append(contrast_asset)
 
-        return assets[:settings.max_assets_per_scene]
+        return assets[: settings.max_assets_per_scene]
 
     def _calculate_required_interactions(
-            self, game_type: GameType,
-            difficulty: DifficultyLevel) -> int:
+        self, game_type: GameType, difficulty: DifficultyLevel
+    ) -> int:
         """Calculate required interactions for scene completion."""
         base_interactions = {
             GameType.PUZZLE: 6,
@@ -324,7 +340,7 @@ class GameGenerationService:
             GameType.DRAWING: 1,
             GameType.MEMORY: 8,
             GameType.RHYTHM: 10,
-            GameType.DRAG_DROP: 6
+            GameType.DRAG_DROP: 6,
         }
 
         base_count = base_interactions.get(game_type, 3)
@@ -334,21 +350,23 @@ class GameGenerationService:
             DifficultyLevel.BEGINNER: 0.7,
             DifficultyLevel.INTERMEDIATE: 1.0,
             DifficultyLevel.ADVANCED: 1.3,
-            DifficultyLevel.EXPERT: 1.6
+            DifficultyLevel.EXPERT: 1.6,
         }
 
         return max(1, int(base_count * multipliers[difficulty]))
 
     def _generate_scoring_config(
-            self, subject: SubjectType,  # pylint: disable=unused-argument
-            game_type: GameType,  # pylint: disable=unused-argument
-            difficulty: DifficultyLevel) -> ScoringConfig:
+        self,
+        subject: SubjectType,  # pylint: disable=unused-argument
+        game_type: GameType,  # pylint: disable=unused-argument
+        difficulty: DifficultyLevel,
+    ) -> ScoringConfig:
         """Generate scoring configuration for the game."""
         base_points = {
             DifficultyLevel.BEGINNER: 10,
             DifficultyLevel.INTERMEDIATE: 20,
             DifficultyLevel.ADVANCED: 30,
-            DifficultyLevel.EXPERT: 50
+            DifficultyLevel.EXPERT: 50,
         }
 
         return ScoringConfig(
@@ -359,12 +377,11 @@ class GameGenerationService:
             accuracy_weight=0.7,
             speed_weight=0.3,
             hint_penalty=5 if difficulty != DifficultyLevel.BEGINNER else 0,
-            completion_bonus=base_points[difficulty] * 2
+            completion_bonus=base_points[difficulty] * 2,
         )
 
     def _apply_accessibility_adaptations(
-        self, scenes: list[GameScene],
-        accessibility: AccessibilitySettings
+        self, scenes: list[GameScene], accessibility: AccessibilitySettings
     ) -> list[GameScene]:
         """Apply accessibility adaptations to game scenes."""
         adapted_scenes = []
@@ -392,9 +409,9 @@ class GameGenerationService:
     def _simplify_instructions(self, instructions: str) -> str:
         """Simplify instructions for better accessibility."""
         # Split into shorter sentences
-        sentences = instructions.split('. ')
+        sentences = instructions.split(". ")
         if len(sentences) > 1:
-            return sentences[0] + '.'
+            return sentences[0] + "."
         return instructions
 
     def get_performance_stats(self) -> dict[str, Any]:
@@ -409,10 +426,11 @@ class GameGenerationService:
             "average_generation_time_ms": avg_generation_time * 1000,
             "target_time_ms": settings.target_generation_time_ms,
             "performance_ratio": (
-                (avg_generation_time * 1000) /
-                settings.target_generation_time_ms
-                if avg_generation_time > 0 else 0
-            )
+                (avg_generation_time * 1000)
+                / settings.target_generation_time_ms
+                if avg_generation_time > 0
+                else 0
+            ),
         }
 
 

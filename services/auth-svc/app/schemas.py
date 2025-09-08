@@ -1,16 +1,17 @@
 """
 Pydantic schemas for request/response validation.
 """
+
 import uuid
 from datetime import datetime
 from typing import Literal, Optional
 
-from pydantic import BaseModel, EmailStr, Field, ConfigDict
+from pydantic import BaseModel, ConfigDict, EmailStr, Field
 
 
 class UserBase(BaseModel):
     """Base user schema with common fields."""
-    
+
     email: EmailStr
     first_name: str = Field(..., min_length=1, max_length=100)
     last_name: str = Field(..., min_length=1, max_length=100)
@@ -18,7 +19,7 @@ class UserBase(BaseModel):
 
 class UserCreate(UserBase):
     """Schema for user creation."""
-    
+
     password: str = Field(..., min_length=8, max_length=128)
     role: Literal["guardian", "teacher", "staff", "admin"] = "guardian"
     tenant_id: Optional[uuid.UUID] = None
@@ -26,7 +27,7 @@ class UserCreate(UserBase):
 
 class GuardianRegister(BaseModel):
     """Schema for guardian self-registration."""
-    
+
     email: EmailStr
     password: str = Field(..., min_length=8, max_length=128)
     first_name: str = Field(..., min_length=1, max_length=100)
@@ -36,14 +37,14 @@ class GuardianRegister(BaseModel):
 
 class LoginRequest(BaseModel):
     """Schema for login requests."""
-    
+
     email: EmailStr
     password: str = Field(..., min_length=1)
 
 
 class StaffLoginRequest(BaseModel):
     """Schema for staff login with additional context."""
-    
+
     email: EmailStr
     password: str = Field(..., min_length=1)
     tenant_id: Optional[uuid.UUID] = None  # For multi-tenant staff
@@ -51,13 +52,13 @@ class StaffLoginRequest(BaseModel):
 
 class RefreshTokenRequest(BaseModel):
     """Schema for refresh token requests."""
-    
+
     refresh_token: str = Field(..., min_length=1)
 
 
 class InviteTeacherRequest(BaseModel):
     """Schema for teacher invitation."""
-    
+
     email: EmailStr
     tenant_id: uuid.UUID
     message: Optional[str] = Field(None, max_length=500)
@@ -65,7 +66,7 @@ class InviteTeacherRequest(BaseModel):
 
 class AcceptInviteRequest(BaseModel):
     """Schema for invitation acceptance."""
-    
+
     invite_token: str = Field(..., min_length=1)
     password: str = Field(..., min_length=8, max_length=128)
     first_name: str = Field(..., min_length=1, max_length=100)
@@ -75,9 +76,9 @@ class AcceptInviteRequest(BaseModel):
 
 class UserResponse(UserBase):
     """Schema for user responses."""
-    
+
     model_config = ConfigDict(from_attributes=True)
-    
+
     id: uuid.UUID
     role: Literal["guardian", "teacher", "staff", "admin"]
     tenant_id: Optional[uuid.UUID] = None
@@ -92,7 +93,7 @@ class UserResponse(UserBase):
 
 class AuthResponse(BaseModel):
     """Schema for authentication responses."""
-    
+
     access_token: str
     refresh_token: str
     token_type: str = "bearer"
@@ -102,7 +103,7 @@ class AuthResponse(BaseModel):
 
 class TokenPayload(BaseModel):
     """Schema for JWT token payload."""
-    
+
     sub: str  # user_id as string
     email: str
     role: Literal["guardian", "teacher", "staff", "admin"]
@@ -115,7 +116,7 @@ class TokenPayload(BaseModel):
 
 class ErrorResponse(BaseModel):
     """Schema for error responses."""
-    
+
     error: str
     message: str
     details: Optional[dict] = None
@@ -123,14 +124,14 @@ class ErrorResponse(BaseModel):
 
 class ValidationErrorDetail(BaseModel):
     """Schema for validation error details."""
-    
+
     field: str
     message: str
 
 
 class ValidationErrorResponse(BaseModel):
     """Schema for validation error responses."""
-    
+
     error: str = "validation_failed"
     message: str = "Request validation failed"
     validation_errors: list[ValidationErrorDetail]
@@ -138,7 +139,7 @@ class ValidationErrorResponse(BaseModel):
 
 class InviteTokenResponse(BaseModel):
     """Schema for invite token responses."""
-    
+
     invite_token: str
     email: str
     role: Literal["teacher", "staff"]
@@ -148,20 +149,20 @@ class InviteTokenResponse(BaseModel):
 
 class PasswordResetRequest(BaseModel):
     """Schema for password reset requests."""
-    
+
     email: EmailStr
 
 
 class PasswordResetConfirm(BaseModel):
     """Schema for password reset confirmation."""
-    
+
     token: str = Field(..., min_length=1)
     new_password: str = Field(..., min_length=8, max_length=128)
 
 
 class UpdateProfileRequest(BaseModel):
     """Schema for profile updates."""
-    
+
     first_name: Optional[str] = Field(None, min_length=1, max_length=100)
     last_name: Optional[str] = Field(None, min_length=1, max_length=100)
     phone: Optional[str] = Field(None, max_length=20)

@@ -39,7 +39,7 @@ class TemplateService:
         self._loaded = True
         logger.info(
             "Template service initialized with %s templates",
-            len(self._template_configs)
+            len(self._template_configs),
         )
 
     async def _load_template_configs(self) -> None:
@@ -108,7 +108,7 @@ class TemplateService:
         # Convert MJML to HTML
         html_result = mjml_to_html(rendered_mjml)
         if html_result.get("errors"):
-            logger.error("MJML compilation errors: %s", html_result['errors'])
+            logger.error("MJML compilation errors: %s", html_result["errors"])
 
         return {"html": html_result.get("html", ""), "subject": subject}
 

@@ -19,7 +19,7 @@ class TestModels:
             event_id="evt_456",
             timestamp=datetime.now(UTC),
             data={"lesson_id": "lesson_001"},
-            metadata={"source": "test"}
+            metadata={"source": "test"},
         )
 
         assert event.learner_id == "learner_123"
@@ -33,7 +33,7 @@ class TestModels:
                 learner_id="learner_123",
                 event_type="lesson_start",
                 event_id="evt_456",
-                timestamp=datetime.now(UTC)
+                timestamp=datetime.now(UTC),
             )
         ]
 
@@ -41,7 +41,7 @@ class TestModels:
             batch_id="batch_123",
             events=events,
             created_at=datetime.now(UTC),
-            partition_date="2025-09-05"
+            partition_date="2025-09-05",
         )
 
         assert batch.batch_id == "batch_123"
@@ -54,7 +54,7 @@ class TestModels:
             learner_id="learner_123",
             minute_timestamp=datetime.now(UTC),
             created_at=datetime.now(UTC),
-            partition_date="2025-09-05"
+            partition_date="2025-09-05",
         )
 
         assert metrics.learner_id == "learner_123"

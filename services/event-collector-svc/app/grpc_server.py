@@ -75,12 +75,8 @@ class EventCollectorServicer(
 
                         event_data = {
                             "learner_id": event_proto.learner_id,
-                            "course_id": event_proto.data.get(
-                                "course_id", ""
-                            ),
-                            "lesson_id": event_proto.data.get(
-                                "lesson_id", ""
-                            ),
+                            "course_id": event_proto.data.get("course_id", ""),
+                            "lesson_id": event_proto.data.get("lesson_id", ""),
                             "event_type": event_proto.event_type,
                             "event_data": dict(event_proto.data),
                             "timestamp": timestamp_str,
@@ -155,9 +151,7 @@ class EventCollectorServicer(
             loop = asyncio.new_event_loop()
             asyncio.set_event_loop(loop)
             try:
-                checks = loop.run_until_complete(
-                    self.processor.health_check()
-                )
+                checks = loop.run_until_complete(self.processor.health_check())
             finally:
                 loop.close()
 

@@ -33,13 +33,14 @@ class SubjectBrainPlanner:
         self.max_activities = settings.max_activities_per_plan
 
     async def create_activity_plan(
-        self, planner_input: PlannerInput
+        self,
+        planner_input: PlannerInput
     ) -> ActivityPlan:
         """Create a personalized activity plan for a learner."""
         logger.info(
             "Creating plan for learner %s in %s",
             planner_input.learner_id,
-            planner_input.subject
+            planner_input.subject,
         )
 
         # Analyze learner baseline and mastery levels
@@ -50,8 +51,7 @@ class SubjectBrainPlanner:
 
         # Filter topics based on teacher constraints
         filtered_topics = self._apply_teacher_constraints(
-            planner_input.available_topics,
-            planner_input.teacher_constraints
+            planner_input.available_topics, planner_input.teacher_constraints
         )
 
         # Generate activity sequence
@@ -59,7 +59,7 @@ class SubjectBrainPlanner:
             analysis,
             filtered_topics,
             planner_input.teacher_constraints,
-            planner_input.session_duration_minutes
+            planner_input.session_duration_minutes,
         )
 
         # Create the final plan
@@ -72,7 +72,7 @@ class SubjectBrainPlanner:
             ),
             expires_at=datetime.utcnow() + timedelta(
                 seconds=self.cache_ttl
-            )
+            ),
         )
 
         logger.info(
@@ -83,7 +83,7 @@ class SubjectBrainPlanner:
     def _analyze_learner_needs(
         self,
         baseline: LearnerBaseline,
-        available_topics: list[CourseworkTopic]
+        available_topics: list[CourseworkTopic],
     ) -> dict[str, Any]:
         """Analyze learner baseline to identify learning needs."""
         analysis = {
@@ -91,12 +91,15 @@ class SubjectBrainPlanner:
             "mastered_topics": [],
             "ready_for_advancement": [],
             "prerequisite_gaps": [],
-            "recommended_focus": []
+            "recommended_focus": [],
         }
 
         # Identify struggling areas (below proficient)
         for topic, mastery in baseline.mastery_levels.items():
-            if mastery in [MasteryLevel.NOT_STARTED, MasteryLevel.BEGINNING]:
+            if mastery in [
+                MasteryLevel.NOT_STARTED,
+                MasteryLevel.BEGINNING
+            ]:
                 analysis["struggling_topics"].append(topic)
             elif mastery == MasteryLevel.DEVELOPING:
                 analysis["recommended_focus"].append(topic)
@@ -108,17 +111,17 @@ class SubjectBrainPlanner:
         for topic in available_topics:
             for prereq in topic.prerequisites:
                 if prereq not in baseline.mastery_levels:
-                    analysis["prerequisite_gaps"].append({
-                        "topic": topic.topic_id,
-                        "missing_prerequisite": prereq
-                    })
+                    analysis["prerequisite_gaps"].append(
+                        {
+                            "topic": topic.topic_id,
+                            "missing_prerequisite": prereq,
+                        }
+                    )
 
         return analysis
 
     def _apply_teacher_constraints(
-        self,
-        topics: list[CourseworkTopic],
-        constraints: TeacherConstraints
+        self, topics: list[CourseworkTopic], constraints: TeacherConstraints
     ) -> list[CourseworkTopic]:
         """Filter topics based on teacher constraints."""
         filtered = []
@@ -144,7 +147,7 @@ class SubjectBrainPlanner:
         analysis: dict[str, Any],
         topics: list[CourseworkTopic],
         constraints: TeacherConstraints,
-        session_duration: int
+        session_duration: int,
     ) -> list[PlannedActivity]:
         """Generate optimal sequence of learning activities."""
         activities = []
@@ -161,17 +164,17 @@ class SubjectBrainPlanner:
                 topic, analysis, constraints, remaining_time
             )
 
-            if (activity and
-                    activity.estimated_duration_minutes <= remaining_time):
+            if (
+                activity
+                and activity.estimated_duration_minutes <= remaining_time
+            ):
                 activities.append(activity)
                 remaining_time -= activity.estimated_duration_minutes
 
         return activities
 
     def _prioritize_topics(
-        self,
-        analysis: dict[str, Any],
-        topics: list[CourseworkTopic]
+        self, analysis: dict[str, Any], topics: list[CourseworkTopic]
     ) -> list[CourseworkTopic]:
         """Prioritize topics based on learner needs analysis."""
         priority_map = {}
@@ -200,9 +203,7 @@ class SubjectBrainPlanner:
 
         # Sort by priority (descending)
         return sorted(
-            topics,
-            key=lambda t: priority_map.get(t.topic_id, 0),
-            reverse=True
+            topics, key=lambda t: priority_map.get(t.topic_id, 0), reverse=True
         )
 
     async def _create_activity_for_topic(
@@ -210,7 +211,7 @@ class SubjectBrainPlanner:
         topic: CourseworkTopic,
         analysis: dict[str, Any],
         constraints: TeacherConstraints,
-        remaining_time: int
+        remaining_time: int,
     ) -> PlannedActivity | None:
         """Create a specific activity for a topic."""
         # Determine activity type based on needs
@@ -232,7 +233,7 @@ class SubjectBrainPlanner:
         base_duration = min(
             topic.estimated_duration_minutes,
             remaining_time,
-            constraints.max_activity_duration_minutes
+            constraints.max_activity_duration_minutes,
         )
 
         # Check prerequisites
@@ -252,14 +253,14 @@ class SubjectBrainPlanner:
             difficulty_adjustment=difficulty_adjustment,
             learning_objectives=topic.learning_objectives,
             prerequisites_met=prerequisites_met,
-            rationale=rationale
+            rationale=rationale,
         )
 
     def _determine_activity_type(
         self,
         topic: CourseworkTopic,
         analysis: dict[str, Any],
-        constraints: TeacherConstraints
+        constraints: TeacherConstraints,
     ) -> ActivityType | None:
         """Determine the best activity type for a topic."""
         # Check teacher preferences first
@@ -284,7 +285,7 @@ class SubjectBrainPlanner:
         self,
         activity_type: ActivityType,
         topic: CourseworkTopic,
-        analysis: dict[str, Any]
+        analysis: dict[str, Any],
     ) -> bool:
         """Check if an activity type is appropriate for the topic."""
         # Assessment requires some baseline knowledge
@@ -307,7 +308,7 @@ class SubjectBrainPlanner:
         topic: CourseworkTopic,
         activity_type: ActivityType,
         analysis: dict[str, Any],
-        difficulty_adjustment: float
+        difficulty_adjustment: float,
     ) -> str:
         """Generate human-readable rationale for activity selection."""
         rationale_parts = []
@@ -332,7 +333,7 @@ class SubjectBrainPlanner:
             ActivityType.PRACTICE: "skill reinforcement",
             ActivityType.ASSESSMENT: "progress evaluation",
             ActivityType.REMEDIATION: "targeted support",
-            ActivityType.ENRICHMENT: "advanced exploration"
+            ActivityType.ENRICHMENT: "advanced exploration",
         }
         rationale_parts.append(
             f"Using {activity_reasons[activity_type]} approach"

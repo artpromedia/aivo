@@ -63,8 +63,7 @@ def create_app() -> FastAPI:
             logger.info("Event collector service started")
         except Exception as e:
             logger.error(
-                "Failed to start event collector service",
-                error=str(e)
+                "Failed to start event collector service", error=str(e)
             )
             raise
 
@@ -89,14 +88,14 @@ async def verify_api_key(request: Request) -> None:
         if not auth_header or not auth_header.startswith("Bearer "):
             raise HTTPException(
                 status_code=status.HTTP_401_UNAUTHORIZED,
-                detail="Missing or invalid authorization header"
+                detail="Missing or invalid authorization header",
             )
 
         token = auth_header.split(" ", 1)[1]
         if token != settings.api_key:
             raise HTTPException(
                 status_code=status.HTTP_401_UNAUTHORIZED,
-                detail="Invalid API key"
+                detail="Invalid API key",
             )
 
 
@@ -106,17 +105,16 @@ async def verify_api_key(request: Request) -> None:
     summary="Collect batch of learner events",
     description=(
         "Accept a batch of learner events with optional gzip compression"
-    )
+    ),
 )
 async def collect_events(
-    request: Request,
-    response: Response
+    request: Request, response: Response
 ) -> CollectResponse:
     """Collect learner events via HTTP POST."""
     if not processor:
         raise HTTPException(
             status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
-            detail="Service not ready"
+            detail="Service not ready",
         )
 
     try:
@@ -134,7 +132,7 @@ async def collect_events(
             except Exception as e:
                 raise HTTPException(
                     status_code=status.HTTP_400_BAD_REQUEST,
-                    detail=f"Invalid gzip compression: {str(e)}"
+                    detail=f"Invalid gzip compression: {str(e)}",
                 ) from e
 
         # Parse JSON
@@ -146,7 +144,7 @@ async def collect_events(
         except Exception as e:
             raise HTTPException(
                 status_code=status.HTTP_400_BAD_REQUEST,
-                detail=f"Invalid JSON: {str(e)}"
+                detail=f"Invalid JSON: {str(e)}",
             ) from e
 
         # Validate request size
@@ -154,7 +152,7 @@ async def collect_events(
             max_size = settings.max_batch_size_bytes
             raise HTTPException(
                 status_code=status.HTTP_413_REQUEST_ENTITY_TOO_LARGE,
-                detail=f"Batch size exceeds limit of {max_size} bytes"
+                detail=f"Batch size exceeds limit of {max_size} bytes",
             )
 
         # Parse events
@@ -177,13 +175,13 @@ async def collect_events(
                     detail=(
                         f"Batch contains {len(events)} events, "
                         f"max allowed: {max_size}"
-                    )
+                    ),
                 )
 
         except Exception as e:
             raise HTTPException(
                 status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
-                detail=f"Event validation failed: {str(e)}"
+                detail=f"Event validation failed: {str(e)}",
             ) from e
 
         # Process events
@@ -211,7 +209,7 @@ async def collect_events(
         logger.error("Error in collect endpoint", error=str(e))
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail="Internal server error"
+            detail="Internal server error",
         ) from e
 
 
@@ -221,7 +219,7 @@ async def collect_events(
     summary="Service health check",
     description=(
         "Get detailed health status of the service and its dependencies"
-    )
+    ),
 )
 async def health_check() -> HealthResponse:
     """Get service health status."""
@@ -230,7 +228,7 @@ async def health_check() -> HealthResponse:
             checks = {
                 "processor": {
                     "status": "unhealthy",
-                    "error": "Not initialized"
+                    "error": "Not initialized",
                 }
             }
             status_val = "unhealthy"
@@ -261,7 +259,7 @@ async def health_check() -> HealthResponse:
     "/ready",
     response_model=ReadinessResponse,
     summary="Service readiness check",
-    description="Check if service is ready to accept requests"
+    description="Check if service is ready to accept requests",
 )
 async def readiness_check() -> ReadinessResponse:
     """Get service readiness status."""
@@ -301,7 +299,7 @@ async def readiness_check() -> ReadinessResponse:
 @app.get(
     "/metrics",
     summary="Service metrics",
-    description="Get service metrics for monitoring"
+    description="Get service metrics for monitoring",
 )
 async def get_metrics() -> dict[str, Any]:
     """Get service metrics."""
@@ -319,7 +317,7 @@ async def get_metrics() -> dict[str, Any]:
 @app.get(
     "/buffer/stats",
     summary="Buffer statistics",
-    description="Get current buffer statistics"
+    description="Get current buffer statistics",
 )
 async def get_buffer_stats() -> dict[str, Any]:
     """Get buffer statistics."""
@@ -360,9 +358,7 @@ async def general_exception_handler(
 ) -> JSONResponse:
     """Handle general exceptions."""
     logger.error(
-        "Unhandled exception",
-        error=str(exc),
-        path=str(request.url.path)
+        "Unhandled exception", error=str(exc), path=str(request.url.path)
     )
 
     error_response = ErrorResponse(

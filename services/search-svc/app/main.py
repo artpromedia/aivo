@@ -80,7 +80,7 @@ async def get_search_service() -> SearchService:
     if search_service is None:
         raise HTTPException(
             status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
-            detail="Search service not initialized"
+            detail="Search service not initialized",
         )
     return search_service
 
@@ -118,7 +118,7 @@ async def health_check(
         logger.error("Health check failed: %s", e)
         raise HTTPException(
             status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
-            detail="Health check failed"
+            detail="Health check failed",
         ) from e
 
 
@@ -147,7 +147,7 @@ async def search(
             "Search request completed: %d results for query '%s' by user %s",
             len(result.hits),
             q,
-            user_context.user_id
+            user_context.user_id,
         )
         return result
 
@@ -155,7 +155,7 @@ async def search(
         logger.error("Search request failed: %s", e)
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail=f"Search failed: {str(e)}"
+            detail=f"Search failed: {str(e)}",
         ) from e
 
 
@@ -179,11 +179,11 @@ async def suggest(
 
         result = await service.suggest(request, user_context)
         logger.debug(
-            "Suggestion request completed: %d suggestions for query '%s' "
-            "by user %s",
+            "Suggestion request completed: %d suggestions for "
+            "query '%s' by user %s",
             len(result.suggestions),
             q,
-            user_context.user_id
+            user_context.user_id,
         )
         return result
 
@@ -191,7 +191,7 @@ async def suggest(
         logger.error("Suggestion request failed: %s", e)
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail=f"Suggestions failed: {str(e)}"
+            detail=f"Suggestions failed: {str(e)}",
         ) from e
 
 
@@ -208,7 +208,7 @@ async def index_document(
         if user_context.role not in admin_roles:
             raise HTTPException(
                 status_code=status.HTTP_403_FORBIDDEN,
-                detail="Insufficient permissions to index documents"
+                detail="Insufficient permissions to index documents",
             )
 
         result = await service.index_document(request, user_context)
@@ -221,7 +221,7 @@ async def index_document(
         logger.error("Index request failed: %s", str(e))
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail="Indexing failed: " + str(e)
+            detail="Indexing failed: " + str(e),
         ) from e
 
 
@@ -238,7 +238,7 @@ async def bulk_index_documents(
         if user_context.role not in admin_roles:
             raise HTTPException(
                 status_code=status.HTTP_403_FORBIDDEN,
-                detail="Insufficient permissions to index documents"
+                detail="Insufficient permissions to index documents",
             )
 
         result = await service.bulk_index_documents(request, user_context)
@@ -251,7 +251,7 @@ async def bulk_index_documents(
         logger.error("Bulk index request failed: %s", str(e))
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail="Bulk indexing failed: " + str(e)
+            detail="Bulk indexing failed: " + str(e),
         ) from e
 
 
@@ -264,7 +264,7 @@ async def global_exception_handler(
     logger.error("Unhandled exception", exc_info=exc)
     return JSONResponse(
         status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-        content={"detail": "Internal server error"}
+        content={"detail": "Internal server error"},
     )
 
 

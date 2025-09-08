@@ -1,15 +1,37 @@
 [tool.ruff]
 line-length = 100
-select = ["E", "F", "I", "N", "UP", "ANN"]
 target-version = "py311"
-ignore = ["E501"]  # line too long, handled by black
 
-[tool.ruff.per-file-ignores]
+[tool.ruff.lint]
+select = ["E", "F", "I", "N", "UP", "ANN"]
+ignore = [
+    "E501",  # line too long, handled by black
+    "ANN401",  # Dynamically typed expressions (Any) - common in FastAPI
+    "N802",  # Invalid function name - common for FastAPI endpoints
+    "N803",  # Invalid argument name - common for FastAPI path params
+]
+
+[tool.ruff.lint.per-file-ignores]
 "__init__.py" = ["F401"]
-"test_*.py" = ["ANN001", "ANN201"]
-"tests/*.py" = ["ANN001", "ANN201"]
-"**/test_*.py" = ["ANN001", "ANN201"]
-"**/tests/*.py" = ["ANN001", "ANN201"]
+"test_*.py" = ["ANN001", "ANN201", "ANN202", "ANN204", "E741"]
+"tests/*.py" = ["ANN001", "ANN201", "ANN202", "ANN204", "E741"]
+"**/test_*.py" = ["ANN001", "ANN201", "ANN202", "ANN204", "E741", "D", "F401"]
+"**/tests/*.py" = ["ANN001", "ANN201", "ANN202", "ANN204", "E741"]
+"**/conftest.py" = ["ANN001", "ANN201", "ANN202", "ANN204", "D", "F401"]
+"libs/sdk-py/**/__init__.py" = ["F401", "F403", "E501"]  # Allow wildcard imports and long lines in SDK
+"libs/sdk-py/**/*.py" = ["ANN201", "ANN202", "ANN001", "E721"]  # SDK files - minimal type requirements
+"**/check_deps.py" = ["F401"]  # Dependency check files - testing imports only
+"**/test_dependencies.py" = ["F401"]  # Dependency check files - testing imports only
+"services/*/test_long_line.py" = ["E501"]  # Allow long lines in line length test files
+# FastAPI endpoints - response models specified in decorators
+"**/main.py" = ["ANN201"]  # FastAPI endpoints with response_model decorators
+"**/routes.py" = ["ANN201"]  # FastAPI route handlers with response_model decorators
+# Generated protobuf files - ignore all type annotations
+"**/protos/*_pb2_grpc.py" = ["ANN001", "ANN201", "ANN202", "ANN204"]
+"**/grpc_server.py" = ["ANN001"]  # gRPC server implementations
+# Migration and setup files - allow import after configuration
+"**/migrations/env.py" = ["E402"]
+"services/auth-svc/app/main.py" = ["E402", "ANN201"]  # Dependency overrides after app setup
 
 [tool.mypy]
 python_version = "3.11"

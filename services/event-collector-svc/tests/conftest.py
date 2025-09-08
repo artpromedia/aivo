@@ -37,6 +37,8 @@ def sample_events(sample_event: LearnerEvent) -> list[LearnerEvent]:
     for i in range(5):
         event_data = sample_event.dict()
         event_data["learner_id"] = f"learner_{i}"
-        event_data["event_type"] = "lesson_completed" if i % 2 else "lesson_started"
+        event_data["event_type"] = (
+            "lesson_completed" if i % 2 else "lesson_started"
+        )
         events.append(LearnerEvent(**event_data))
     return events

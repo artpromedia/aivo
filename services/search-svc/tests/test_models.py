@@ -36,7 +36,7 @@ def test_user_context_creation():
         district_id="district1",
         school_id="school1",
         class_ids=["class1", "class2"],
-        learner_ids=["learner1", "learner2"]
+        learner_ids=["learner1", "learner2"],
     )
 
     assert context.user_id == "user123"
@@ -57,7 +57,7 @@ def test_lesson_document_creation():
         subject="Mathematics",
         grade_level=5,
         district_id="district1",
-        teacher_id="teacher1"
+        teacher_id="teacher1",
     )
 
     assert lesson.type == "lesson"
@@ -80,7 +80,7 @@ def test_coursework_document_creation():
         district_id="district1",
         school_id="school1",
         class_id="class1",
-        teacher_id="teacher1"
+        teacher_id="teacher1",
     )
 
     assert coursework.type == "coursework"
@@ -102,7 +102,7 @@ def test_learner_document_creation():
         school_id="school1",
         class_ids=["class1"],
         teacher_ids=["teacher1"],
-        guardian_ids=["guardian1"]
+        guardian_ids=["guardian1"],
     )
 
     assert learner.type == "learner"

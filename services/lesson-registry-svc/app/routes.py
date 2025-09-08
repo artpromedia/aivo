@@ -36,11 +36,7 @@ logger = logging.getLogger(__name__)
 router = APIRouter(prefix="/api/v1", tags=["lessons"])
 
 
-@router.post(
-    "/lessons",
-    response_model=Lesson,
-    status_code=status.HTTP_201_CREATED
-)
+@router.post("/lessons", response_model=Lesson, status_code=status.HTTP_201_CREATED)
 async def create_lesson(
     lesson_data: LessonCreate,
     current_user: User = Depends(require_teacher),
@@ -65,10 +61,7 @@ async def get_lesson(
     lesson = await lesson_service.get_lesson(lesson_id, current_user.tenant_id)
 
     if not lesson:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail="Lesson not found"
-        )
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Lesson not found")
 
     return lesson
 
@@ -84,27 +77,18 @@ async def update_lesson(
     lesson_service = get_lesson_service(db)
 
     # Check if lesson exists
-    existing_lesson = await lesson_service.get_lesson(
-        lesson_id, current_user.tenant_id
-    )
+    existing_lesson = await lesson_service.get_lesson(lesson_id, current_user.tenant_id)
     if not existing_lesson:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail="Lesson not found"
-        )
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Lesson not found")
 
     # Check permissions
-    if not can_edit_lesson(
-        current_user, existing_lesson.created_by, existing_lesson.tenant_id
-    ):
+    if not can_edit_lesson(current_user, existing_lesson.created_by, existing_lesson.tenant_id):
         raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN,
-            detail="Insufficient permissions to edit this lesson"
+            detail="Insufficient permissions to edit this lesson",
         )
 
-    lesson = await lesson_service.update_lesson(
-        lesson_id, lesson_data, current_user.tenant_id
-    )
+    lesson = await lesson_service.update_lesson(lesson_id, lesson_data, current_user.tenant_id)
     return lesson
 
 
@@ -118,38 +102,26 @@ async def delete_lesson(
     lesson_service = get_lesson_service(db)
 
     # Check if lesson exists
-    existing_lesson = await lesson_service.get_lesson(
-        lesson_id, current_user.tenant_id
-    )
+    existing_lesson = await lesson_service.get_lesson(lesson_id, current_user.tenant_id)
     if not existing_lesson:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail="Lesson not found"
-        )
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Lesson not found")
 
     # Check permissions
-    if not can_edit_lesson(
-        current_user, existing_lesson.created_by, existing_lesson.tenant_id
-    ):
+    if not can_edit_lesson(current_user, existing_lesson.created_by, existing_lesson.tenant_id):
         raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN,
-            detail="Insufficient permissions to delete this lesson"
+            detail="Insufficient permissions to delete this lesson",
         )
 
-    success = await lesson_service.delete_lesson(
-        lesson_id, current_user.tenant_id
-    )
+    success = await lesson_service.delete_lesson(lesson_id, current_user.tenant_id)
     if not success:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail="Lesson not found"
-        )
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Lesson not found")
 
 
 @router.post(
     "/lessons/{lesson_id}/versions",
     response_model=LessonVersion,
-    status_code=status.HTTP_201_CREATED
+    status_code=status.HTTP_201_CREATED,
 )
 async def create_lesson_version(
     lesson_id: UUID,
@@ -161,26 +133,17 @@ async def create_lesson_version(
     lesson_service = get_lesson_service(db)
 
     # Check if lesson exists and user can edit it
-    existing_lesson = await lesson_service.get_lesson(
-        lesson_id, current_user.tenant_id
-    )
+    existing_lesson = await lesson_service.get_lesson(lesson_id, current_user.tenant_id)
     if not existing_lesson:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail="Lesson not found"
-        )
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Lesson not found")
 
-    if not can_edit_lesson(
-        current_user, existing_lesson.created_by, existing_lesson.tenant_id
-    ):
+    if not can_edit_lesson(current_user, existing_lesson.created_by, existing_lesson.tenant_id):
         raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN,
-            detail="Insufficient permissions to create version for this lesson"
+            detail="Insufficient permissions to create version for this lesson",
         )
 
-    version = await lesson_service.create_version(
-        lesson_id, version_data, current_user.tenant_id
-    )
+    version = await lesson_service.create_version(lesson_id, version_data, current_user.tenant_id)
     return version
 
 
@@ -193,14 +156,11 @@ async def update_lesson_version(
 ) -> LessonVersion:
     """Update a lesson version (only if in DRAFT state)."""
     lesson_service = get_lesson_service(db)
-    version = await lesson_service.update_version(
-        version_id, version_data, current_user.tenant_id
-    )
+    version = await lesson_service.update_version(version_id, version_data, current_user.tenant_id)
 
     if not version:
         raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail="Version not found or not in draft state"
+            status_code=status.HTTP_404_NOT_FOUND, detail="Version not found or not in draft state"
         )
 
     return version
@@ -219,7 +179,7 @@ async def publish_lesson_version(
     if not can_publish_lesson(current_user, current_user.tenant_id):
         raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN,
-            detail="Insufficient permissions to publish lessons"
+            detail="Insufficient permissions to publish lessons",
         )
 
     version = await lesson_service.publish_version(
@@ -228,21 +188,16 @@ async def publish_lesson_version(
 
     if not version:
         raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail="Version not found or not in draft state"
+            status_code=status.HTTP_404_NOT_FOUND, detail="Version not found or not in draft state"
         )
 
     return PublishResponse(
-        success=True,
-        message="Lesson version published successfully",
-        version=version
+        success=True, message="Lesson version published successfully", version=version
     )
 
 
 @router.post(
-    "/versions/{version_id}/assets",
-    response_model=Asset,
-    status_code=status.HTTP_201_CREATED
+    "/versions/{version_id}/assets", response_model=Asset, status_code=status.HTTP_201_CREATED
 )
 async def add_asset_to_version(
     version_id: UUID,
@@ -252,15 +207,10 @@ async def add_asset_to_version(
 ) -> Asset:
     """Add an asset to a lesson version."""
     lesson_service = get_lesson_service(db)
-    asset = await lesson_service.add_asset(
-        version_id, asset_data, current_user.tenant_id
-    )
+    asset = await lesson_service.add_asset(version_id, asset_data, current_user.tenant_id)
 
     if not asset:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail="Version not found"
-        )
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Version not found")
 
     return asset
 
@@ -285,7 +235,7 @@ async def get_asset_upload_url(
     if not upload_data:
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail="Failed to generate upload URL"
+            detail="Failed to generate upload URL",
         )
 
     return upload_data
@@ -296,15 +246,11 @@ async def search_lessons(
     q: str = Query(None, description="Search query"),
     subject: str = Query(None, description="Filter by subject"),
     grade_band: str = Query(None, description="Filter by grade band"),
-    keywords: list[str] = Query(
-        default=[], description="Filter by keywords"
-    ),
+    keywords: list[str] = Query(default=[], description="Filter by keywords"),
     page: int = Query(1, ge=1, description="Page number"),
     page_size: int = Query(20, ge=1, le=100, description="Items per page"),
     sort_by: str = Query("created_at", description="Sort field"),
-    sort_order: str = Query(
-        "desc", pattern="^(asc|desc)$", description="Sort order"
-    ),
+    sort_order: str = Query("desc", pattern="^(asc|desc)$", description="Sort order"),
     current_user: User = Depends(get_current_user),
     db: AsyncSession = Depends(get_db),
 ) -> SearchResults:
@@ -325,9 +271,7 @@ async def search_lessons(
         sort_order=sort_order,
     )
 
-    lessons, total = await lesson_service.search_lessons(
-        search_params, current_user.tenant_id
-    )
+    lessons, total = await lesson_service.search_lessons(search_params, current_user.tenant_id)
 
     # Calculate pagination info
     total_pages = (total + page_size - 1) // page_size
