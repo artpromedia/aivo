@@ -5,6 +5,7 @@ This module defines the database tables and relationships for storing
 ink session metadata and tracking stroke submissions.
 """
 from datetime import datetime
+from typing import Self
 from uuid import UUID, uuid4
 
 from sqlalchemy import (
@@ -58,7 +59,7 @@ class InkSession(Base):
     )
     metadata_json: Mapped[str | None] = mapped_column(Text, nullable=True)
 
-    def __repr__(self) -> str:
+    def __repr__(self: Self) -> str:
         """String representation of the session."""
         return (
             f"<InkSession(session_id={self.session_id}, "
@@ -108,7 +109,7 @@ class InkPage(Base):
     )
     metadata_json: Mapped[str | None] = mapped_column(Text, nullable=True)
 
-    def __repr__(self) -> str:
+    def __repr__(self: Self) -> str:
         """String representation of the page."""
         return (
             f"<InkPage(page_id={self.page_id}, "
@@ -156,7 +157,7 @@ class StrokeMetrics(Base):
         Float, default=0.0, nullable=False
     )
 
-    def __repr__(self) -> str:
+    def __repr__(self: Self) -> str:
         """String representation of the metrics."""
         return (
             f"<StrokeMetrics(learner_id={self.learner_id}, "

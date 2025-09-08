@@ -2,6 +2,7 @@
 
 import logging
 from datetime import UTC, datetime
+from typing import NamedTuple
 from uuid import UUID
 
 from fastapi import FastAPI, HTTPException
@@ -18,6 +19,15 @@ from .schemas import (
     RecognitionResponse,
 )
 
+
+class RegionParams(NamedTuple):
+    """Parameters for recognition region."""
+    x: float | None = None
+    y: float | None = None
+    width: float | None = None
+    height: float | None = None
+
+
 # Configure logging
 logging.basicConfig(
     level=getattr(logging, str(settings.log_level).upper()),
@@ -25,6 +35,22 @@ logging.basicConfig(
 )
 
 logger = logging.getLogger(__name__)
+
+
+def _raise_not_found_error(message: str) -> None:
+    """Raise HTTPException for not found errors."""
+    raise HTTPException(status_code=404, detail=message)
+
+
+def _raise_timeout_error(message: str) -> None:
+    """Raise HTTPException for timeout errors."""
+    raise HTTPException(status_code=408, detail=message)
+
+
+def _raise_bad_request_error(message: str) -> None:
+    """Raise HTTPException for bad request errors."""
+    raise HTTPException(status_code=400, detail=message)
+
 
 # Create FastAPI application
 app = FastAPI(
@@ -67,42 +93,33 @@ async def health_check() -> HealthResponse:
 async def recognize_math(
     session_id: UUID,
     page_number: int = 1,
-    region_x: float | None = None,
-    region_y: float | None = None,
-    region_width: float | None = None,
-    region_height: float | None = None,
+    region: RegionParams | None = None,
 ) -> RecognitionResponse:
     """Recognize mathematical expression from ink session.
 
     Args:
         session_id: Ink session identifier
         page_number: Page number to recognize (default: 1)
-        region_x: Optional bounding box X coordinate
-        region_y: Optional bounding box Y coordinate
-        region_width: Optional bounding box width
-        region_height: Optional bounding box height
+        region: Optional bounding box parameters
 
     Returns:
         Recognition result with LaTeX, AST, and confidence
     """
     try:
         # Build region if coordinates provided
-        region = None
-        if all(
-            x is not None
-            for x in [region_x, region_y, region_width, region_height]
-        ):
-            region = {
-                "x": region_x,
-                "y": region_y,
-                "width": region_width,
-                "height": region_height,
+        region_dict = None
+        if region and all(x is not None for x in region):
+            region_dict = {
+                "x": region.x,
+                "y": region.y,
+                "width": region.width,
+                "height": region.height,
             }
 
         request = RecognitionRequest(
             session_id=session_id,
             page_number=page_number,
-            region=region,
+            region=region_dict,
         )
 
         result = await math_recognition_service.recognize_from_session(request)
@@ -110,18 +127,12 @@ async def recognize_math(
         if not result.success and result.error_message:
             # Return specific HTTP status codes based on error type
             if "not found" in result.error_message.lower():
-                raise HTTPException(
-                    status_code=404, detail=result.error_message,
-                )
+                _raise_not_found_error(result.error_message)
             if "timeout" in result.error_message.lower():
-                raise HTTPException(
-                    status_code=408, detail=result.error_message,
-                )
-            raise HTTPException(
-                status_code=400, detail=result.error_message,
-            )
-
-        return result
+                _raise_timeout_error(result.error_message)
+            _raise_bad_request_error(result.error_message)
+        else:
+            return result
 
     except HTTPException:
         raise
@@ -147,14 +158,10 @@ async def recognize_math_from_ink(ink_data: InkData) -> RecognitionResponse:
 
         if not result.success and result.error_message:
             if "timeout" in result.error_message.lower():
-                raise HTTPException(
-                    status_code=408, detail=result.error_message,
-                )
-            raise HTTPException(
-                status_code=400, detail=result.error_message,
-            )
-
-        return result
+                _raise_timeout_error(result.error_message)
+            _raise_bad_request_error(result.error_message)
+        else:
+            return result
 
     except HTTPException:
         raise

@@ -5,7 +5,7 @@ This module defines the request/response models for the digital ink capture
 API, including stroke data structures, session management, and event payloads.
 """
 from datetime import datetime
-from typing import Any
+from typing import Any, Self
 from uuid import UUID
 
 from pydantic import BaseModel, Field, validator
@@ -59,7 +59,7 @@ class Stroke(BaseModel):
 
     @validator("tool_type")
     @classmethod
-    def validate_tool_type(cls, v: str) -> str:  # noqa: N805
+    def validate_tool_type(cls: type[Self], v: str) -> str:  # noqa: N805
         """Validate tool type is supported."""
         allowed_tools = {"pen", "finger", "eraser", "highlighter"}
         if v not in allowed_tools:
@@ -68,7 +68,7 @@ class Stroke(BaseModel):
 
     @validator("color")
     @classmethod
-    def validate_color(cls, v: str) -> str:  # noqa: N805
+    def validate_color(cls: type[Self], v: str) -> str:  # noqa: N805
         """Validate color is a valid hex color."""
         if not v.startswith("#") or len(v) != 7:
             raise ValueError(
@@ -115,7 +115,7 @@ class StrokeRequest(BaseModel):
     @validator("strokes")
     @classmethod
     def validate_stroke_count(  # noqa: N805
-        cls, v: list[Stroke]
+        cls: type[Self], v: list[Stroke]
     ) -> list[Stroke]:
         """Validate stroke count doesn't exceed limits."""
         max_strokes = 1000  # Could be made configurable
@@ -160,7 +160,7 @@ class InkSession(BaseModel):
 
     @validator("status")
     @classmethod
-    def validate_status(cls, v: str) -> str:  # noqa: N805
+    def validate_status(cls: type[Self], v: str) -> str:  # noqa: N805
         """Validate session status."""
         allowed_statuses = {"active", "completed", "expired", "cancelled"}
         if v not in allowed_statuses:

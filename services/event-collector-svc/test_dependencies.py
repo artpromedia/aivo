@@ -4,6 +4,8 @@
 import importlib.util
 import sys
 
+from app.config import settings
+
 
 def test_imports():
     """Test all critical imports."""
@@ -49,7 +51,6 @@ def test_imports():
         print("✓ Pydantic modules available")
 
         print("Testing application modules...")
-        from app.config import settings
         assert importlib.util.find_spec("app.models")
 
         print(
@@ -66,14 +67,14 @@ def test_imports():
         print("\n🎉 All dependencies are installed and working correctly!")
         return True
 
+    except (ModuleNotFoundError, AttributeError) as e:
+        print(f"❌ Module or attribute error: {e}")
+        return False
     except ImportError as e:
         print(f"❌ Import error: {e}")
-        return False
-    except Exception as e:
-        print(f"❌ Unexpected error: {e}")
         return False
 
 
 if __name__ == "__main__":
-    success = test_imports()
-    sys.exit(0 if success else 1)
+    SUCCESS = test_imports()
+    sys.exit(0 if SUCCESS else 1)

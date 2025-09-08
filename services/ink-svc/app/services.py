@@ -6,7 +6,7 @@ strokes, managing sessions, storing data in S3, and publishing events.
 """
 import json
 from datetime import datetime, timedelta
-from typing import Any
+from typing import Any, Self
 from uuid import UUID, uuid4
 
 import boto3
@@ -30,7 +30,7 @@ logger = structlog.get_logger(__name__)
 class S3StorageService:
     """Service for storing ink data in AWS S3."""
 
-    def __init__(self) -> None:
+    def __init__(self: Self) -> None:
         """Initialize S3 client with configuration."""
         try:
             self.s3_client = boto3.client(
@@ -48,7 +48,7 @@ class S3StorageService:
             self.s3_client = None
 
     def generate_s3_key(
-        self, session_id: UUID, page_id: UUID, learner_id: UUID
+        self: Self, session_id: UUID, page_id: UUID, learner_id: UUID
     ) -> str:
         """Generate S3 key for ink page data."""
         date_str = datetime.utcnow().strftime("%Y/%m/%d")
@@ -58,7 +58,7 @@ class S3StorageService:
         )
 
     async def store_page_data(
-        self, s3_key: str, page_data: InkPageData
+        self: Self, s3_key: str, page_data: InkPageData
     ) -> bool:
         """
         Store ink page data as NDJSON in S3.
@@ -114,13 +114,13 @@ class S3StorageService:
 class EventPublishingService:
     """Service for publishing ink recognition events."""
 
-    def __init__(self) -> None:
+    def __init__(self: Self) -> None:
         """Initialize event publishing service."""
         self.event_service_url = settings.event_service_url
         self.enabled = settings.enable_events
 
     async def publish_ink_ready_event(
-        self,
+        self: Self,
         session_id: UUID,
         page_id: UUID,
         learner_id: UUID,
@@ -260,14 +260,14 @@ class ConsentGateService:
 class InkCaptureService:
     """Main service for processing ink capture requests."""
 
-    def __init__(self) -> None:
+    def __init__(self: Self) -> None:
         """Initialize ink capture service with dependencies."""
         self.storage_service = S3StorageService()
         self.event_service = EventPublishingService()
         self.consent_service = ConsentGateService()
 
     async def get_or_create_session(
-        self,
+        self: Self,
         session_id: UUID,
         learner_id: UUID,
         subject: str,
@@ -321,7 +321,7 @@ class InkCaptureService:
         return new_session
 
     async def process_strokes(
-        self, stroke_request: StrokeRequest, db: AsyncSession
+        self: Self, stroke_request: StrokeRequest, db: AsyncSession
     ) -> StrokeResponse:
         """
         Process submitted ink strokes.
@@ -454,7 +454,7 @@ class InkCaptureService:
             recognition_job_id=recognition_job_id,
         )
 
-    async def cleanup_expired_sessions(self, db: AsyncSession) -> int:
+    async def cleanup_expired_sessions(self: Self, db: AsyncSession) -> int:
         """
         Clean up expired sessions.
 

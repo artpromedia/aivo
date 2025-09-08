@@ -21,7 +21,7 @@ class OpenApiError(Exception):
 class ApiTypeError(OpenApiError, TypeError):
     """Exception raised for type-related API errors."""
     def __init__(
-        self, msg, path_to_item=None, valid_classes=None, key_type=None
+        self: Self, msg, path_to_item=None, valid_classes=None, key_type=None
     ) -> None:
         """Raises an exception for TypeErrors
 
@@ -51,7 +51,7 @@ class ApiTypeError(OpenApiError, TypeError):
 
 class ApiValueError(OpenApiError, ValueError):
     """Exception raised for value-related API errors."""
-    def __init__(self, msg, path_to_item=None) -> None:
+    def __init__(self: Self, msg, path_to_item=None) -> None:
         """
         Args:
             msg (str): the exception message
@@ -70,7 +70,7 @@ class ApiValueError(OpenApiError, ValueError):
 
 class ApiAttributeError(OpenApiError, AttributeError):
     """Exception raised for attribute-related API errors."""
-    def __init__(self, msg, path_to_item=None) -> None:
+    def __init__(self: Self, msg, path_to_item=None) -> None:
         """
         Raised when an attribute reference or assignment fails.
 
@@ -90,7 +90,7 @@ class ApiAttributeError(OpenApiError, AttributeError):
 
 class ApiKeyError(OpenApiError, KeyError):
     """Exception raised for key-related API errors."""
-    def __init__(self, msg, path_to_item=None) -> None:
+    def __init__(self: Self, msg, path_to_item=None) -> None:
         """
         Args:
             msg (str): the exception message
@@ -109,7 +109,7 @@ class ApiKeyError(OpenApiError, KeyError):
 class ApiError(OpenApiError):
     """General API error exception."""
     def __init__(
-        self,
+        self: Self,
         status=None,
         reason=None,
         http_resp=None,
@@ -138,7 +138,7 @@ class ApiError(OpenApiError):
 
     @classmethod
     def from_response(
-        cls,
+        cls: type[Self],
         *,
         http_resp,
         body: str | None,
@@ -174,7 +174,7 @@ class ApiError(OpenApiError):
             raise ServiceException(http_resp=http_resp, body=body, data=data)
         raise ApiError(http_resp=http_resp, body=body, data=data)
 
-    def __str__(self) -> str:
+    def __str__(self: Self) -> str:
         """Custom error messages for exception"""
         error_message = f"({self.status})\nReason: {self.reason}\n"
         if self.headers:

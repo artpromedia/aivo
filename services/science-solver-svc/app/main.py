@@ -175,13 +175,13 @@ async def parse_diagram(
 
         # Convert to OpenCV format
         pil_image = Image.open(io.BytesIO(image_data))
-        
+
         if cv2 is None:
             raise HTTPException(
                 status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
                 detail="OpenCV not available for image processing",
             )
-        
+
         # pylint: disable=no-member
         cv_image = cv2.cvtColor(np.array(pil_image), cv2.COLOR_RGB2BGR)
 

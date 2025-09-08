@@ -6,7 +6,7 @@ HTTP client service with circuit breaker and OpenTelemetry tracing.
 import logging
 import time
 from collections.abc import Callable
-from typing import Any
+from typing import Any, Self
 
 import httpx
 from opentelemetry import trace  # type: ignore[import-untyped]
@@ -34,7 +34,7 @@ class CircuitBreaker:
     """Circuit breaker implementation."""
 
     def __init__(
-        self, failure_threshold: int = 5, recovery_timeout: int = 60
+        self: Self, failure_threshold: int = 5, recovery_timeout: int = 60
     ) -> None:
         self.failure_threshold = failure_threshold
         self.recovery_timeout = recovery_timeout
@@ -43,7 +43,7 @@ class CircuitBreaker:
         self.state = "closed"  # closed, open, half-open
 
     async def call(
-        self, func: Callable, *args: Any, **kwargs: Any
+        self: Self, func: Callable, *args: Any, **kwargs: Any
     ) -> Any:
         """Execute function with circuit breaker protection."""
         if self.state == "open":
@@ -60,19 +60,19 @@ class CircuitBreaker:
             self._on_failure()
             raise e
 
-    def _should_attempt_reset(self) -> bool:
+    def _should_attempt_reset(self: Self) -> bool:
         """Check if circuit breaker should attempt reset."""
         if self.last_failure_time is None:
             return True
 
         return (time.time() - self.last_failure_time) >= self.recovery_timeout
 
-    def _on_success(self) -> None:
+    def _on_success(self: Self) -> None:
         """Handle successful call."""
         self.failure_count = 0
         self.state = "closed"
 
-    def _on_failure(self) -> None:
+    def _on_failure(self: Self) -> None:
         """Handle failed call."""
         self.failure_count += 1
         self.last_failure_time = time.time()
@@ -87,7 +87,7 @@ class CircuitBreaker:
 class HTTPClientService:
     """HTTP client service with circuit breaker, retries, and tracing."""
 
-    def __init__(self) -> None:
+    def __init__(self: Self) -> None:
         """Initialize HTTP client service."""
         self.settings = get_settings()
         self.client: httpx.AsyncClient | None = None
@@ -96,7 +96,7 @@ class HTTPClientService:
         # Initialize OpenTelemetry instrumentation
         HTTPXClientInstrumentor().instrument()
 
-    async def initialize(self) -> None:
+    async def initialize(self: Self) -> None:
         """Initialize HTTP client."""
         self.client = httpx.AsyncClient(
             timeout=httpx.Timeout(self.settings.http_timeout),
@@ -106,12 +106,12 @@ class HTTPClientService:
         )
         logger.info("HTTP client service initialized")
 
-    async def close(self) -> None:
+    async def close(self: Self) -> None:
         """Close HTTP client."""
         if self.client:
             await self.client.aclose()
 
-    def _get_circuit_breaker(self, service_name: str) -> CircuitBreaker:
+    def _get_circuit_breaker(self: Self, service_name: str) -> CircuitBreaker:
         """Get or create circuit breaker for service."""
         if service_name not in self.circuit_breakers:
             self.circuit_breakers[service_name] = CircuitBreaker(
@@ -128,7 +128,7 @@ class HTTPClientService:
         ),
     )
     async def _make_request(
-        self, method: str, url: str, **kwargs: Any
+        self: Self, method: str, url: str, **kwargs: Any
     ) -> httpx.Response:
         """Make HTTP request with retries."""
         if not self.client:
@@ -139,7 +139,7 @@ class HTTPClientService:
         return response
 
     async def request(
-        self, service_name: str, method: str, url: str, **kwargs: Any
+        self: Self, service_name: str, method: str, url: str, **kwargs: Any
     ) -> dict[str, Any]:
         """Make HTTP request with circuit breaker and tracing."""
         circuit_breaker = self._get_circuit_breaker(service_name)
@@ -188,30 +188,30 @@ class HTTPClientService:
                 raise
 
     async def get(
-        self, service_name: str, url: str, **kwargs: Any
+        self: Self, service_name: str, url: str, **kwargs: Any
     ) -> dict[str, Any]:
         """Make GET request."""
         return await self.request(service_name, "GET", url, **kwargs)
 
     async def post(
-        self, service_name: str, url: str, **kwargs: Any
+        self: Self, service_name: str, url: str, **kwargs: Any
     ) -> dict[str, Any]:
         """Make POST request."""
         return await self.request(service_name, "POST", url, **kwargs)
 
     async def put(
-        self, service_name: str, url: str, **kwargs: Any
+        self: Self, service_name: str, url: str, **kwargs: Any
     ) -> dict[str, Any]:
         """Make PUT request."""
         return await self.request(service_name, "PUT", url, **kwargs)
 
     async def delete(
-        self, service_name: str, url: str, **kwargs: Any
+        self: Self, service_name: str, url: str, **kwargs: Any
     ) -> dict[str, Any]:
         """Make DELETE request."""
         return await self.request(service_name, "DELETE", url, **kwargs)
 
-    def get_circuit_breaker_status(self) -> dict[str, dict[str, Any]]:
+    def get_circuit_breaker_status(self: Self) -> dict[str, dict[str, Any]]:
         """Get status of all circuit breakers."""
         status = {}
         for service_name, cb in self.circuit_breakers.items():

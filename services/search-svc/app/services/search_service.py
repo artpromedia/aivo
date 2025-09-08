@@ -2,7 +2,7 @@
 
 import json
 import logging
-from typing import Any
+from typing import Any, Self
 
 import redis.asyncio as redis
 
@@ -27,7 +27,7 @@ logger = logging.getLogger(__name__)
 class SearchService:
     """Main search service that orchestrates search operations."""
 
-    def __init__(self) -> None:
+    def __init__(self: Self) -> None:
         """Initialize the search service."""
         self.opensearch_service = OpenSearchService()
         self.rbac_service = RBACService()
@@ -35,7 +35,7 @@ class SearchService:
         self.redis_client = None
         logger.info("SearchService initialized")
 
-    async def initialize(self) -> None:
+    async def initialize(self: Self) -> None:
         """Initialize all service dependencies."""
         try:
             # pylint: disable=no-member
@@ -49,7 +49,7 @@ class SearchService:
             logger.error("Failed to initialize SearchService: %s", str(e))
             raise
 
-    async def health_check(self) -> HealthStatus:
+    async def health_check(self: Self) -> HealthStatus:
         """Perform health check on all dependencies."""
         try:
             # Check OpenSearch health
@@ -83,7 +83,7 @@ class SearchService:
             return HealthStatus(status="unhealthy", details={"error": str(e)})
 
     async def search(
-        self,
+        self: Self,
         request: SearchRequest,
         user_context: UserContext
     ) -> SearchResponse:
@@ -137,7 +137,7 @@ class SearchService:
             raise
 
     async def suggest(
-        self,
+        self: Self,
         request: SuggestionRequest,
         user_context: UserContext
     ) -> SuggestionResponse:
@@ -174,7 +174,7 @@ class SearchService:
             raise
 
     async def index_document(
-        self,
+        self: Self,
         request: IndexRequest,
         user_context: UserContext
     ) -> dict[str, Any]:
@@ -226,7 +226,7 @@ class SearchService:
             raise
 
     async def bulk_index(
-        self,
+        self: Self,
         request: BulkIndexRequest,
         user_context: UserContext
     ) -> dict[str, Any]:
@@ -277,7 +277,7 @@ class SearchService:
             raise
 
     def _generate_cache_key(
-        self, request: SearchRequest, user_context: UserContext
+        self: Self, request: SearchRequest, user_context: UserContext
     ) -> str:
         """Generate a cache key for the search request."""
         key_data = {
@@ -288,7 +288,7 @@ class SearchService:
         }
         return f"search:{hash(str(sorted(key_data.items())))}"
 
-    async def _get_cached_result(self, cache_key: str) -> dict | None:
+    async def _get_cached_result(self: Self, cache_key: str) -> dict | None:
         """Get cached search result."""
         try:
             if not self.redis_client:
@@ -303,7 +303,7 @@ class SearchService:
             return None
 
     async def _cache_result(
-        self, cache_key: str, result: SearchResponse
+        self: Self, cache_key: str, result: SearchResponse
     ) -> None:
         """Cache search result."""
         try:
@@ -318,7 +318,7 @@ class SearchService:
         except Exception as e:  # pylint: disable=broad-exception-caught
             logger.warning("Failed to cache result: %s", str(e))
 
-    async def _invalidate_search_cache(self) -> None:
+    async def _invalidate_search_cache(self: Self) -> None:
         """Invalidate all search cache entries."""
         try:
             if not self.redis_client:
@@ -332,7 +332,7 @@ class SearchService:
         except Exception as e:  # pylint: disable=broad-exception-caught
             logger.warning("Failed to invalidate search cache: %s", str(e))
 
-    async def close(self) -> None:
+    async def close(self: Self) -> None:
         """Close all service connections."""
         try:
             await self.opensearch_service.close()  # pylint: disable=no-member

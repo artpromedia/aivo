@@ -11,8 +11,8 @@ import numpy as np
 try:
     from PIL import Image
 except ImportError as e:
-    msg = "PIL (Pillow) is required but not installed"
-    raise ImportError(msg) from e
+    MSG = "PIL (Pillow) is required but not installed"
+    raise ImportError(MSG) from e
 
 from .cas_service import cas_service
 from .config import settings

@@ -5,6 +5,8 @@ This module handles environment-based configuration for the digital ink
 capture service, including database settings, S3 storage, and event
 publishing configurations.
 """
+from typing import Self
+
 from pydantic import Field
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
@@ -68,7 +70,7 @@ class Settings(BaseSettings):
     enable_media_gate: bool = Field(default=True, alias="ENABLE_MEDIA_GATE")
 
     @property
-    def s3_key_prefix(self) -> str:
+    def s3_key_prefix(self: Self) -> str:
         """Generate S3 key prefix for ink storage."""
         return f"{self.s3_prefix}/"
 

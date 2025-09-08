@@ -3,7 +3,7 @@ Pydantic schemas for the Approval Service API.
 """
 
 from datetime import datetime
-from typing import Any
+from typing import Any, Self
 from uuid import UUID
 
 from pydantic import (
@@ -118,7 +118,7 @@ class ApprovalCreateInput(BaseSchema):
 
     @field_validator("participants")
     @classmethod
-    def validate_participants(cls, v: list) -> list:
+    def validate_participants(cls: type[Self], v: list) -> list:
         """Validate participants list."""
         if not v:
             raise ValueError("At least one participant is required")
@@ -148,7 +148,7 @@ class ApprovalCreateInput(BaseSchema):
         return v
 
     @model_validator(mode="after")
-    def validate_required_participants(self) -> "ApprovalCreateInput":
+    def validate_required_participants(self: Self) -> "ApprovalCreateInput":
         """Validate required participants count."""
         if self.required_participants is not None and self.participants:
             participants_count = len(self.participants)

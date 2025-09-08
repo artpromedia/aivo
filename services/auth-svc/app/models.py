@@ -7,8 +7,7 @@ from datetime import datetime
 from typing import Optional
 
 from sqlalchemy import Boolean, DateTime, String, Text, text
-from sqlalchemy.dialects.postgresql import ENUM as PostgresEnum
-from sqlalchemy.dialects.postgresql import UUID as PostgresUUID
+from sqlalchemy.dialects.postgresql import ENUM, UUID
 from sqlalchemy.orm import Mapped, declarative_base, mapped_column
 
 Base = declarative_base()
@@ -20,7 +19,7 @@ class User(Base):
     __tablename__ = "users"
 
     id: Mapped[uuid.UUID] = mapped_column(
-        PostgresUUID(as_uuid=True), primary_key=True, default=uuid.uuid4
+        UUID(as_uuid=True), primary_key=True, default=uuid.uuid4
     )
     email: Mapped[str] = mapped_column(String(255), unique=True, index=True)
     hashed_password: Mapped[str] = mapped_column(String(255))
@@ -29,7 +28,7 @@ class User(Base):
 
     # Role-based access control
     role: Mapped[str] = mapped_column(
-        PostgresEnum(
+        ENUM(
             "guardian", "teacher", "staff", "admin", name="user_role"
         ),
         default="guardian",
@@ -37,12 +36,12 @@ class User(Base):
 
     # Multi-tenancy support
     tenant_id: Mapped[Optional[uuid.UUID]] = mapped_column(
-        PostgresUUID(as_uuid=True), nullable=True, index=True
+        UUID(as_uuid=True), nullable=True, index=True
     )
 
     # User status
     status: Mapped[str] = mapped_column(
-        PostgresEnum(
+        ENUM(
             "active", "inactive", "pending", "suspended", name="user_status"
         ),
         default="pending",
@@ -89,11 +88,11 @@ class RefreshToken(Base):
     __tablename__ = "refresh_tokens"
 
     id: Mapped[uuid.UUID] = mapped_column(
-        PostgresUUID(as_uuid=True), primary_key=True, default=uuid.uuid4
+        UUID(as_uuid=True), primary_key=True, default=uuid.uuid4
     )
     token: Mapped[str] = mapped_column(String(255), unique=True, index=True)
     user_id: Mapped[uuid.UUID] = mapped_column(
-        PostgresUUID(as_uuid=True), index=True
+        UUID(as_uuid=True), index=True
     )
 
     # Token metadata
@@ -129,19 +128,19 @@ class InviteToken(Base):
     __tablename__ = "invite_tokens"
 
     id: Mapped[uuid.UUID] = mapped_column(
-        PostgresUUID(as_uuid=True), primary_key=True, default=uuid.uuid4
+        UUID(as_uuid=True), primary_key=True, default=uuid.uuid4
     )
     token: Mapped[str] = mapped_column(String(255), unique=True, index=True)
     email: Mapped[str] = mapped_column(String(255), index=True)
 
     # Invitation details
     role: Mapped[str] = mapped_column(
-        PostgresEnum("teacher", "staff", name="invite_role")
+        ENUM("teacher", "staff", name="invite_role")
     )
     tenant_id: Mapped[Optional[uuid.UUID]] = mapped_column(
-        PostgresUUID(as_uuid=True), nullable=True
+        UUID(as_uuid=True), nullable=True
     )
-    invited_by: Mapped[uuid.UUID] = mapped_column(PostgresUUID(as_uuid=True))
+    invited_by: Mapped[uuid.UUID] = mapped_column(UUID(as_uuid=True))
 
     # Token status
     is_used: Mapped[bool] = mapped_column(Boolean, default=False)
