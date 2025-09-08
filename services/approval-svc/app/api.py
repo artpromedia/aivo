@@ -4,6 +4,7 @@ API endpoints for the Approval Service.
 
 import logging
 from datetime import datetime
+from typing import Any
 from uuid import UUID
 
 from fastapi import APIRouter, Depends, HTTPException, Query, Request
@@ -28,21 +29,29 @@ router = APIRouter(prefix="/approvals", tags=["approvals"])
 
 
 @router.post("", response_model=ApprovalCreationResult)
-async def create_approval(approval_data: ApprovalCreateInput, db: AsyncSession = Depends(get_db)):
+async def create_approval(
+    approval_data: ApprovalCreateInput, db: AsyncSession = Depends(get_db)
+) -> ApprovalCreationResult:
     """Create a new approval request."""
     try:
         approval = await approval_service.create_approval(db, approval_data)
 
         return ApprovalCreationResult(
-            success=True, message="Approval created successfully", approval_id=approval.id
+            success=True,
+            message="Approval created successfully",
+            approval_id=approval.id,
         )
 
     except ValueError as e:
-        logger.warning(f"Validation error creating approval: {e}")
-        return ApprovalCreationResult(success=False, message="Validation error", errors=[str(e)])
+        logger.warning("Validation error creating approval: %s", e)
+        return ApprovalCreationResult(
+            success=False, message="Validation error", errors=[str(e)]
+        )
     except Exception as e:
-        logger.error(f"Failed to create approval: {e}")
-        raise HTTPException(status_code=500, detail="Internal server error")
+        logger.error("Failed to create approval: %s", e)
+        raise HTTPException(
+            status_code=500, detail="Internal server error"
+        ) from e
 
 
 @router.get("/{approval_id}", response_model=ApprovalResponse)
@@ -50,7 +59,7 @@ async def get_approval(
     approval_id: UUID,
     tenant_id: str | None = Query(None, description="Tenant ID for filtering"),
     db: AsyncSession = Depends(get_db),
-):
+) -> ApprovalResponse:
     """Get approval by ID."""
     approval = await approval_service.get_approval(db, approval_id, tenant_id)
 
@@ -63,22 +72,46 @@ async def get_approval(
 @router.get("", response_model=ApprovalListResponse)
 async def list_approvals(
     tenant_id: str | None = Query(None, description="Tenant ID for filtering"),
-    status: ApprovalStatus | None = Query(None, description="Filter by status"),
-    approval_type: ApprovalType | None = Query(None, description="Filter by type"),
+    status: ApprovalStatus | None = Query(
+        None, description="Filter by status"
+    ),
+    approval_type: ApprovalType | None = Query(
+        None, description="Filter by type"
+    ),
     priority: Priority | None = Query(None, description="Filter by priority"),
-    resource_type: str | None = Query(None, description="Filter by resource type"),
+    resource_type: str | None = Query(
+        None, description="Filter by resource type"
+    ),
     created_by: str | None = Query(None, description="Filter by creator"),
-    participant_user_id: str | None = Query(None, description="Filter by participant"),
-    expires_before: datetime | None = Query(None, description="Filter by expiry before date"),
-    expires_after: datetime | None = Query(None, description="Filter by expiry after date"),
-    created_before: datetime | None = Query(None, description="Filter by creation before date"),
-    created_after: datetime | None = Query(None, description="Filter by creation after date"),
-    limit: int = Query(default=50, ge=1, le=1000, description="Number of items to return"),
-    offset: int = Query(default=0, ge=0, description="Number of items to skip"),
-    order_by: str = Query(default="created_at", description="Field to order by"),
-    order_desc: bool = Query(default=True, description="Order in descending order"),
+    participant_user_id: str | None = Query(
+        None, description="Filter by participant"
+    ),
+    expires_before: datetime | None = Query(
+        None, description="Filter by expiry before date"
+    ),
+    expires_after: datetime | None = Query(
+        None, description="Filter by expiry after date"
+    ),
+    created_before: datetime | None = Query(
+        None, description="Filter by creation before date"
+    ),
+    created_after: datetime | None = Query(
+        None, description="Filter by creation after date"
+    ),
+    limit: int = Query(
+        default=50, ge=1, le=1000, description="Number of items to return"
+    ),
+    offset: int = Query(
+        default=0, ge=0, description="Number of items to skip"
+    ),
+    order_by: str = Query(
+        default="created_at", description="Field to order by"
+    ),
+    order_desc: bool = Query(
+        default=True, description="Order in descending order"
+    ),
     db: AsyncSession = Depends(get_db),
-):
+) -> ApprovalListResponse:
     """List approvals with filtering and pagination."""
     query = ApprovalListQuery(
         tenant_id=tenant_id,
@@ -107,11 +140,13 @@ async def list_approvals(
 async def make_decision(
     approval_id: UUID,
     decision_data: DecisionInput,
-    user_id: str = Query(..., description="ID of the user making the decision"),
+    user_id: str = Query(
+        ..., description="ID of the user making the decision"
+    ),
     tenant_id: str | None = Query(None, description="Tenant ID for filtering"),
     request: Request = None,
     db: AsyncSession = Depends(get_db),
-):
+) -> DecisionResult:
     """Make a decision (approve/reject) on an approval request."""
     # Extract request metadata
     request_metadata = {}
@@ -141,10 +176,12 @@ async def make_decision(
 @router.post("/{approval_id}/cancel")
 async def cancel_approval(
     approval_id: UUID,
-    user_id: str = Query(..., description="ID of the user cancelling the approval"),
+    user_id: str = Query(  # pylint: disable=unused-argument
+        ..., description="ID of the user cancelling the approval"
+    ),
     tenant_id: str | None = Query(None, description="Tenant ID for filtering"),
     db: AsyncSession = Depends(get_db),
-):
+) -> dict[str, str]:
     """Cancel an approval request."""
     # This is a simplified version - in a real implementation you'd want to:
     # 1. Check permissions (only creator or admin can cancel)
@@ -159,10 +196,16 @@ async def cancel_approval(
 
     if approval.status != ApprovalStatus.PENDING:
         raise HTTPException(
-            status_code=409, detail=f"Cannot cancel approval with status {approval.status.value}"
+            status_code=409,
+            detail=f"Cannot cancel approval with status "
+            f"{approval.status.value}",
         )
 
-    # TODO: Implement cancellation logic
+    # NOTE: Cancellation logic is pending implementation
+    # Future implementation should:
+    # 1. Check permissions (only creator or admin can cancel)
+    # 2. Update the approval status to CANCELLED
+    # 3. Send notifications and webhooks
     return {"message": "Approval cancellation not yet implemented"}
 
 
@@ -171,7 +214,7 @@ async def get_approval_status(
     approval_id: UUID,
     tenant_id: str | None = Query(None, description="Tenant ID for filtering"),
     db: AsyncSession = Depends(get_db),
-):
+) -> dict[str, Any]:
     """Get approval status and progress."""
     approval = await approval_service.get_approval(db, approval_id, tenant_id)
 

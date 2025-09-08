@@ -1,6 +1,7 @@
 """
 Alembic environment configuration.
 """
+# pylint: disable=import-error,no-member
 
 import asyncio
 import os
@@ -11,6 +12,9 @@ from sqlalchemy import pool
 from sqlalchemy.engine import Connection
 from sqlalchemy.ext.asyncio import async_engine_from_config
 
+# Import your models here for autogenerate support
+from app.models import Base  # pylint: disable=no-name-in-module
+
 # this is the Alembic Config object, which provides
 # access to the values within the .ini file in use.
 config = context.config
@@ -19,9 +23,6 @@ config = context.config
 # This line sets up loggers basically.
 if config.config_file_name is not None:
     fileConfig(config.config_file_name)
-
-# Import your models here for autogenerate support
-from app.models import Base
 
 target_metadata = Base.metadata
 
@@ -33,7 +34,9 @@ target_metadata = Base.metadata
 
 def get_url():
     """Get database URL from environment or config."""
-    return os.getenv("DATABASE_URL") or config.get_main_option("sqlalchemy.url")
+    return (
+        os.getenv("DATABASE_URL") or config.get_main_option("sqlalchemy.url")
+    )
 
 
 def run_migrations_offline() -> None:

@@ -1,15 +1,19 @@
 """
 Admin Portal Aggregator Service - Main FastAPI application.
 """
+# pylint: disable=import-error
 
 import logging
 from contextlib import asynccontextmanager
 from datetime import datetime
 
-from fastapi import Depends, FastAPI, HTTPException, Query
+from fastapi import Depends, FastAPI, HTTPException, Query, Request
 from fastapi.middleware.cors import CORSMiddleware
-from opentelemetry import trace
-from opentelemetry.instrumentation.fastapi import FastAPIInstrumentor
+from fastapi.responses import JSONResponse
+from opentelemetry import trace  # type: ignore[import-untyped]
+from opentelemetry.instrumentation.fastapi import (  # type: ignore[import-untyped]  # noqa: E501
+    FastAPIInstrumentor,
+)
 
 from .cache_service import cache_service
 from .config import get_settings
@@ -35,6 +39,7 @@ tracer = trace.get_tracer(__name__)
 
 
 @asynccontextmanager
+# pylint: disable=unused-argument,redefined-outer-name
 async def lifespan(app: FastAPI):
     """Application lifespan manager."""
     logger.info("Starting Admin Portal Aggregator Service...")
@@ -74,7 +79,9 @@ FastAPIInstrumentor.instrument_app(app)
 
 
 # Dependency for tenant ID validation
-async def get_tenant_id(tenant_id: str = Query(..., description="Tenant identifier")) -> str:
+async def get_tenant_id(
+    tenant_id: str = Query(..., description="Tenant identifier"),
+) -> str:
     """Validate and return tenant ID."""
     if not tenant_id or len(tenant_id) < 3:
         raise HTTPException(status_code=400, detail="Invalid tenant ID")
@@ -92,16 +99,17 @@ async def health_check():
         try:
             cache_stats = await cache_service.get_stats()
             dependencies["cache"] = cache_stats.get("status", "unknown")
-        except Exception as e:
+        except Exception as e:  # pylint: disable=broad-exception-caught
             dependencies["cache"] = f"error: {str(e)}"
 
         # Check HTTP client circuit breakers
         try:
             cb_status = http_client.get_circuit_breaker_status()
-            dependencies["http_client"] = (
-                "ok" if all(cb["state"] == "closed" for cb in cb_status.values()) else "degraded"
+            all_closed = all(
+                cb["state"] == "closed" for cb in cb_status.values()
             )
-        except Exception as e:
+            dependencies["http_client"] = "ok" if all_closed else "degraded"
+        except Exception as e:  # pylint: disable=broad-exception-caught
             dependencies["http_client"] = f"error: {str(e)}"
 
         span.set_attributes(
@@ -132,10 +140,13 @@ async def get_summary(tenant_id: str = Depends(get_tenant_id)):
             return summary
         except Exception as e:
             span.record_exception(e)
-            logger.error(f"Failed to get summary for tenant {tenant_id}: {e}")
-            raise HTTPException(
-                status_code=500, detail=f"Failed to retrieve summary data: {str(e)}"
+            logger.error(
+                "Failed to get summary for tenant %s: %s", tenant_id, e
             )
+            raise HTTPException(
+                status_code=500,
+                detail=f"Failed to retrieve summary data: {str(e)}",
+            ) from e
 
 
 @app.get("/subscription", response_model=SubscriptionDetails)
@@ -150,10 +161,13 @@ async def get_subscription(tenant_id: str = Depends(get_tenant_id)):
             return subscription
         except Exception as e:
             span.record_exception(e)
-            logger.error(f"Failed to get subscription for tenant {tenant_id}: {e}")
-            raise HTTPException(
-                status_code=500, detail=f"Failed to retrieve subscription data: {str(e)}"
+            logger.error(
+                "Failed to get subscription for tenant %s: %s", tenant_id, e
             )
+            raise HTTPException(
+                status_code=500,
+                detail=f"Failed to retrieve subscription data: {str(e)}",
+            ) from e
 
 
 @app.get("/billing-history", response_model=BillingHistoryResponse)
@@ -168,10 +182,13 @@ async def get_billing_history(tenant_id: str = Depends(get_tenant_id)):
             return billing
         except Exception as e:
             span.record_exception(e)
-            logger.error(f"Failed to get billing history for tenant {tenant_id}: {e}")
-            raise HTTPException(
-                status_code=500, detail=f"Failed to retrieve billing history: {str(e)}"
+            logger.error(
+                "Failed to get billing history for tenant %s: %s", tenant_id, e
             )
+            raise HTTPException(
+                status_code=500,
+                detail=f"Failed to retrieve billing history: {str(e)}",
+            ) from e
 
 
 @app.get("/team", response_model=TeamResponse)
@@ -186,8 +203,11 @@ async def get_team(tenant_id: str = Depends(get_tenant_id)):
             return team
         except Exception as e:
             span.record_exception(e)
-            logger.error(f"Failed to get team for tenant {tenant_id}: {e}")
-            raise HTTPException(status_code=500, detail=f"Failed to retrieve team data: {str(e)}")
+            logger.error("Failed to get team for tenant %s: %s", tenant_id, e)
+            raise HTTPException(
+                status_code=500,
+                detail=f"Failed to retrieve team data: {str(e)}",
+            ) from e
 
 
 @app.get("/usage", response_model=UsageResponse)
@@ -203,8 +223,11 @@ async def get_usage(tenant_id: str = Depends(get_tenant_id)):
             return usage
         except Exception as e:
             span.record_exception(e)
-            logger.error(f"Failed to get usage for tenant {tenant_id}: {e}")
-            raise HTTPException(status_code=500, detail=f"Failed to retrieve usage data: {str(e)}")
+            logger.error("Failed to get usage for tenant %s: %s", tenant_id, e)
+            raise HTTPException(
+                status_code=500,
+                detail=f"Failed to retrieve usage data: {str(e)}",
+            ) from e
 
 
 @app.get("/namespaces", response_model=NamespacesResponse)
@@ -216,14 +239,19 @@ async def get_namespaces(tenant_id: str = Depends(get_tenant_id)):
         try:
             namespaces = await service_aggregator.get_namespaces(tenant_id)
             span.set_attribute("namespaces.total", namespaces.total_namespaces)
-            span.set_attribute("namespaces.storage_gb", namespaces.total_storage_gb)
+            span.set_attribute(
+                "namespaces.storage_gb", namespaces.total_storage_gb
+            )
             return namespaces
         except Exception as e:
             span.record_exception(e)
-            logger.error(f"Failed to get namespaces for tenant {tenant_id}: {e}")
-            raise HTTPException(
-                status_code=500, detail=f"Failed to retrieve namespaces data: {str(e)}"
+            logger.error(
+                "Failed to get namespaces for tenant %s: %s", tenant_id, e
             )
+            raise HTTPException(
+                status_code=500,
+                detail=f"Failed to retrieve namespaces data: {str(e)}",
+            ) from e
 
 
 @app.delete("/cache/{tenant_id}")
@@ -236,15 +264,22 @@ async def clear_tenant_cache(tenant_id: str):
             cleared_count = await cache_service.clear_tenant(tenant_id)
             span.set_attribute("cache.cleared_count", cleared_count)
 
+            message = (
+                f"Cleared {cleared_count} cache entries for tenant {tenant_id}"
+            )
             return {
-                "message": f"Cleared {cleared_count} cache entries for tenant {tenant_id}",
+                "message": message,
                 "tenant_id": tenant_id,
                 "cleared_count": cleared_count,
             }
         except Exception as e:
             span.record_exception(e)
-            logger.error(f"Failed to clear cache for tenant {tenant_id}: {e}")
-            raise HTTPException(status_code=500, detail=f"Failed to clear cache: {str(e)}")
+            logger.error(
+                "Failed to clear cache for tenant %s: %s", tenant_id, e
+            )
+            raise HTTPException(
+                status_code=500, detail=f"Failed to clear cache: {str(e)}"
+            ) from e
 
 
 @app.get("/circuit-breakers")
@@ -255,10 +290,11 @@ async def get_circuit_breaker_status():
             status = http_client.get_circuit_breaker_status()
             return {"circuit_breakers": status, "timestamp": datetime.utcnow()}
         except Exception as e:
-            logger.error(f"Failed to get circuit breaker status: {e}")
+            logger.error("Failed to get circuit breaker status: %s", e)
             raise HTTPException(
-                status_code=500, detail=f"Failed to retrieve circuit breaker status: {str(e)}"
-            )
+                status_code=500,
+                detail=f"Failed to retrieve circuit breaker status: {str(e)}",
+            ) from e
 
 
 @app.get("/cache/stats")
@@ -269,15 +305,21 @@ async def get_cache_stats():
             stats = await cache_service.get_stats()
             return {"cache_stats": stats, "timestamp": datetime.utcnow()}
         except Exception as e:
-            logger.error(f"Failed to get cache stats: {e}")
-            raise HTTPException(status_code=500, detail=f"Failed to retrieve cache stats: {str(e)}")
+            logger.error("Failed to get cache stats: %s", e)
+            raise HTTPException(
+                status_code=500,
+                detail=f"Failed to retrieve cache stats: {str(e)}",
+            ) from e
 
 
 # Global exception handler
 @app.exception_handler(Exception)
-async def global_exception_handler(request, exc):
+async def global_exception_handler(
+    request: Request,  # pylint: disable=unused-argument
+    exc: Exception,
+) -> JSONResponse:
     """Global exception handler."""
-    logger.error(f"Unhandled exception: {exc}")
+    logger.error("Unhandled exception: %s", exc)
     return ErrorResponse(
         error="internal_server_error",
         message="An internal server error occurred",
@@ -289,4 +331,9 @@ async def global_exception_handler(request, exc):
 if __name__ == "__main__":
     import uvicorn
 
-    uvicorn.run("app.main:app", host=settings.host, port=settings.port, reload=settings.debug)
+    uvicorn.run(
+        "app.main:app",
+        host=settings.host,
+        port=settings.port,
+        reload=settings.debug,
+    )

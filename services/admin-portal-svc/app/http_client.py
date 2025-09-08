@@ -1,14 +1,24 @@
 """
 HTTP client service with circuit breaker and OpenTelemetry tracing.
 """
+# pylint: disable=import-error
 
 import logging
+import time
+from collections.abc import Callable
 from typing import Any
 
 import httpx
-from opentelemetry import trace
-from opentelemetry.instrumentation.httpx import HTTPXClientInstrumentor
-from tenacity import retry, retry_if_exception_type, stop_after_attempt, wait_exponential
+from opentelemetry import trace  # type: ignore[import-untyped]
+from opentelemetry.instrumentation.httpx import (  # type: ignore[import-untyped]  # noqa: E501
+    HTTPXClientInstrumentor,
+)
+from tenacity import (  # type: ignore[import-untyped]
+    retry,
+    retry_if_exception_type,
+    stop_after_attempt,
+    wait_exponential,
+)
 
 from .config import get_settings
 
@@ -19,20 +29,22 @@ tracer = trace.get_tracer(__name__)
 class CircuitBreakerError(Exception):
     """Circuit breaker is open."""
 
-    pass
-
 
 class CircuitBreaker:
     """Circuit breaker implementation."""
 
-    def __init__(self, failure_threshold: int = 5, recovery_timeout: int = 60) -> None:
+    def __init__(
+        self, failure_threshold: int = 5, recovery_timeout: int = 60
+    ) -> None:
         self.failure_threshold = failure_threshold
         self.recovery_timeout = recovery_timeout
         self.failure_count = 0
         self.last_failure_time = None
         self.state = "closed"  # closed, open, half-open
 
-    async def call(self, func, *args, **kwargs):
+    async def call(
+        self, func: Callable, *args: Any, **kwargs: Any
+    ) -> Any:
         """Execute function with circuit breaker protection."""
         if self.state == "open":
             if self._should_attempt_reset():
@@ -53,8 +65,6 @@ class CircuitBreaker:
         if self.last_failure_time is None:
             return True
 
-        import time
-
         return (time.time() - self.last_failure_time) >= self.recovery_timeout
 
     def _on_success(self) -> None:
@@ -64,14 +74,14 @@ class CircuitBreaker:
 
     def _on_failure(self) -> None:
         """Handle failed call."""
-        import time
-
         self.failure_count += 1
         self.last_failure_time = time.time()
 
         if self.failure_count >= self.failure_threshold:
             self.state = "open"
-            logger.warning(f"Circuit breaker opened after {self.failure_count} failures")
+            logger.warning(
+                "Circuit breaker opened after %s failures", self.failure_count
+            )
 
 
 class HTTPClientService:
@@ -90,7 +100,9 @@ class HTTPClientService:
         """Initialize HTTP client."""
         self.client = httpx.AsyncClient(
             timeout=httpx.Timeout(self.settings.http_timeout),
-            limits=httpx.Limits(max_connections=100, max_keepalive_connections=20),
+            limits=httpx.Limits(
+                max_connections=100, max_keepalive_connections=20
+            ),
         )
         logger.info("HTTP client service initialized")
 
@@ -103,17 +115,21 @@ class HTTPClientService:
         """Get or create circuit breaker for service."""
         if service_name not in self.circuit_breakers:
             self.circuit_breakers[service_name] = CircuitBreaker(
-                failure_threshold=self.settings.circuit_breaker_failure_threshold,
-                recovery_timeout=self.settings.circuit_breaker_recovery_timeout,
+                failure_threshold=self.settings.circuit_breaker_failure_threshold,  # noqa: E501
+                recovery_timeout=self.settings.circuit_breaker_recovery_timeout,  # noqa: E501
             )
         return self.circuit_breakers[service_name]
 
     @retry(
         stop=stop_after_attempt(3),
         wait=wait_exponential(multiplier=1, min=4, max=10),
-        retry=retry_if_exception_type((httpx.RequestError, httpx.TimeoutException)),
+        retry=retry_if_exception_type(
+            (httpx.RequestError, httpx.TimeoutException)
+        ),
     )
-    async def _make_request(self, method: str, url: str, **kwargs) -> httpx.Response:
+    async def _make_request(
+        self, method: str, url: str, **kwargs: Any
+    ) -> httpx.Response:
         """Make HTTP request with retries."""
         if not self.client:
             raise RuntimeError("HTTP client not initialized")
@@ -122,54 +138,76 @@ class HTTPClientService:
         response.raise_for_status()
         return response
 
-    async def request(self, service_name: str, method: str, url: str, **kwargs) -> dict[str, Any]:
+    async def request(
+        self, service_name: str, method: str, url: str, **kwargs: Any
+    ) -> dict[str, Any]:
         """Make HTTP request with circuit breaker and tracing."""
         circuit_breaker = self._get_circuit_breaker(service_name)
 
         with tracer.start_as_current_span(
             f"http_request_{service_name}",
-            attributes={"http.method": method, "http.url": url, "service.name": service_name},
+            attributes={
+                "http.method": method,
+                "http.url": url,
+                "service.name": service_name,
+            },
         ) as span:
             try:
-                response = await circuit_breaker.call(self._make_request, method, url, **kwargs)
+                response = await circuit_breaker.call(
+                    self._make_request, method, url, **kwargs
+                )
 
                 data = response.json()
                 span.set_attribute("http.status_code", response.status_code)
                 span.set_attribute("http.response_size", len(response.content))
 
-                logger.debug(f"Successful request to {service_name}: {method} {url}")
+                logger.debug(
+                    "Successful request to %s: %s %s",
+                    service_name, method, url
+                )
                 return data
 
             except CircuitBreakerError as e:
                 span.set_attribute("circuit_breaker.state", "open")
                 span.record_exception(e)
-                logger.error(f"Circuit breaker open for {service_name}")
+                logger.error("Circuit breaker open for %s", service_name)
                 raise
 
             except httpx.HTTPStatusError as e:
                 span.set_attribute("http.status_code", e.response.status_code)
                 span.record_exception(e)
-                logger.error(f"HTTP error from {service_name}: {e.response.status_code}")
+                logger.error(
+                    "HTTP error from %s: %s",
+                    service_name, e.response.status_code
+                )
                 raise
 
             except Exception as e:
                 span.record_exception(e)
-                logger.error(f"Request failed to {service_name}: {e}")
+                logger.error("Request failed to %s: %s", service_name, e)
                 raise
 
-    async def get(self, service_name: str, url: str, **kwargs) -> dict[str, Any]:
+    async def get(
+        self, service_name: str, url: str, **kwargs: Any
+    ) -> dict[str, Any]:
         """Make GET request."""
         return await self.request(service_name, "GET", url, **kwargs)
 
-    async def post(self, service_name: str, url: str, **kwargs) -> dict[str, Any]:
+    async def post(
+        self, service_name: str, url: str, **kwargs: Any
+    ) -> dict[str, Any]:
         """Make POST request."""
         return await self.request(service_name, "POST", url, **kwargs)
 
-    async def put(self, service_name: str, url: str, **kwargs) -> dict[str, Any]:
+    async def put(
+        self, service_name: str, url: str, **kwargs: Any
+    ) -> dict[str, Any]:
         """Make PUT request."""
         return await self.request(service_name, "PUT", url, **kwargs)
 
-    async def delete(self, service_name: str, url: str, **kwargs) -> dict[str, Any]:
+    async def delete(
+        self, service_name: str, url: str, **kwargs: Any
+    ) -> dict[str, Any]:
         """Make DELETE request."""
         return await self.request(service_name, "DELETE", url, **kwargs)
 

@@ -6,7 +6,13 @@ from datetime import datetime
 from typing import Any
 from uuid import UUID
 
-from pydantic import BaseModel, EmailStr, Field, field_validator, model_validator
+from pydantic import (
+    BaseModel,
+    EmailStr,
+    Field,
+    field_validator,
+    model_validator,
+)
 
 from .enums import (
     ApprovalStatus,
@@ -23,6 +29,8 @@ class BaseSchema(BaseModel):
     """Base schema with common configuration."""
 
     class Config:
+        """Pydantic model configuration."""
+
         from_attributes = True
         use_enum_values = True
 
@@ -97,7 +105,9 @@ class ApprovalCreateInput(BaseSchema):
     ttl_hours: int | None = Field(None, ge=1, le=720)  # 1 hour to 30 days
 
     # Participants
-    participants: list[ParticipantInput] = Field(..., min_length=1, max_length=10)
+    participants: list[ParticipantInput] = Field(
+        ..., min_length=1, max_length=10
+    )
     required_participants: int | None = None
     require_all_participants: bool = True
 
@@ -108,7 +118,7 @@ class ApprovalCreateInput(BaseSchema):
 
     @field_validator("participants")
     @classmethod
-    def validate_participants(cls, v):
+    def validate_participants(cls, v: list) -> list:
         """Validate participants list."""
         if not v:
             raise ValueError("At least one participant is required")
@@ -118,7 +128,8 @@ class ApprovalCreateInput(BaseSchema):
         if len(user_ids) != len(set(user_ids)):
             raise ValueError("Duplicate user_ids are not allowed")
 
-        # Check role requirements - must have at least one guardian and one staff
+        # Check role requirements - must have at least one guardian and
+        # one staff member
         roles = [p.role for p in v]
         has_guardian = any(role == ParticipantRole.GUARDIAN for role in roles)
         staff_roles = [
@@ -130,17 +141,21 @@ class ApprovalCreateInput(BaseSchema):
         has_staff = any(role in staff_roles for role in roles)
 
         if not has_guardian or not has_staff:
-            raise ValueError("Must have at least one guardian and one staff member")
+            raise ValueError(
+                "Must have at least one guardian and one staff member"
+            )
 
         return v
 
     @model_validator(mode="after")
-    def validate_required_participants(self):
+    def validate_required_participants(self) -> "ApprovalCreateInput":
         """Validate required participants count."""
         if self.required_participants is not None and self.participants:
             participants_count = len(self.participants)
             if self.required_participants > participants_count:
-                raise ValueError("Required participants cannot exceed total participants")
+                raise ValueError(
+                    "Required participants cannot exceed total participants"
+                )
             if self.required_participants < 1:
                 raise ValueError("Required participants must be at least 1")
         return self

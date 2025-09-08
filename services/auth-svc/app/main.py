@@ -11,20 +11,26 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.middleware.trustedhost import TrustedHostMiddleware
 from fastapi.responses import JSONResponse
 from sqlalchemy.exc import SQLAlchemyError
-from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker, create_async_engine
+from sqlalchemy.ext.asyncio import (
+    AsyncSession,
+    async_sessionmaker,
+    create_async_engine,
+)
 
 from .models import Base
+from .routes import get_db_dependency
 from .routes import router as auth_router
 from .schemas import ErrorResponse
 
 # Database configuration
 DATABASE_URL = os.getenv(
-    "DATABASE_URL", "postgresql+asyncpg://auth_user:auth_password@localhost:5432/auth_db"
+    "DATABASE_URL",
+    "postgresql+asyncpg://auth_user:auth_password@localhost:5432/auth_db",
 )
 
 # Create async engine with conditional pool arguments
 engine_kwargs = {
-    "echo": bool(os.getenv("DATABASE_ECHO", False)),
+    "echo": os.getenv("DATABASE_ECHO", "false").lower() == "true",
 }
 
 # Only add pool arguments for non-SQLite databases
@@ -39,10 +45,13 @@ if not DATABASE_URL.startswith("sqlite"):
 engine = create_async_engine(DATABASE_URL, **engine_kwargs)
 
 # Create session factory
-async_session_factory = async_sessionmaker(engine, class_=AsyncSession, expire_on_commit=False)
+async_session_factory = async_sessionmaker(
+    engine, class_=AsyncSession, expire_on_commit=False
+)
 
 
 @asynccontextmanager
+# pylint: disable=unused-argument,redefined-outer-name
 async def lifespan(app: FastAPI) -> AsyncGenerator[None, None]:
     """Application lifespan manager."""
     # Create database tables
@@ -61,8 +70,16 @@ app = FastAPI(
     description="Authentication and authorization service with JWT and RBAC",
     version="1.0.0",
     lifespan=lifespan,
-    docs_url="/docs" if os.getenv("ENVIRONMENT", "development") == "development" else None,
-    redoc_url="/redoc" if os.getenv("ENVIRONMENT", "development") == "development" else None,
+    docs_url=(
+        "/docs"
+        if os.getenv("ENVIRONMENT", "development") == "development"
+        else None
+    ),
+    redoc_url=(
+        "/redoc"
+        if os.getenv("ENVIRONMENT", "development") == "development"
+        else None
+    ),
 )
 
 # Add CORS middleware
@@ -94,18 +111,19 @@ async def get_db() -> AsyncGenerator[AsyncSession, None]:
             await session.close()
 
 
+# Override the dependency in the app after including the router
+
 # Include routers first
 app.include_router(auth_router, prefix="/api/v1/auth", tags=["auth"])
-
-# Override the dependency in the app after including the router
-from .routes import get_db_dependency
 
 app.dependency_overrides[get_db_dependency] = get_db
 
 
 # Exception handlers
 @app.exception_handler(HTTPException)
-async def http_exception_handler(request: Request, exc: HTTPException) -> JSONResponse:
+async def http_exception_handler(
+    request: Request, exc: HTTPException  # pylint: disable=unused-argument
+) -> JSONResponse:
     """Handle HTTP exceptions."""
     return JSONResponse(
         status_code=exc.status_code,
@@ -118,7 +136,10 @@ async def http_exception_handler(request: Request, exc: HTTPException) -> JSONRe
 
 
 @app.exception_handler(SQLAlchemyError)
-async def sqlalchemy_exception_handler(request: Request, exc: SQLAlchemyError) -> JSONResponse:
+async def sqlalchemy_exception_handler(
+    request: Request,  # pylint: disable=unused-argument
+    exc: SQLAlchemyError,  # pylint: disable=unused-argument
+) -> JSONResponse:
     """Handle SQLAlchemy exceptions."""
     return JSONResponse(
         status_code=500,
@@ -130,7 +151,10 @@ async def sqlalchemy_exception_handler(request: Request, exc: SQLAlchemyError) -
 
 
 @app.exception_handler(Exception)
-async def general_exception_handler(request: Request, exc: Exception) -> JSONResponse:
+async def general_exception_handler(
+    request: Request,  # pylint: disable=unused-argument
+    exc: Exception,  # pylint: disable=unused-argument
+) -> JSONResponse:
     """Handle general exceptions."""
     return JSONResponse(
         status_code=500,
@@ -155,7 +179,11 @@ async def root() -> dict:
     return {
         "message": "Auth Service API",
         "version": "1.0.0",
-        "docs": "/docs" if os.getenv("ENVIRONMENT", "development") == "development" else "disabled",
+        "docs": (
+            "/docs"
+            if os.getenv("ENVIRONMENT", "development") == "development"
+            else "disabled"
+        ),
     }
 
 
