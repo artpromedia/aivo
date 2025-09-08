@@ -105,11 +105,11 @@ async def create_guardian(
         guardian = await service.create_guardian(guardian_data)
         return guardian
     except Exception as e:
-        logger.error(f"Failed to create guardian: {e}")
+        logger.error("Failed to create guardian: %s", str(e))
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
             detail=f"Failed to create guardian: {str(e)}"
-        )
+        ) from e
 
 
 @app.get("/guardians/{guardian_id}", response_model=Guardian)
@@ -144,11 +144,11 @@ async def create_tenant(
         tenant = await service.create_tenant(tenant_data)
         return tenant
     except Exception as e:
-        logger.error(f"Failed to create tenant: {e}")
+        logger.error("Failed to create tenant: %s", str(e))
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
             detail=f"Failed to create tenant: {str(e)}"
-        )
+        ) from e
 
 
 @app.get("/tenants/{tenant_id}", response_model=Tenant)
@@ -183,11 +183,11 @@ async def create_teacher(
         teacher = await service.create_teacher(teacher_data)
         return teacher
     except Exception as e:
-        logger.error(f"Failed to create teacher: {e}")
+        logger.error("Failed to create teacher: %s", str(e))
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
             detail=f"Failed to create teacher: {str(e)}"
-        )
+        ) from e
 
 
 @app.get("/teachers/{teacher_id}", response_model=Teacher)
@@ -232,13 +232,13 @@ async def create_learner(
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
             detail=str(e)
-        )
+        ) from e
     except Exception as e:
-        logger.error(f"Failed to create learner: {e}")
+        logger.error("Failed to create learner: %s", str(e))
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail=f"Failed to create learner: {str(e)}"
-        )
+        ) from e
 
 
 @app.get("/learners/{learner_id}", response_model=Learner)
@@ -319,9 +319,11 @@ async def update_learner(
     except HTTPException:
         raise
     except Exception as e:
-        logger.error(f"Failed to update learner {learner_id}: {e}")
+        logger.error("Failed to update learner %s: %s", learner_id, str(e))
         await db.rollback()
-        raise HTTPException(status_code=500, detail="Failed to update learner")
+        raise HTTPException(
+            status_code=500, detail="Failed to update learner"
+        ) from e
 
 
 # Teacher assignment endpoints
@@ -350,14 +352,16 @@ async def assign_teacher_to_learner(
     except ValueError as e:
         error_msg = str(e)
         if "already assigned" in error_msg:
-            raise HTTPException(status_code=409, detail=error_msg)
+            raise HTTPException(status_code=409, detail=error_msg) from e
         elif "not found" in error_msg:
-            raise HTTPException(status_code=404, detail=error_msg)
+            raise HTTPException(status_code=404, detail=error_msg) from e
         else:
-            raise HTTPException(status_code=400, detail=error_msg)
+            raise HTTPException(status_code=400, detail=error_msg) from e
     except Exception as e:
-        logger.error(f"Failed to assign teacher: {e}")
-        raise HTTPException(status_code=500, detail="Failed to assign teacher")
+        logger.error("Failed to assign teacher: %s", str(e))
+        raise HTTPException(
+            status_code=500, detail="Failed to assign teacher"
+        ) from e
 
 
 @app.post(
@@ -396,11 +400,11 @@ async def assign_multiple_teachers_to_learner(
         }
 
     except Exception as e:
-        logger.error(f"Failed to assign teachers: {e}")
+        logger.error("Failed to assign teachers: %s", str(e))
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail=f"Failed to assign teachers: {str(e)}"
-        )
+        ) from e
 
 
 @app.delete(
@@ -427,11 +431,11 @@ async def remove_teacher_from_learner(
             )
 
     except Exception as e:
-        logger.error(f"Failed to remove teacher assignment: {e}")
+        logger.error("Failed to remove teacher assignment: %s", str(e))
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail=f"Failed to remove teacher assignment: {str(e)}"
-        )
+        ) from e
 
 
 # Error handlers
@@ -452,7 +456,7 @@ async def general_exception_handler(
     _request: Request, exc: Exception
 ) -> ErrorResponse:
     """Handle general exceptions."""
-    logger.error(f"Unhandled exception: {exc}")
+    logger.error("Unhandled exception: %s", str(exc))
     return ErrorResponse(
         error="Server Error",
         message=f"An unexpected error occurred: {exc}",

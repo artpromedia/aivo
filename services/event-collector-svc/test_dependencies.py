@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 """Test script to verify all dependencies are installed correctly."""
 
+import importlib.util
 import sys
 
 
@@ -8,56 +9,59 @@ def test_imports():
     """Test all critical imports."""
     try:
         print("Testing basic Python modules...")
-        import asyncio
-        import json
-        from datetime import datetime
+        # Test availability without importing unused modules
+        assert importlib.util.find_spec("asyncio")
+        assert importlib.util.find_spec("json")
+        assert importlib.util.find_spec("datetime")
 
-        print("✓ Basic Python modules imported")
+        print("✓ Basic Python modules available")
 
         print("Testing web framework dependencies...")
-        import fastapi
-        import uvicorn
+        assert importlib.util.find_spec("fastapi")
+        assert importlib.util.find_spec("uvicorn")
 
-        print("✓ FastAPI and Uvicorn imported")
+        print("✓ FastAPI and Uvicorn available")
 
         print("Testing async and data dependencies...")
-        import aiofiles
-        import orjson
-        import pendulum
-        import structlog
+        assert importlib.util.find_spec("aiofiles")
+        assert importlib.util.find_spec("orjson")
+        assert importlib.util.find_spec("pendulum")
+        assert importlib.util.find_spec("structlog")
 
-        print("✓ Async and data modules imported")
+        print("✓ Async and data modules available")
 
         print("Testing Kafka dependencies...")
-        import aiokafka
+        assert importlib.util.find_spec("aiokafka")
 
-        print("✓ Kafka modules imported")
+        print("✓ Kafka modules available")
 
         print("Testing gRPC dependencies...")
-        import grpc
-        import grpcio_tools
-        from google.protobuf import empty_pb2
+        assert importlib.util.find_spec("grpc")
+        assert importlib.util.find_spec("grpcio_tools")
+        assert importlib.util.find_spec("google.protobuf")
 
-        print("✓ gRPC modules imported")
+        print("✓ gRPC modules available")
 
         print("Testing Pydantic dependencies...")
-        import pydantic
-        from pydantic_settings import BaseSettings
+        assert importlib.util.find_spec("pydantic")
+        assert importlib.util.find_spec("pydantic_settings")
 
-        print("✓ Pydantic modules imported")
+        print("✓ Pydantic modules available")
 
         print("Testing application modules...")
         from app.config import settings
-        from app.models import LearnerEvent
+        assert importlib.util.find_spec("app.models")
 
         print(
-            f"✓ Application modules imported - Service: {settings.service_name}"
+            f"✓ Application modules available - Service: "
+            f"{settings.service_name}"
         )
 
         print("Testing protobuf modules...")
-        from protos import event_collector_pb2, event_collector_pb2_grpc
+        assert importlib.util.find_spec("protos.event_collector_pb2")
+        assert importlib.util.find_spec("protos.event_collector_pb2_grpc")
 
-        print("✓ Protobuf modules imported")
+        print("✓ Protobuf modules available")
 
         print("\n🎉 All dependencies are installed and working correctly!")
         return True

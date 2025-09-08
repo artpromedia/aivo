@@ -170,7 +170,7 @@ class EventPublishingService:
 
             return recognition_job_id
 
-        except Exception as e:
+        except (ConnectionError, RuntimeError, ValueError) as e:
             logger.error(
                 "Failed to publish INK_READY event",
                 error=str(e),
@@ -185,7 +185,9 @@ class ConsentGateService:
 
     @staticmethod
     async def validate_consent(
-        learner_id: UUID, subject: str, metadata: dict[str, Any]
+        learner_id: UUID,
+        subject: str,
+        metadata: dict[str, Any],  # pylint: disable=unused-argument
     ) -> tuple[bool, str | None]:
         """
         Validate learner consent for data collection.

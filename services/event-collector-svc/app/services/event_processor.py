@@ -69,7 +69,7 @@ class EventProcessor:
 
         try:
             await self.kafka.stop()
-        except Exception as e:
+        except (RuntimeError, OSError, ConnectionError) as e:
             logger.error("Error stopping Kafka service", error=str(e))
 
         logger.info("Event processor stopped")
@@ -96,7 +96,7 @@ class EventProcessor:
 
                     validated_events.append(event)
 
-                except Exception as e:
+                except (ValueError, TypeError, AttributeError) as e:
                     validation_errors.append(
                         f"Event validation error: {str(e)}"
                     )
@@ -141,7 +141,7 @@ class EventProcessor:
                 "errors": validation_errors,
             }
 
-        except Exception as e:
+        except (RuntimeError, OSError, ValueError) as e:
             logger.error("Error collecting events", error=str(e))
             return {
                 "accepted": 0,
@@ -164,7 +164,7 @@ class EventProcessor:
                 logger.info("Event processing loop cancelled")
                 break
 
-            except Exception as e:
+            except (RuntimeError, OSError, ConnectionError) as e:
                 logger.error("Error in event processing loop", error=str(e))
                 self._metrics["processing_errors_total"] += 1
                 await asyncio.sleep(5)  # Brief pause before retry
@@ -256,7 +256,12 @@ class EventProcessor:
                         # Keep batch for retry or manual intervention
                         self._metrics["processing_errors_total"] += 1
 
-                except Exception as e:
+                except (
+                    RuntimeError,
+                    OSError,
+                    ConnectionError,
+                    ValueError,
+                ) as e:
                     logger.error(
                         "Error processing batch",
                         batch_id=batch.get("batch_id"),
@@ -264,7 +269,7 @@ class EventProcessor:
                     )
                     self._metrics["processing_errors_total"] += 1
 
-        except Exception as e:
+        except (RuntimeError, OSError, ConnectionError) as e:
             logger.error("Error in batch processing", error=str(e))
             self._metrics["processing_errors_total"] += 1
 
@@ -316,7 +321,7 @@ class EventProcessor:
                 **kafka_health,
             }
 
-        except Exception as e:
+        except (RuntimeError, OSError, ConnectionError, AttributeError) as e:
             return {
                 "status": "unhealthy",
                 "error": str(e),
@@ -338,7 +343,7 @@ class EventProcessor:
                 },
             }
 
-        except Exception as e:
+        except (RuntimeError, OSError, ConnectionError, AttributeError) as e:
             logger.error("Error getting metrics", error=str(e))
             return {"error": str(e)}
 

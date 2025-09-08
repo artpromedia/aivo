@@ -1,11 +1,12 @@
 # Ink Capture Service
 
-Digital ink capture service for stylus and finger input. Captures strokes, stores NDJSON pages in S3, and emits recognition events.
+Digital ink capture service for stylus and finger input. Captures strokes,
+stores NDJSON pages in S3, and emits recognition events.
 
 ## Features
 
 - **Stroke Capture**: Process digital ink strokes from stylus/finger input
-- **Consent Gate**: Validate learner consent and permissions  
+- **Consent Gate**: Validate learner consent and permissions
 - **Media Gate**: Apply content filtering and validation policies
 - **S3 Storage**: Store ink pages as NDJSON for recognition processing
 - **Event Publishing**: Emit INK_READY events to trigger recognition jobs
@@ -18,6 +19,7 @@ Digital ink capture service for stylus and finger input. Captures strokes, store
 Submit digital ink strokes for processing.
 
 **Request Body:**
+
 ```json
 {
   "session_id": "550e8400-e29b-41d4-a716-446655440001",
@@ -43,6 +45,7 @@ Submit digital ink strokes for processing.
 ```
 
 **Response:**
+
 ```json
 {
   "session_id": "550e8400-e29b-41d4-a716-446655440001",

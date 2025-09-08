@@ -8,15 +8,18 @@ recognition jobs.
 import logging
 from contextlib import asynccontextmanager
 from typing import Any
+from uuid import UUID
 
 import structlog
 from fastapi import Depends, FastAPI, HTTPException, status
 from fastapi.middleware.cors import CORSMiddleware
+from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from . import __version__
 from .config import settings
 from .database import create_tables, get_db, health_check
+from .models import InkSession
 from .schemas import (
     ErrorResponse,
     HealthResponse,
@@ -47,14 +50,14 @@ structlog.configure(
 logging.basicConfig(
     format="%(message)s",
     stream=None,
-    level=getattr(logging, settings.log_level.upper()),
+    level=getattr(logging, str(settings.log_level).upper()),
 )
 
 logger = structlog.get_logger(__name__)
 
 
 @asynccontextmanager
-async def lifespan(app: FastAPI):  # type: ignore[misc] # noqa: ANN201
+async def lifespan(_app: FastAPI):  # type: ignore[misc] # noqa: ANN201
     """
     Application lifespan context manager.
 
@@ -227,12 +230,6 @@ async def get_session_status(
         HTTPException: If session not found
     """
     try:
-        from uuid import UUID
-
-        from sqlalchemy import select
-
-        from .models import InkSession
-
         session_uuid = UUID(session_id)
         result = await db.execute(
             select(InkSession).where(InkSession.session_id == session_uuid)

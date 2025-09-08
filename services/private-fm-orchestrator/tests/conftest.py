@@ -2,9 +2,12 @@
 Test configuration and fixtures for private brain orchestrator tests.
 """
 
+from collections.abc import AsyncGenerator
+
 import pytest
 import pytest_asyncio
 from app.database import get_db
+from app.main import app as main_app
 from app.models import Base
 from httpx import ASGITransport, AsyncClient
 from sqlalchemy.ext.asyncio import (
@@ -30,7 +33,7 @@ TestSessionLocal = async_sessionmaker(
 )
 
 
-async def get_test_db() -> AsyncSession:
+async def get_test_db() -> AsyncGenerator[AsyncSession, None]:
     """Override database dependency for testing."""
     async with TestSessionLocal() as session:
         try:
@@ -40,7 +43,7 @@ async def get_test_db() -> AsyncSession:
 
 
 @pytest_asyncio.fixture
-async def db_session():
+async def db_session():  # pylint: disable=redefined-outer-name
     """Create a fresh database session for each test."""
     # Create tables
     async with test_engine.begin() as conn:
@@ -56,19 +59,17 @@ async def db_session():
 
 
 @pytest_asyncio.fixture
-async def app(db_session):
+async def app(db_session):  # pylint: disable=redefined-outer-name
     """Create FastAPI app for testing."""
-    from app.main import app
-
     # Override the database dependency
-    app.dependency_overrides[get_db] = lambda: db_session
-    yield app
+    main_app.dependency_overrides[get_db] = lambda: db_session
+    yield main_app
     # Clear overrides after test
-    app.dependency_overrides.clear()
+    main_app.dependency_overrides.clear()
 
 
 @pytest_asyncio.fixture
-async def client(app):
+async def client(app):  # pylint: disable=redefined-outer-name
     """Create test client"""
     async with AsyncClient(
         transport=ASGITransport(app=app), base_url="http://test"
@@ -83,7 +84,9 @@ def sample_learner_id():
 
 
 @pytest.fixture
-def sample_request_data(sample_learner_id):
+def sample_request_data(
+    sample_learner_id,  # pylint: disable=redefined-outer-name
+):
     """Sample private brain request data."""
     return {
         "learner_id": sample_learner_id,

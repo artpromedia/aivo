@@ -14,7 +14,7 @@ from sqlalchemy import (
     Integer,
     String,
     Text,
-    func,
+    text,
 )
 from sqlalchemy.dialects.postgresql import UUID as PG_UUID
 from sqlalchemy.ext.declarative import declarative_base
@@ -43,10 +43,14 @@ class InkSession(Base):
         String(100), nullable=False, index=True
     )
     created_at: Mapped[datetime] = mapped_column(
-        DateTime(timezone=True), server_default=func.now(), nullable=False
+        DateTime(timezone=True),
+        server_default=text("CURRENT_TIMESTAMP"),
+        nullable=False
     )
     last_activity: Mapped[datetime] = mapped_column(
-        DateTime(timezone=True), server_default=func.now(), nullable=False
+        DateTime(timezone=True),
+        server_default=text("CURRENT_TIMESTAMP"),
+        nullable=False
     )
     page_count: Mapped[int] = mapped_column(Integer, default=0, nullable=False)
     status: Mapped[str] = mapped_column(
@@ -92,7 +96,9 @@ class InkPage(Base):
     canvas_height: Mapped[float] = mapped_column(Float, nullable=False)
     stroke_count: Mapped[int] = mapped_column(Integer, nullable=False)
     created_at: Mapped[datetime] = mapped_column(
-        DateTime(timezone=True), server_default=func.now(), nullable=False
+        DateTime(timezone=True),
+        server_default=text("CURRENT_TIMESTAMP"),
+        nullable=False
     )
     recognition_requested: Mapped[bool] = mapped_column(
         Boolean, default=False, nullable=False
@@ -132,7 +138,7 @@ class StrokeMetrics(Base):
     )
     date: Mapped[datetime] = mapped_column(
         DateTime(timezone=True),
-        server_default=func.now(),
+        server_default=text("CURRENT_TIMESTAMP"),
         nullable=False,
         index=True
     )

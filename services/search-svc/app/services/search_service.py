@@ -61,9 +61,7 @@ class SearchService:
             if self.redis_client:
                 try:
                     await self.redis_client.ping()
-                except (
-                    Exception
-                ) as e:  # pylint: disable=broad-exception-caught  # noqa: E501
+                except (ConnectionError, TimeoutError, RuntimeError) as e:
                     logger.warning("Redis health check failed: %s", str(e))
                     redis_healthy = False
 

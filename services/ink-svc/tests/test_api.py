@@ -20,7 +20,7 @@ async def test_submit_strokes_success(
     """Test successful stroke submission."""
     response = client.post("/strokes", json=sample_stroke_request)
     assert response.status_code == 201
-    
+
     data = response.json()
     assert "session_id" in data
     assert "page_id" in data
@@ -40,7 +40,7 @@ async def test_submit_strokes_validation_error(client: TestClient):
         "canvas_width": 800,
         "canvas_height": 600,
     }
-    
+
     response = client.post("/strokes", json=invalid_request)
     assert response.status_code == 422
 
@@ -69,7 +69,7 @@ async def test_submit_strokes_too_many_strokes(client: TestClient):
             for i in range(1001)  # Exceeds max limit
         ]
     }
-    
+
     response = client.post("/strokes", json=stroke_request)
     assert response.status_code == 400
 
@@ -88,12 +88,12 @@ async def test_get_session_status_success(
     """Test getting session status after creating session."""
     # First create a session by submitting strokes
     client.post("/strokes", json=sample_stroke_request)
-    
+
     # Then get session status
     session_id = sample_stroke_request["session_id"]
     response = client.get(f"/sessions/{session_id}/status")
     assert response.status_code == 200
-    
+
     data = response.json()
     assert data["session_id"] == session_id
     assert data["learner_id"] == sample_stroke_request["learner_id"]

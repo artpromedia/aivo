@@ -58,6 +58,7 @@ class Stroke(BaseModel):
     )
 
     @validator("tool_type")
+    @classmethod
     def validate_tool_type(cls, v: str) -> str:  # noqa: N805
         """Validate tool type is supported."""
         allowed_tools = {"pen", "finger", "eraser", "highlighter"}
@@ -66,6 +67,7 @@ class Stroke(BaseModel):
         return v
 
     @validator("color")
+    @classmethod
     def validate_color(cls, v: str) -> str:  # noqa: N805
         """Validate color is a valid hex color."""
         if not v.startswith("#") or len(v) != 7:
@@ -111,6 +113,7 @@ class StrokeRequest(BaseModel):
     )
 
     @validator("strokes")
+    @classmethod
     def validate_stroke_count(  # noqa: N805
         cls, v: list[Stroke]
     ) -> list[Stroke]:
@@ -156,6 +159,7 @@ class InkSession(BaseModel):
     status: str = Field(default="active", description="Session status")
 
     @validator("status")
+    @classmethod
     def validate_status(cls, v: str) -> str:  # noqa: N805
         """Validate session status."""
         allowed_statuses = {"active", "completed", "expired", "cancelled"}

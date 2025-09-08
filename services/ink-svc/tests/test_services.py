@@ -1,24 +1,31 @@
 """Tests for ink service business logic."""
-import pytest
+import sys
+from pathlib import Path
 from uuid import uuid4
 
-from app.schemas import Point, Stroke, StrokeRequest
-from app.services import ConsentGateService, S3StorageService
+import pytest
+
+# Add the parent directory to Python path to enable imports
+sys.path.insert(0, str(Path(__file__).parent.parent))
+
+# pylint: disable=wrong-import-position,import-error,no-name-in-module
+from app.schemas import Point, Stroke, StrokeRequest  # noqa: E402
+from app.services import ConsentGateService, S3StorageService  # noqa: E402
 
 
 @pytest.mark.asyncio
 async def test_consent_validation():
     """Test consent validation logic."""
     service = ConsentGateService()
-    
+
     learner_id = uuid4()
     subject = "mathematics"
     metadata = {"device": "tablet"}
-    
+
     is_valid, error = await service.validate_consent(
         learner_id, subject, metadata
     )
-    
+
     assert is_valid is True
     assert error is None
 
@@ -27,7 +34,7 @@ async def test_consent_validation():
 async def test_media_policy_validation():
     """Test media policy validation."""
     service = ConsentGateService()
-    
+
     # Create valid stroke request
     stroke_request = StrokeRequest(
         session_id=uuid4(),
@@ -45,9 +52,9 @@ async def test_media_policy_validation():
             )
         ]
     )
-    
+
     is_valid, error = await service.validate_media_policy(stroke_request)
-    
+
     assert is_valid is True
     assert error is None
 
@@ -56,7 +63,7 @@ async def test_media_policy_validation():
 async def test_media_policy_too_many_strokes():
     """Test media policy with too many strokes."""
     service = ConsentGateService()
-    
+
     # Create stroke request with too many strokes
     strokes = [
         Stroke(
@@ -65,7 +72,7 @@ async def test_media_policy_too_many_strokes():
         )
         for _ in range(1001)  # Exceeds limit
     ]
-    
+
     stroke_request = StrokeRequest(
         session_id=uuid4(),
         learner_id=uuid4(),
@@ -74,9 +81,9 @@ async def test_media_policy_too_many_strokes():
         canvas_height=600,
         strokes=strokes
     )
-    
+
     is_valid, error = await service.validate_media_policy(stroke_request)
-    
+
     assert is_valid is False
     assert "Too many strokes" in error
 
@@ -84,13 +91,13 @@ async def test_media_policy_too_many_strokes():
 def test_s3_key_generation():
     """Test S3 key generation."""
     service = S3StorageService()
-    
+
     session_id = uuid4()
     page_id = uuid4()
     learner_id = uuid4()
-    
+
     s3_key = service.generate_s3_key(session_id, page_id, learner_id)
-    
+
     assert s3_key.startswith("ink-pages/")
     assert str(session_id) in s3_key
     assert str(page_id) in s3_key

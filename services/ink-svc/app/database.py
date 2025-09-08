@@ -75,6 +75,6 @@ async def health_check() -> dict[str, str]:
         async with AsyncSessionLocal() as session:
             await session.execute("SELECT 1")
             return {"database": "healthy"}
-    except Exception as e:
-        logger.error(f"Database health check failed: {e}")
+    except (ConnectionError, TimeoutError, RuntimeError) as e:
+        logger.error("Database health check failed: %s", str(e))
         return {"database": "unhealthy", "error": str(e)}
