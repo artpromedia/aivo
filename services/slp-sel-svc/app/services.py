@@ -5,7 +5,11 @@ Core service implementations for speech processing and journaling.
 import re
 from datetime import datetime, timedelta
 
-import librosa
+try:
+    import librosa  # pylint: disable=import-error
+except ImportError:
+    librosa = None  # Optional dependency for audio processing
+
 import numpy as np
 from cryptography.fernet import Fernet
 
@@ -42,6 +46,10 @@ class SpeechProcessor:
         Returns:
             List of phoneme timing data
         """
+        if librosa is None:
+            print("Warning: librosa not available. Audio processing disabled.")
+            return []
+
         try:
             # Load audio file
             audio, sr = librosa.load(audio_path, sr=self.sample_rate)
@@ -366,7 +374,7 @@ class JournalService:
         # Calculate cutoff date for retention policy
         _ = datetime.utcnow() - timedelta(days=retention_days)
 
-        # TODO: Implement actual database cleanup
+        # TODO: Implement actual database cleanup  # pylint: disable=fixme
         # This would typically involve:
         # 1. Query for entries older than cutoff_date
         # 2. Safely delete entries while preserving analytics
