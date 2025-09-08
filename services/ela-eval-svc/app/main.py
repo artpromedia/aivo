@@ -121,7 +121,7 @@ async def evaluate_submission(
     except (ValueError, RuntimeError) as e:
         logger.exception("Error in evaluation endpoint")
         _raise_processing_error(f"Processing error: {e!s}")
-    except Exception as e:
+    except Exception as e:  # pylint: disable=broad-exception-caught
         logger.exception("Unexpected error in evaluation endpoint")
         _raise_processing_error(f"Internal server error: {e!s}")
 
@@ -151,7 +151,7 @@ async def get_evaluation_history(
     except (ValueError, RuntimeError) as e:
         logger.exception("Error in evaluation history endpoint")
         _raise_processing_error(f"Processing error: {e!s}")
-    except Exception as e:
+    except Exception as e:  # pylint: disable=broad-exception-caught
         logger.exception("Unexpected error in evaluation history endpoint")
         _raise_processing_error(f"Internal server error: {e!s}")
 
@@ -183,7 +183,7 @@ async def get_evaluation_by_id(evaluation_id: str) -> EvaluationResponse:
     except (ValueError, RuntimeError) as e:
         logger.exception("Error in get evaluation endpoint")
         _raise_processing_error(f"Processing error: {e!s}")
-    except Exception as e:
+    except Exception as e:  # pylint: disable=broad-exception-caught
         logger.exception("Unexpected error in get evaluation endpoint")
         _raise_processing_error(f"Internal server error: {e!s}")
 

@@ -42,7 +42,7 @@ def test_evaluate_submission() -> None:
 
     response = client.post("/evaluate", json=request_data)
     assert response.status_code == 200
-    
+
     data = response.json()
     assert "evaluation_id" in data
     assert "scores" in data
@@ -91,7 +91,7 @@ def test_get_evaluation_history() -> None:
     """Test evaluation history endpoint."""
     response = client.get("/evaluations")
     assert response.status_code == 200
-    
+
     data = response.json()
     assert "evaluations" in data
     assert "total_count" in data
