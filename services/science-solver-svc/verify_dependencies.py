@@ -86,25 +86,27 @@ def _test_fastapi_import() -> bool:
     try:
         from app.main import app
         assert app is not None  # noqa: S101
-        print("✅ FastAPI app imports successfully")
-        return True
     except ImportError as e:
         print(f"❌ FastAPI app import failed: {e}")
         return False
+    else:
+        print("✅ FastAPI app imports successfully")
+        return True
 
 
 def _test_config_import() -> bool:
     """Test configuration import."""
     try:
         from app.config import settings
+    except ImportError as e:
+        print(f"❌ Configuration import failed: {e}")
+        return False
+    else:
         print(
             f"✅ Configuration loaded: {settings.service_name} "
             f"v{settings.service_version}",
         )
         return True
-    except ImportError as e:
-        print(f"❌ Configuration import failed: {e}")
-        return False
 
 
 def _test_schemas_import() -> bool:
@@ -121,11 +123,12 @@ def _test_schemas_import() -> bool:
             UnitValidationRequest,
         ]
         assert len(test_schemas) == 3  # noqa: S101,PLR2004
-        print("✅ Pydantic schemas import successfully")
-        return True
     except ImportError as e:
         print(f"❌ Schema import failed: {e}")
         return False
+    else:
+        print("✅ Pydantic schemas import successfully")
+        return True
 
 
 def _test_scientific_computing() -> bool:
@@ -145,11 +148,12 @@ def _test_scientific_computing() -> bool:
         expr = x**2 + 2*x + 1
         sp.simplify(expr)  # Test simplification works
 
-        print("✅ Scientific computing libraries working")
-        return True
     except Exception as e:
         print(f"❌ Scientific computing test failed: {e}")
         return False
+    else:
+        print("✅ Scientific computing libraries working")
+        return True
 
 
 def _test_image_processing() -> bool:
@@ -173,11 +177,12 @@ def _test_image_processing() -> bool:
         # Test PIL
         Image.fromarray(test_img)
 
-        print("✅ Image processing libraries working")
-        return True
     except Exception as e:
         print(f"❌ Image processing test failed: {e}")
         return False
+    else:
+        print("✅ Image processing libraries working")
+        return True
 
 
 def test_functionality() -> bool:
