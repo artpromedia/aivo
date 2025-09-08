@@ -5,7 +5,7 @@ import pytest
 from app.config import Settings
 
 
-@pytest.fixture
+@pytest.fixture()
 def settings() -> Settings:
     """Create test settings."""
     return Settings(

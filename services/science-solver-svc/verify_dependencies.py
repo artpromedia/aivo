@@ -81,42 +81,40 @@ def test_imports() -> dict[str, Any]:
     return results
 
 
-def test_functionality() -> bool:
-    """Test basic functionality of key components."""
-    print("🧪 Testing Core Functionality...")
-
-    # Test FastAPI app import
+def _test_fastapi_import() -> bool:
+    """Test FastAPI app import."""
     try:
         from app.main import app
-
-        # Verify the app exists (we imported it for testing)
         assert app is not None  # noqa: S101
         print("✅ FastAPI app imports successfully")
+        return True
     except ImportError as e:
         print(f"❌ FastAPI app import failed: {e}")
         return False
 
-    # Test configuration
+
+def _test_config_import() -> bool:
+    """Test configuration import."""
     try:
         from app.config import settings
-
         print(
             f"✅ Configuration loaded: {settings.service_name} "
             f"v{settings.service_version}",
         )
+        return True
     except ImportError as e:
         print(f"❌ Configuration import failed: {e}")
         return False
 
-    # Test schemas
+
+def _test_schemas_import() -> bool:
+    """Test Pydantic schemas import."""
     try:
         from app.schemas import (
             ChemicalEquationRequest,
             DiagramParseRequest,
             UnitValidationRequest,
         )
-
-        # Verify all schemas exist (we imported them for testing)
         test_schemas = [
             ChemicalEquationRequest,
             DiagramParseRequest,
@@ -124,11 +122,14 @@ def test_functionality() -> bool:
         ]
         assert len(test_schemas) == 3  # noqa: S101,PLR2004
         print("✅ Pydantic schemas import successfully")
+        return True
     except ImportError as e:
         print(f"❌ Schema import failed: {e}")
         return False
 
-    # Test scientific computation
+
+def _test_scientific_computing() -> bool:
+    """Test scientific computing libraries."""
     try:
         import numpy as np
         import sympy as sp
@@ -145,11 +146,14 @@ def test_functionality() -> bool:
         sp.simplify(expr)  # Test simplification works
 
         print("✅ Scientific computing libraries working")
+        return True
     except Exception as e:
         print(f"❌ Scientific computing test failed: {e}")
         return False
 
-    # Test image processing with graceful cv2 handling
+
+def _test_image_processing() -> bool:
+    """Test image processing libraries."""
     try:
         try:
             import cv2
@@ -170,11 +174,26 @@ def test_functionality() -> bool:
         Image.fromarray(test_img)
 
         print("✅ Image processing libraries working")
+        return True
     except Exception as e:
         print(f"❌ Image processing test failed: {e}")
         return False
 
-    return True
+
+def test_functionality() -> bool:
+    """Test basic functionality of key components."""
+    print("🧪 Testing Core Functionality...")
+
+    # Run all tests
+    tests = [
+        _test_fastapi_import,
+        _test_config_import,
+        _test_schemas_import,
+        _test_scientific_computing,
+        _test_image_processing,
+    ]
+
+    return all(test() for test in tests)
 
 
 def main() -> int:
