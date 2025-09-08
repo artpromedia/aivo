@@ -15,7 +15,7 @@ fastapi = "0.111.*"
 uvicorn = "0.30.*"
 
 [tool.poetry.group.dev.dependencies]
-ruff = "^0.6.0"
+ruff = "^0.12.12"
 mypy = "^1.11.0"
 pytest = "^8.3.0"
 httpx = "^0.24.0"
