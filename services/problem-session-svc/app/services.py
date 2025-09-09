@@ -82,8 +82,8 @@ class InkService:
         session_id: UUID,
         learner_id: UUID,
         subject: SubjectType,
-        canvas_width: int,
-        canvas_height: int,
+        canvas_width: int,  # pylint: disable=unused-argument
+        canvas_height: int,  # pylint: disable=unused-argument
     ) -> UUID | None:
         """Create an ink capture session."""
         try:
@@ -100,7 +100,7 @@ class InkService:
 
             return ink_session_id
 
-        except Exception as e:
+        except Exception as e:  # pylint: disable=broad-exception-caught
             logger.error(
                 "Failed to create ink session",
                 error=str(e),
@@ -190,7 +190,7 @@ class RecognitionService:
                 )
                 return None
 
-        except Exception as e:
+        except Exception as e:  # pylint: disable=broad-exception-caught
             logger.error(
                 "Recognition failed",
                 error=str(e),
@@ -229,7 +229,9 @@ class RecognitionService:
             return None
 
     async def _recognize_science(
-        self, ink_session_id: UUID, page_number: int
+        self,
+        ink_session_id: UUID,
+        page_number: int,  # pylint: disable=unused-argument
     ) -> RecognitionResult | None:
         """Recognize science expressions and diagrams."""
         try:
@@ -299,7 +301,7 @@ class GradingService:
                 )
                 return None
 
-        except Exception as e:
+        except Exception as e:  # pylint: disable=broad-exception-caught
             logger.error(
                 "Grading failed",
                 error=str(e),
@@ -378,7 +380,7 @@ class GradingService:
                 expected_answer=expected_answer,
             )
 
-        except Exception as e:
+        except Exception as e:  # pylint: disable=broad-exception-caught
             logger.error("Science grading failed", error=str(e))
             return None
 
@@ -509,7 +511,7 @@ class ProblemSessionOrchestrator:
 
             return session
 
-        except Exception as e:
+        except Exception as e:  # pylint: disable=broad-exception-caught
             logger.error(
                 "Failed to start session",
                 error=str(e),
@@ -588,7 +590,7 @@ class ProblemSessionOrchestrator:
 
             return ink_response
 
-        except Exception as e:
+        except Exception as e:  # pylint: disable=broad-exception-caught
             logger.error(
                 "Failed to submit ink",
                 error=str(e),
@@ -689,7 +691,7 @@ class ProblemSessionOrchestrator:
                     # Check if session should complete
                     await self._check_session_completion(session_id, db)
 
-        except Exception as e:
+        except Exception as e:  # pylint: disable=broad-exception-caught
             logger.error(
                 "Recognition processing failed",
                 error=str(e),
@@ -724,7 +726,7 @@ class ProblemSessionOrchestrator:
             if should_complete:
                 await self.complete_session(session_id, db)
 
-        except Exception as e:
+        except Exception as e:  # pylint: disable=broad-exception-caught
             logger.error(
                 "Session completion check failed",
                 error=str(e),
@@ -796,7 +798,7 @@ class ProblemSessionOrchestrator:
                     duration_minutes=actual_duration,
                 )
 
-        except Exception as e:
+        except Exception as e:  # pylint: disable=broad-exception-caught
             logger.error(
                 "Failed to complete session",
                 error=str(e),

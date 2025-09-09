@@ -1,11 +1,12 @@
 """Tests for the orchestration services."""
+# pylint: disable=redefined-outer-name  # pytest fixtures redefine outer names
 
 from unittest.mock import AsyncMock, patch
 from uuid import uuid4
 
 import pytest
 
-from app.schemas import SubjectType
+from app.schemas import InkSubmissionResponse, SubjectType
 from app.services import (
     InkService,
     ProblemSessionOrchestrator,
@@ -241,7 +242,7 @@ class TestProblemSessionOrchestrator:
     async def test_submit_ink_success(
         self,
         mock_ink_submit,
-        mock_recognition,
+        mock_recognition,  # pylint: disable=unused-argument
         orchestrator,
         mock_db,
         sample_session_id,
@@ -261,8 +262,6 @@ class TestProblemSessionOrchestrator:
         mock_db.execute.return_value = mock_result
 
         # Mock services
-        from app.schemas import InkSubmissionResponse
-
         mock_ink_submit.return_value = InkSubmissionResponse(
             session_id=sample_session_id,
             page_id=uuid4(),
