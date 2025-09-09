@@ -1,0 +1,633 @@
+openapi: 3.0.3
+info:
+  title: Device Enrollment & Attestation API
+  description: |
+    API for Aivo Pad device enrollment and certificate attestation.
+    
+    ## Overview
+    This service handles the enrollment of Aivo Pad devices and provides
+    attestation capabilities for device identity verification.
+    
+    ## Workflow
+    1. **Enrollment**: Register device with serial number and hardware fingerprint
+    2. **Challenge**: Request attestation challenge for device verification
+    3. **Attestation**: Submit signed challenge to receive device certificate
+    
+    ## Authentication
+    - Bootstrap tokens are issued during enrollment for initial authentication
+    - Device certificates are used for ongoing authentication after attestation
+  version: 1.0.0
+  contact:
+    name: Aivo Team
+    email: dev@aivo.com
+  license:
+    name: Proprietary
+    
+servers:
+  - url: http://localhost:8000/api/v1
+    description: Development server
+  - url: https://device-enroll.aivo.com/api/v1
+    description: Production server
+
+paths:
+  /enroll:
+    post:
+      summary: Enroll Aivo Pad Device
+      description: |
+        Enroll a new Aivo Pad device in the system. Returns a device ID and
+        bootstrap token for initial authentication.
+      operationId: enrollDevice
+      tags:
+        - Device Enrollment
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/EnrollmentRequest'
+            example:
+              serial_number: "APD-2024-001234"
+              hardware_fingerprint: "sha256:a1b2c3d4e5f6..."
+              device_model: "aivo-pad"
+              firmware_version: "1.0.2"
+              enrollment_data:
+                batch_id: "BATCH-2024-Q1"
+                manufacturing_date: "2024-01-15"
+      responses:
+        '201':
+          description: Device enrolled successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EnrollmentResponse'
+              example:
+                device_id: "123e4567-e89b-12d3-a456-426614174000"
+                status: "enrolled"
+                bootstrap_token: "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9..."
+                bootstrap_expires_at: "2024-01-16T10:30:00Z"
+                message: "Device enrolled successfully"
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '409':
+          $ref: '#/components/responses/Conflict'
+        '500':
+          $ref: '#/components/responses/InternalError'
+
+  /attest/challenge:
+    post:
+      summary: Request Attestation Challenge
+      description: |
+        Request an attestation challenge for device verification. The challenge
+        must be signed with the device's private key and submitted to the
+        attestation endpoint.
+      operationId: createAttestationChallenge
+      tags:
+        - Device Attestation
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AttestationChallengeRequest'
+            example:
+              device_id: "123e4567-e89b-12d3-a456-426614174000"
+      responses:
+        '200':
+          description: Challenge created successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AttestationChallengeResponse'
+              example:
+                challenge_id: "456e7890-e89b-12d3-a456-426614174001"
+                nonce: "f1e2d3c4b5a69788..."
+                challenge_data: "aivo-pad-attestation:123e4567...:f1e2d3c4...:1642334200"
+                expires_at: "2024-01-15T10:45:00Z"
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/InternalError'
+
+  /attest:
+    post:
+      summary: Submit Attestation
+      description: |
+        Submit signed attestation challenge and receive device certificate.
+        The signature must be created using the device's private key.
+      operationId: submitAttestation
+      tags:
+        - Device Attestation
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AttestationSubmissionRequest'
+            example:
+              challenge_id: "456e7890-e89b-12d3-a456-426614174001"
+              signature: "3045022100..."
+              public_key_pem: |
+                -----BEGIN PUBLIC KEY-----
+                MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEA...
+                -----END PUBLIC KEY-----
+              attestation_data:
+                tpm_version: "2.0"
+                secure_boot: true
+      responses:
+        '200':
+          description: Attestation verified successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AttestationSubmissionResponse'
+              example:
+                challenge_id: "456e7890-e89b-12d3-a456-426614174001"
+                status: "verified"
+                device_certificate_pem: |
+                  -----BEGIN CERTIFICATE-----
+                  MIIDXTCCAkWgAwIBAgIJAL8+...
+                  -----END CERTIFICATE-----
+                certificate_serial: "1234567890"
+                certificate_expires_at: "2025-01-15T10:30:00Z"
+                message: "Attestation verified and certificate issued"
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/InternalError'
+
+  /devices/{device_id}:
+    get:
+      summary: Get Device Information
+      description: Retrieve detailed information about a specific device
+      operationId: getDeviceInfo
+      tags:
+        - Device Management
+      parameters:
+        - name: device_id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+          description: Device identifier
+          example: "123e4567-e89b-12d3-a456-426614174000"
+      responses:
+        '200':
+          description: Device information retrieved
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DeviceInfoResponse'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/InternalError'
+
+  /devices:
+    get:
+      summary: List Devices
+      description: Get paginated list of enrolled devices
+      operationId: listDevices
+      tags:
+        - Device Management
+      parameters:
+        - name: page
+          in: query
+          schema:
+            type: integer
+            minimum: 1
+            default: 1
+          description: Page number
+        - name: size
+          in: query
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 100
+            default: 50
+          description: Page size
+      responses:
+        '200':
+          description: Device list retrieved
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DeviceListResponse'
+        '500':
+          $ref: '#/components/responses/InternalError'
+
+  /devices/{device_id}/revoke:
+    post:
+      summary: Revoke Device Certificate
+      description: Revoke a device certificate and disable the device
+      operationId: revokeDeviceCertificate
+      tags:
+        - Device Management
+      parameters:
+        - name: device_id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+          description: Device identifier
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CertificateRevokeRequest'
+      responses:
+        '200':
+          description: Certificate revoked successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CertificateRevokeResponse'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/InternalError'
+
+  /health:
+    get:
+      summary: Health Check
+      description: Check service health and database connectivity
+      operationId: healthCheck
+      tags:
+        - System
+      responses:
+        '200':
+          description: Service is healthy
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HealthResponse'
+        '503':
+          $ref: '#/components/responses/ServiceUnavailable'
+
+components:
+  schemas:
+    EnrollmentRequest:
+      type: object
+      required:
+        - serial_number
+        - hardware_fingerprint
+      properties:
+        serial_number:
+          type: string
+          minLength: 1
+          maxLength: 255
+          description: Device serial number
+          example: "APD-2024-001234"
+        hardware_fingerprint:
+          type: string
+          minLength: 1
+          maxLength: 512
+          description: Unique hardware fingerprint
+          example: "sha256:a1b2c3d4e5f6..."
+        device_model:
+          type: string
+          maxLength: 100
+          default: "aivo-pad"
+          description: Device model identifier
+          example: "aivo-pad"
+        firmware_version:
+          type: string
+          maxLength: 50
+          description: Device firmware version
+          example: "1.0.2"
+        enrollment_data:
+          type: object
+          description: Additional enrollment metadata
+          example:
+            batch_id: "BATCH-2024-Q1"
+            manufacturing_date: "2024-01-15"
+
+    EnrollmentResponse:
+      type: object
+      required:
+        - device_id
+        - status
+        - bootstrap_token
+        - bootstrap_expires_at
+        - message
+      properties:
+        device_id:
+          type: string
+          format: uuid
+          description: Unique device identifier
+        status:
+          $ref: '#/components/schemas/DeviceStatus'
+        bootstrap_token:
+          type: string
+          description: Bootstrap authentication token
+        bootstrap_expires_at:
+          type: string
+          format: date-time
+          description: Bootstrap token expiration
+        message:
+          type: string
+          description: Status message
+
+    AttestationChallengeRequest:
+      type: object
+      required:
+        - device_id
+      properties:
+        device_id:
+          type: string
+          format: uuid
+          description: Device identifier
+
+    AttestationChallengeResponse:
+      type: object
+      required:
+        - challenge_id
+        - nonce
+        - challenge_data
+        - expires_at
+      properties:
+        challenge_id:
+          type: string
+          format: uuid
+          description: Challenge identifier
+        nonce:
+          type: string
+          description: Random nonce for signing
+        challenge_data:
+          type: string
+          description: Data to be signed
+        expires_at:
+          type: string
+          format: date-time
+          description: Challenge expiration time
+
+    AttestationSubmissionRequest:
+      type: object
+      required:
+        - challenge_id
+        - signature
+        - public_key_pem
+      properties:
+        challenge_id:
+          type: string
+          format: uuid
+          description: Challenge identifier
+        signature:
+          type: string
+          description: Signed challenge data (hex encoded)
+        public_key_pem:
+          type: string
+          description: Device public key in PEM format
+        attestation_data:
+          type: object
+          description: Additional attestation metadata
+
+    AttestationSubmissionResponse:
+      type: object
+      required:
+        - challenge_id
+        - status
+        - message
+      properties:
+        challenge_id:
+          type: string
+          format: uuid
+          description: Challenge identifier
+        status:
+          $ref: '#/components/schemas/AttestationStatus'
+        device_certificate_pem:
+          type: string
+          description: Device certificate in PEM format
+        certificate_serial:
+          type: string
+          description: Certificate serial number
+        certificate_expires_at:
+          type: string
+          format: date-time
+          description: Certificate expiration time
+        message:
+          type: string
+          description: Status message
+
+    DeviceInfoResponse:
+      type: object
+      required:
+        - device_id
+        - serial_number
+        - device_model
+        - status
+        - created_at
+      properties:
+        device_id:
+          type: string
+          format: uuid
+          description: Device identifier
+        serial_number:
+          type: string
+          description: Device serial number
+        device_model:
+          type: string
+          description: Device model
+        status:
+          $ref: '#/components/schemas/DeviceStatus'
+        firmware_version:
+          type: string
+          description: Firmware version
+        certificate_serial:
+          type: string
+          description: Certificate serial number
+        certificate_expires_at:
+          type: string
+          format: date-time
+          description: Certificate expiration
+        last_seen_at:
+          type: string
+          format: date-time
+          description: Last activity
+        created_at:
+          type: string
+          format: date-time
+          description: Enrollment date
+
+    DeviceListResponse:
+      type: object
+      required:
+        - devices
+        - total
+        - page
+        - size
+      properties:
+        devices:
+          type: array
+          items:
+            $ref: '#/components/schemas/DeviceInfoResponse'
+          description: List of devices
+        total:
+          type: integer
+          description: Total device count
+        page:
+          type: integer
+          description: Current page
+        size:
+          type: integer
+          description: Page size
+
+    CertificateRevokeRequest:
+      type: object
+      required:
+        - device_id
+        - reason
+      properties:
+        device_id:
+          type: string
+          format: uuid
+          description: Device identifier
+        reason:
+          type: string
+          description: Revocation reason
+
+    CertificateRevokeResponse:
+      type: object
+      required:
+        - device_id
+        - status
+        - revoked_at
+        - message
+      properties:
+        device_id:
+          type: string
+          format: uuid
+          description: Device identifier
+        status:
+          $ref: '#/components/schemas/DeviceStatus'
+        revoked_at:
+          type: string
+          format: date-time
+          description: Revocation timestamp
+        message:
+          type: string
+          description: Status message
+
+    HealthResponse:
+      type: object
+      required:
+        - status
+        - timestamp
+        - version
+        - database
+      properties:
+        status:
+          type: string
+          description: Service status
+        timestamp:
+          type: string
+          format: date-time
+          description: Check timestamp
+        version:
+          type: string
+          description: Service version
+        database:
+          type: string
+          description: Database status
+
+    DeviceStatus:
+      type: string
+      enum:
+        - pending
+        - enrolled
+        - attested
+        - revoked
+        - expired
+      description: Device enrollment status
+
+    AttestationStatus:
+      type: string
+      enum:
+        - pending
+        - verified
+        - failed
+        - expired
+      description: Attestation verification status
+
+    ErrorResponse:
+      type: object
+      required:
+        - error
+        - message
+      properties:
+        error:
+          type: string
+          description: Error code
+        message:
+          type: string
+          description: Error message
+        details:
+          type: object
+          description: Additional error details
+
+  responses:
+    BadRequest:
+      description: Invalid request
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+          example:
+            error: "validation_error"
+            message: "Invalid request parameters"
+
+    NotFound:
+      description: Resource not found
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+          example:
+            error: "not_found"
+            message: "Resource not found"
+
+    Conflict:
+      description: Resource conflict
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+          example:
+            error: "conflict"
+            message: "Resource already exists"
+
+    InternalError:
+      description: Internal server error
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+          example:
+            error: "internal_error"
+            message: "An internal server error occurred"
+
+    ServiceUnavailable:
+      description: Service unavailable
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+          example:
+            error: "service_unavailable"
+            message: "Service is temporarily unavailable"
+
+tags:
+  - name: Device Enrollment
+    description: Device registration and enrollment operations
+  - name: Device Attestation
+    description: Device identity verification and certificate issuance
+  - name: Device Management
+    description: Device information and lifecycle management
+  - name: System
+    description: System health and status endpoints
