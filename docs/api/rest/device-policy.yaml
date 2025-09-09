@@ -1,0 +1,799 @@
+openapi: 3.0.3
+info:
+  title: Device Policy & MDM Service
+  description: |
+    Aivo Pad device policy management service providing:
+    - Single-app kiosk policy management
+    - Network profile configuration
+    - DNS filtering and allowlist management
+    - Study window scheduling
+    - Long-poll policy synchronization
+  version: 1.0.0
+  contact:
+    name: Aivo Development Team
+    email: dev@aivo.com
+
+servers:
+  - url: http://localhost:8000/api/v1
+    description: Development server
+  - url: https://api.aivo.com/device-policy/v1
+    description: Production server
+
+paths:
+  /policies:
+    get:
+      summary: List device policies
+      description: Retrieve a paginated list of device policies with optional filtering
+      parameters:
+        - name: policy_type
+          in: query
+          schema:
+            type: string
+            enum: [kiosk, network, dns, study_window, allowlist]
+        - name: status
+          in: query
+          schema:
+            type: string
+            enum: [draft, active, inactive, archived]
+        - name: tenant_id
+          in: query
+          schema:
+            type: string
+        - name: page
+          in: query
+          schema:
+            type: integer
+            minimum: 1
+            default: 1
+        - name: size
+          in: query
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 100
+            default: 50
+      responses:
+        '200':
+          description: List of policies
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PolicyListResponse'
+
+    post:
+      summary: Create a new device policy
+      description: Create a new policy configuration for device management
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PolicyCreate'
+            examples:
+              kiosk_policy:
+                summary: Single-app kiosk policy
+                value:
+                  name: "Study Mode Kiosk"
+                  description: "Single-app kiosk for study sessions"
+                  policy_type: "kiosk"
+                  config:
+                    mode: "single_app"
+                    apps:
+                      - package_name: "com.aivo.study"
+                        app_name: "Aivo Study"
+                        auto_launch: true
+                        allow_exit: false
+                        fullscreen: true
+                  priority: 100
+              network_policy:
+                summary: Network configuration policy
+                value:
+                  name: "School WiFi Profile"
+                  description: "Managed WiFi configuration"
+                  policy_type: "network"
+                  config:
+                    profiles:
+                      - ssid: "AivoSchool"
+                        security_type: "wpa2"
+                        password: "secretpassword"
+                        auto_connect: true
+                        priority: 1
+                    dns_servers: ["8.8.8.8", "8.8.4.4"]
+                  priority: 200
+      responses:
+        '201':
+          description: Policy created successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PolicyResponse'
+        '400':
+          description: Invalid policy configuration
+        '500':
+          description: Internal server error
+
+  /policies/{policy_id}:
+    get:
+      summary: Get a specific policy
+      parameters:
+        - name: policy_id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: Policy details
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PolicyResponse'
+        '404':
+          description: Policy not found
+
+    put:
+      summary: Update a policy
+      parameters:
+        - name: policy_id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PolicyUpdate'
+      responses:
+        '200':
+          description: Policy updated successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PolicyResponse'
+        '404':
+          description: Policy not found
+
+    delete:
+      summary: Delete a policy
+      parameters:
+        - name: policy_id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '204':
+          description: Policy deleted successfully
+        '404':
+          description: Policy not found
+
+  /device-policies:
+    post:
+      summary: Assign policy to device
+      description: Assign a specific policy to a device
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/DevicePolicyAssign'
+      responses:
+        '201':
+          description: Policy assigned successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DevicePolicyResponse'
+        '400':
+          description: Policy already assigned or invalid request
+
+  /devices/{device_id}/policies:
+    get:
+      summary: Get device policies
+      description: Retrieve all policies assigned to a specific device
+      parameters:
+        - name: device_id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: List of device policies
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/DevicePolicyResponse'
+
+  /policy/sync:
+    post:
+      summary: Synchronize policies
+      description: Request policy synchronization for a device
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PolicySyncRequest'
+            example:
+              device_id: "550e8400-e29b-41d4-a716-446655440000"
+              current_policies:
+                "policy-id-1": 1
+                "policy-id-2": 3
+      responses:
+        '200':
+          description: Policy sync response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PolicySyncResponse'
+
+    get:
+      summary: Long-poll policy sync
+      description: Long-polling endpoint for real-time policy updates
+      parameters:
+        - name: device_id
+          in: query
+          required: true
+          schema:
+            type: string
+            format: uuid
+        - name: current_policies
+          in: query
+          description: JSON string of current policy versions
+          schema:
+            type: string
+            default: "{}"
+        - name: timeout
+          in: query
+          schema:
+            type: integer
+            minimum: 30
+            maximum: 600
+            default: 300
+      responses:
+        '200':
+          description: Policy updates available
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PolicySyncResponse'
+        '204':
+          description: No updates available (timeout reached)
+        '400':
+          description: Invalid current_policies JSON
+
+  /allowlist:
+    get:
+      summary: List allowlist entries
+      description: Retrieve network allowlist entries for walled garden
+      parameters:
+        - name: entry_type
+          in: query
+          schema:
+            type: string
+            enum: [domain, url, ip, subnet]
+        - name: category
+          in: query
+          schema:
+            type: string
+        - name: is_active
+          in: query
+          schema:
+            type: boolean
+        - name: tenant_id
+          in: query
+          schema:
+            type: string
+        - name: page
+          in: query
+          schema:
+            type: integer
+            minimum: 1
+            default: 1
+        - name: size
+          in: query
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 100
+            default: 50
+      responses:
+        '200':
+          description: List of allowlist entries
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AllowlistResponse'
+
+    post:
+      summary: Create allowlist entry
+      description: Add a new entry to the network allowlist
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AllowlistEntryCreate'
+            examples:
+              domain_entry:
+                summary: Domain allowlist entry
+                value:
+                  entry_type: "domain"
+                  value: "example.com"
+                  description: "Educational website"
+                  category: "education"
+                  tags: ["safe", "educational"]
+                  priority: 100
+              url_entry:
+                summary: URL allowlist entry
+                value:
+                  entry_type: "url"
+                  value: "https://api.aivo.com/v1/*"
+                  description: "Aivo API endpoints"
+                  category: "api"
+                  priority: 200
+      responses:
+        '201':
+          description: Allowlist entry created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AllowlistEntryResponse'
+
+  /allowlist/active:
+    get:
+      summary: Get active allowlist
+      description: Retrieve all active allowlist entries for walled garden implementation
+      parameters:
+        - name: tenant_id
+          in: query
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Active allowlist entries
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/AllowlistEntryResponse'
+
+  /allowlist/{entry_id}:
+    get:
+      summary: Get allowlist entry
+      parameters:
+        - name: entry_id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: Allowlist entry details
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AllowlistEntryResponse'
+        '404':
+          description: Entry not found
+
+    put:
+      summary: Update allowlist entry
+      parameters:
+        - name: entry_id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AllowlistEntryUpdate'
+      responses:
+        '200':
+          description: Entry updated successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AllowlistEntryResponse'
+        '404':
+          description: Entry not found
+
+    delete:
+      summary: Delete allowlist entry
+      parameters:
+        - name: entry_id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '204':
+          description: Entry deleted successfully
+        '404':
+          description: Entry not found
+
+  /health:
+    get:
+      summary: Health check
+      description: Service health status
+      responses:
+        '200':
+          description: Service is healthy
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    example: "healthy"
+                  timestamp:
+                    type: string
+                    format: date-time
+        '503':
+          description: Service is unhealthy
+
+components:
+  schemas:
+    PolicyType:
+      type: string
+      enum: [kiosk, network, dns, study_window, allowlist]
+
+    PolicyStatus:
+      type: string
+      enum: [draft, active, inactive, archived]
+
+    SyncStatus:
+      type: string
+      enum: [pending, in_progress, synced, failed, outdated]
+
+    PolicyCreate:
+      type: object
+      required: [name, policy_type, config]
+      properties:
+        name:
+          type: string
+          minLength: 1
+          maxLength: 255
+        description:
+          type: string
+          maxLength: 1000
+        policy_type:
+          $ref: '#/components/schemas/PolicyType'
+        config:
+          type: object
+          description: Policy configuration JSON
+        target_criteria:
+          type: object
+          description: Target device criteria
+        priority:
+          type: integer
+          minimum: 1
+          maximum: 1000
+          default: 100
+        effective_from:
+          type: string
+          format: date-time
+        effective_until:
+          type: string
+          format: date-time
+        tenant_id:
+          type: string
+          maxLength: 255
+
+    PolicyUpdate:
+      type: object
+      properties:
+        name:
+          type: string
+          minLength: 1
+          maxLength: 255
+        description:
+          type: string
+          maxLength: 1000
+        config:
+          type: object
+        target_criteria:
+          type: object
+        priority:
+          type: integer
+          minimum: 1
+          maximum: 1000
+        effective_from:
+          type: string
+          format: date-time
+        effective_until:
+          type: string
+          format: date-time
+        status:
+          $ref: '#/components/schemas/PolicyStatus'
+
+    PolicyResponse:
+      type: object
+      properties:
+        policy_id:
+          type: string
+          format: uuid
+        name:
+          type: string
+        description:
+          type: string
+        policy_type:
+          $ref: '#/components/schemas/PolicyType'
+        status:
+          $ref: '#/components/schemas/PolicyStatus'
+        config:
+          type: object
+        version:
+          type: integer
+        checksum:
+          type: string
+        target_criteria:
+          type: object
+        priority:
+          type: integer
+        effective_from:
+          type: string
+          format: date-time
+        effective_until:
+          type: string
+          format: date-time
+        created_by:
+          type: string
+        tenant_id:
+          type: string
+        created_at:
+          type: string
+          format: date-time
+        updated_at:
+          type: string
+          format: date-time
+
+    PolicyListResponse:
+      type: object
+      properties:
+        items:
+          type: array
+          items:
+            $ref: '#/components/schemas/PolicyResponse'
+        total:
+          type: integer
+        page:
+          type: integer
+        size:
+          type: integer
+        pages:
+          type: integer
+
+    DevicePolicyAssign:
+      type: object
+      required: [device_id, policy_id]
+      properties:
+        device_id:
+          type: string
+          format: uuid
+        policy_id:
+          type: string
+          format: uuid
+
+    DevicePolicyResponse:
+      type: object
+      properties:
+        assignment_id:
+          type: string
+          format: uuid
+        device_id:
+          type: string
+          format: uuid
+        policy_id:
+          type: string
+          format: uuid
+        sync_status:
+          $ref: '#/components/schemas/SyncStatus'
+        last_sync_at:
+          type: string
+          format: date-time
+        sync_attempts:
+          type: integer
+        last_error:
+          type: string
+        applied_version:
+          type: integer
+        applied_checksum:
+          type: string
+        assigned_by:
+          type: string
+        assigned_at:
+          type: string
+          format: date-time
+        updated_at:
+          type: string
+          format: date-time
+
+    PolicySyncRequest:
+      type: object
+      required: [device_id]
+      properties:
+        device_id:
+          type: string
+          format: uuid
+        current_policies:
+          type: object
+          additionalProperties:
+            type: integer
+          description: Current policy versions by policy_id
+
+    PolicyDiff:
+      type: object
+      required: [policy_id, action]
+      properties:
+        policy_id:
+          type: string
+          format: uuid
+        action:
+          type: string
+          enum: [add, update, remove]
+        from_version:
+          type: integer
+        to_version:
+          type: integer
+        config:
+          type: object
+        checksum:
+          type: string
+
+    PolicySyncResponse:
+      type: object
+      properties:
+        device_id:
+          type: string
+          format: uuid
+        sync_type:
+          type: string
+          enum: [full, diff, patch]
+        policies:
+          type: array
+          items:
+            $ref: '#/components/schemas/PolicyDiff'
+        sync_timestamp:
+          type: string
+          format: date-time
+
+    AllowlistEntryCreate:
+      type: object
+      required: [entry_type, value]
+      properties:
+        entry_type:
+          type: string
+          enum: [domain, url, ip, subnet]
+        value:
+          type: string
+          minLength: 1
+          maxLength: 2048
+        description:
+          type: string
+          maxLength: 1000
+        category:
+          type: string
+          maxLength: 100
+        tags:
+          type: array
+          items:
+            type: string
+        priority:
+          type: integer
+          minimum: 1
+          maximum: 1000
+          default: 100
+        tenant_id:
+          type: string
+          maxLength: 255
+
+    AllowlistEntryUpdate:
+      type: object
+      properties:
+        value:
+          type: string
+          minLength: 1
+          maxLength: 2048
+        description:
+          type: string
+          maxLength: 1000
+        category:
+          type: string
+          maxLength: 100
+        tags:
+          type: array
+          items:
+            type: string
+        priority:
+          type: integer
+          minimum: 1
+          maximum: 1000
+        is_active:
+          type: boolean
+
+    AllowlistEntryResponse:
+      type: object
+      properties:
+        entry_id:
+          type: string
+          format: uuid
+        entry_type:
+          type: string
+          enum: [domain, url, ip, subnet]
+        value:
+          type: string
+        description:
+          type: string
+        category:
+          type: string
+        tags:
+          type: array
+          items:
+            type: string
+        priority:
+          type: integer
+        is_active:
+          type: boolean
+        created_by:
+          type: string
+        tenant_id:
+          type: string
+        created_at:
+          type: string
+          format: date-time
+        updated_at:
+          type: string
+          format: date-time
+
+    AllowlistResponse:
+      type: object
+      properties:
+        items:
+          type: array
+          items:
+            $ref: '#/components/schemas/AllowlistEntryResponse'
+        total:
+          type: integer
+        page:
+          type: integer
+        size:
+          type: integer
+        pages:
+          type: integer
+
+    ErrorResponse:
+      type: object
+      properties:
+        error:
+          type: string
+        message:
+          type: string
+        details:
+          type: object
+
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+
+security:
+  - bearerAuth: []
