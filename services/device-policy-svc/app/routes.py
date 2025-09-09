@@ -1,4 +1,5 @@
 """FastAPI routes for Device Policy Service."""
+# flake8: noqa: E501
 
 import json
 from datetime import datetime
