@@ -50,7 +50,7 @@ class TestDeviceEnrollmentService:
     """Test DeviceEnrollmentService."""
 
     async def test_enroll_device_success(
-        self, enrollment_service, mock_db, sample_device
+        self, enrollment_service, mock_db, _sample_device
     ):
         """Test successful device enrollment."""
         # Mock database operations

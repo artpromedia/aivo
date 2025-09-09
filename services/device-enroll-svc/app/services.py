@@ -183,7 +183,10 @@ class AttestationService:
 
         # Generate challenge data
         nonce = secrets.token_hex(32)
-        challenge_data = f"aivo-pad-attestation:{device_id}:{nonce}:{int(datetime.utcnow().timestamp())}"  # noqa: E501
+        timestamp = int(datetime.utcnow().timestamp())
+        challenge_data = (
+            f"aivo-pad-attestation:{device_id}:{nonce}:{timestamp}"
+        )
 
         # Create challenge record
         challenge = AttestationChallenge(
