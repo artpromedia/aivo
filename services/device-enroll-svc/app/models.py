@@ -11,16 +11,14 @@ from sqlalchemy import (
     DateTime,
     String,
     Text,
-    func,
+    text,
 )
-from sqlalchemy.dialects.postgresql import UUID as PostgresUUID
+from sqlalchemy.dialects.postgresql import UUID as PGUUID
 from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column
 
 
 class Base(DeclarativeBase):
     """Base class for all database models."""
-
-    pass
 
 
 class DeviceStatus(str, Enum):
@@ -48,7 +46,7 @@ class Device(Base):
     __tablename__ = "devices"
 
     device_id: Mapped[UUID] = mapped_column(
-        PostgresUUID(as_uuid=True),
+        PGUUID(as_uuid=True),
         primary_key=True,
         default=uuid4,
         index=True,
@@ -68,7 +66,7 @@ class Device(Base):
     status: Mapped[DeviceStatus] = mapped_column(
         String(20), nullable=False, default=DeviceStatus.PENDING
     )
-    
+
     # Enrollment data
     enrollment_data: Mapped[Optional[dict]] = mapped_column(
         JSON, nullable=True
@@ -79,7 +77,7 @@ class Device(Base):
     bootstrap_expires_at: Mapped[Optional[datetime]] = mapped_column(
         DateTime, nullable=True
     )
-    
+
     # Certificate data
     public_key_pem: Mapped[Optional[str]] = mapped_column(
         Text, nullable=True
@@ -96,7 +94,7 @@ class Device(Base):
     certificate_expires_at: Mapped[Optional[datetime]] = mapped_column(
         DateTime, nullable=True
     )
-    
+
     # Metadata
     enrollment_ip: Mapped[Optional[str]] = mapped_column(
         String(45), nullable=True
@@ -110,16 +108,16 @@ class Device(Base):
     is_active: Mapped[bool] = mapped_column(
         Boolean, nullable=False, default=True
     )
-    
+
     # Timestamps
     created_at: Mapped[datetime] = mapped_column(
-        DateTime, nullable=False, server_default=func.now()
+        DateTime, nullable=False, server_default=text("CURRENT_TIMESTAMP")
     )
     updated_at: Mapped[datetime] = mapped_column(
         DateTime,
         nullable=False,
-        server_default=func.now(),
-        onupdate=func.now(),
+        server_default=text("CURRENT_TIMESTAMP"),
+        onupdate=text("CURRENT_TIMESTAMP"),
     )
 
 
@@ -129,13 +127,13 @@ class AttestationChallenge(Base):
     __tablename__ = "attestation_challenges"
 
     challenge_id: Mapped[UUID] = mapped_column(
-        PostgresUUID(as_uuid=True),
+        PGUUID(as_uuid=True),
         primary_key=True,
         default=uuid4,
         index=True,
     )
     device_id: Mapped[UUID] = mapped_column(
-        PostgresUUID(as_uuid=True),
+        PGUUID(as_uuid=True),
         nullable=False,
         index=True,
     )
@@ -144,7 +142,7 @@ class AttestationChallenge(Base):
     status: Mapped[AttestationStatus] = mapped_column(
         String(20), nullable=False, default=AttestationStatus.PENDING
     )
-    
+
     # Response data
     signature: Mapped[Optional[str]] = mapped_column(Text, nullable=True)
     attestation_data: Mapped[Optional[dict]] = mapped_column(
@@ -165,13 +163,13 @@ class AttestationChallenge(Base):
 
     # Timestamps
     created_at: Mapped[datetime] = mapped_column(
-        DateTime, nullable=False, server_default=func.now()
+        DateTime, nullable=False, server_default=text("CURRENT_TIMESTAMP")
     )
     updated_at: Mapped[datetime] = mapped_column(
         DateTime,
         nullable=False,
-        server_default=func.now(),
-        onupdate=func.now(),
+        server_default=text("CURRENT_TIMESTAMP"),
+        onupdate=text("CURRENT_TIMESTAMP"),
     )
 
 
@@ -181,13 +179,13 @@ class DeviceAuditLog(Base):
     __tablename__ = "device_audit_logs"
 
     log_id: Mapped[UUID] = mapped_column(
-        PostgresUUID(as_uuid=True),
+        PGUUID(as_uuid=True),
         primary_key=True,
         default=uuid4,
         index=True,
     )
     device_id: Mapped[UUID] = mapped_column(
-        PostgresUUID(as_uuid=True),
+        PGUUID(as_uuid=True),
         nullable=False,
         index=True,
     )
@@ -200,8 +198,8 @@ class DeviceAuditLog(Base):
     user_agent: Mapped[Optional[str]] = mapped_column(
         String(500), nullable=True
     )
-    
+
     # Timestamps
     created_at: Mapped[datetime] = mapped_column(
-        DateTime, nullable=False, server_default=func.now()
+        DateTime, nullable=False, server_default=text("CURRENT_TIMESTAMP")
     )
