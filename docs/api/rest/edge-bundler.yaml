@@ -1,0 +1,670 @@
+openapi: 3.0.3
+info:
+  title: Edge Bundler Service
+  description: |
+    Aivo Edge Bundler Service for creating signed offline lesson bundles with:
+    - ≤50MB total bundle size with ≤25MB pre-cache budget
+    - CRDT merge hooks for offline synchronization
+    - Signed bundles with SHA256 checksums
+    - Subject-based lesson packaging with adapters
+  version: 1.0.0
+  contact:
+    name: Aivo Development Team
+    email: dev@aivo.com
+
+servers:
+  - url: http://localhost:8000/api/v1
+    description: Development server
+  - url: https://api.aivo.com/edge-bundler/v1
+    description: Production server
+
+paths:
+  /bundles:
+    post:
+      summary: Create offline lesson bundle
+      description: |
+        Create a new signed offline bundle with size constraints and CRDT support.
+        Input: { learnerId, subjects[] } → tarball (manifests/assets/adapters ≤25MB)
+      operationId: createBundle
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/BundleRequest'
+            examples:
+              math_bundle:
+                summary: Math lessons bundle
+                value:
+                  learner_id: "123e4567-e89b-12d3-a456-426614174000"
+                  subjects: ["math", "algebra"]
+                  bundle_name: "Math Fundamentals"
+                  max_bundle_size: 52428800
+                  max_precache_size: 26214400
+                  compression_type: "gzip"
+                  include_adapters: true
+                  precache_priority: ["algebra_basics"]
+                  offline_duration_hours: 168
+      responses:
+        '201':
+          description: Bundle creation started
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BundleResponse'
+        '400':
+          description: Invalid request or size constraints violated
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+    get:
+      summary: List bundles
+      description: Retrieve bundles with optional filtering
+      parameters:
+        - name: learner_id
+          in: query
+          schema:
+            type: string
+            format: uuid
+        - name: status
+          in: query
+          schema:
+            $ref: '#/components/schemas/BundleStatus'
+        - name: page
+          in: query
+          schema:
+            type: integer
+            minimum: 1
+            default: 1
+        - name: size
+          in: query
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 100
+            default: 20
+      responses:
+        '200':
+          description: List of bundles
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BundleListResponse'
+
+  /bundles/{bundleId}:
+    get:
+      summary: Get bundle details
+      parameters:
+        - name: bundleId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: Bundle details
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BundleResponse'
+        '404':
+          description: Bundle not found
+
+    delete:
+      summary: Delete bundle
+      parameters:
+        - name: bundleId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '204':
+          description: Bundle deleted
+        '404':
+          description: Bundle not found
+
+  /bundles/{bundleId}/download:
+    post:
+      summary: Initiate bundle download
+      description: Create download session and get signed URLs
+      parameters:
+        - name: bundleId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/DownloadRequest'
+      responses:
+        '200':
+          description: Download URLs generated
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DownloadResponse'
+        '404':
+          description: Bundle not found
+        '409':
+          description: Bundle not ready for download
+
+  /bundles/{bundleId}/files/bundle:
+    get:
+      summary: Download bundle file
+      description: Download the actual compressed bundle tarball
+      parameters:
+        - name: bundleId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: Bundle file
+          content:
+            application/gzip:
+              schema:
+                type: string
+                format: binary
+        '404':
+          description: Bundle file not found
+
+  /bundles/{bundleId}/files/manifest:
+    get:
+      summary: Download manifest file
+      description: Download the bundle manifest with metadata and CRDT config
+      parameters:
+        - name: bundleId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: Manifest file
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BundleManifest'
+        '404':
+          description: Manifest file not found
+
+  /bundles/{bundleId}/crdt/merge:
+    post:
+      summary: Merge CRDT operations
+      description: Process offline CRDT operations and resolve conflicts
+      parameters:
+        - name: bundleId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CRDTMergeRequest'
+      responses:
+        '200':
+          description: CRDT merge results
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CRDTMergeResponse'
+        '404':
+          description: Bundle not found
+
+  /bundles/stats:
+    get:
+      summary: Get bundle statistics
+      description: Retrieve usage and performance statistics
+      responses:
+        '200':
+          description: Bundle statistics
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BundleStatsResponse'
+
+  /health:
+    get:
+      summary: Health check
+      description: Service health and dependency status
+      responses:
+        '200':
+          description: Service healthy
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HealthResponse'
+        '503':
+          description: Service unhealthy
+
+components:
+  schemas:
+    BundleRequest:
+      type: object
+      required:
+        - learner_id
+        - subjects
+      properties:
+        learner_id:
+          type: string
+          format: uuid
+          description: Target learner UUID
+        subjects:
+          type: array
+          items:
+            type: string
+          minItems: 1
+          maxItems: 10
+          description: List of subjects to include
+        bundle_name:
+          type: string
+          maxLength: 255
+          description: Optional bundle name
+        max_bundle_size:
+          type: integer
+          minimum: 1048576
+          maximum: 52428800
+          default: 52428800
+          description: Maximum bundle size (50MB limit)
+        max_precache_size:
+          type: integer
+          minimum: 524288
+          maximum: 26214400
+          default: 26214400
+          description: Maximum precache size (25MB limit)
+        compression_type:
+          $ref: '#/components/schemas/CompressionType'
+        bundle_version:
+          type: string
+          pattern: '^\\d+\\.\\d+\\.\\d+$'
+          default: "1.0.0"
+          description: Semantic version
+        include_adapters:
+          type: boolean
+          default: true
+          description: Include lesson adapters
+        precache_priority:
+          type: array
+          items:
+            type: string
+          description: High-priority content for precaching
+        offline_duration_hours:
+          type: integer
+          minimum: 1
+          maximum: 720
+          default: 168
+          description: Offline availability (1h-30d)
+
+    BundleResponse:
+      type: object
+      properties:
+        bundle_id:
+          type: string
+          format: uuid
+        learner_id:
+          type: string
+          format: uuid
+        subjects:
+          type: array
+          items:
+            type: string
+        bundle_name:
+          type: string
+        status:
+          $ref: '#/components/schemas/BundleStatus'
+        max_bundle_size:
+          type: integer
+        max_precache_size:
+          type: integer
+        actual_size:
+          type: integer
+          nullable: true
+        precache_size:
+          type: integer
+          nullable: true
+        compression_type:
+          $ref: '#/components/schemas/CompressionType'
+        bundle_version:
+          type: string
+        bundle_path:
+          type: string
+          nullable: true
+        sha256_hash:
+          type: string
+          nullable: true
+        is_signed:
+          type: boolean
+        lesson_count:
+          type: integer
+        asset_count:
+          type: integer
+        adapter_count:
+          type: integer
+        created_at:
+          type: string
+          format: date-time
+        updated_at:
+          type: string
+          format: date-time
+        expires_at:
+          type: string
+          format: date-time
+          nullable: true
+        processing_started_at:
+          type: string
+          format: date-time
+          nullable: true
+        processing_completed_at:
+          type: string
+          format: date-time
+          nullable: true
+        error_message:
+          type: string
+          nullable: true
+
+    BundleListResponse:
+      type: object
+      properties:
+        bundles:
+          type: array
+          items:
+            $ref: '#/components/schemas/BundleResponse'
+        total:
+          type: integer
+        page:
+          type: integer
+        size:
+          type: integer
+        pages:
+          type: integer
+
+    BundleManifest:
+      type: object
+      properties:
+        bundle_id:
+          type: string
+          format: uuid
+        version:
+          type: string
+        created_at:
+          type: string
+          format: date-time
+        expires_at:
+          type: string
+          format: date-time
+          nullable: true
+        learner_id:
+          type: string
+          format: uuid
+        subjects:
+          type: array
+          items:
+            type: string
+        compression_type:
+          $ref: '#/components/schemas/CompressionType'
+        total_size:
+          type: integer
+        precache_size:
+          type: integer
+        assets:
+          type: array
+          items:
+            $ref: '#/components/schemas/BundleAssetInfo'
+        crdt_config:
+          $ref: '#/components/schemas/CRDTConfig'
+        signature:
+          type: string
+          nullable: true
+        checksum:
+          type: string
+
+    BundleAssetInfo:
+      type: object
+      properties:
+        asset_type:
+          type: string
+          enum: [lesson, adapter, media]
+        asset_name:
+          type: string
+        file_size:
+          type: integer
+        mime_type:
+          type: string
+          nullable: true
+        content_id:
+          type: string
+          nullable: true
+        subject:
+          type: string
+          nullable: true
+        is_precache:
+          type: boolean
+        priority:
+          type: integer
+
+    CRDTConfig:
+      type: object
+      properties:
+        enable_crdt:
+          type: boolean
+        vector_clock_node_id:
+          type: string
+        merge_strategy:
+          type: string
+          enum: [last_writer_wins, merge_conflicts, custom]
+        conflict_resolution_hooks:
+          type: array
+          items:
+            type: string
+        sync_granularity:
+          type: string
+          enum: [lesson, section, paragraph]
+        offline_queue_max_size:
+          type: integer
+
+    DownloadRequest:
+      type: object
+      required:
+        - bundle_id
+        - learner_id
+      properties:
+        bundle_id:
+          type: string
+          format: uuid
+        learner_id:
+          type: string
+          format: uuid
+        client_version:
+          type: string
+          nullable: true
+        include_manifest:
+          type: boolean
+          default: true
+
+    DownloadResponse:
+      type: object
+      properties:
+        bundle_id:
+          type: string
+          format: uuid
+        download_url:
+          type: string
+          format: uri
+        manifest_url:
+          type: string
+          format: uri
+          nullable: true
+        size:
+          type: integer
+        sha256_hash:
+          type: string
+        expires_at:
+          type: string
+          format: date-time
+        download_id:
+          type: string
+          format: uuid
+
+    CRDTMergeRequest:
+      type: object
+      required:
+        - bundle_id
+        - learner_id
+        - operations
+        - client_vector_clock
+      properties:
+        bundle_id:
+          type: string
+          format: uuid
+        learner_id:
+          type: string
+          format: uuid
+        operations:
+          type: array
+          items:
+            $ref: '#/components/schemas/CRDTOperation'
+          minItems: 1
+          maxItems: 100
+        client_vector_clock:
+          type: object
+          additionalProperties:
+            type: integer
+
+    CRDTMergeResponse:
+      type: object
+      properties:
+        accepted_operations:
+          type: array
+          items:
+            type: string
+            format: uuid
+        conflicted_operations:
+          type: array
+          items:
+            type: string
+            format: uuid
+        server_operations:
+          type: array
+          items:
+            $ref: '#/components/schemas/CRDTOperation'
+        updated_vector_clock:
+          type: object
+          additionalProperties:
+            type: integer
+        conflicts_resolved:
+          type: integer
+
+    CRDTOperation:
+      type: object
+      required:
+        - operation_id
+        - operation_type
+        - content_type
+        - content_id
+        - vector_clock
+        - operation_data
+        - timestamp
+      properties:
+        operation_id:
+          type: string
+          format: uuid
+        operation_type:
+          type: string
+          enum: [create, update, delete, merge]
+        content_type:
+          type: string
+        content_id:
+          type: string
+        vector_clock:
+          type: object
+          additionalProperties:
+            type: integer
+        operation_data:
+          type: object
+        timestamp:
+          type: string
+          format: date-time
+
+    BundleStatsResponse:
+      type: object
+      properties:
+        total_bundles:
+          type: integer
+        active_bundles:
+          type: integer
+        total_size_bytes:
+          type: integer
+        average_size_bytes:
+          type: integer
+        download_count:
+          type: integer
+        most_popular_subjects:
+          type: array
+          items:
+            type: object
+            additionalProperties:
+              type: integer
+        crdt_operations_count:
+          type: integer
+        conflict_resolution_count:
+          type: integer
+
+    BundleStatus:
+      type: string
+      enum: [pending, processing, completed, failed, expired]
+
+    CompressionType:
+      type: string
+      enum: [gzip, brotli, zstd]
+
+    ErrorResponse:
+      type: object
+      properties:
+        error:
+          type: string
+        message:
+          type: string
+        details:
+          type: object
+          nullable: true
+        timestamp:
+          type: string
+          format: date-time
+
+    HealthResponse:
+      type: object
+      properties:
+        status:
+          type: string
+          enum: [healthy, degraded, unhealthy]
+        timestamp:
+          type: string
+          format: date-time
+        version:
+          type: string
+        dependencies:
+          type: object
+          additionalProperties:
+            type: string
+        metrics:
+          type: object
+          additionalProperties:
+            oneOf:
+              - type: integer
+              - type: number
