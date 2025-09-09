@@ -318,11 +318,12 @@ class PolicySyncService:
         device_id: UUID,
         current_policies: dict[str, int],
         db: AsyncSession,
-        timeout: int = 300,
+        timeout: int = 300,  # noqa: ARG002 - Reserved for future long polling implementation
     ) -> PolicySyncResponse | None:
         """Long polling for policy updates."""
         # For now, return immediate sync result
         # In production, implement actual long polling with WebSockets or SSE
+        # timeout parameter will be used for WebSocket/SSE timeout handling
         sync_request = PolicySyncRequest(device_id=device_id, current_policies=current_policies)
         return await self.sync_policies(sync_request, db)
 
