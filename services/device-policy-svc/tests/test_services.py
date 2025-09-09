@@ -1,11 +1,12 @@
 """Unit tests for policy management."""
+# flake8: noqa: E501
 
 
 from app.models import PolicyStatus, PolicyType
 from app.schemas import (
     KioskPolicyConfig,
-    PolicyCreateRequest,
-    PolicyUpdateRequest,
+    PolicyCreate,
+    PolicyUpdate,
 )
 
 
@@ -27,7 +28,7 @@ class TestPolicyService:
             ],
         )
 
-        request = PolicyCreateRequest(
+        request = PolicyCreate(
             name="Test Kiosk Policy",
             description="Test policy for kiosk mode",
             policy_type=PolicyType.KIOSK,
@@ -58,7 +59,7 @@ class TestPolicyService:
         db_session.add(sample_policy)
         await db_session.commit()
 
-        update_request = PolicyUpdateRequest(
+        update_request = PolicyUpdate(
             name="Updated Policy",
             description="Updated description",
         )

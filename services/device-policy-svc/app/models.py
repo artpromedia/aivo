@@ -1,4 +1,5 @@
 """Database models for Device Policy Service."""
+# flake8: noqa: E501
 
 from datetime import datetime
 from enum import Enum

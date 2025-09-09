@@ -1,4 +1,5 @@
 """Pydantic schemas for Device Policy Service."""
+# flake8: noqa: E501
 
 from datetime import datetime
 from uuid import UUID

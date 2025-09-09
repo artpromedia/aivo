@@ -1,4 +1,5 @@
 """Business logic services for Device Policy Service."""
+# flake8: noqa: E501
 
 import hashlib
 import json
@@ -318,7 +319,7 @@ class PolicySyncService:
         device_id: UUID,
         current_policies: dict[str, int],
         db: AsyncSession,
-        timeout: int = 300,  # noqa: ARG002 - Reserved for future long polling implementation
+        timeout: int = 300,  # pylint: disable=unused-argument
     ) -> PolicySyncResponse | None:
         """Long polling for policy updates."""
         # For now, return immediate sync result

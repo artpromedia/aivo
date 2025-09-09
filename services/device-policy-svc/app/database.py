@@ -1,4 +1,5 @@
 """Database configuration for Device Policy Service."""
+# flake8: noqa: E501
 
 import os
 from collections.abc import AsyncGenerator
