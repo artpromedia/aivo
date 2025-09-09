@@ -6,7 +6,9 @@ import re
 from datetime import datetime, timedelta
 
 try:
-    import librosa  # pylint: disable=import-error
+    # pylint: disable=import-error
+    # pyright: ignore[reportMissingImports]
+    import librosa
 except ImportError:
     librosa = None  # Optional dependency for audio processing
 
