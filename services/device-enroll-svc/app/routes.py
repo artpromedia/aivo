@@ -6,7 +6,7 @@ from uuid import UUID
 
 import structlog
 from fastapi import APIRouter, Depends, HTTPException, Request, status
-from sqlalchemy import func, select
+from sqlalchemy import select, text
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from .database import get_db
@@ -304,7 +304,9 @@ async def list_devices(
         offset = (page - 1) * size
 
         # Get total count
-        count_result = await db.execute(select(func.count(Device.device_id)))
+        count_result = await db.execute(
+            text("SELECT COUNT(*) FROM devices")
+        )
         total = count_result.scalar()
 
         # Get devices
