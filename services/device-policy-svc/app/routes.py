@@ -1,5 +1,6 @@
 """FastAPI routes for Device Policy Service."""
 
+import json
 from datetime import datetime
 from typing import Annotated
 from uuid import UUID
@@ -191,8 +192,6 @@ async def long_poll_sync(
     db: Annotated[AsyncSession, Depends(get_db)] = None,
 ) -> PolicySyncResponse | None:
     """Long polling endpoint for policy updates."""
-    import json
-
     try:
         current_dict = json.loads(current_policies)
         return await sync_service.long_poll_sync(device_id, current_dict, db, timeout)
@@ -274,7 +273,7 @@ async def delete_allowlist_entry(
 
 @router.get("/allowlist", response_model=AllowlistResponse)
 async def list_allowlist_entries(
-    entry_type: Annotated[str | None, Query(regex="^(domain|url|ip|subnet)$")] = None,
+    entry_type: Annotated[str | None, Query(pattern="^(domain|url|ip|subnet)$")] = None,
     category: Annotated[str | None, Query()] = None,
     is_active: Annotated[bool | None, Query()] = None,
     tenant_id: Annotated[str | None, Query()] = None,

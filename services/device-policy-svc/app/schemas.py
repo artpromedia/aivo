@@ -103,7 +103,7 @@ class PolicyDiff(BaseModel):
     """Schema for policy differences."""
 
     policy_id: UUID
-    action: str = Field(..., regex="^(add|update|remove)$")
+    action: str = Field(..., pattern="^(add|update|remove)$")
     from_version: int | None = None
     to_version: int | None = None
     config: dict | None = None
@@ -114,7 +114,7 @@ class PolicySyncResponse(BaseModel):
     """Schema for policy sync response."""
 
     device_id: UUID
-    sync_type: str = Field(..., regex="^(full|diff|patch)$")
+    sync_type: str = Field(..., pattern="^(full|diff|patch)$")
     policies: list[PolicyDiff]
     sync_timestamp: datetime = Field(default_factory=datetime.utcnow)
 
@@ -123,7 +123,7 @@ class PolicySyncResponse(BaseModel):
 class AllowlistEntryBase(BaseModel):
     """Base allowlist entry schema."""
 
-    entry_type: str = Field(..., regex="^(domain|url|ip|subnet)$")
+    entry_type: str = Field(..., pattern="^(domain|url|ip|subnet)$")
     value: str = Field(..., min_length=1, max_length=2048)
     description: str | None = Field(None, max_length=1000)
     category: str | None = Field(None, max_length=100)
@@ -179,7 +179,7 @@ class KioskAppConfig(BaseModel):
 class KioskPolicyConfig(BaseModel):
     """Schema for kiosk policy configuration."""
 
-    mode: str = Field("single_app", regex="^(single_app|multi_app)$")
+    mode: str = Field("single_app", pattern="^(single_app|multi_app)$")
     apps: list[KioskAppConfig] = Field(..., min_items=1)
     study_windows: list[dict] | None = None
     restrictions: dict | None = None
@@ -190,7 +190,7 @@ class NetworkProfile(BaseModel):
     """Schema for network profile configuration."""
 
     ssid: str = Field(..., description="Network SSID")
-    security_type: str = Field(..., regex="^(open|wep|wpa|wpa2|wpa3)$")
+    security_type: str = Field(..., pattern="^(open|wep|wpa|wpa2|wpa3)$")
     password: str | None = None
     hidden: bool = False
     auto_connect: bool = True
@@ -210,7 +210,7 @@ class NetworkPolicyConfig(BaseModel):
 class DNSFilterRule(BaseModel):
     """Schema for DNS filter rule."""
 
-    rule_type: str = Field(..., regex="^(block|allow|redirect)$")
+    rule_type: str = Field(..., pattern="^(block|allow|redirect)$")
     pattern: str = Field(..., description="Domain pattern or regex")
     action: str = Field(..., description="Action to take")
     category: str | None = None
@@ -220,7 +220,7 @@ class DNSFilterRule(BaseModel):
 class DNSPolicyConfig(BaseModel):
     """Schema for DNS policy configuration."""
 
-    default_action: str = Field("allow", regex="^(allow|block)$")
+    default_action: str = Field("allow", pattern="^(allow|block)$")
     rules: list[DNSFilterRule] = Field(default_factory=list)
     safe_search: bool = True
     block_malware: bool = True
@@ -232,8 +232,8 @@ class StudyWindow(BaseModel):
     """Schema for study window configuration."""
 
     name: str = Field(..., description="Window name")
-    start_time: str = Field(..., regex=r"^\d{2}:\d{2}$")
-    end_time: str = Field(..., regex=r"^\d{2}:\d{2}$")
+    start_time: str = Field(..., pattern=r"^\d{2}:\d{2}$")
+    end_time: str = Field(..., pattern=r"^\d{2}:\d{2}$")
     days: list[str] = Field(..., description="Days of week", min_items=1)
     timezone: str = Field("UTC", description="Timezone")
     allowed_apps: list[str] | None = None
@@ -244,7 +244,7 @@ class StudyWindowPolicyConfig(BaseModel):
     """Schema for study window policy configuration."""
 
     windows: list[StudyWindow] = Field(..., min_items=1)
-    default_mode: str = Field("restricted", regex="^(open|restricted|locked)$")
+    default_mode: str = Field("restricted", pattern="^(open|restricted|locked)$")
     break_duration: int = Field(15, ge=5, le=60, description="Break duration in minutes")
 
 

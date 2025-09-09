@@ -1,14 +1,19 @@
 """Application configuration for Device Policy Service."""
 
-
-from pydantic import BaseSettings
+try:
+    from pydantic_settings import BaseSettings
+except ImportError:
+    from pydantic import BaseSettings
 
 
 class Settings(BaseSettings):
     """Application settings."""
 
     # Database
-    database_url: str = "postgresql+asyncpg://postgres:postgres@localhost:5432/device_policy_db"
+    database_url: str = (
+        "postgresql+asyncpg://postgres:postgres@localhost:5432/"
+        "device_policy_db"
+    )
     sql_debug: bool = False
 
     # API

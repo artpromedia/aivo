@@ -5,7 +5,7 @@ from collections.abc import AsyncGenerator
 from contextlib import asynccontextmanager
 
 import structlog
-from fastapi import FastAPI
+from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
 
 from app.database import create_tables
@@ -56,7 +56,10 @@ async def lifespan(_app: FastAPI) -> AsyncGenerator[None, None]:
 # FastAPI app configuration
 app = FastAPI(
     title="Device Policy & MDM Service",
-    description=("Aivo Pad device policy management, kiosk mode, and network allowlist service"),
+    description=(
+        "Aivo Pad device policy management, kiosk mode, and "
+        "network allowlist service"
+    ),
     version="1.0.0",
     docs_url="/docs",
     redoc_url="/redoc",
@@ -79,7 +82,7 @@ app.include_router(router, prefix="/api/v1")
 
 # Global exception handler
 @app.exception_handler(Exception)
-async def global_exception_handler(request, exc):
+async def global_exception_handler(request: Request, exc: Exception):
     """Global exception handler."""
     logger.error(
         "Unhandled exception",
