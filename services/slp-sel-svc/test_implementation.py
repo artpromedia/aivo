@@ -3,11 +3,16 @@ Simple test to verify SLP/SEL Engine implementation.
 """
 
 import asyncio
-import json
 from uuid import uuid4
 
 from app.database import db
-from app.schemas import JournalEntryRequest, PrivacyLevel
+from app.schemas import (
+    JournalEntry,
+    JournalEntryRequest,
+    JournalHistoryRequest,
+    PhonemeTimingData,
+    PrivacyLevel,
+)
 from app.services import journal_service, speech_processor
 
 
@@ -20,8 +25,6 @@ async def test_speech_processing():
     print(f"Target phonemes: {target_phonemes}")
 
     # Test articulation scoring with mock phoneme data
-    from app.schemas import PhonemeTimingData
-
     mock_phonemes = [
         PhonemeTimingData(
             phoneme="p",
@@ -52,16 +55,25 @@ async def test_journal_sentiment():
     print("=== Testing Journal Sentiment Analysis ===")
 
     test_texts = [
-        "I had an amazing day today! I felt so happy and excited about learning new things.",
-        "Today was really difficult. I felt sad and frustrated with my homework.",
-        "It was an okay day. Nothing special happened, just regular school activities.",
+        (
+            "I had an amazing day today! I felt so happy and excited "
+            "about learning new things."
+        ),
+        (
+            "Today was really difficult. I felt sad and frustrated "
+            "with my homework."
+        ),
+        (
+            "It was an okay day. Nothing special happened, "
+            "just regular school activities."
+        ),
         "I love reading books and I'm grateful for my friends who help me.",
     ]
 
     for i, text in enumerate(test_texts, 1):
         sentiment = journal_service.analyze_sentiment(text)
         print(
-            f"Text {i}: {sentiment.sentiment.value} "
+            f"Text {i}: {sentiment.sentiment} "
             f"(confidence: {sentiment.confidence:.2f})"
         )
         print(f"  Emotions: {', '.join(sentiment.key_emotions[:3])}")
@@ -82,15 +94,15 @@ async def test_database_operations():
     # Create test journal entry
     entry_request = JournalEntryRequest(
         title="Test Journal Entry",
-        content="Today I learned about speech therapy and it was very interesting!",
+        content=(
+            "Today I learned about speech therapy and it was very interesting!"
+        ),
         privacy_level=PrivacyLevel.PRIVATE,
         mood_rating=8,
         tags=["learning", "therapy"],
     )
 
     # Create and save entry
-    from app.schemas import JournalEntry
-
     entry = JournalEntry(
         student_id=student_id,
         title=entry_request.title,
@@ -109,23 +121,24 @@ async def test_database_operations():
         print(f"Successfully retrieved entry: {retrieved_entry.title}")
 
     # Test history
-    from app.schemas import JournalHistoryRequest
-
     history_request = JournalHistoryRequest(
         student_id=student_id, limit=10, offset=0
     )
 
     history = db.get_journal_history(student_id, history_request)
     print(f"Journal history: {history.total_count} entries")
-    if history.sentiment_trends:
-        print(
-            f"Sentiment trend: {history.sentiment_trends.get('trend_direction', 'N/A')}"
-        )
+    if hasattr(history, "sentiment_trends") and history.sentiment_trends:
+        trend_data = dict(history.sentiment_trends)
+        trend_direction = trend_data.get("trend_direction", "N/A")
+        print(f"Sentiment trend: {trend_direction}")
+    else:
+        print("Sentiment trend: N/A")
 
     # Test analytics
     analytics = db.get_analytics_summary()
     print(
-        f"Analytics: {analytics['journal_stats']['total_entries']} total entries"
+        f"Analytics: {analytics['journal_stats']['total_entries']} "
+        "total entries"
     )
 
     print("✅ Database operations tests passed!\n")

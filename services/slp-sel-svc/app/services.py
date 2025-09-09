@@ -71,14 +71,18 @@ class SpeechProcessor:
                 units="time"
             )
 
-            # Advanced phoneme detection using onset detection and spectral analysis
+            # Advanced phoneme detection using onset detection and spectral
+            # analysis
             phoneme_data = []
             num_segments = min(len(target_phonemes), len(onset_frames) - 1)
 
             for i in range(num_segments):
                 phoneme = target_phonemes[i]
                 start_time = onset_frames[i]
-                end_time = onset_frames[i + 1] if i + 1 < len(onset_frames) else len(audio) / sr
+                end_time = (
+                    onset_frames[i + 1] if i + 1 < len(onset_frames)
+                    else len(audio) / sr
+                )
 
                 # Extract audio segment for analysis
                 start_sample = int(start_time * sr)
@@ -86,7 +90,9 @@ class SpeechProcessor:
                 segment = audio[start_sample:end_sample]
 
                 # Advanced confidence calculation using multiple features
-                confidence = self._calculate_advanced_confidence(segment, phoneme, sr)
+                confidence = self._calculate_advanced_confidence(
+                    segment, phoneme, sr
+                )
 
                 # Detect actual phoneme using spectral features
                 detected_phoneme = self._detect_phoneme(segment, sr)
