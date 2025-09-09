@@ -4,7 +4,6 @@ In production, this would be replaced with proper database integration.
 """
 
 from datetime import datetime, timedelta
-from typing import Optional
 from uuid import UUID
 
 from .schemas import (
@@ -39,7 +38,7 @@ class InMemoryDatabase:
 
     def get_journal_entry(
         self, student_id: UUID, entry_id: UUID, requester_role: str = "student"
-    ) -> Optional[JournalEntry]:
+    ) -> JournalEntry | None:
         """Get a specific journal entry with privacy validation."""
         entry = self.journal_entries.get(entry_id)
 
@@ -183,7 +182,7 @@ class InMemoryDatabase:
         self.drill_sessions[session.session_id] = session
         return session
 
-    def get_drill_session(self, session_id: UUID) -> Optional[DrillSession]:
+    def get_drill_session(self, session_id: UUID) -> DrillSession | None:
         """Get a specific drill session."""
         return self.drill_sessions.get(session_id)
 
@@ -234,7 +233,7 @@ class InMemoryDatabase:
 
         for entry in self.journal_entries.values():
             sentiment = journal_service.analyze_sentiment(entry.content)
-            sentiment_counts[sentiment.sentiment.value] += 1
+            sentiment_counts[sentiment.sentiment] += 1
 
         return {
             "journal_stats": {
@@ -252,7 +251,7 @@ class InMemoryDatabase:
             "speech_stats": {
                 "total_sessions": total_sessions,
                 "unique_students": len(
-                    set(s.student_id for s in self.drill_sessions.values())
+                    {s.student_id for s in self.drill_sessions.values()}
                 ),
             },
         }
