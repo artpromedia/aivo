@@ -1,0 +1,675 @@
+openapi: 3.0.3
+info:
+  title: Problem Session Orchestrator API
+  description: |
+    Coordinates interactive learning sessions across multiple subject-specific services.
+    
+    Implements the plan→present→ink→recognize→grade→feedback workflow for interactive
+    learning experiences in mathematics and science subjects.
+    
+    ## Workflow
+    
+    1. **PLAN** - Create activity plan using Subject Brain service
+    2. **PRESENT** - Present problems to learner
+    3. **INK** - Capture digital ink from learner responses
+    4. **RECOGNIZE** - Process ink using math/science recognition services
+    5. **GRADE** - Evaluate responses for correctness
+    6. **FEEDBACK** - Provide feedback and continue session
+    
+    ## Features
+    
+    - Subject-aware orchestration (Mathematics, Science, Physics, Chemistry, Biology)
+    - Real-time ink capture and recognition
+    - Automated grading and feedback
+    - Session state management
+    - Event publishing for analytics
+    
+  version: 0.1.0
+  contact:
+    name: AIVO Engineering Team
+    email: engineering@artpromedia.com
+  license:
+    name: MIT
+    url: https://opensource.org/licenses/MIT
+
+servers:
+  - url: http://localhost:8000
+    description: Development server
+
+paths:
+  /health:
+    get:
+      summary: Health Check
+      description: Check service health and dependency status
+      operationId: healthCheck
+      tags:
+        - Health
+      responses:
+        '200':
+          description: Service is healthy
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HealthResponse'
+              example:
+                status: healthy
+                service: problem-session-svc
+                timestamp: '2025-09-09T10:30:00Z'
+                dependencies:
+                  database: healthy
+                  ink_service: unknown
+                  math_service: unknown
+                  science_service: unknown
+                  subject_brain: unknown
+
+  /start:
+    post:
+      summary: Start Problem Session
+      description: |
+        Start a new interactive problem session for a learner in a specific subject.
+        
+        This endpoint coordinates the creation of:
+        - Activity plan from Subject Brain service
+        - Ink capture session for digital handwriting
+        - Session tracking and state management
+        
+        The session will progress through phases: plan→present→ink→recognize→grade→feedback
+      operationId: startSession
+      tags:
+        - Sessions
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/StartSessionRequest'
+            example:
+              learner_id: 550e8400-e29b-41d4-a716-446655440001
+              subject: mathematics
+              session_duration_minutes: 30
+              canvas_width: 800
+              canvas_height: 600
+              force_refresh: false
+      responses:
+        '200':
+          description: Session started successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SessionResponse'
+              example:
+                session_id: 550e8400-e29b-41d4-a716-446655440002
+                learner_id: 550e8400-e29b-41d4-a716-446655440001
+                subject: mathematics
+                status: active
+                current_phase: present
+                created_at: '2025-09-09T10:30:00Z'
+                started_at: '2025-09-09T10:30:01Z'
+                session_duration_minutes: 30
+                total_problems_attempted: 0
+                total_problems_correct: 0
+                canvas_width: 800
+                canvas_height: 600
+                ink_session_id: 550e8400-e29b-41d4-a716-446655440003
+        '400':
+          description: Invalid request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /ink:
+    post:
+      summary: Submit Ink for Recognition
+      description: |
+        Submit digital ink strokes for recognition and processing.
+        
+        This triggers the ink→recognize→grade→feedback workflow:
+        1. Ink strokes are submitted to the ink capture service
+        2. Recognition is performed based on session subject (math/science)
+        3. Response is graded for correctness
+        4. Feedback is provided to the learner
+        5. Session progresses to next activity
+      operationId: submitInk
+      tags:
+        - Sessions
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/InkSubmissionRequest'
+            example:
+              session_id: 550e8400-e29b-41d4-a716-446655440002
+              page_number: 1
+              strokes:
+                - stroke_id: 550e8400-e29b-41d4-a716-446655440004
+                  tool_type: pen
+                  color: '#000000'
+                  width: 2.0
+                  points:
+                    - x: 100
+                      y: 150
+                      pressure: 0.8
+                      timestamp: 0
+                    - x: 110
+                      y: 155
+                      pressure: 0.9
+                      timestamp: 50
+              metadata:
+                device: tablet
+                stylus_type: apple_pencil
+      responses:
+        '200':
+          description: Ink submitted successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/InkSubmissionResponse'
+              example:
+                session_id: 550e8400-e29b-41d4-a716-446655440002
+                page_id: 550e8400-e29b-41d4-a716-446655440005
+                recognition_job_id: 550e8400-e29b-41d4-a716-446655440006
+                status: submitted
+                message: Ink submitted successfully
+        '400':
+          description: Invalid request or session not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /sessions/{sessionId}:
+    get:
+      summary: Get Session Status
+      description: |
+        Retrieve current status and details of a problem session.
+        
+        Returns session state, progress, current activity, and performance metrics.
+      operationId: getSession
+      tags:
+        - Sessions
+      parameters:
+        - name: sessionId
+          in: path
+          required: true
+          description: Unique session identifier
+          schema:
+            type: string
+            format: uuid
+          example: 550e8400-e29b-41d4-a716-446655440002
+      responses:
+        '200':
+          description: Session details retrieved successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SessionResponse'
+              example:
+                session_id: 550e8400-e29b-41d4-a716-446655440002
+                learner_id: 550e8400-e29b-41d4-a716-446655440001
+                subject: mathematics
+                status: providing_feedback
+                current_phase: feedback
+                created_at: '2025-09-09T10:30:00Z'
+                started_at: '2025-09-09T10:30:01Z'
+                session_duration_minutes: 30
+                total_problems_attempted: 3
+                total_problems_correct: 2
+                average_confidence: 0.87
+                current_activity:
+                  activity_id: act_001
+                  type: practice
+                  topic:
+                    topic_id: algebra_equations
+                    name: Linear Equations
+                  estimated_duration_minutes: 10
+                canvas_width: 800
+                canvas_height: 600
+                ink_session_id: 550e8400-e29b-41d4-a716-446655440003
+        '404':
+          description: Session not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /sessions/{sessionId}/complete:
+    post:
+      summary: Complete Session
+      description: |
+        Manually complete a problem session and publish SESSION_RESULT event.
+        
+        This will finalize the session, calculate performance metrics, and
+        emit events for analytics processing.
+      operationId: completeSession
+      tags:
+        - Sessions
+      parameters:
+        - name: sessionId
+          in: path
+          required: true
+          description: Unique session identifier
+          schema:
+            type: string
+            format: uuid
+          example: 550e8400-e29b-41d4-a716-446655440002
+      responses:
+        '200':
+          description: Session completed successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    example: completed
+                  session_id:
+                    type: string
+                    format: uuid
+                    example: 550e8400-e29b-41d4-a716-446655440002
+        '404':
+          description: Session not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /:
+    get:
+      summary: Service Information
+      description: Get basic service information and capabilities
+      operationId: getServiceInfo
+      tags:
+        - Health
+      responses:
+        '200':
+          description: Service information
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  service:
+                    type: string
+                    example: Problem Session Orchestrator
+                  version:
+                    type: string
+                    example: 0.1.0
+                  description:
+                    type: string
+                    example: Coordinates interactive learning sessions across multiple subject-specific services
+
+components:
+  schemas:
+    SubjectType:
+      type: string
+      enum:
+        - mathematics
+        - science
+        - physics
+        - chemistry
+        - biology
+      description: Subject areas supported by the orchestrator
+
+    SessionPhase:
+      type: string
+      enum:
+        - plan
+        - present
+        - ink
+        - recognize
+        - grade
+        - feedback
+      description: Current phase within the problem session workflow
+
+    SessionStatus:
+      type: string
+      enum:
+        - planning
+        - active
+        - waiting_ink
+        - recognizing
+        - grading
+        - providing_feedback
+        - completed
+        - failed
+        - timeout
+      description: Overall session status
+
+    StartSessionRequest:
+      type: object
+      required:
+        - learner_id
+        - subject
+      properties:
+        learner_id:
+          type: string
+          format: uuid
+          description: Unique learner identifier
+          example: 550e8400-e29b-41d4-a716-446655440001
+        subject:
+          $ref: '#/components/schemas/SubjectType'
+        session_duration_minutes:
+          type: integer
+          minimum: 5
+          maximum: 120
+          default: 30
+          description: Planned session duration in minutes
+          example: 30
+        canvas_width:
+          type: integer
+          minimum: 400
+          maximum: 2000
+          default: 800
+          description: Canvas width in pixels for ink capture
+          example: 800
+        canvas_height:
+          type: integer
+          minimum: 300
+          maximum: 1500
+          default: 600
+          description: Canvas height in pixels for ink capture
+          example: 600
+        force_refresh:
+          type: boolean
+          default: false
+          description: Force refresh of activity plan from Subject Brain
+          example: false
+
+    SessionResponse:
+      type: object
+      required:
+        - session_id
+        - learner_id
+        - subject
+        - status
+        - current_phase
+        - created_at
+        - session_duration_minutes
+        - total_problems_attempted
+        - total_problems_correct
+        - canvas_width
+        - canvas_height
+      properties:
+        session_id:
+          type: string
+          format: uuid
+          description: Unique session identifier
+          example: 550e8400-e29b-41d4-a716-446655440002
+        learner_id:
+          type: string
+          format: uuid
+          description: Learner identifier
+          example: 550e8400-e29b-41d4-a716-446655440001
+        subject:
+          $ref: '#/components/schemas/SubjectType'
+        status:
+          $ref: '#/components/schemas/SessionStatus'
+        current_phase:
+          $ref: '#/components/schemas/SessionPhase'
+        created_at:
+          type: string
+          format: date-time
+          description: Session creation timestamp
+          example: '2025-09-09T10:30:00Z'
+        started_at:
+          type: string
+          format: date-time
+          nullable: true
+          description: Session start timestamp
+          example: '2025-09-09T10:30:01Z'
+        completed_at:
+          type: string
+          format: date-time
+          nullable: true
+          description: Session completion timestamp
+          example: '2025-09-09T11:00:30Z'
+        session_duration_minutes:
+          type: integer
+          description: Planned session duration in minutes
+          example: 30
+        total_problems_attempted:
+          type: integer
+          description: Number of problems attempted
+          example: 5
+        total_problems_correct:
+          type: integer
+          description: Number of problems answered correctly
+          example: 4
+        average_confidence:
+          type: number
+          format: float
+          nullable: true
+          description: Average recognition confidence (0.0-1.0)
+          example: 0.87
+        current_activity:
+          type: object
+          nullable: true
+          description: Current activity details from activity plan
+          example:
+            activity_id: act_001
+            type: practice
+            topic:
+              topic_id: algebra_equations
+              name: Linear Equations
+            estimated_duration_minutes: 10
+        canvas_width:
+          type: integer
+          description: Canvas width in pixels
+          example: 800
+        canvas_height:
+          type: integer
+          description: Canvas height in pixels
+          example: 600
+        ink_session_id:
+          type: string
+          format: uuid
+          nullable: true
+          description: Associated ink capture session ID
+          example: 550e8400-e29b-41d4-a716-446655440003
+        error_message:
+          type: string
+          nullable: true
+          description: Error message if session failed
+          example: null
+
+    InkSubmissionRequest:
+      type: object
+      required:
+        - session_id
+        - strokes
+      properties:
+        session_id:
+          type: string
+          format: uuid
+          description: Session identifier
+          example: 550e8400-e29b-41d4-a716-446655440002
+        page_number:
+          type: integer
+          default: 1
+          description: Page number for multi-page sessions
+          example: 1
+        strokes:
+          type: array
+          description: Array of ink stroke data
+          items:
+            type: object
+            required:
+              - stroke_id
+              - points
+            properties:
+              stroke_id:
+                type: string
+                format: uuid
+                description: Unique stroke identifier
+                example: 550e8400-e29b-41d4-a716-446655440004
+              tool_type:
+                type: string
+                default: pen
+                description: Drawing tool type
+                example: pen
+              color:
+                type: string
+                default: '#000000'
+                description: Stroke color in hex format
+                example: '#000000'
+              width:
+                type: number
+                format: float
+                default: 2.0
+                description: Stroke width in pixels
+                example: 2.0
+              points:
+                type: array
+                description: Array of stroke points
+                items:
+                  type: object
+                  required:
+                    - x
+                    - y
+                    - timestamp
+                  properties:
+                    x:
+                      type: number
+                      format: float
+                      description: X coordinate
+                      example: 100.5
+                    y:
+                      type: number
+                      format: float
+                      description: Y coordinate
+                      example: 150.3
+                    pressure:
+                      type: number
+                      format: float
+                      default: 1.0
+                      description: Stylus pressure (0.0-1.0)
+                      example: 0.8
+                    timestamp:
+                      type: integer
+                      description: Timestamp in milliseconds from stroke start
+                      example: 50
+        metadata:
+          type: object
+          description: Additional metadata about the ink submission
+          example:
+            device: tablet
+            stylus_type: apple_pencil
+
+    InkSubmissionResponse:
+      type: object
+      required:
+        - session_id
+        - page_id
+        - status
+        - message
+      properties:
+        session_id:
+          type: string
+          format: uuid
+          description: Session identifier
+          example: 550e8400-e29b-41d4-a716-446655440002
+        page_id:
+          type: string
+          format: uuid
+          description: Ink page identifier
+          example: 550e8400-e29b-41d4-a716-446655440005
+        recognition_job_id:
+          type: string
+          format: uuid
+          nullable: true
+          description: Recognition job identifier
+          example: 550e8400-e29b-41d4-a716-446655440006
+        status:
+          type: string
+          description: Submission status
+          example: submitted
+        message:
+          type: string
+          description: Status message
+          example: Ink submitted successfully
+
+    HealthResponse:
+      type: object
+      required:
+        - status
+        - service
+        - timestamp
+      properties:
+        status:
+          type: string
+          description: Overall service health status
+          example: healthy
+        service:
+          type: string
+          description: Service name
+          example: problem-session-svc
+        timestamp:
+          type: string
+          format: date-time
+          description: Health check timestamp
+          example: '2025-09-09T10:30:00Z'
+        dependencies:
+          type: object
+          description: Status of external dependencies
+          additionalProperties:
+            type: string
+          example:
+            database: healthy
+            ink_service: unknown
+            math_service: unknown
+            science_service: unknown
+
+    ErrorResponse:
+      type: object
+      required:
+        - error
+        - message
+      properties:
+        error:
+          type: string
+          description: Error type identifier
+          example: session_not_found
+        message:
+          type: string
+          description: Human-readable error message
+          example: The specified session was not found
+        details:
+          type: object
+          description: Additional error details
+          additionalProperties: true
+          example:
+            session_id: 550e8400-e29b-41d4-a716-446655440002
+            timestamp: '2025-09-09T10:30:00Z'
+
+tags:
+  - name: Health
+    description: Service health and monitoring endpoints
+  - name: Sessions
+    description: Problem session management and workflow orchestration
