@@ -1,11 +1,15 @@
 """Tests for the main FastAPI application."""
 
-import pytest
-from fastapi.testclient import TestClient
+# pylint: disable=redefined-outer-name  # pytest fixtures
+
 from unittest.mock import AsyncMock, patch
 from uuid import uuid4
 
+import pytest
+from fastapi.testclient import TestClient
+
 from app.main import app
+from app.schemas import InkSubmissionResponse
 
 
 @pytest.fixture
@@ -30,7 +34,7 @@ def test_health_check(client):
     """Test health check endpoint."""
     response = client.get("/health")
     assert response.status_code == 200
-    
+
     data = response.json()
     assert data["status"] == "healthy"
     assert data["service"] == "problem-session-svc"
@@ -42,7 +46,7 @@ def test_root_endpoint(client):
     """Test root endpoint."""
     response = client.get("/")
     assert response.status_code == 200
-    
+
     data = response.json()
     assert data["service"] == "Problem Session Orchestrator"
     assert data["version"] == "0.1.0"
@@ -58,7 +62,7 @@ def test_start_session_success(
     # Mock database session
     mock_db = AsyncMock()
     mock_get_db.return_value.__aenter__.return_value = mock_db
-    
+
     # Mock orchestrator response
     mock_session = AsyncMock()
     mock_session.session_id = uuid4()
@@ -79,9 +83,9 @@ def test_start_session_success(
     mock_session.canvas_height = 600
     mock_session.ink_session_id = uuid4()
     mock_session.error_message = None
-    
+
     mock_start_session.return_value = mock_session
-    
+
     # Test request
     request_data = {
         "learner_id": str(sample_learner_id),
@@ -90,10 +94,10 @@ def test_start_session_success(
         "canvas_width": 800,
         "canvas_height": 600
     }
-    
+
     response = client.post("/start", json=request_data)
     assert response.status_code == 200
-    
+
     data = response.json()
     assert "session_id" in data
     assert data["learner_id"] == str(sample_learner_id)
@@ -108,7 +112,7 @@ def test_start_session_invalid_subject(client, sample_learner_id):
         "subject": "invalid_subject",
         "session_duration_minutes": 30
     }
-    
+
     response = client.post("/start", json=request_data)
     assert response.status_code == 422  # Validation error
 
@@ -120,7 +124,7 @@ def test_start_session_invalid_duration(client, sample_learner_id):
         "subject": "mathematics",
         "session_duration_minutes": 200  # Too long
     }
-    
+
     response = client.post("/start", json=request_data)
     assert response.status_code == 422  # Validation error
 
@@ -134,9 +138,8 @@ def test_submit_ink_success(
     # Mock database session
     mock_db = AsyncMock()
     mock_get_db.return_value.__aenter__.return_value = mock_db
-    
+
     # Mock orchestrator response
-    from app.schemas import InkSubmissionResponse
     mock_response = InkSubmissionResponse(
         session_id=sample_session_id,
         page_id=uuid4(),
@@ -145,7 +148,7 @@ def test_submit_ink_success(
         message="Ink submitted successfully"
     )
     mock_submit_ink.return_value = mock_response
-    
+
     # Test request
     request_data = {
         "session_id": str(sample_session_id),
@@ -164,10 +167,10 @@ def test_submit_ink_success(
         ],
         "metadata": {"device": "tablet"}
     }
-    
+
     response = client.post("/ink", json=request_data)
     assert response.status_code == 200
-    
+
     data = response.json()
     assert data["session_id"] == str(sample_session_id)
     assert data["status"] == "submitted"
@@ -182,7 +185,7 @@ def test_submit_ink_missing_strokes(client, sample_session_id):
         "metadata": {"device": "tablet"}
         # Missing strokes
     }
-    
+
     response = client.post("/ink", json=request_data)
     assert response.status_code == 422  # Validation error
 
@@ -196,7 +199,7 @@ def test_get_session_success(
     # Mock database session
     mock_db = AsyncMock()
     mock_get_db.return_value.__aenter__.return_value = mock_db
-    
+
     # Mock database query result
     mock_session = AsyncMock()
     mock_session.session_id = sample_session_id
@@ -217,14 +220,14 @@ def test_get_session_success(
     mock_session.canvas_height = 600
     mock_session.ink_session_id = uuid4()
     mock_session.error_message = None
-    
+
     mock_result = AsyncMock()
     mock_result.scalar_one_or_none.return_value = mock_session
     mock_execute.return_value = mock_result
-    
+
     response = client.get(f"/sessions/{sample_session_id}")
     assert response.status_code == 200
-    
+
     data = response.json()
     assert data["session_id"] == str(sample_session_id)
     assert data["learner_id"] == str(sample_learner_id)
@@ -240,12 +243,12 @@ def test_get_session_not_found(
     # Mock database session
     mock_db = AsyncMock()
     mock_get_db.return_value.__aenter__.return_value = mock_db
-    
+
     # Mock database query result (no session found)
     mock_result = AsyncMock()
     mock_result.scalar_one_or_none.return_value = None
     mock_execute.return_value = mock_result
-    
+
     response = client.get(f"/sessions/{sample_session_id}")
     assert response.status_code == 404
 
@@ -259,13 +262,13 @@ def test_complete_session_success(
     # Mock database session
     mock_db = AsyncMock()
     mock_get_db.return_value.__aenter__.return_value = mock_db
-    
+
     # Mock orchestrator method
     mock_complete_session.return_value = None
-    
+
     response = client.post(f"/sessions/{sample_session_id}/complete")
     assert response.status_code == 200
-    
+
     data = response.json()
     assert data["status"] == "completed"
     assert data["session_id"] == str(sample_session_id)
@@ -274,6 +277,6 @@ def test_complete_session_success(
 def test_invalid_uuid_format(client):
     """Test endpoints with invalid UUID format."""
     invalid_uuid = "not-a-uuid"
-    
+
     response = client.get(f"/sessions/{invalid_uuid}")
     assert response.status_code == 422  # Validation error
