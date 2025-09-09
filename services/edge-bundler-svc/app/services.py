@@ -495,9 +495,9 @@ class CRDTService:
             select(CRDTMergeLog)
             .where(
                 and_(
-                    CRDTMergeLog.content_id == operation.content_id,
-                    CRDTMergeLog.operation_type.in_(["create", "update"]),
-                    CRDTMergeLog.created_at > operation.timestamp - timedelta(minutes=5),
+                    CRDTMergeLog.content_id == operation.content_id,  # pylint: disable=no-member
+                    CRDTMergeLog.operation_type.in_(["create", "update"]),  # pylint: disable=no-member
+                    CRDTMergeLog.created_at > operation.timestamp - timedelta(minutes=5),  # pylint: disable=no-member
                 )
             )
         )

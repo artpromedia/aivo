@@ -1,18 +1,26 @@
 # Device Policy Service
 
-FastAPI-based microservice for managing device policies, kiosk mode, and network allowlists in Mobile Device Management (MDM) systems.
+FastAPI-based microservice for managing device policies, kiosk mode, and
+network allowlists in Mobile Device Management (MDM) systems.
 
 ## Features
 
 ### Core Policy Management
-- **Kiosk Mode**: Single-app and multi-app kiosk configurations with app restrictions
-- **Network Policies**: WiFi profile management, mobile data controls, and hotspot restrictions  
-- **DNS Filtering**: Category-based content blocking with custom rules and allowlists
+
+- **Kiosk Mode**: Single-app and multi-app kiosk configurations with app
+  restrictions
+- **Network Policies**: WiFi profile management, mobile data controls, and
+  hotspot restrictions
+- **DNS Filtering**: Category-based content blocking with custom rules and
+  allowlists
 - **Study Windows**: Time-based access controls with schedule enforcement
-- **Network Allowlist**: Walled garden implementation for educational content filtering
+- **Network Allowlist**: Walled garden implementation for educational content
+  filtering
 
 ### Technical Capabilities
-- **Real-time Sync**: Long-poll synchronization for efficient device policy updates
+
+- **Real-time Sync**: Long-poll synchronization for efficient device policy
+  updates
 - **Policy Versioning**: Checksums and version control with conflict detection
 - **Bulk Operations**: Device fleet management and bulk policy assignments
 - **Audit Logging**: Comprehensive tracking of policy changes and sync events
@@ -21,6 +29,7 @@ FastAPI-based microservice for managing device policies, kiosk mode, and network
 ## Quick Start
 
 ### Prerequisites
+
 - Python 3.10+
 - PostgreSQL database
 - Docker (optional)
@@ -28,12 +37,14 @@ FastAPI-based microservice for managing device policies, kiosk mode, and network
 ### Installation
 
 1. **Clone and Setup**
+
    ```bash
    cd services/device-policy-svc
    pip install -r requirements.txt
    ```
 
 2. **Configure Environment**
+
    ```bash
    export DATABASE_URL="postgresql://user:pass@localhost/devicepolicy"
    export SECRET_KEY="your-secret-key"
@@ -41,6 +52,7 @@ FastAPI-based microservice for managing device policies, kiosk mode, and network
    ```
 
 3. **Run Development Server**
+
    ```bash
    uvicorn app.main:app --host 0.0.0.0 --port 8000 --reload
    ```
@@ -62,14 +74,17 @@ docker run -d \
 ## API Documentation
 
 Once running, access the interactive API documentation:
-- **Swagger UI**: http://localhost:8000/docs
-- **ReDoc**: http://localhost:8000/redoc
-- **OpenAPI Schema**: http://localhost:8000/openapi.json
+
+- **Swagger UI**: <http://localhost:8000/docs>
+- **ReDoc**: <http://localhost:8000/redoc>
+- **OpenAPI Schema**: <http://localhost:8000/openapi.json>
 
 ## Policy Types
 
 ### Kiosk Policy
+
 Configure single-app or multi-app kiosk mode:
+
 ```json
 {
   "policy_type": "kiosk",
@@ -88,8 +103,10 @@ Configure single-app or multi-app kiosk mode:
 }
 ```
 
-### Network Policy  
+### Network Policy
+
 Manage WiFi, mobile data, and connectivity:
+
 ```json
 {
   "policy_type": "network",
@@ -109,7 +126,9 @@ Manage WiFi, mobile data, and connectivity:
 ```
 
 ### DNS Policy
+
 Content filtering and DNS controls:
+
 ```json
 {
   "policy_type": "dns",
@@ -125,7 +144,9 @@ Content filtering and DNS controls:
 ```
 
 ### Study Window Policy
+
 Time-based access restrictions:
+
 ```json
 {
   "policy_type": "study_window", 
@@ -148,6 +169,7 @@ Time-based access restrictions:
 The service provides a walled garden implementation for educational content:
 
 ### Add Allowlist Entries
+
 ```bash
 POST /allowlist
 {
@@ -159,6 +181,7 @@ POST /allowlist
 ```
 
 ### Bulk Import
+
 ```bash
 POST /allowlist/bulk
 {
@@ -172,7 +195,9 @@ POST /allowlist/bulk
 ## Device Synchronization
 
 ### Long-Poll Sync
+
 Devices can efficiently sync policies using long-polling:
+
 ```bash
 GET /policy/sync?device_id=device123&timeout=30
 ```
@@ -180,6 +205,7 @@ GET /policy/sync?device_id=device123&timeout=30
 Returns immediately if changes are available, or waits up to 30 seconds for updates.
 
 ### Assign Policies
+
 ```bash
 POST /device-policies
 {
@@ -191,6 +217,7 @@ POST /device-policies
 ## Development
 
 ### Running Tests
+
 ```bash
 # Unit tests
 pytest tests/test_services.py -v
@@ -203,6 +230,7 @@ pytest -v
 ```
 
 ### Code Quality
+
 ```bash
 # Linting
 ruff check .
@@ -215,6 +243,7 @@ mypy app/
 ```
 
 ### Database Migrations
+
 ```bash
 # Generate migration
 alembic revision --autogenerate -m "Add new policy type"
@@ -226,11 +255,13 @@ alembic upgrade head
 ## Monitoring
 
 ### Health Check
+
 ```bash
 GET /health
 ```
 
 ### Metrics
+
 - Policy assignment counts
 - Sync request rates  
 - Active device counts
@@ -256,7 +287,7 @@ GET /health
 
 ## Architecture
 
-```
+```text
 ┌─────────────────┐    ┌──────────────────┐    ┌─────────────────┐
 │   Device Apps   │    │   Admin Portal   │    │   MDM Console   │
 └─────────────────┘    └──────────────────┘    └─────────────────┘

@@ -1,5 +1,6 @@
 ﻿"""Edge Bundler Service for offline lesson packaging with CRDT support."""
 # flake8: noqa: E501
+# pylint: disable=too-few-public-methods
 
 from datetime import datetime
 from enum import Enum
@@ -212,5 +213,3 @@ class CRDTMergeLog(Base):
         PGUUID(as_uuid=True), nullable=False, index=True
     )
     merge_context: Mapped[dict] = mapped_column(JSON, nullable=True)
-
-
