@@ -6,11 +6,11 @@ from typing import Any
 from uuid import UUID, uuid4
 
 from sqlalchemy import (
+    JSON,
     Boolean,
     DateTime,
     Float,
     Integer,
-    JSON,
     String,
     Text,
     text,
@@ -77,7 +77,7 @@ class ProblemSession(Base):
     current_phase: Mapped[str] = mapped_column(
         String(20), default=SessionPhase.PLAN, nullable=False
     )
-    
+
     # Session metadata
     created_at: Mapped[datetime] = mapped_column(
         DateTime(timezone=True),
@@ -95,7 +95,7 @@ class ProblemSession(Base):
         server_default=text("CURRENT_TIMESTAMP"),
         nullable=False,
     )
-    
+
     # Activity planning data
     activity_plan_id: Mapped[str | None] = mapped_column(
         String(100), nullable=True
@@ -106,7 +106,7 @@ class ProblemSession(Base):
     current_activity_index: Mapped[int] = mapped_column(
         Integer, default=0, nullable=False
     )
-    
+
     # Session configuration
     session_duration_minutes: Mapped[int] = mapped_column(
         Integer, default=30, nullable=False
@@ -117,7 +117,7 @@ class ProblemSession(Base):
     canvas_height: Mapped[int] = mapped_column(
         Integer, default=600, nullable=False
     )
-    
+
     # Session results
     total_problems_attempted: Mapped[int] = mapped_column(
         Integer, default=0, nullable=False
@@ -128,7 +128,7 @@ class ProblemSession(Base):
     average_confidence: Mapped[float | None] = mapped_column(
         Float, nullable=True
     )
-    
+
     # External service references
     ink_session_id: Mapped[UUID | None] = mapped_column(
         PG_UUID(as_uuid=True), nullable=True
@@ -136,7 +136,7 @@ class ProblemSession(Base):
     brain_runtime_id: Mapped[str | None] = mapped_column(
         String(100), nullable=True
     )
-    
+
     # Error handling
     error_message: Mapped[str | None] = mapped_column(Text, nullable=True)
     retry_count: Mapped[int] = mapped_column(
@@ -156,12 +156,12 @@ class ProblemAttempt(Base):
         PG_UUID(as_uuid=True), nullable=False, index=True
     )
     activity_id: Mapped[str] = mapped_column(String(100), nullable=False)
-    
+
     # Problem data
     problem_type: Mapped[str] = mapped_column(String(50), nullable=False)
     problem_statement: Mapped[str] = mapped_column(Text, nullable=False)
     expected_answer: Mapped[str | None] = mapped_column(Text, nullable=True)
-    
+
     # Attempt timing
     presented_at: Mapped[datetime] = mapped_column(
         DateTime(timezone=True),
@@ -183,7 +183,7 @@ class ProblemAttempt(Base):
     feedback_provided_at: Mapped[datetime | None] = mapped_column(
         DateTime(timezone=True), nullable=True
     )
-    
+
     # Recognition results
     ink_page_id: Mapped[UUID | None] = mapped_column(
         PG_UUID(as_uuid=True), nullable=True
@@ -197,12 +197,12 @@ class ProblemAttempt(Base):
     recognition_ast: Mapped[dict[str, Any] | None] = mapped_column(
         JSON, nullable=True
     )
-    
+
     # Grading results
     is_correct: Mapped[bool | None] = mapped_column(Boolean, nullable=True)
     grade_score: Mapped[float | None] = mapped_column(Float, nullable=True)
     grade_feedback: Mapped[str | None] = mapped_column(Text, nullable=True)
-    
+
     # Final status
     attempt_status: Mapped[str] = mapped_column(
         String(30), default="presented", nullable=False
