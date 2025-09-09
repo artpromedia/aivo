@@ -40,7 +40,11 @@ allowlist_service = AllowlistService()
 
 
 # Policy management endpoints
-@router.post("/policies", response_model=PolicyResponse, status_code=status.HTTP_201_CREATED)
+@router.post(
+    "/policies",
+    response_model=PolicyResponse,
+    status_code=status.HTTP_201_CREATED
+)
 async def create_policy(
     policy_data: PolicyCreate,
     request: Request,
@@ -51,12 +55,15 @@ async def create_policy(
         # Get user from request headers (in production, use proper auth)
         created_by = request.headers.get("X-User-ID")
 
-        policy = await policy_service.create_policy(policy_data, db, created_by=created_by)
+        policy = await policy_service.create_policy(
+            policy_data, db, created_by=created_by
+        )
         return PolicyResponse.from_orm(policy)
     except Exception as e:
         logger.error("Failed to create policy", error=str(e))
         raise HTTPException(
-            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail="Failed to create policy"
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail="Failed to create policy"
         ) from e
 
 
@@ -195,10 +202,11 @@ async def long_poll_sync(
     try:
         current_dict = json.loads(current_policies)
         return await sync_service.long_poll_sync(device_id, current_dict, db, timeout)
-    except json.JSONDecodeError:
+    except json.JSONDecodeError as exc:
         raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST, detail="Invalid current_policies JSON"
-        )
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Invalid current_policies JSON"
+        ) from exc
     except Exception as e:
         logger.error("Long poll sync failed", error=str(e))
         raise HTTPException(
