@@ -1,0 +1,97 @@
+syntax = "proto3";
+
+package mesh.discovery.v1;
+
+option go_package = "github.com/artpromedia/aivo/infra/mesh/proto/discovery/v1;discoveryv1";
+
+// Service discovery for dynamic mesh configuration
+service Discovery {
+  // Register a service in the mesh
+  rpc RegisterService(ServiceRegistration) returns (ServiceRegistrationResponse);
+  
+  // Deregister a service from the mesh
+  rpc DeregisterService(ServiceDeregistration) returns (ServiceDeregistrationResponse);
+  
+  // Discover services in the mesh
+  rpc DiscoverServices(ServiceDiscoveryRequest) returns (ServiceDiscoveryResponse);
+  
+  // Stream service updates
+  rpc WatchServices(ServiceWatchRequest) returns (stream ServiceUpdate);
+}
+
+message ServiceRegistration {
+  string service_name = 1;
+  string service_version = 2;
+  repeated ServiceEndpoint endpoints = 3;
+  map<string, string> metadata = 4;
+  repeated string tags = 5;
+  HealthCheck health_check = 6;
+}
+
+message ServiceEndpoint {
+  string address = 1;
+  int32 port = 2;
+  string protocol = 3;  // grpc, http, etc.
+  map<string, string> metadata = 4;
+}
+
+message HealthCheck {
+  string path = 1;
+  int32 interval_seconds = 2;
+  int32 timeout_seconds = 3;
+  int32 healthy_threshold = 4;
+  int32 unhealthy_threshold = 5;
+}
+
+message ServiceRegistrationResponse {
+  string service_id = 1;
+  bool success = 2;
+  string message = 3;
+}
+
+message ServiceDeregistration {
+  string service_id = 1;
+  string service_name = 2;
+}
+
+message ServiceDeregistrationResponse {
+  bool success = 1;
+  string message = 2;
+}
+
+message ServiceDiscoveryRequest {
+  string service_name = 1;
+  repeated string tags = 2;
+  map<string, string> filters = 3;
+}
+
+message ServiceDiscoveryResponse {
+  repeated ServiceInfo services = 1;
+}
+
+message ServiceInfo {
+  string service_id = 1;
+  string service_name = 2;
+  string service_version = 3;
+  repeated ServiceEndpoint endpoints = 4;
+  map<string, string> metadata = 5;
+  repeated string tags = 6;
+  string status = 7;  // healthy, unhealthy, unknown
+  int64 last_updated = 8;
+}
+
+message ServiceWatchRequest {
+  string service_name = 1;
+  repeated string tags = 2;
+}
+
+message ServiceUpdate {
+  enum UpdateType {
+    ADDED = 0;
+    UPDATED = 1;
+    REMOVED = 2;
+  }
+  
+  UpdateType type = 1;
+  ServiceInfo service = 2;
+}

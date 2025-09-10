@@ -1,0 +1,36 @@
+syntax = "proto3";
+
+package mesh.health.v1;
+
+option go_package = "github.com/artpromedia/aivo/infra/mesh/proto/health/v1;healthv1";
+
+// Health checking service for mesh components
+service Health {
+  // Check the health status of a service
+  rpc Check(HealthCheckRequest) returns (HealthCheckResponse);
+  
+  // Stream health status updates
+  rpc Watch(HealthCheckRequest) returns (stream HealthCheckResponse);
+}
+
+message HealthCheckRequest {
+  // Service name to check (empty for overall health)
+  string service = 1;
+}
+
+message HealthCheckResponse {
+  enum ServingStatus {
+    UNKNOWN = 0;
+    SERVING = 1;
+    NOT_SERVING = 2;
+    SERVICE_UNKNOWN = 3;  // Used only by the Watch method.
+  }
+  
+  ServingStatus status = 1;
+  
+  // Additional health metadata
+  map<string, string> metadata = 2;
+  
+  // Timestamp of the health check
+  int64 timestamp = 3;
+}

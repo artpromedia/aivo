@@ -1,0 +1,233 @@
+# Prometheus configuration for gRPC mesh monitoring
+global:
+  scrape_interval: 15s
+  evaluation_interval: 15s
+  external_labels:
+    cluster: 'grpc-mesh'
+    environment: 'development'
+
+rule_files:
+  - 'rules/*.yml'
+
+alerting:
+  alertmanagers:
+    - static_configs:
+        - targets:
+            - alertmanager:9093
+
+scrape_configs:
+  # Prometheus self-monitoring
+  - job_name: 'prometheus'
+    static_configs:
+      - targets: ['localhost:9090']
+    metrics_path: /metrics
+    scrape_interval: 30s
+
+  # Envoy proxy metrics (sidecar and ingress)
+  - job_name: 'envoy-sidecars'
+    static_configs:
+      - targets:
+          - 'event-collector-envoy:9901'
+          - 'auth-envoy:9901'
+          - 'learner-envoy:9901'
+          - 'analytics-envoy:9901'
+    metrics_path: /stats/prometheus
+    scrape_interval: 15s
+    relabel_configs:
+      - source_labels: [__address__]
+        target_label: instance
+      - source_labels: [__address__]
+        regex: '([^:]+):.+'
+        target_label: service_name
+        replacement: '${1}'
+
+  # Service discovery via Consul
+  - job_name: 'consul-services'
+    consul_sd_configs:
+      - server: 'consul:8500'
+        services: []
+    relabel_configs:
+      - source_labels: [__meta_consul_service]
+        target_label: job
+      - source_labels: [__meta_consul_service]
+        target_label: service
+      - source_labels: [__meta_consul_node]
+        target_label: node
+      - source_labels: [__meta_consul_tags]
+        regex: ',(?:[^,]+,)*version=([^,]+),?.*'
+        target_label: version
+      - source_labels: [__meta_consul_service_port]
+        target_label: port
+
+  # Application metrics from services
+  - job_name: 'grpc-services'
+    static_configs:
+      - targets:
+          - 'event-collector-svc:8000'
+          - 'auth-svc:8000'
+          - 'learner-svc:8000'
+          - 'analytics-svc:8000'
+    metrics_path: /metrics
+    scrape_interval: 30s
+    scrape_timeout: 10s
+    relabel_configs:
+      - source_labels: [__address__]
+        regex: '([^:]+):.+'
+        target_label: service_name
+        replacement: '${1}'
+
+  # Infrastructure components
+  - job_name: 'consul'
+    static_configs:
+      - targets: ['consul:8500']
+    metrics_path: /v1/agent/metrics
+    params:
+      format: ['prometheus']
+    scrape_interval: 30s
+
+  - job_name: 'jaeger'
+    static_configs:
+      - targets: ['jaeger:14269']
+    metrics_path: /metrics
+    scrape_interval: 30s
+
+  # Database and message queue monitoring
+  - job_name: 'postgres'
+    static_configs:
+      - targets: ['postgres-exporter:9187']
+    scrape_interval: 30s
+
+  - job_name: 'kafka'
+    static_configs:
+      - targets: ['kafka-exporter:9308']
+    scrape_interval: 30s
+
+  # Node/container metrics
+  - job_name: 'node-exporter'
+    static_configs:
+      - targets: ['node-exporter:9100']
+    scrape_interval: 30s
+
+  - job_name: 'cadvisor'
+    static_configs:
+      - targets: ['cadvisor:8080']
+    scrape_interval: 30s
+    metrics_path: /metrics
+
+# Recording rules for common queries
+recording_rules:
+  - name: grpc_mesh_rules
+    interval: 30s
+    rules:
+      # Request rate per service
+      - record: grpc:request_rate
+        expr: |
+          sum(rate(envoy_cluster_upstream_rq_total[5m])) by (service_name, cluster_name)
+
+      # Request latency percentiles
+      - record: grpc:request_duration_p50
+        expr: |
+          histogram_quantile(0.5, sum(rate(envoy_cluster_upstream_rq_time_bucket[5m])) by (service_name, le))
+
+      - record: grpc:request_duration_p95
+        expr: |
+          histogram_quantile(0.95, sum(rate(envoy_cluster_upstream_rq_time_bucket[5m])) by (service_name, le))
+
+      - record: grpc:request_duration_p99
+        expr: |
+          histogram_quantile(0.99, sum(rate(envoy_cluster_upstream_rq_time_bucket[5m])) by (service_name, le))
+
+      # Error rate per service
+      - record: grpc:error_rate
+        expr: |
+          sum(rate(envoy_cluster_upstream_rq_total{envoy_response_code!~"2.."}[5m])) by (service_name) / 
+          sum(rate(envoy_cluster_upstream_rq_total[5m])) by (service_name)
+
+      # Circuit breaker status
+      - record: grpc:circuit_breaker_open
+        expr: |
+          envoy_cluster_circuit_breakers_remaining{priority="default"} == 0
+
+      # Service health status
+      - record: grpc:service_up
+        expr: |
+          up{job=~"grpc-services|envoy-sidecars"}
+
+      # Connection pool utilization
+      - record: grpc:connection_pool_utilization
+        expr: |
+          envoy_cluster_upstream_cx_active / envoy_cluster_circuit_breakers_remaining{priority="default"}
+
+# Alerting rules
+alerting_rules:
+  - name: grpc_mesh_alerts
+    rules:
+      # High error rate alert
+      - alert: HighErrorRate
+        expr: grpc:error_rate > 0.05
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: 'High error rate detected for {{ $labels.service_name }}'
+          description: 'Service {{ $labels.service_name }} has error rate of {{ $value | humanizePercentage }} for more than 5 minutes'
+
+      # Service down alert
+      - alert: ServiceDown
+        expr: grpc:service_up == 0
+        for: 1m
+        labels:
+          severity: critical
+        annotations:
+          summary: 'Service {{ $labels.service_name }} is down'
+          description: 'Service {{ $labels.service_name }} has been down for more than 1 minute'
+
+      # High latency alert
+      - alert: HighLatency
+        expr: grpc:request_duration_p95 > 5
+        for: 10m
+        labels:
+          severity: warning
+        annotations:
+          summary: 'High latency detected for {{ $labels.service_name }}'
+          description: 'Service {{ $labels.service_name }} has 95th percentile latency of {{ $value }}s for more than 10 minutes'
+
+      # Circuit breaker open
+      - alert: CircuitBreakerOpen
+        expr: grpc:circuit_breaker_open == 1
+        for: 1m
+        labels:
+          severity: warning
+        annotations:
+          summary: 'Circuit breaker open for {{ $labels.service_name }}'
+          description: 'Circuit breaker is open for service {{ $labels.service_name }}'
+
+      # High connection pool utilization
+      - alert: HighConnectionPoolUtilization
+        expr: grpc:connection_pool_utilization > 0.8
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: 'High connection pool utilization for {{ $labels.service_name }}'
+          description: 'Connection pool utilization is {{ $value | humanizePercentage }} for service {{ $labels.service_name }}'
+
+      # Consul service discovery issues
+      - alert: ConsulServiceDiscoveryDown
+        expr: up{job="consul"} == 0
+        for: 1m
+        labels:
+          severity: critical
+        annotations:
+          summary: 'Consul service discovery is down'
+          description: 'Consul service discovery has been down for more than 1 minute'
+
+      # Jaeger tracing issues
+      - alert: JaegerTracingDown
+        expr: up{job="jaeger"} == 0
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: 'Jaeger tracing is down'
+          description: 'Jaeger tracing service has been down for more than 5 minutes'

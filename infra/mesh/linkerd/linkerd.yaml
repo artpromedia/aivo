@@ -1,0 +1,190 @@
+# Linkerd Service Mesh Configuration for Internal gRPC Communication
+# Alternative to Envoy for lighter-weight mesh implementation
+
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: linkerd-config
+  namespace: linkerd
+data:
+  global: |
+    {
+      "linkerdNamespace": "linkerd",
+      "cniEnabled": false,
+      "version": "stable-2.14.1",
+      "identityContext": {
+        "trustDomain": "cluster.local",
+        "trustAnchorsPem": "",
+        "issuanceLifetime": "24h0m0s",
+        "clockSkewAllowance": "20s"
+      },
+      "autoInjectContext": null,
+      "omitWebhookSideEffects": false,
+      "clusterDomain": "cluster.local",
+      "clusterNetworks": "10.0.0.0/8,172.16.0.0/12,192.168.0.0/16",
+      "proxyInit": {
+        "ignoreInboundPorts": "",
+        "ignoreOutboundPorts": "",
+        "inboundPort": 4143,
+        "adminPort": 4191,
+        "outboundPort": 4140,
+        "proxyUID": 2102,
+        "proxyLogLevel": "warn,linkerd=info",
+        "proxyVersion": "stable-2.14.1",
+        "proxyInitImage": "cr.l5d.io/linkerd/proxy-init:v2.0.0",
+        "proxyInitImageVersion": "v2.0.0"
+      },
+      "proxy": {
+        "enableExternalProfiles": true,
+        "image": {
+          "name": "cr.l5d.io/linkerd/proxy",
+          "version": "stable-2.14.1"
+        },
+        "logLevel": "warn,linkerd=info",
+        "logFormat": "plain",
+        "ports": {
+          "admin": 4191,
+          "control": 4190,
+          "inbound": 4143,
+          "outbound": 4140
+        },
+        "resources": {
+          "cpu": {
+            "limit": "",
+            "request": "100m"
+          },
+          "memory": {
+            "limit": "",
+            "request": "20Mi"
+          }
+        },
+        "uid": 2102,
+        "waitBeforeExitSeconds": 0,
+        "outboundConnectTimeout": "1000ms",
+        "inboundConnectTimeout": "100ms",
+        "opaquePorts": "25,587,3306,4444,5432,6379,9300,11211",
+        "defaultInboundPolicy": "all-unauthenticated"
+      }
+    }
+
+---
+apiVersion: linkerd.io/v1alpha2
+kind: ServiceProfile
+metadata:
+  name: auth-svc
+  namespace: default
+spec:
+  routes:
+    - name: authenticate
+      condition:
+        method: POST
+        pathRegex: /auth/authenticate
+      timeout: 5s
+      retryBudget:
+        retryRatio: 0.2
+        minRetriesPerSecond: 10
+        ttl: 10s
+    - name: authorize
+      condition:
+        method: POST
+        pathRegex: /auth/authorize
+      timeout: 3s
+      retryBudget:
+        retryRatio: 0.1
+        minRetriesPerSecond: 5
+        ttl: 10s
+
+---
+apiVersion: linkerd.io/v1alpha2
+kind: ServiceProfile
+metadata:
+  name: learner-svc
+  namespace: default
+spec:
+  routes:
+    - name: get_profile
+      condition:
+        method: GET
+        pathRegex: /learner/profile/.*
+      timeout: 10s
+      retryBudget:
+        retryRatio: 0.2
+        minRetriesPerSecond: 10
+        ttl: 10s
+    - name: update_progress
+      condition:
+        method: POST
+        pathRegex: /learner/progress
+      timeout: 15s
+      retryBudget:
+        retryRatio: 0.1
+        minRetriesPerSecond: 5
+        ttl: 10s
+
+---
+apiVersion: linkerd.io/v1alpha2
+kind: ServiceProfile
+metadata:
+  name: event-collector-svc
+  namespace: default
+spec:
+  routes:
+    - name: collect_event
+      condition:
+        method: POST
+        pathRegex: /events/collect
+      timeout: 2s
+      retryBudget:
+        retryRatio: 0.3
+        minRetriesPerSecond: 20
+        ttl: 10s
+      responseClasses:
+        - condition:
+            status:
+              min: 500
+              max: 599
+          isFailure: true
+
+---
+apiVersion: policy.linkerd.io/v1beta1
+kind: Server
+metadata:
+  name: grpc-server
+  namespace: default
+spec:
+  podSelector:
+    matchLabels:
+      app: grpc-service
+  port: grpc
+  proxyProtocol: gRPC
+
+---
+apiVersion: policy.linkerd.io/v1alpha1
+kind: AuthorizationPolicy
+metadata:
+  name: grpc-mesh-policy
+  namespace: default
+spec:
+  targetRef:
+    group: policy.linkerd.io
+    kind: Server
+    name: grpc-server
+  requiredRoutes:
+    - pathRegex: '.*'
+      headers:
+        - name: 'authorization'
+          value: 'Bearer .*'
+
+---
+apiVersion: linkerd.io/v1alpha2
+kind: TrafficSplit
+metadata:
+  name: learner-svc-split
+  namespace: default
+spec:
+  service: learner-svc
+  backends:
+    - service: learner-svc-v1
+      weight: 90
+    - service: learner-svc-v2
+      weight: 10

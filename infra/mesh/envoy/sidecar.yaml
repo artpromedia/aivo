@@ -1,0 +1,434 @@
+# Envoy Sidecar Configuration for Internal gRPC Services
+# Provides outbound connectivity to other services in the mesh
+
+admin:
+  address:
+    socket_address:
+      protocol: TCP
+      address: 127.0.0.1
+      port_value: 9902
+
+node:
+  cluster: mesh-cluster
+  id: ${SERVICE_NAME:-unknown}-sidecar
+  metadata:
+    service: ${SERVICE_NAME:-unknown}
+    version: ${SERVICE_VERSION:-unknown}
+    type: sidecar
+
+static_resources:
+  listeners:
+    # Outbound listener for gRPC client connections
+    - name: outbound_listener
+      address:
+        socket_address:
+          protocol: TCP
+          address: 127.0.0.1
+          port_value: ${OUTBOUND_PORT:-15001}
+
+      filter_chains:
+        - filters:
+            - name: envoy.filters.network.http_connection_manager
+              typed_config:
+                '@type': type.googleapis.com/envoy.extensions.filters.network.http_connection_manager.v3.HttpConnectionManager
+                stat_prefix: outbound_grpc
+                codec_type: HTTP2
+
+                # Request timeouts
+                request_timeout: 30s
+                stream_idle_timeout: 300s
+
+                # Original destination for transparent proxy
+                use_remote_address: true
+                original_ip_detection_extensions:
+                  - name: envoy.extensions.http.original_ip_detection.xff
+                    typed_config:
+                      '@type': type.googleapis.com/envoy.extensions.http.original_ip_detection.xff.v3.XffConfig
+                      xff_num_trusted_hops: 1
+
+                route_config:
+                  name: outbound_routes
+                  virtual_hosts:
+                    # Event Collector Service
+                    - name: event_collector_service
+                      domains:
+                        - 'event-collector-svc:*'
+                        - 'event-collector-svc'
+                      routes:
+                        - match:
+                            prefix: '/'
+                            grpc: {}
+                          route:
+                            cluster: event_collector_service
+                            timeout: 10s
+                            retry_policy:
+                              retry_on: '5xx,reset,connect-failure,refused-stream'
+                              num_retries: 3
+                              per_try_timeout: 3s
+                              retry_back_off:
+                                base_interval: 0.25s
+                                max_interval: 2s
+
+                    # Auth Service
+                    - name: auth_service
+                      domains:
+                        - 'auth-svc:*'
+                        - 'auth-svc'
+                      routes:
+                        - match:
+                            prefix: '/'
+                            grpc: {}
+                          route:
+                            cluster: auth_service
+                            timeout: 5s
+                            retry_policy:
+                              retry_on: '5xx,reset,connect-failure,refused-stream'
+                              num_retries: 2
+                              per_try_timeout: 2s
+                              retry_back_off:
+                                base_interval: 0.1s
+                                max_interval: 1s
+
+                    # Learner Service
+                    - name: learner_service
+                      domains:
+                        - 'learner-svc:*'
+                        - 'learner-svc'
+                      routes:
+                        - match:
+                            prefix: '/'
+                            grpc: {}
+                          route:
+                            cluster: learner_service
+                            timeout: 15s
+                            retry_policy:
+                              retry_on: '5xx,reset,connect-failure,refused-stream'
+                              num_retries: 3
+                              per_try_timeout: 5s
+                              retry_back_off:
+                                base_interval: 0.5s
+                                max_interval: 3s
+
+                    # Analytics Service
+                    - name: analytics_service
+                      domains:
+                        - 'analytics-svc:*'
+                        - 'analytics-svc'
+                      routes:
+                        - match:
+                            prefix: '/'
+                            grpc: {}
+                          route:
+                            cluster: analytics_service
+                            timeout: 20s
+                            retry_policy:
+                              retry_on: '5xx,reset,connect-failure,refused-stream'
+                              num_retries: 2
+                              per_try_timeout: 8s
+                              retry_back_off:
+                                base_interval: 1s
+                                max_interval: 5s
+
+                    # Default catch-all for other services
+                    - name: default_service
+                      domains: ['*']
+                      routes:
+                        - match:
+                            prefix: '/'
+                            grpc: {}
+                          route:
+                            cluster: dynamic_service
+                            timeout: 15s
+                            retry_policy:
+                              retry_on: '5xx,reset,connect-failure,refused-stream'
+                              num_retries: 3
+                              per_try_timeout: 5s
+                              retry_back_off:
+                                base_interval: 0.5s
+                                max_interval: 2s
+
+                http_filters:
+                  - name: envoy.filters.http.grpc_stats
+                    typed_config:
+                      '@type': type.googleapis.com/envoy.extensions.filters.http.grpc_stats.v3.FilterConfig
+                      emit_filter_state: true
+                      enable_upstream_stats: true
+
+                  - name: envoy.filters.http.router
+
+  clusters:
+    # Event Collector Service Cluster
+    - name: event_collector_service
+      connect_timeout: 2s
+      type: STRICT_DNS
+      lb_policy: ROUND_ROBIN
+      http2_protocol_options:
+        initial_stream_window_size: 65536
+        initial_connection_window_size: 1048576
+
+      circuit_breakers:
+        thresholds:
+          - priority: DEFAULT
+            max_connections: 50
+            max_pending_requests: 100
+            max_requests: 200
+            max_retries: 5
+            retry_budget:
+              budget_percent:
+                value: 20.0
+              min_retry_concurrency: 2
+
+      health_checks:
+        - timeout: 3s
+          interval: 30s
+          unhealthy_threshold: 3
+          healthy_threshold: 2
+          grpc_health_check:
+            service_name: 'eventcollector.EventCollectorService'
+
+      load_assignment:
+        cluster_name: event_collector_service
+        endpoints:
+          - lb_endpoints:
+              - endpoint:
+                  address:
+                    socket_address:
+                      address: event-collector-svc
+                      port_value: 50051
+
+      transport_socket:
+        name: envoy.transport_sockets.tls
+        typed_config:
+          '@type': type.googleapis.com/envoy.extensions.transport_sockets.tls.v3.UpstreamTlsContext
+          common_tls_context:
+            tls_certificates:
+              - certificate_chain:
+                  filename: /etc/ssl/certs/service.crt
+                private_key:
+                  filename: /etc/ssl/private/service.key
+            validation_context:
+              trusted_ca:
+                filename: /etc/ssl/certs/ca.crt
+              match_typed_subject_alt_names:
+                - san_type: DNS
+                  matcher:
+                    exact: event-collector-svc
+
+    # Auth Service Cluster
+    - name: auth_service
+      connect_timeout: 1s
+      type: STRICT_DNS
+      lb_policy: ROUND_ROBIN
+      http2_protocol_options: {}
+
+      circuit_breakers:
+        thresholds:
+          - priority: DEFAULT
+            max_connections: 100
+            max_pending_requests: 200
+            max_requests: 500
+            max_retries: 3
+            retry_budget:
+              budget_percent:
+                value: 15.0
+              min_retry_concurrency: 1
+
+      health_checks:
+        - timeout: 2s
+          interval: 15s
+          unhealthy_threshold: 2
+          healthy_threshold: 2
+          grpc_health_check:
+            service_name: 'auth.AuthService'
+
+      load_assignment:
+        cluster_name: auth_service
+        endpoints:
+          - lb_endpoints:
+              - endpoint:
+                  address:
+                    socket_address:
+                      address: auth-svc
+                      port_value: 50051
+
+      transport_socket:
+        name: envoy.transport_sockets.tls
+        typed_config:
+          '@type': type.googleapis.com/envoy.extensions.transport_sockets.tls.v3.UpstreamTlsContext
+          common_tls_context:
+            tls_certificates:
+              - certificate_chain:
+                  filename: /etc/ssl/certs/service.crt
+                private_key:
+                  filename: /etc/ssl/private/service.key
+            validation_context:
+              trusted_ca:
+                filename: /etc/ssl/certs/ca.crt
+              match_typed_subject_alt_names:
+                - san_type: DNS
+                  matcher:
+                    exact: auth-svc
+
+    # Learner Service Cluster
+    - name: learner_service
+      connect_timeout: 2s
+      type: STRICT_DNS
+      lb_policy: ROUND_ROBIN
+      http2_protocol_options: {}
+
+      circuit_breakers:
+        thresholds:
+          - priority: DEFAULT
+            max_connections: 75
+            max_pending_requests: 150
+            max_requests: 300
+            max_retries: 5
+            retry_budget:
+              budget_percent:
+                value: 25.0
+              min_retry_concurrency: 3
+
+      load_assignment:
+        cluster_name: learner_service
+        endpoints:
+          - lb_endpoints:
+              - endpoint:
+                  address:
+                    socket_address:
+                      address: learner-svc
+                      port_value: 50051
+
+      transport_socket:
+        name: envoy.transport_sockets.tls
+        typed_config:
+          '@type': type.googleapis.com/envoy.extensions.transport_sockets.tls.v3.UpstreamTlsContext
+          common_tls_context:
+            tls_certificates:
+              - certificate_chain:
+                  filename: /etc/ssl/certs/service.crt
+                private_key:
+                  filename: /etc/ssl/private/service.key
+            validation_context:
+              trusted_ca:
+                filename: /etc/ssl/certs/ca.crt
+              match_typed_subject_alt_names:
+                - san_type: DNS
+                  matcher:
+                    exact: learner-svc
+
+    # Analytics Service Cluster
+    - name: analytics_service
+      connect_timeout: 3s
+      type: STRICT_DNS
+      lb_policy: ROUND_ROBIN
+      http2_protocol_options: {}
+
+      circuit_breakers:
+        thresholds:
+          - priority: DEFAULT
+            max_connections: 30
+            max_pending_requests: 50
+            max_requests: 100
+            max_retries: 2
+            retry_budget:
+              budget_percent:
+                value: 10.0
+              min_retry_concurrency: 1
+
+      load_assignment:
+        cluster_name: analytics_service
+        endpoints:
+          - lb_endpoints:
+              - endpoint:
+                  address:
+                    socket_address:
+                      address: analytics-svc
+                      port_value: 50051
+
+      transport_socket:
+        name: envoy.transport_sockets.tls
+        typed_config:
+          '@type': type.googleapis.com/envoy.extensions.transport_sockets.tls.v3.UpstreamTlsContext
+          common_tls_context:
+            tls_certificates:
+              - certificate_chain:
+                  filename: /etc/ssl/certs/service.crt
+                private_key:
+                  filename: /etc/ssl/private/service.key
+            validation_context:
+              trusted_ca:
+                filename: /etc/ssl/certs/ca.crt
+              match_typed_subject_alt_names:
+                - san_type: DNS
+                  matcher:
+                    exact: analytics-svc
+
+    # Dynamic service discovery cluster
+    - name: dynamic_service
+      connect_timeout: 2s
+      type: EDS
+      eds_cluster_config:
+        eds_config:
+          resource_api_version: V3
+          api_config_source:
+            api_type: GRPC
+            transport_api_version: V3
+            grpc_services:
+              - envoy_grpc:
+                  cluster_name: service_discovery
+
+      circuit_breakers:
+        thresholds:
+          - priority: DEFAULT
+            max_connections: 50
+            max_pending_requests: 100
+            max_requests: 200
+            max_retries: 3
+
+    # Service discovery cluster
+    - name: service_discovery
+      connect_timeout: 2s
+      type: STRICT_DNS
+      lb_policy: ROUND_ROBIN
+      load_assignment:
+        cluster_name: service_discovery
+        endpoints:
+          - lb_endpoints:
+              - endpoint:
+                  address:
+                    socket_address:
+                      address: ${DISCOVERY_HOST:-consul}
+                      port_value: ${DISCOVERY_PORT:-8500}
+
+# Dynamic configuration for service discovery
+dynamic_resources:
+  cds_config:
+    resource_api_version: V3
+    api_config_source:
+      api_type: GRPC
+      transport_api_version: V3
+      grpc_services:
+        - envoy_grpc:
+            cluster_name: service_discovery
+      set_node_on_first_message: true
+
+# Stats configuration
+stats_sinks:
+  - name: envoy.stat_sinks.statsd
+    typed_config:
+      '@type': type.googleapis.com/envoy.extensions.stat_sinks.statsd.v3.StatsdSink
+      address:
+        socket_address:
+          protocol: UDP
+          address: ${STATSD_HOST:-localhost}
+          port_value: ${STATSD_PORT:-8125}
+      prefix: grpc_mesh.${SERVICE_NAME:-unknown}
+
+stats_config:
+  stats_tags:
+    - tag_name: service
+      regex: "^cluster\\.(\\w+_service)\\."
+    - tag_name: method
+      regex: "^cluster\\.[^.]+\\.grpc\\.([^.]+)\\."
+    - tag_name: status
+      regex: "^cluster\\.[^.]+\\.grpc\\.[^.]+\\.([^.]+)\\."

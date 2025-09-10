@@ -1,0 +1,61 @@
+syntax = "proto3";
+
+package mesh.auth.v1;
+
+option go_package = "github.com/artpromedia/aivo/infra/mesh/proto/auth/v1;authv1";
+
+// Internal authentication service for mesh-to-mesh communication
+service MeshAuth {
+  // Authenticate service-to-service calls
+  rpc AuthenticateService(ServiceAuthRequest) returns (ServiceAuthResponse);
+  
+  // Validate service identity
+  rpc ValidateIdentity(IdentityValidationRequest) returns (IdentityValidationResponse);
+  
+  // Refresh service credentials
+  rpc RefreshCredentials(CredentialRefreshRequest) returns (CredentialRefreshResponse);
+}
+
+message ServiceAuthRequest {
+  string service_name = 1;
+  string service_version = 2;
+  string client_certificate = 3;
+  repeated string scopes = 4;
+  map<string, string> metadata = 5;
+}
+
+message ServiceAuthResponse {
+  bool authenticated = 1;
+  string access_token = 2;
+  int64 expires_at = 3;
+  repeated string granted_scopes = 4;
+  string error_message = 5;
+}
+
+message IdentityValidationRequest {
+  string access_token = 1;
+  string requested_scope = 2;
+  string target_service = 3;
+}
+
+message IdentityValidationResponse {
+  bool valid = 1;
+  string service_name = 2;
+  string service_version = 3;
+  repeated string scopes = 4;
+  int64 expires_at = 5;
+  string error_message = 6;
+}
+
+message CredentialRefreshRequest {
+  string service_name = 1;
+  string refresh_token = 2;
+}
+
+message CredentialRefreshResponse {
+  bool success = 1;
+  string access_token = 2;
+  string refresh_token = 3;
+  int64 expires_at = 4;
+  string error_message = 5;
+}
