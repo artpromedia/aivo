@@ -1,22 +1,34 @@
 # Internal gRPC Mesh with mTLS and Advanced Routing
 
-This document describes the internal gRPC service mesh implementation for the Aivo Platform, providing secure, reliable, and observable inter-service communication with **mTLS authentication**, **per-route deadlines**, **circuit breakers**, **retries with exponential backoff**, and **distributed tracing**.
+This document describes the internal gRPC service mesh implementation for the
+Aivo Platform, providing secure, reliable, and observable inter-service
+communication with **mTLS authentication**, **per-route deadlines**,
+**circuit breakers**, **retries with exponential backoff**, and **distributed
+tracing**.
 
 ## Architecture Overview
 
 The gRPC mesh provides:
-- **mTLS Security**: Mutual TLS authentication between all services with certificate rotation
-- **Per-Route Deadlines**: Configurable timeouts per service endpoint (auth: 5s, learner: 10s, events: 2s)
-- **Circuit Breakers**: Automatic failure detection with 5-failure threshold and 60s recovery timeout
-- **Retries & Backoff**: Exponential backoff with jitter (0.1s base, 1s max, 3 retries max)
-- **Observability**: Distributed tracing with Jaeger, metrics with Prometheus, structured logging
-- **Service Discovery**: Dynamic service registration with Consul and health checking
+
+- **mTLS Security**: Mutual TLS authentication between all services with
+  certificate rotation
+- **Per-Route Deadlines**: Configurable timeouts per service endpoint
+  (auth: 5s, learner: 10s, events: 2s)
+- **Circuit Breakers**: Automatic failure detection with 5-failure threshold
+  and 60s recovery timeout
+- **Retries & Backoff**: Exponential backoff with jitter (0.1s base, 1s max,
+  3 retries max)
+- **Observability**: Distributed tracing with Jaeger, metrics with Prometheus,
+  structured logging
+- **Service Discovery**: Dynamic service registration with Consul and health
+  checking
 
 ## Components
 
 ### 1. Envoy Proxy Sidecars
 
 Each service runs with an Envoy proxy sidecar that handles:
+
 - **mTLS termination and origination** with automatic certificate validation
 - **Load balancing** with round-robin and health-based algorithms
 - **Circuit breaking** with configurable thresholds and recovery timeouts
@@ -25,6 +37,7 @@ Each service runs with an Envoy proxy sidecar that handles:
 - **Distributed tracing** with automatic span propagation
 
 **Key Configuration Features:**
+
 - Per-route timeouts: Auth (5s), Learner (10s), Event Collector (2s)
 - Circuit breaker: 5 failures → OPEN, 60s recovery
 - Retry policy: 3 retries with exponential backoff (0.1s → 1s)
@@ -33,6 +46,7 @@ Each service runs with an Envoy proxy sidecar that handles:
 ### 2. Linkerd Alternative Configuration
 
 For lighter-weight mesh implementation:
+
 - **ServiceProfiles** with per-route retry budgets and timeouts
 - **AuthorizationPolicies** for secure service-to-service communication
 - **TrafficSplits** for canary deployments and gradual rollouts
@@ -269,6 +283,7 @@ common_tls_context:
 ### Common Issues
 
 1. **Certificate Validation Failures**
+
    ```bash
    # Verify certificate chain
    openssl verify -CAfile ca.crt service.crt
@@ -278,6 +293,7 @@ common_tls_context:
    ```
 
 2. **Circuit Breaker Triggering**
+
    ```bash
    # Check circuit breaker status
    curl localhost:9901/stats | grep circuit_breaker
@@ -287,6 +303,7 @@ common_tls_context:
    ```
 
 3. **Timeout Issues**
+
    ```yaml
    # Increase timeouts for slow services
    timeout: 30s
@@ -329,6 +346,7 @@ openssl s_client -connect auth-svc:50051 -cert service.crt -key service.key -CAf
 ### From Direct gRPC Calls
 
 1. **Update Client Code**:
+
    ```python
    # Before
    channel = grpc.aio.insecure_channel("auth-svc:50051")
@@ -455,7 +473,7 @@ circuit_breakers:
 
 ### Certificate Structure
 
-```
+```text
 certs/
 ├── ca/
 │   ├── ca.crt              # Root CA certificate
@@ -471,6 +489,7 @@ certs/
 ### Subject Alternative Names (SAN)
 
 Each service certificate includes multiple SAN entries:
+
 - `service-name`
 - `service-name.default`
 - `service-name.default.svc`
@@ -489,6 +508,7 @@ Each service certificate includes multiple SAN entries:
 ### Setup Steps
 
 1. **Generate Certificates**:
+
    ```bash
    # Linux/macOS
    ./scripts/generate-certs.sh ./certs
@@ -498,17 +518,20 @@ Each service certificate includes multiple SAN entries:
    ```
 
 2. **Start Infrastructure**:
+
    ```bash
    docker-compose up -d consul jaeger prometheus grafana
    ```
 
 3. **Deploy Services**:
+
    ```bash
    docker-compose up -d event-collector-svc event-collector-envoy
    docker-compose up -d auth-svc auth-envoy
    ```
 
 4. **Verify Deployment**:
+
    ```bash
    # Check Envoy admin interfaces
    curl http://localhost:9901/clusters
@@ -540,12 +563,14 @@ node:
 ### Metrics
 
 **Envoy Metrics** (via Prometheus):
+
 - Request rates and latencies
 - Circuit breaker status
 - Connection pool statistics
 - Retry and timeout counts
 
 **Custom Metrics** (via StatsD):
+
 - Business logic metrics
 - Application performance metrics
 - Error rates and types
@@ -553,6 +578,7 @@ node:
 ### Tracing
 
 **Jaeger Integration**:
+
 - Automatic trace propagation
 - Service-to-service call graphs
 - Latency analysis
@@ -561,6 +587,7 @@ node:
 ### Health Checks
 
 **gRPC Health Checks**:
+
 ```protobuf
 service Health {
   rpc Check(HealthCheckRequest) returns (HealthCheckResponse);
@@ -569,6 +596,7 @@ service Health {
 ```
 
 **Envoy Health Checks**:
+
 - Periodic health check requests
 - Automatic service removal on failure
 - Health-based load balancing
@@ -663,6 +691,7 @@ docker logs mesh_consul | grep -E "(health|service)"
 ### Adding a New Service
 
 1. **Implement gRPC Server**:
+
    ```python
    # Python example
    import grpc
@@ -682,12 +711,14 @@ docker logs mesh_consul | grep -E "(health|service)"
    - Add service-specific routing rules
 
 3. **Generate Certificates**:
+
    ```bash
    # Add service to certificate generation script
    ./scripts/generate-certs.sh ./certs
    ```
 
 4. **Update Docker Compose**:
+
    ```yaml
    new-service:
      build: ../../services/new-service

@@ -1,0 +1,518 @@
+# GraphQL Schema for S2B-01 Gateway
+# Exposes unified API for learner, IEP, analytics, and dashboard services
+
+scalar DateTime
+scalar JSON
+
+# JWT Claims and Authentication Context
+type User {
+  id: ID!
+  email: String!
+  role: UserRole!
+  tenantId: String
+  scopes: [String!]!
+}
+
+enum UserRole {
+  STUDENT
+  TEACHER
+  STAFF
+  DISTRICT_ADMIN
+  SYSTEM_ADMIN
+}
+
+# Learner Management Types
+type Learner {
+  id: ID!
+  tenantId: String!
+  firstName: String!
+  lastName: String!
+  email: String
+  dateOfBirth: DateTime
+  grade: String
+  enrollmentStatus: EnrollmentStatus!
+  guardians: [Guardian!]!
+  ieps: [IepDoc!]!
+  analytics: LearnerAnalytics
+  createdAt: DateTime!
+  updatedAt: DateTime!
+}
+
+type Guardian {
+  id: ID!
+  learnerId: ID!
+  firstName: String!
+  lastName: String!
+  email: String
+  phone: String
+  relationship: GuardianRelationship!
+  isPrimary: Boolean!
+  createdAt: DateTime!
+}
+
+enum EnrollmentStatus {
+  ACTIVE
+  INACTIVE
+  GRADUATED
+  TRANSFERRED
+}
+
+enum GuardianRelationship {
+  PARENT
+  GUARDIAN
+  FOSTER_PARENT
+  GRANDPARENT
+  OTHER
+}
+
+# IEP Document Types (from existing IEP service)
+type IepDoc {
+  id: ID!
+  studentId: ID!
+  student: Learner
+  tenantId: String!
+  
+  # Document metadata
+  documentVersion: String!
+  status: IepStatus!
+  effectiveDate: DateTime!
+  expirationDate: DateTime!
+  
+  # Student information
+  studentInfo: StudentInfo!
+  
+  # Educational content
+  goals: [Goal!]!
+  accommodations: [Accommodation!]!
+  modifications: [Modification!]!
+  services: [Service!]!
+  
+  # Approval workflow
+  approvalRecords: [ApprovalRecord!]!
+  currentApprovalStep: Int!
+  
+  # CRDT operations for collaborative editing
+  vectorClock: JSON!
+  operations: [CrdtOperation!]!
+  
+  # Metadata
+  createdBy: String!
+  lastModifiedBy: String!
+  createdAt: DateTime!
+  updatedAt: DateTime!
+}
+
+enum IepStatus {
+  DRAFT
+  SUBMITTED_FOR_APPROVAL
+  PARTIALLY_APPROVED
+  APPROVED
+  ACTIVE
+  EXPIRED
+  ARCHIVED
+}
+
+type StudentInfo {
+  fullName: String!
+  dateOfBirth: DateTime!
+  grade: String!
+  disability: String!
+  placementSetting: String!
+  assessmentAccommodations: [String!]!
+}
+
+type Goal {
+  id: ID!
+  domain: GoalDomain!
+  description: String!
+  measurableAnnualGoal: String!
+  benchmarks: [Benchmark!]!
+  progressReports: [ProgressReport!]!
+  createdAt: DateTime!
+}
+
+enum GoalDomain {
+  ACADEMIC
+  FUNCTIONAL
+  BEHAVIORAL
+  COMMUNICATION
+  SOCIAL
+}
+
+type Benchmark {
+  id: ID!
+  description: String!
+  targetDate: DateTime!
+  achieved: Boolean!
+}
+
+type ProgressReport {
+  id: ID!
+  reportingPeriod: String!
+  progressTowardGoal: String!
+  reportDate: DateTime!
+  reportedBy: String!
+}
+
+type Accommodation {
+  id: ID!
+  category: AccommodationCategory!
+  description: String!
+  setting: AccommodationSetting!
+  frequency: String!
+}
+
+enum AccommodationCategory {
+  PRESENTATION
+  RESPONSE
+  TIMING
+  SETTING
+  ASSISTIVE_TECHNOLOGY
+}
+
+enum AccommodationSetting {
+  CLASSROOM
+  ASSESSMENT
+  BOTH
+}
+
+type Modification {
+  id: ID!
+  subject: String!
+  description: String!
+  justification: String!
+}
+
+type Service {
+  id: ID!
+  serviceType: ServiceType!
+  frequency: String!
+  duration: String!
+  location: String!
+  provider: String!
+  startDate: DateTime!
+  endDate: DateTime
+}
+
+enum ServiceType {
+  SPECIAL_EDUCATION
+  SPEECH_THERAPY
+  OCCUPATIONAL_THERAPY
+  PHYSICAL_THERAPY
+  COUNSELING
+  BEHAVIORAL_SUPPORT
+}
+
+type ApprovalRecord {
+  id: ID!
+  approvalStep: Int!
+  approverRole: String!
+  approverUserId: String!
+  status: ApprovalStatus!
+  comments: String
+  approvedAt: DateTime
+  createdAt: DateTime!
+}
+
+enum ApprovalStatus {
+  PENDING
+  APPROVED
+  REJECTED
+  REQUIRES_REVISION
+}
+
+type CrdtOperation {
+  id: ID!
+  operationType: CrdtOperationType!
+  fieldPath: String!
+  value: JSON
+  vectorClock: JSON!
+  authorId: String!
+  timestamp: DateTime!
+}
+
+enum CrdtOperationType {
+  INSERT
+  UPDATE
+  DELETE
+  MERGE
+}
+
+# Analytics Types
+type LearnerAnalytics {
+  learnerId: ID!
+  academicProgress: AcademicProgress!
+  goalProgress: [GoalProgress!]!
+  attendanceMetrics: AttendanceMetrics!
+  behavioralData: BehavioralData!
+  assessmentScores: [AssessmentScore!]!
+  interventionTracking: [InterventionTracking!]!
+  lastUpdated: DateTime!
+}
+
+type AcademicProgress {
+  currentGPA: Float
+  gradeLevel: String!
+  subjectGrades: [SubjectGrade!]!
+  progressTrend: ProgressTrend!
+  comparedToGrade: ComparisonMetric!
+}
+
+type SubjectGrade {
+  subject: String!
+  currentGrade: String!
+  percentage: Float
+  trend: ProgressTrend!
+}
+
+enum ProgressTrend {
+  IMPROVING
+  STABLE
+  DECLINING
+}
+
+type ComparisonMetric {
+  percentile: Float
+  standardDeviations: Float
+  comparison: String!
+}
+
+type GoalProgress {
+  goalId: ID!
+  goal: Goal!
+  completionPercentage: Float!
+  onTrack: Boolean!
+  projectedCompletion: DateTime
+  recentBenchmarks: [Benchmark!]!
+}
+
+type AttendanceMetrics {
+  attendanceRate: Float!
+  absences: Int!
+  tardies: Int!
+  attendanceTrend: ProgressTrend!
+  lastThirtyDays: Float!
+}
+
+type BehavioralData {
+  incidentCount: Int!
+  positiveReinforcements: Int!
+  interventionsActive: Int!
+  behavioralGoalsOnTrack: Int!
+  trend: ProgressTrend!
+}
+
+type AssessmentScore {
+  assessmentId: ID!
+  assessmentName: String!
+  subject: String!
+  score: Float!
+  percentile: Float
+  dateAdministered: DateTime!
+  accommodationsUsed: [String!]!
+}
+
+type InterventionTracking {
+  interventionId: ID!
+  interventionType: String!
+  startDate: DateTime!
+  endDate: DateTime
+  effectiveness: Float
+  status: InterventionStatus!
+}
+
+enum InterventionStatus {
+  ACTIVE
+  COMPLETED
+  DISCONTINUED
+  ON_HOLD
+}
+
+# Dashboard Analytics Types
+type DashboardMetrics {
+  totalLearners: Int!
+  activeIeps: Int!
+  pendingApprovals: Int!
+  upcomingDeadlines: Int!
+  recentActivity: [ActivityItem!]!
+  performanceOverview: PerformanceOverview!
+}
+
+type ActivityItem {
+  id: ID!
+  type: ActivityType!
+  description: String!
+  timestamp: DateTime!
+  userId: String!
+  metadata: JSON
+}
+
+enum ActivityType {
+  IEP_CREATED
+  IEP_APPROVED
+  GOAL_UPDATED
+  ASSESSMENT_COMPLETED
+  MEETING_SCHEDULED
+}
+
+type PerformanceOverview {
+  totalStudentsServed: Int!
+  iepComplianceRate: Float!
+  averageGoalProgress: Float!
+  servicesDelivered: Int!
+  upcomingMeetings: Int!
+}
+
+# Input Types
+input LearnerInput {
+  firstName: String!
+  lastName: String!
+  email: String
+  dateOfBirth: DateTime
+  grade: String
+  enrollmentStatus: EnrollmentStatus!
+}
+
+input GuardianInput {
+  firstName: String!
+  lastName: String!
+  email: String
+  phone: String
+  relationship: GuardianRelationship!
+  isPrimary: Boolean!
+}
+
+input IepDocInput {
+  studentId: ID!
+  effectiveDate: DateTime!
+  expirationDate: DateTime!
+  studentInfo: StudentInfoInput!
+}
+
+input StudentInfoInput {
+  fullName: String!
+  dateOfBirth: DateTime!
+  grade: String!
+  disability: String!
+  placementSetting: String!
+  assessmentAccommodations: [String!]!
+}
+
+input GoalInput {
+  domain: GoalDomain!
+  description: String!
+  measurableAnnualGoal: String!
+  benchmarks: [BenchmarkInput!]!
+}
+
+input BenchmarkInput {
+  description: String!
+  targetDate: DateTime!
+}
+
+input AccommodationInput {
+  category: AccommodationCategory!
+  description: String!
+  setting: AccommodationSetting!
+  frequency: String!
+}
+
+input CrdtOperationInput {
+  operationType: CrdtOperationType!
+  fieldPath: String!
+  value: JSON
+  vectorClock: JSON!
+}
+
+# Queries
+type Query {
+  # Health check
+  health: String!
+  
+  # Learner queries
+  learner(id: ID!): Learner
+  learners(
+    tenantId: String
+    enrollmentStatus: EnrollmentStatus
+    grade: String
+    limit: Int = 50
+    offset: Int = 0
+  ): [Learner!]!
+  
+  # IEP queries
+  iep(id: ID!): IepDoc
+  ieps(
+    studentId: ID
+    tenantId: String
+    status: IepStatus
+    limit: Int = 50
+    offset: Int = 0
+  ): [IepDoc!]!
+  studentIeps(studentId: ID!): [IepDoc!]!
+  activeIeps(tenantId: String): [IepDoc!]!
+  pendingApprovals(tenantId: String): [IepDoc!]!
+  
+  # Analytics queries
+  learnerAnalytics(learnerId: ID!): LearnerAnalytics
+  dashboardMetrics(tenantId: String): DashboardMetrics!
+  
+  # Performance queries
+  academicTrends(
+    tenantId: String
+    timeframe: String = "30d"
+  ): [SubjectGrade!]!
+  goalProgressSummary(
+    tenantId: String
+    timeframe: String = "current"
+  ): [GoalProgress!]!
+}
+
+# Mutations
+type Mutation {
+  # Learner mutations
+  createLearner(input: LearnerInput!): Learner!
+  updateLearner(id: ID!, input: LearnerInput!): Learner!
+  addGuardian(learnerId: ID!, guardian: GuardianInput!): Guardian!
+  
+  # IEP mutations
+  createIep(input: IepDocInput!): IepDoc!
+  saveDraft(
+    iepId: ID!
+    operations: [CrdtOperationInput!]!
+  ): IepDoc!
+  submitForApproval(iepId: ID!): IepDoc!
+  addGoal(iepId: ID!, goal: GoalInput!): Goal!
+  addAccommodation(
+    iepId: ID!
+    accommodation: AccommodationInput!
+  ): Accommodation!
+  
+  # Progress tracking
+  updateGoalProgress(
+    goalId: ID!
+    progressReport: String!
+    reportingPeriod: String!
+  ): ProgressReport!
+  
+  # Approval workflow
+  approveIep(
+    iepId: ID!
+    comments: String
+  ): ApprovalRecord!
+  rejectIep(
+    iepId: ID!
+    comments: String!
+  ): ApprovalRecord!
+}
+
+# Subscriptions for real-time updates
+type Subscription {
+  # IEP real-time collaboration
+  iepDocumentUpdated(iepId: ID!): IepDoc!
+  
+  # Dashboard updates
+  dashboardMetricsUpdated(tenantId: String!): DashboardMetrics!
+  
+  # Approval notifications
+  approvalStatusChanged(tenantId: String!): ApprovalRecord!
+}

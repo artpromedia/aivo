@@ -55,7 +55,7 @@ class MeshConfig:
     keepalive_time_ms: int = 30000
     keepalive_timeout_ms: int = 5000
 
-    def validate(self) -> None:
+    def validate(self: "MeshConfig") -> None:
         """Validate configuration parameters."""
         if not self.service_name:
             msg = "service_name is required"
@@ -76,7 +76,7 @@ class CircuitBreakerState:
     """Simple circuit breaker implementation for gRPC clients."""
 
     def __init__(
-        self,
+        self: "CircuitBreakerState",
         failure_threshold: int = 5,
         recovery_timeout: float = 60.0,
         timeout: float = 10.0,
@@ -88,7 +88,7 @@ class CircuitBreakerState:
         self.last_failure_time = 0.0
         self.state = "CLOSED"  # CLOSED, OPEN, HALF_OPEN
 
-    def call_allowed(self) -> bool:
+    def call_allowed(self: "CircuitBreakerState") -> bool:
         """Check if a call is allowed based on circuit breaker state."""
         if self.state == "CLOSED":
             return True
@@ -100,12 +100,12 @@ class CircuitBreakerState:
         else:  # HALF_OPEN
             return True
 
-    def record_success(self) -> None:
+    def record_success(self: "CircuitBreakerState") -> None:
         """Record a successful operation."""
         self.failure_count = 0
         self.state = "CLOSED"
 
-    def record_failure(self) -> None:
+    def record_failure(self: "CircuitBreakerState") -> None:
         """Record a failed operation."""
         self.failure_count += 1
         self.last_failure_time = time.time()
@@ -118,13 +118,13 @@ class CircuitBreakerState:
 class MeshClient:
     """gRPC mesh client with mTLS, circuit breaking, and observability."""
 
-    def __init__(self, config: MeshConfig) -> None:
+    def __init__(self: "MeshClient", config: MeshConfig) -> None:
         self.config = config
         self.circuit_breakers: dict[str, CircuitBreakerState] = {}
         self._tracer = None
         self._setup_tracing()
 
-    def _setup_tracing(self) -> None:
+    def _setup_tracing(self: "MeshClient") -> None:
         """Set up OpenTelemetry tracing for the mesh client."""
         if not self.config.enable_tracing or not OBSERVABILITY_AVAILABLE:
             return
@@ -151,12 +151,11 @@ class MeshClient:
             self._tracer = trace.get_tracer(__name__)
             logger.info("Tracing initialized for mesh client")
 
-        except Exception as e:
+        except ImportError as e:
             logger.warning("Failed to initialize tracing: %s", e)
             self._tracer = None
-            logger.warning(f"Failed to initialize tracing: {e}")
 
-    def _load_certificates(self) -> grpc.ChannelCredentials:
+    def _load_certificates(self: "MeshClient") -> grpc.ChannelCredentials:
         """Load mTLS certificates for secure communication."""
         try:
             # Load CA certificate
@@ -194,11 +193,13 @@ class MeshClient:
             logger.info("mTLS certificates loaded successfully")
             return credentials
 
-        except Exception as e:
-            logger.error(f"Failed to load certificates: {e}")
+        except (FileNotFoundError, PermissionError, OSError) as e:
+            logger.error("Failed to load certificates: %s", e)
             raise
 
-    def _get_circuit_breaker(self, service_name: str) -> CircuitBreakerState:
+    def _get_circuit_breaker(
+        self: "MeshClient", service_name: str
+    ) -> CircuitBreakerState:
         """Get or create a circuit breaker for a service."""
         if service_name not in self.circuit_breakers:
             self.circuit_breakers[service_name] = CircuitBreakerState()
@@ -206,7 +207,7 @@ class MeshClient:
 
     @asynccontextmanager
     async def get_channel(
-        self, service_name: str, target_host: str | None = None
+        self: "MeshClient", service_name: str, target_host: str | None = None
     ) -> AsyncGenerator[aio.Channel, None]:
         """
         Get a secure gRPC channel to a service through the mesh.
@@ -252,19 +253,21 @@ class MeshClient:
                 channel.channel_ready(), timeout=self.config.connection_timeout
             )
             circuit_breaker.record_success()
-            logger.debug(f"Connected to service: {service_name}")
+            logger.debug("Connected to service: %s", service_name)
 
             yield channel
 
-        except Exception as e:
+        except (grpc.RpcError, asyncio.TimeoutError, OSError) as e:
             circuit_breaker.record_failure()
-            logger.error(f"Failed to connect to service {service_name}: {e}")
+            logger.error(
+                "Failed to connect to service %s: %s", service_name, e
+            )
             raise
         finally:
             await channel.close()
 
     async def call_with_retry(
-        self,
+        self: "MeshClient",
         channel: aio.Channel,
         method_name: str,
         request: Any,
@@ -332,16 +335,23 @@ class MeshClient:
 
                 if attempt == self.config.max_retries:
                     logger.error(
-                        f"Failed call to {service_name}.{method_name} "
-                        f"after {attempt + 1} attempts: {e}"
+                        "Failed call to %s.%s after %d attempts: %s",
+                        service_name,
+                        method_name,
+                        attempt + 1,
+                        e,
                     )
                     raise
 
                 # Calculate retry delay with exponential backoff
                 delay = self.config.retry_delay * (2**attempt)
                 logger.warning(
-                    f"Call to {service_name}.{method_name} failed "
-                    f"(attempt {attempt + 1}), retrying in {delay}s: {e}"
+                    "Call to %s.%s failed (attempt %d), retrying in %gs: %s",
+                    service_name,
+                    method_name,
+                    attempt + 1,
+                    delay,
+                    e,
                 )
                 await asyncio.sleep(delay)
 
@@ -366,10 +376,10 @@ def setup_server_tracing(service_name: str, jaeger_endpoint: str) -> None:
         # Instrument gRPC servers
         GrpcAioInstrumentorServer().instrument()
 
-        logger.info(f"Server tracing initialized for {service_name}")
+        logger.info("Server tracing initialized for %s", service_name)
 
-    except Exception as e:
-        logger.warning(f"Failed to initialize server tracing: {e}")
+    except ImportError as e:
+        logger.warning("Failed to initialize server tracing: %s", e)
 
 
 def create_mesh_config_from_env() -> MeshConfig:

@@ -1,0 +1,470 @@
+"""
+Aivo Platform GraphQL API Schema
+Unified API for learner management, IEP documents, analytics, and dashboard services
+"""
+
+scalar DateTime
+scalar JSON
+
+# Authentication & User Management
+enum UserRole {
+  STUDENT
+  TEACHER
+  STAFF
+  DISTRICT_ADMIN
+  SYSTEM_ADMIN
+}
+
+type User {
+  id: ID!
+  email: String!
+  role: UserRole!
+  tenantId: String
+  scopes: [String!]!
+  createdAt: DateTime!
+  updatedAt: DateTime!
+}
+
+# Learner Management
+type Learner {
+  id: ID!
+  firstName: String!
+  lastName: String!
+  email: String
+  dateOfBirth: DateTime
+  gradeLevel: String
+  studentId: String
+  tenantId: String!
+  guardians: [Guardian!]!
+  ieps: [IepDoc!]!
+  analytics: LearnerAnalytics
+  createdAt: DateTime!
+  updatedAt: DateTime!
+}
+
+type Guardian {
+  id: ID!
+  firstName: String!
+  lastName: String!
+  email: String!
+  phone: String
+  relationship: GuardianRelationship!
+  isPrimary: Boolean!
+  emergencyContact: Boolean!
+  createdAt: DateTime!
+  updatedAt: DateTime!
+}
+
+enum GuardianRelationship {
+  PARENT
+  GUARDIAN
+  GRANDPARENT
+  SIBLING
+  OTHER_FAMILY
+  FOSTER_PARENT
+  CAREGIVER
+  OTHER
+}
+
+input CreateLearnerInput {
+  firstName: String!
+  lastName: String!
+  email: String
+  dateOfBirth: DateTime
+  gradeLevel: String
+  studentId: String
+  tenantId: String!
+}
+
+input UpdateLearnerInput {
+  firstName: String
+  lastName: String
+  email: String
+  dateOfBirth: DateTime
+  gradeLevel: String
+  studentId: String
+}
+
+input AddGuardianInput {
+  learnerId: ID!
+  firstName: String!
+  lastName: String!
+  email: String!
+  phone: String
+  relationship: GuardianRelationship!
+  isPrimary: Boolean = false
+  emergencyContact: Boolean = false
+}
+
+# IEP Document Management
+type IepDoc {
+  id: ID!
+  studentId: String!
+  version: String!
+  status: IepStatus!
+  content: JSON!
+  metadata: IepMetadata!
+  approvals: [IepApproval!]!
+  history: [IepHistoryEntry!]!
+  createdAt: DateTime!
+  updatedAt: DateTime!
+  submittedAt: DateTime
+  approvedAt: DateTime
+  tenantId: String!
+}
+
+enum IepStatus {
+  DRAFT
+  SUBMITTED
+  UNDER_REVIEW
+  APPROVED
+  REJECTED
+  ACTIVE
+  EXPIRED
+  ARCHIVED
+}
+
+type IepMetadata {
+  title: String!
+  academicYear: String!
+  schoolYear: String!
+  lastModifiedBy: String!
+  templateVersion: String
+  tags: [String!]!
+}
+
+type IepApproval {
+  id: ID!
+  approverRole: UserRole!
+  approverId: String!
+  status: ApprovalStatus!
+  comments: String
+  approvedAt: DateTime
+  createdAt: DateTime!
+}
+
+enum ApprovalStatus {
+  PENDING
+  APPROVED
+  REJECTED
+  WITHDRAWN
+}
+
+type IepHistoryEntry {
+  id: ID!
+  version: String!
+  action: IepAction!
+  performedBy: String!
+  changes: JSON
+  timestamp: DateTime!
+  comments: String
+}
+
+enum IepAction {
+  CREATED
+  UPDATED
+  SUBMITTED
+  APPROVED
+  REJECTED
+  ARCHIVED
+  RESTORED
+}
+
+input CreateIepInput {
+  studentId: String!
+  title: String!
+  academicYear: String!
+  schoolYear: String!
+  content: JSON!
+  templateVersion: String
+  tags: [String!] = []
+}
+
+input UpdateIepInput {
+  title: String
+  content: JSON
+  tags: [String!]
+}
+
+input SubmitIepInput {
+  comments: String
+}
+
+input ApproveIepInput {
+  comments: String
+}
+
+input RejectIepInput {
+  comments: String!
+  suggestedChanges: String
+}
+
+# Analytics & Dashboard
+type DashboardMetrics {
+  totalLearners: Int!
+  activeIeps: Int!
+  pendingApprovals: Int!
+  completedAssessments: Int!
+  upcomingDeadlines: Int!
+  recentActivity: [DashboardActivity!]!
+  performanceInsights: PerformanceInsights!
+  tenantId: String!
+  generatedAt: DateTime!
+}
+
+type DashboardActivity {
+  id: ID!
+  type: ActivityType!
+  title: String!
+  description: String!
+  userId: String!
+  resourceId: String
+  resourceType: String
+  timestamp: DateTime!
+  metadata: JSON
+}
+
+enum ActivityType {
+  IEP_CREATED
+  IEP_SUBMITTED
+  IEP_APPROVED
+  IEP_REJECTED
+  LEARNER_ADDED
+  ASSESSMENT_COMPLETED
+  GOAL_UPDATED
+  MEETING_SCHEDULED
+  DOCUMENT_UPLOADED
+  SYSTEM_UPDATE
+}
+
+type PerformanceInsights {
+  averageIepCompletionTime: Float!
+  approvalRate: Float!
+  mostActiveUsers: [UserActivity!]!
+  trendsOverTime: [TrendDataPoint!]!
+}
+
+type UserActivity {
+  userId: String!
+  userName: String!
+  activityCount: Int!
+  lastActive: DateTime!
+}
+
+type TrendDataPoint {
+  date: DateTime!
+  value: Float!
+  label: String!
+  metadata: JSON
+}
+
+type LearnerAnalytics {
+  learnerId: String!
+  academicProgress: AcademicProgress!
+  goalTracking: [GoalProgress!]!
+  assessmentHistory: [AssessmentResult!]!
+  engagementMetrics: EngagementMetrics!
+  recommendations: [Recommendation!]!
+  lastUpdated: DateTime!
+}
+
+type AcademicProgress {
+  overall: ProgressMetric!
+  bySubject: [SubjectProgress!]!
+  trends: [ProgressTrend!]!
+  milestones: [Milestone!]!
+}
+
+type ProgressMetric {
+  current: Float!
+  target: Float!
+  percentComplete: Float!
+  status: ProgressStatus!
+}
+
+enum ProgressStatus {
+  ON_TRACK
+  AHEAD
+  BEHIND
+  AT_RISK
+  NEEDS_ATTENTION
+}
+
+type SubjectProgress {
+  subject: String!
+  progress: ProgressMetric!
+  lastAssessed: DateTime!
+  nextMilestone: String
+}
+
+type ProgressTrend {
+  period: String!
+  startDate: DateTime!
+  endDate: DateTime!
+  improvement: Float!
+  trend: TrendDirection!
+}
+
+enum TrendDirection {
+  IMPROVING
+  STABLE
+  DECLINING
+  INSUFFICIENT_DATA
+}
+
+type Milestone {
+  id: ID!
+  title: String!
+  description: String!
+  targetDate: DateTime!
+  completedDate: DateTime
+  status: MilestoneStatus!
+  progress: Float!
+}
+
+enum MilestoneStatus {
+  NOT_STARTED
+  IN_PROGRESS
+  COMPLETED
+  OVERDUE
+  CANCELLED
+}
+
+type GoalProgress {
+  goalId: String!
+  title: String!
+  description: String!
+  progress: ProgressMetric!
+  activities: [GoalActivity!]!
+  lastUpdated: DateTime!
+}
+
+type GoalActivity {
+  id: ID!
+  date: DateTime!
+  activity: String!
+  outcome: String!
+  measuredValue: Float
+  notes: String
+  recordedBy: String!
+}
+
+type AssessmentResult {
+  id: ID!
+  assessmentType: String!
+  subject: String!
+  score: Float!
+  maxScore: Float!
+  percentile: Float
+  grade: String
+  completedAt: DateTime!
+  assessor: String!
+  notes: String
+}
+
+type EngagementMetrics {
+  weeklyHours: Float!
+  sessionCount: Int!
+  averageSessionLength: Float!
+  lastEngagement: DateTime!
+  engagementTrend: TrendDirection!
+  activityBreakdown: [ActivityBreakdown!]!
+}
+
+type ActivityBreakdown {
+  category: String!
+  hours: Float!
+  percentage: Float!
+  trend: TrendDirection!
+}
+
+type Recommendation {
+  id: ID!
+  type: RecommendationType!
+  title: String!
+  description: String!
+  priority: RecommendationPriority!
+  actionItems: [String!]!
+  resources: [String!]!
+  dueDate: DateTime
+  createdAt: DateTime!
+}
+
+enum RecommendationType {
+  ACADEMIC_SUPPORT
+  GOAL_ADJUSTMENT
+  INTERVENTION
+  ENRICHMENT
+  ASSESSMENT
+  COLLABORATION
+  RESOURCE
+  MEETING
+}
+
+enum RecommendationPriority {
+  LOW
+  MEDIUM
+  HIGH
+  URGENT
+}
+
+# Root Query Type
+type Query {
+  # Health & System
+  ping: String!
+  version: String!
+  status: Status!
+
+  # Learner Queries
+  learner(id: ID!): Learner
+  learners(tenantId: String, limit: Int = 20, offset: Int = 0): [Learner!]!
+
+  # IEP Queries
+  iep(id: ID!): IepDoc
+  ieps(
+    studentId: String
+    status: IepStatus
+    tenantId: String
+    limit: Int = 20
+    offset: Int = 0
+  ): [IepDoc!]!
+  activeIeps(tenantId: String!): [IepDoc!]!
+  pendingApprovals(tenantId: String!): [IepDoc!]!
+
+  # Analytics & Dashboard Queries
+  dashboardMetrics(tenantId: String!): DashboardMetrics!
+  learnerAnalytics(learnerId: ID!): LearnerAnalytics
+  academicTrends(
+    tenantId: String!
+    startDate: DateTime!
+    endDate: DateTime!
+    subject: String
+  ): [TrendDataPoint!]!
+}
+
+# Root Mutation Type
+type Mutation {
+  # Learner Mutations
+  createLearner(input: CreateLearnerInput!): Learner!
+  updateLearner(id: ID!, input: UpdateLearnerInput!): Learner!
+  addGuardian(input: AddGuardianInput!): Guardian!
+
+  # IEP Mutations
+  createIep(input: CreateIepInput!): IepDoc!
+  updateIep(id: ID!, input: UpdateIepInput!): IepDoc!
+  saveDraft(id: ID!, content: JSON!): IepDoc!
+  submitForApproval(id: ID!, input: SubmitIepInput!): IepDoc!
+  approveIep(id: ID!, input: ApproveIepInput!): IepDoc!
+  rejectIep(id: ID!, input: RejectIepInput!): IepDoc!
+  archiveIep(id: ID!): IepDoc!
+
+  # System Mutations
+  noop: Boolean!
+}
+
+type Status {
+  status: String!
+  timestamp: String!
+  version: String!
+  uptime: Int!
+}
