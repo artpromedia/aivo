@@ -4,6 +4,10 @@ import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 
 import { Layout } from '@/components/layout/Layout';
 import { Dashboard } from '@/pages/Dashboard';
+import { DevicePolicy } from '@/pages/DevicePolicy';
+import { Devices } from '@/pages/Devices';
+import { InkOps } from '@/pages/InkOps';
+import { OTA } from '@/pages/OTA';
 import { UsersPage } from '@/pages/UsersPage';
 
 // Create a client
@@ -24,6 +28,10 @@ function App() {
           <Route path='/' element={<Layout />}>
             <Route index element={<Dashboard />} />
             <Route path='users' element={<UsersPage />} />
+            <Route path='devices' element={<Devices />} />
+            <Route path='device-policies' element={<DevicePolicy />} />
+            <Route path='ota' element={<OTA />} />
+            <Route path='ink-ops' element={<InkOps />} />
             <Route
               path='subscriptions'
               element={<div>Subscriptions Page (Coming Soon)</div>}

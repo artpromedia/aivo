@@ -5,6 +5,16 @@ import importPlugin from "eslint-plugin-import";
 import unusedImportsPlugin from "eslint-plugin-unused-imports";
 
 export default [
+  {
+    ignores: [
+      "**/node_modules/**",
+      "**/dist/**", 
+      "**/build/**",
+      "**/public/mockServiceWorker.js",
+      "**/.next/**",
+      "**/playwright-report/**"
+    ]
+  },
   js.configs.recommended,
   {
     files: ["**/*.{ts,tsx,cts,mts}"],

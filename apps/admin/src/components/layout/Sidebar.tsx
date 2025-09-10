@@ -9,6 +9,10 @@ import {
   Sun,
   Menu,
   X,
+  Smartphone,
+  Shield,
+  Download,
+  Pen,
 } from 'lucide-react';
 import { useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
@@ -30,6 +34,26 @@ const navigationItems = [
     name: 'Users & Licenses',
     href: '/users',
     icon: Users,
+  },
+  {
+    name: 'Device Management',
+    href: '/devices',
+    icon: Smartphone,
+  },
+  {
+    name: 'Device Policies',
+    href: '/device-policies',
+    icon: Shield,
+  },
+  {
+    name: 'OTA Updates',
+    href: '/ota',
+    icon: Download,
+  },
+  {
+    name: 'Ink Operations',
+    href: '/ink-ops',
+    icon: Pen,
   },
   {
     name: 'Subscriptions',

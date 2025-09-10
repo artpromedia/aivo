@@ -155,3 +155,51 @@ The scripts can be integrated into your CI/CD pipeline:
   run: |
     .\scripts\docker-security-scan-fix.ps1 -SkipBackups
 ```
+
+## Stage Verification Scripts
+
+### `verify-stage2a.ts` (TypeScript/Node.js)
+
+Comprehensive end-to-end verification script for Stage 2A services and workflows.
+
+**Usage:**
+
+```bash
+# Run the complete S2A verification
+npx ts-node scripts/verify-stage2a.ts
+
+# Or with Node.js directly
+node --loader ts-node/esm scripts/verify-stage2a.ts
+```
+
+**What it tests:**
+
+1. **Problem Session Pipeline:**
+   - Start problem session → capture ink input → recognize math → solve →
+     grade → results
+   - Tests: ink-svc, math-recognizer-svc, science-solver-svc, ela-eval-svc,
+     slp-sel-svc, problem-session-svc
+
+2. **Device Management Pipeline:**
+   - Enroll mock device → create policy → assign policy → request bundle
+   - Tests: device-enroll-svc, device-policy-svc, edge-bundler-svc,
+     device-ota-svc
+
+**Prerequisites:**
+
+- All S2A services running (via Docker Compose)
+- Authentication service available
+- Services healthy and responding on expected ports
+
+**Services Tested:**
+
+- `ink-svc` (port 8100)
+- `math-recognizer-svc` (port 8101)
+- `science-solver-svc` (port 8102)
+- `ela-eval-svc` (port 8103)
+- `slp-sel-svc` (port 8104)
+- `problem-session-svc` (port 8105)
+- `device-enroll-svc` (port 8106)
+- `device-policy-svc` (port 8107)
+- `edge-bundler-svc` (port 8108)
+- `device-ota-svc` (port 8109)

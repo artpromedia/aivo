@@ -1,13 +1,13 @@
-import { defineConfig } from '@playwright/test'
-
 // Playwright test files should have their own ESLint config
+import globals from 'globals';
+
 export default [
   {
     files: ['**/*.spec.ts', '**/*.test.ts'],
     languageOptions: {
       globals: {
-        ...require('globals').browser,
-        ...require('globals').node,
+        ...globals.browser,
+        ...globals.node,
       },
     },
     rules: {

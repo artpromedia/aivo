@@ -34,8 +34,8 @@ export function UsersPage() {
     try {
       await updateRoleMutation.mutateAsync({ userId, role: newRole });
       alert('User role updated successfully!');
-    } catch (error) {
-      console.error('Failed to update user role:', error);
+    } catch {
+      // TODO: Implement proper error logging
       alert('Failed to update user role');
     }
   };
@@ -45,8 +45,8 @@ export function UsersPage() {
       try {
         await deactivateUserMutation.mutateAsync(userId);
         alert('User deactivated successfully!');
-      } catch (error) {
-        console.error('Failed to deactivate user:', error);
+      } catch {
+        // TODO: Implement proper error logging
         alert('Failed to deactivate user');
       }
     }
@@ -58,8 +58,10 @@ export function UsersPage() {
   };
 
   const handleSearchUsers = () => {
-    // Implement search functionality
-    console.log('Searching for:', searchTerm);
+    // TODO: Implement search functionality
+    if (searchTerm) {
+      // Search logic will be implemented here
+    }
   };
 
   const filteredUsers = usersData?.users || [];

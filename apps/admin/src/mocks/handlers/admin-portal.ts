@@ -176,7 +176,7 @@ const mockAdminPortalData = {
 
 export const adminPortalHandlers = [
   // Dashboard Summary
-  http.get('*/admin-portal/v1/dashboard/summary', ({ request }) => {
+  http.get('http://localhost:8000/admin/dashboard/summary', ({ request }) => {
     const url = new URL(request.url);
     const tenantId = url.searchParams.get('tenant_id');
     const authHeader = request.headers.get('authorization');

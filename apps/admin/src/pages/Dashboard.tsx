@@ -93,8 +93,8 @@ export function Dashboard() {
   };
 
   const handleDownloadReport = () => {
-    // API call to generate and download usage report
-    console.log('Downloading usage report...');
+    // TODO: Implement API call to generate and download usage report
+    alert('Usage report download will be implemented soon');
   };
 
   return (
