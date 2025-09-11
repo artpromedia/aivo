@@ -1,0 +1,96 @@
+﻿version: '3.8'
+
+services:
+  postgres:
+    image: postgres:15
+    environment:
+      POSTGRES_DB: compliance_db
+      POSTGRES_USER: compliance_user
+      POSTGRES_PASSWORD: compliance_pass
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U compliance_user -d compliance_db"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  redis:
+    image: redis:7-alpine
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  compliance-app:
+    build: .
+    ports:
+      - "8000:8000"
+    environment:
+      DATABASE_URL: postgresql+asyncpg://compliance_user:compliance_pass@postgres:5432/compliance_db
+      REDIS_URL: redis://redis:6379/0
+      COMPLIANCE_MASTER_KEY: dev-master-key-32-characters-long
+      COMPLIANCE_EXPORT_PATH: /app/exports
+      LOG_LEVEL: INFO
+    volumes:
+      - ./exports:/app/exports
+      - ./logs:/app/logs
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/api/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  celery-worker:
+    build: .
+    command: celery -A app.jobs worker --loglevel=info --concurrency=2
+    environment:
+      DATABASE_URL: postgresql+asyncpg://compliance_user:compliance_pass@postgres:5432/compliance_db
+      REDIS_URL: redis://redis:6379/0
+      COMPLIANCE_MASTER_KEY: dev-master-key-32-characters-long
+      COMPLIANCE_EXPORT_PATH: /app/exports
+      LOG_LEVEL: INFO
+    volumes:
+      - ./exports:/app/exports
+      - ./logs:/app/logs
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+
+  celery-beat:
+    build: .
+    command: celery -A app.jobs beat --loglevel=info
+    environment:
+      DATABASE_URL: postgresql+asyncpg://compliance_user:compliance_pass@postgres:5432/compliance_db
+      REDIS_URL: redis://redis:6379/0
+      COMPLIANCE_MASTER_KEY: dev-master-key-32-characters-long
+      LOG_LEVEL: INFO
+    volumes:
+      - ./logs:/app/logs
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+
+volumes:
+  postgres_data:
+  redis_data:
+
+networks:
+  default:
+    name: compliance-network
