@@ -1,0 +1,510 @@
+﻿openapi: 3.0.3
+info:
+  title: Model Dispatch Service API
+  description: |
+    LLM provider selection and dispatch service based on subject, grade band, and region.
+    
+    ## Features
+    - **Subject/Grade/Region Policy**: Automatic provider selection
+    - **Data Residency**: Regional routing compliance 
+    - **Teacher Override**: Manual provider selection capability
+    - **Analytics**: Dispatch metrics and performance tracking
+    
+    ## Workflow
+    1. Submit dispatch request with `{subject, grade_band, region}`
+    2. Service evaluates policies and selects appropriate provider
+    3. Returns `{provider, templateIds, moderation_threshold}`
+    4. Optional teacher override with justification
+    
+  version: 1.0.0
+  contact:
+    name: AIVO Engineering
+    email: engineering@aivo.com
+  license:
+    name: MIT
+    url: https://opensource.org/licenses/MIT
+
+servers:
+  - url: http://localhost:8002
+    description: Development server
+  - url: https://api.aivo.com/model-dispatch
+    description: Production server
+
+tags:
+  - name: dispatch
+    description: Model dispatch operations
+  - name: providers
+    description: Provider information
+  - name: analytics
+    description: Metrics and analytics
+  - name: validation
+    description: Policy validation
+  - name: health
+    description: Service health
+
+paths:
+  /health:
+    get:
+      tags: [health]
+      summary: Health check
+      description: Check service health and status
+      responses:
+        '200':
+          description: Service is healthy
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HealthResponse'
+
+  /dispatch:
+    post:
+      tags: [dispatch]
+      summary: Dispatch model request
+      description: |
+        Select appropriate LLM provider based on subject, grade band, and region.
+        
+        **Policy Resolution Order:**
+        1. Exact match (subject + grade + region)
+        2. Subject + grade (any region) 
+        3. Subject only (any grade/region)
+        4. Default policy (fallback)
+        
+        **Teacher Override:**
+        - Allows manual provider selection
+        - Requires justification reason
+        - Logged for audit purposes
+        
+      parameters:
+        - name: request_id
+          in: query
+          required: true
+          description: Unique identifier for request tracking
+          schema:
+            type: string
+            format: uuid
+            example: "123e4567-e89b-12d3-a456-426614174000"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/DispatchRequest'
+            examples:
+              basic_request:
+                summary: Basic dispatch request
+                value:
+                  subject: "mathematics"
+                  grade_band: "elementary" 
+                  region: "us_east"
+              teacher_override:
+                summary: Teacher override request
+                value:
+                  subject: "science"
+                  grade_band: "high"
+                  region: "eu_west"
+                  teacher_override: true
+                  override_provider_id: "550e8400-e29b-41d4-a716-446655440000"
+                  override_reason: "Student needs specialized science model"
+      responses:
+        '200':
+          description: Successfully dispatched request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DispatchResponse'
+              examples:
+                successful_dispatch:
+                  summary: Successful dispatch
+                  value:
+                    provider_id: "550e8400-e29b-41d4-a716-446655440000"
+                    provider_name: "OpenAI GPT-4"
+                    endpoint_url: "https://api.openai.com/v1/chat/completions"
+                    template_ids: ["123e4567-e89b-12d3-a456-426614174001"]
+                    moderation_threshold: 0.8
+                    policy_id: "456e7890-e89b-12d3-a456-426614174002"
+                    allow_teacher_override: true
+                    rate_limits:
+                      requests_per_minute: 60
+                      tokens_per_minute: 100000
+                    estimated_cost:
+                      per_1k_input_tokens: 0.03
+                      per_1k_output_tokens: 0.06
+                    request_id: "123e4567-e89b-12d3-a456-426614174000"
+        '400':
+          description: Invalid request parameters
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+              examples:
+                no_policy:
+                  summary: No policy found
+                  value:
+                    error: "ValueError"
+                    message: "No dispatch policy found for mathematics/elementary/africa_south"
+                    details:
+                      suggestion: "Create a dispatch policy for this combination"
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /providers:
+    get:
+      tags: [providers]
+      summary: Get available providers
+      description: List LLM providers available for specified region
+      parameters:
+        - name: region
+          in: query
+          required: true
+          description: Geographic region for provider filtering
+          schema:
+            $ref: '#/components/schemas/Region'
+      responses:
+        '200':
+          description: List of available providers
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/ProviderInfo'
+
+  /analytics:
+    get:
+      tags: [analytics]
+      summary: Get dispatch analytics
+      description: Retrieve metrics and analytics for dispatch operations
+      parameters:
+        - name: region
+          in: query
+          required: false
+          description: Filter analytics by region
+          schema:
+            $ref: '#/components/schemas/Region'
+        - name: days
+          in: query
+          required: false
+          description: Number of days to analyze
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 90
+            default: 7
+      responses:
+        '200':
+          description: Analytics data
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AnalyticsResponse'
+
+  /subjects:
+    get:
+      tags: [validation]
+      summary: Get available subjects
+      description: List all supported academic subjects
+      responses:
+        '200':
+          description: List of subjects
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: string
+                example: ["mathematics", "science", "language_arts", "social_studies"]
+
+  /grade-bands:
+    get:
+      tags: [validation]
+      summary: Get available grade bands
+      description: List all supported grade bands
+      responses:
+        '200':
+          description: List of grade bands
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: string
+                example: ["early_childhood", "elementary", "middle", "high", "adult"]
+
+  /regions:
+    get:
+      tags: [validation]
+      summary: Get available regions
+      description: List all supported geographic regions
+      responses:
+        '200':
+          description: List of regions
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: string
+                example: ["us_east", "us_west", "eu_west", "apac_singapore"]
+
+  /policies/validate:
+    get:
+      tags: [validation]
+      summary: Validate policy exists
+      description: Check if dispatch policy exists for given parameters
+      parameters:
+        - name: subject
+          in: query
+          required: true
+          schema:
+            $ref: '#/components/schemas/Subject'
+        - name: grade_band
+          in: query
+          required: true
+          schema:
+            $ref: '#/components/schemas/GradeBand'
+        - name: region
+          in: query
+          required: true
+          schema:
+            $ref: '#/components/schemas/Region'
+      responses:
+        '200':
+          description: Policy validation result
+          content:
+            application/json:
+              schema:
+                oneOf:
+                  - $ref: '#/components/schemas/PolicyValidationSuccess'
+                  - $ref: '#/components/schemas/PolicyValidationFailure'
+
+components:
+  schemas:
+    Subject:
+      type: string
+      enum:
+        - mathematics
+        - science
+        - language_arts
+        - social_studies
+        - art
+        - music
+        - physical_education
+        - technology
+        - foreign_language
+        - career_technical
+        - special_education
+        - general
+      example: mathematics
+
+    GradeBand:
+      type: string
+      enum:
+        - early_childhood
+        - elementary
+        - middle
+        - high
+        - adult
+        - special
+      example: elementary
+
+    Region:
+      type: string
+      enum:
+        - us_east
+        - us_west
+        - us_central
+        - canada
+        - eu_west
+        - eu_central
+        - uk
+        - apac_singapore
+        - apac_tokyo
+        - apac_sydney
+        - africa_south
+        - latam_brazil
+        - middle_east
+      example: us_east
+
+    DispatchRequest:
+      type: object
+      required:
+        - subject
+        - grade_band
+        - region
+      properties:
+        subject:
+          $ref: '#/components/schemas/Subject'
+        grade_band:
+          $ref: '#/components/schemas/GradeBand'
+        region:
+          $ref: '#/components/schemas/Region'
+        teacher_override:
+          type: boolean
+          default: false
+          description: Enable teacher override for provider selection
+        override_provider_id:
+          type: string
+          format: uuid
+          description: Provider ID for teacher override (required if teacher_override=true)
+        override_reason:
+          type: string
+          maxLength: 500
+          description: Justification for teacher override
+
+    DispatchResponse:
+      type: object
+      required:
+        - provider_id
+        - provider_name
+        - endpoint_url
+        - template_ids
+        - moderation_threshold
+        - policy_id
+        - allow_teacher_override
+        - rate_limits
+        - estimated_cost
+        - request_id
+      properties:
+        provider_id:
+          type: string
+          format: uuid
+        provider_name:
+          type: string
+        endpoint_url:
+          type: string
+          format: uri
+        template_ids:
+          type: array
+          items:
+            type: string
+            format: uuid
+        moderation_threshold:
+          type: number
+          minimum: 0
+          maximum: 1
+        policy_id:
+          type: string
+          format: uuid
+        allow_teacher_override:
+          type: boolean
+        rate_limits:
+          type: object
+          properties:
+            requests_per_minute:
+              type: integer
+            tokens_per_minute:
+              type: integer
+        estimated_cost:
+          type: object
+          properties:
+            per_1k_input_tokens:
+              type: number
+            per_1k_output_tokens:
+              type: number
+        request_id:
+          type: string
+
+    ProviderInfo:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        name:
+          type: string
+        type:
+          type: string
+          enum: [openai, anthropic, google, microsoft, aws_bedrock, hugging_face, local, custom]
+        supported_regions:
+          type: array
+          items:
+            type: string
+        max_tokens:
+          type: integer
+        cost_per_1k_input:
+          type: number
+        cost_per_1k_output:
+          type: number
+        reliability_score:
+          type: number
+          minimum: 0
+          maximum: 1
+
+    AnalyticsResponse:
+      type: object
+      properties:
+        total_requests:
+          type: integer
+        success_rate:
+          type: number
+          minimum: 0
+          maximum: 1
+        teacher_override_rate:
+          type: number
+          minimum: 0
+          maximum: 1
+        most_used_subjects:
+          type: object
+          additionalProperties:
+            type: integer
+        most_used_grades:
+          type: object
+          additionalProperties:
+            type: integer
+        average_response_time_ms:
+          type: number
+
+    HealthResponse:
+      type: object
+      properties:
+        status:
+          type: string
+          example: healthy
+        service:
+          type: string
+          example: model-dispatch-svc
+        version:
+          type: string
+          example: 1.0.0
+
+    PolicyValidationSuccess:
+      type: object
+      properties:
+        valid:
+          type: boolean
+          enum: [true]
+        policy_id:
+          type: string
+          format: uuid
+        provider_name:
+          type: string
+        moderation_threshold:
+          type: number
+        allow_teacher_override:
+          type: boolean
+
+    PolicyValidationFailure:
+      type: object
+      properties:
+        valid:
+          type: boolean
+          enum: [false]
+        error:
+          type: string
+        suggestion:
+          type: string
+
+    ErrorResponse:
+      type: object
+      properties:
+        error:
+          type: string
+        message:
+          type: string
+        details:
+          type: object
+          additionalProperties: true

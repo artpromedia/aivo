@@ -1,92 +1,61 @@
-[build-system]
-requires = ["setuptools>=45", "wheel", "setuptools-scm[toml]>=6.2"]
-build-backend = "setuptools.build_meta"
-
-[project]
+﻿[tool.poetry]
 name = "model-dispatch-svc"
-version = "0.1.0"
-description = "Model Dispatch Policy Service - LLM provider routing by subject/grade/region"
-authors = [{name = "AIVO Team", email = "team@aivo.com"}]
-dependencies = [
-    "fastapi>=0.104.0",
-    "uvicorn[standard]>=0.24.0",
-    "pydantic>=2.5.0",
-    "pydantic-settings>=2.1.0",
-    "redis>=5.0.0",
-    "python-multipart>=0.0.6",
-]
+version = "1.0.0"
+description = "LLM provider dispatch service with subject/grade/region policy"
+authors = ["AIVO Team <dev@aivo.com>"]
+readme = "README.md"
+packages = [{include = "app"}]
 
-[project.optional-dependencies]
-dev = [
-    "pytest>=7.4.0",
-    "pytest-asyncio>=0.21.0",
-    "pytest-cov>=4.1.0",
-    "pytest-mock>=3.11.0",
-    "httpx>=0.25.0",
-    "ruff>=0.6.5",
-]
+[tool.poetry.dependencies]
+python = "^3.11"
+fastapi = "^0.104.1"
+uvicorn = {extras = ["standard"], version = "^0.24.0"}
+pydantic = "^2.5.0"
+pydantic-settings = "^2.1.0"
+sqlalchemy = "^2.0.23"
+alembic = "^1.13.0"
+asyncpg = "^0.29.0"
+redis = "^5.0.1"
+httpx = "^0.25.2"
+structlog = "^23.2.0"
+opentelemetry-api = "^1.21.0"
+opentelemetry-sdk = "^1.21.0"
+opentelemetry-instrumentation-fastapi = "^0.42b0"
+opentelemetry-instrumentation-sqlalchemy = "^0.42b0"
+pycountry = "^23.12.11"
+python-multipart = "^0.0.6"
 
-[tool.setuptools.packages.find]
-where = ["."]
-include = ["app*"]
+[tool.poetry.group.dev.dependencies]
+pytest = "^7.4.3"
+pytest-asyncio = "^0.21.1"
+pytest-cov = "^4.1.0"
+black = "^23.11.0"
+ruff = "^0.6.5"
+mypy = "^1.7.1"
+pre-commit = "^3.6.0"
+
+[tool.poetry.scripts]
+start = "uvicorn app.main:app --host 0.0.0.0 --port 8002 --reload"
+migrate = "alembic upgrade head"
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
 
 [tool.ruff]
 line-length = 100
 target-version = "py311"
-exclude = [
-    ".git",
-    ".pytest_cache",
-    ".ruff_cache",
-    ".venv",
-    "__pycache__",
-    "build",
-    "dist",
-]
 
 [tool.ruff.lint]
 select = ["E", "F", "W", "I", "UP", "N"]
 ignore = []
-fixable = ["ALL"]
-unfixable = []
-
-[tool.ruff.lint.per-file-ignores]
-"tests/*" = ["F401", "F811"]
-
-[tool.ruff.lint.isort]
-known-first-party = ["app"]
 
 [tool.ruff.format]
 quote-style = "double"
 indent-style = "space"
-skip-magic-trailing-comma = false
-line-ending = "auto"
 
-[tool.pytest.ini_options]
-minversion = "7.0"
-addopts = "-ra -q --strict-markers --strict-config"
-testpaths = ["tests"]
-python_files = ["test_*.py", "*_test.py"]
-python_classes = ["Test*"]
-python_functions = ["test_*"]
-asyncio_mode = "auto"
-
-[tool.coverage.run]
-source = ["app"]
-omit = ["tests/*", "**/__pycache__/*"]
-
-[tool.coverage.report]
-exclude_lines = [
-    "pragma: no cover",
-    "def __repr__",
-    "if self.debug:",
-    "if settings.DEBUG",
-    "raise AssertionError",
-    "raise NotImplementedError",
-    "if 0:",
-    "if __name__ == .__main__.:",
-    "class .*\\bProtocol\\):",
-    "@(abc\\.)?abstractmethod",
-]
-show_missing = true
-skip_covered = false
-precision = 2
+[tool.mypy]
+python_version = "3.11"
+warn_return_any = true
+warn_unused_configs = true
+disallow_untyped_defs = true

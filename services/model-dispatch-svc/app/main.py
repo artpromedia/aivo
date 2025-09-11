@@ -1,224 +1,308 @@
-"""Model Dispatch Policy Service - FastAPI Application."""
+﻿"""
+FastAPI application for model dispatch service.
 
-import time
+Provides REST API for LLM provider selection and policy management.
+"""
 from contextlib import asynccontextmanager
-from datetime import datetime, timedelta
-from typing import Any
+from typing import Dict, List, Optional
+from uuid import UUID
 
-from fastapi import BackgroundTasks, FastAPI, HTTPException
+from fastapi import Depends, FastAPI, HTTPException, Query
 from fastapi.middleware.cors import CORSMiddleware
+from pydantic import BaseModel, Field
+from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker, create_async_engine
+from structlog import configure, get_logger
 
-from app.config import settings
-from app.models import (
-    HealthResponse,
-    OverrideResponse,
-    PolicyRequest,
-    PolicyResponse,
-    PolicyStats,
-    TeacherOverride,
+from app.models import Base, GradeBand, Region, Subject
+from app.services.dispatch_service import (
+    DispatchRequest,
+    DispatchResponse,
+    ModelDispatchService,
 )
-from app.services.cache_service import cache_service
-from app.services.policy_engine import policy_engine
+
+# Configure structured logging
+configure(
+    processors=[],
+    wrapper_class=None,
+    logger_factory=None,
+    cache_logger_on_first_use=True,
+)
+
+logger = get_logger(__name__)
+
+# Database setup
+DATABASE_URL = "postgresql+asyncpg://postgres:password@localhost:5432/model_dispatch_db"
+engine = create_async_engine(DATABASE_URL, echo=False)
+async_session = async_sessionmaker(engine, expire_on_commit=False)
 
 
 @asynccontextmanager
-async def lifespan(_app: FastAPI):
-    """Manage application lifespan."""
-    # Startup
-    await cache_service.connect()
-    await policy_engine.initialize()
-    print("Model Dispatch Policy Service started")
-
+async def lifespan(app: FastAPI):
+    """Application lifespan manager."""
+    # Create tables on startup
+    async with engine.begin() as conn:
+        await conn.run_sync(Base.metadata.create_all)
+    logger.info("Database tables created")
     yield
+    # Cleanup on shutdown
+    await engine.dispose()
+    logger.info("Application shutdown complete")
 
-    # Shutdown
-    await cache_service.disconnect()
-    print("Model Dispatch Policy Service stopped")
 
-
-# Create FastAPI app
+# FastAPI app setup
 app = FastAPI(
-    title="Model Dispatch Policy Service",
-    description=(
-        "LLM provider routing by subject/grade/region "
-        "with data residency enforcement"
-    ),
-    version=settings.service_version,
+    title="Model Dispatch Service",
+    description="LLM provider selection based on subject, grade, and region",
+    version="1.0.0",
     lifespan=lifespan,
 )
 
-# Add CORS middleware
+# CORS middleware
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=settings.cors_origins,
-    allow_credentials=settings.cors_credentials,
-    allow_methods=settings.cors_methods,
-    allow_headers=settings.cors_headers,
+    allow_origins=["*"],  # Configure for production
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
 )
+
+
+async def get_db_session() -> AsyncSession:
+    """Get database session dependency."""
+    async with async_session() as session:
+        try:
+            yield session
+        finally:
+            await session.close()
+
+
+async def get_dispatch_service(
+    db: AsyncSession = Depends(get_db_session),
+) -> ModelDispatchService:
+    """Get dispatch service dependency."""
+    return ModelDispatchService(db)
+
+
+# Pydantic models for API
+class DispatchRequestAPI(BaseModel):
+    """API model for dispatch requests."""
+
+    subject: Subject = Field(..., description="Academic subject")
+    grade_band: GradeBand = Field(..., description="Grade band")
+    region: Region = Field(..., description="Geographic region")
+    teacher_override: bool = Field(False, description="Teacher override flag")
+    override_provider_id: Optional[UUID] = Field(
+        None, description="Provider ID for teacher override"
+    )
+    override_reason: Optional[str] = Field(
+        None, max_length=500, description="Reason for override"
+    )
+
+
+class DispatchResponseAPI(BaseModel):
+    """API model for dispatch responses."""
+
+    provider_id: UUID
+    provider_name: str
+    endpoint_url: str
+    template_ids: List[UUID]
+    moderation_threshold: float
+    policy_id: UUID
+    allow_teacher_override: bool
+    rate_limits: Dict[str, int]
+    estimated_cost: Dict[str, float]
+    request_id: str
+
+
+class HealthResponse(BaseModel):
+    """Health check response."""
+
+    status: str
+    service: str
+    version: str
+
+
+class ProviderInfo(BaseModel):
+    """Provider information response."""
+
+    id: str
+    name: str
+    type: str
+    supported_regions: List[str]
+    max_tokens: int
+    cost_per_1k_input: float
+    cost_per_1k_output: float
+    reliability_score: float
+
+
+class AnalyticsResponse(BaseModel):
+    """Analytics response."""
+
+    total_requests: int
+    success_rate: float
+    teacher_override_rate: float
+    most_used_subjects: Dict[str, int]
+    most_used_grades: Dict[str, int]
+    average_response_time_ms: float
 
 
 @app.get("/health", response_model=HealthResponse)
 async def health_check() -> HealthResponse:
     """Health check endpoint."""
-    stats = await policy_engine.get_stats()
     return HealthResponse(
-        status="healthy",
-        service="model-dispatch-svc",
-        version=settings.service_version,
-        timestamp=time.time(),
-        rules_loaded=stats.get("rules_count", 0),
+        status="healthy", service="model-dispatch-svc", version="1.0.0"
     )
 
 
-@app.post("/policy", response_model=PolicyResponse)
-async def get_policy(request: PolicyRequest) -> PolicyResponse:
-    """Get LLM provider routing policy for the given parameters."""
+@app.post("/dispatch", response_model=DispatchResponseAPI)
+async def dispatch_model(
+    request: DispatchRequestAPI,
+    request_id: str = Query(..., description="Unique request identifier"),
+    service: ModelDispatchService = Depends(get_dispatch_service),
+) -> DispatchResponseAPI:
+    """
+    Dispatch request to appropriate LLM provider.
+
+    Selects provider based on subject, grade band, and region policies.
+    """
     try:
-        # Check cache first
-        cached_response = await cache_service.get_policy(request)
-        if cached_response:
-            return cached_response
-
-        # Get policy from engine
-        response = await policy_engine.get_policy(request)
-
-        # Cache the response
-        await cache_service.set_policy(request, response)
-
-        return response
-
-    except Exception as e:
-        raise HTTPException(
-            status_code=500, detail=f"Failed to get policy: {str(e)}"
-        ) from e
-
-
-@app.post("/override", response_model=OverrideResponse)
-async def create_teacher_override(
-    override: TeacherOverride,
-) -> OverrideResponse:
-    """Create a teacher override for LLM provider selection."""
-    try:
-        override_id = await policy_engine.add_teacher_override(override)
-
-        # Calculate expiration time
-        expires_at = datetime.now() + timedelta(hours=override.duration_hours)
-
-        return OverrideResponse(
-            override_id=override_id,
-            expires_at=expires_at,
-            applied=True,
-            message=(
-                f"Override created successfully for "
-                f"{override.duration_hours} hours"
-            ),
+        # Convert API request to service request
+        dispatch_request = DispatchRequest(
+            subject=request.subject,
+            grade_band=request.grade_band,
+            region=request.region,
+            teacher_override=request.teacher_override,
+            override_provider_id=request.override_provider_id,
+            override_reason=request.override_reason,
+            request_id=request_id,
         )
 
-    except Exception as e:
-        raise HTTPException(
-            status_code=500, detail=f"Failed to create override: {str(e)}"
-        ) from e
+        # Get dispatch response
+        response = await service.dispatch_request(dispatch_request)
 
-
-@app.get("/stats", response_model=PolicyStats)
-async def get_stats() -> PolicyStats:
-    """Get policy dispatch statistics."""
-    try:
-        engine_stats = await policy_engine.get_stats()
-        cache_stats = await cache_service.get_stats()
-
-        return PolicyStats(
-            total_requests=engine_stats["total_requests"],
-            cache_hits=cache_stats["hits"],
-            cache_misses=cache_stats["misses"],
-            provider_distribution=engine_stats["provider_distribution"],
-            region_distribution=engine_stats["region_distribution"],
-            average_response_time_ms=engine_stats["average_response_time_ms"],
-            rules_count=engine_stats["rules_count"],
-            last_updated=engine_stats["last_updated"],
+        # Convert service response to API response
+        return DispatchResponseAPI(
+            provider_id=response.provider_id,
+            provider_name=response.provider_name,
+            endpoint_url=response.endpoint_url,
+            template_ids=response.template_ids,
+            moderation_threshold=response.moderation_threshold,
+            policy_id=response.policy_id,
+            allow_teacher_override=response.allow_teacher_override,
+            rate_limits=response.rate_limits,
+            estimated_cost=response.estimated_cost,
+            request_id=request_id,
         )
 
+    except ValueError as e:
+        logger.error("Dispatch failed", error=str(e), request_id=request_id)
+        raise HTTPException(status_code=400, detail=str(e))
     except Exception as e:
-        raise HTTPException(
-            status_code=500, detail=f"Failed to get statistics: {str(e)}"
-        ) from e
+        logger.error("Unexpected error in dispatch", error=str(e), request_id=request_id)
+        raise HTTPException(status_code=500, detail="Internal server error")
 
 
-@app.post("/cache/clear")
-async def clear_cache(background_tasks: BackgroundTasks) -> dict[str, str]:
-    """Clear policy cache."""
+@app.get("/providers", response_model=List[ProviderInfo])
+async def get_providers(
+    region: Region = Query(..., description="Region to filter providers"),
+    service: ModelDispatchService = Depends(get_dispatch_service),
+) -> List[ProviderInfo]:
+    """Get available providers for a region."""
     try:
-        background_tasks.add_task(cache_service.clear_all)
-        return {"message": "Cache clear initiated"}
-
+        providers_data = await service.get_available_providers(region)
+        return [ProviderInfo(**provider) for provider in providers_data]
     except Exception as e:
-        raise HTTPException(
-            status_code=500, detail=f"Failed to clear cache: {str(e)}"
-        ) from e
+        logger.error("Failed to get providers", error=str(e), region=region)
+        raise HTTPException(status_code=500, detail="Failed to retrieve providers")
 
 
-@app.post("/cache/invalidate/subject/{subject}")
-async def invalidate_subject_cache(
-    subject: str, background_tasks: BackgroundTasks
-) -> dict[str, str]:
-    """Invalidate cache for a specific subject."""
+@app.get("/analytics", response_model=AnalyticsResponse)
+async def get_analytics(
+    region: Optional[Region] = Query(None, description="Filter by region"),
+    days: int = Query(7, ge=1, le=90, description="Number of days to analyze"),
+    service: ModelDispatchService = Depends(get_dispatch_service),
+) -> AnalyticsResponse:
+    """Get dispatch analytics and metrics."""
     try:
-        background_tasks.add_task(cache_service.invalidate_subject, subject)
+        analytics_data = await service.get_dispatch_analytics(region=region, days=days)
+        return AnalyticsResponse(**analytics_data)
+    except Exception as e:
+        logger.error("Failed to get analytics", error=str(e))
+        raise HTTPException(status_code=500, detail="Failed to retrieve analytics")
+
+
+@app.get("/subjects", response_model=List[str])
+async def get_subjects() -> List[str]:
+    """Get list of available subjects."""
+    return [subject.value for subject in Subject]
+
+
+@app.get("/grade-bands", response_model=List[str])
+async def get_grade_bands() -> List[str]:
+    """Get list of available grade bands."""
+    return [grade.value for grade in GradeBand]
+
+
+@app.get("/regions", response_model=List[str])
+async def get_regions() -> List[str]:
+    """Get list of available regions."""
+    return [region.value for region in Region]
+
+
+@app.get("/policies/validate")
+async def validate_policy(
+    subject: Subject = Query(..., description="Subject to validate"),
+    grade_band: GradeBand = Query(..., description="Grade band to validate"),
+    region: Region = Query(..., description="Region to validate"),
+    service: ModelDispatchService = Depends(get_dispatch_service),
+) -> Dict[str, any]:
+    """Validate that a policy exists for the given parameters."""
+    try:
+        # Create a test dispatch request
+        test_request = DispatchRequest(
+            subject=subject,
+            grade_band=grade_band,
+            region=region,
+            request_id="validation_test",
+        )
+
+        # Try to get a dispatch response
+        response = await service.dispatch_request(test_request)
+
         return {
-            "message": f"Cache invalidation initiated for subject: {subject}"
+            "valid": True,
+            "policy_id": str(response.policy_id),
+            "provider_name": response.provider_name,
+            "moderation_threshold": response.moderation_threshold,
+            "allow_teacher_override": response.allow_teacher_override,
         }
 
-    except Exception as e:
-        raise HTTPException(
-            status_code=500, detail=f"Failed to invalidate cache: {str(e)}"
-        ) from e
-
-
-@app.post("/cache/invalidate/region/{region}")
-async def invalidate_region_cache(
-    region: str, background_tasks: BackgroundTasks
-) -> dict[str, str]:
-    """Invalidate cache for a specific region."""
-    try:
-        background_tasks.add_task(cache_service.invalidate_region, region)
+    except ValueError as e:
         return {
-            "message": f"Cache invalidation initiated for region: {region}"
+            "valid": False,
+            "error": str(e),
+            "suggestion": "Create a dispatch policy for this combination",
         }
-
     except Exception as e:
-        raise HTTPException(
-            status_code=500, detail=f"Failed to invalidate cache: {str(e)}"
-        ) from e
+        logger.error("Policy validation error", error=str(e))
+        raise HTTPException(status_code=500, detail="Validation failed")
 
 
-@app.post("/config/reload")
-async def reload_config() -> dict[str, Any]:
-    """Reload policy configuration."""
-    try:
-        success = await policy_engine.reload_config()
-        return {
-            "success": success,
-            "message": (
-                "Configuration reloaded successfully"
-                if success
-                else "Reload failed"
-            ),
-            "timestamp": time.time(),
-        }
+# Error handlers
+@app.exception_handler(ValueError)
+async def value_error_handler(request, exc):
+    """Handle ValueError exceptions."""
+    logger.warning("ValueError in request", error=str(exc))
+    return HTTPException(status_code=400, detail=str(exc))
 
-    except Exception as e:
-        raise HTTPException(
-            status_code=500, detail=f"Failed to reload config: {str(e)}"
-        ) from e
+
+@app.exception_handler(404)
+async def not_found_handler(request, exc):
+    """Handle 404 errors."""
+    return HTTPException(status_code=404, detail="Resource not found")
 
 
 if __name__ == "__main__":
     import uvicorn
 
-    uvicorn.run(
-        "app.main:app",
-        host=settings.host,
-        port=settings.port,
-        reload=settings.debug,
-        log_level=str(settings.log_level).lower(),
-    )
+    uvicorn.run(app, host="0.0.0.0", port=8002, reload=True)
