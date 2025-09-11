@@ -66,9 +66,7 @@ class TemplateEngine:
                         "{{document_name}} has been updated by "
                         "{{updated_by}}. {{update_summary}}"
                     ),
-                    "sms": (
-                        "Doc Update: {{document_name}} updated. Check portal."
-                    ),
+                    "sms": ("Doc Update: {{document_name}} updated. Check portal."),
                 },
                 "es": {
                     "title": "Documento Actualizado",
@@ -76,10 +74,7 @@ class TemplateEngine:
                         "{{document_name}} ha sido actualizado por "
                         "{{updated_by}}. {{update_summary}}"
                     ),
-                    "sms": (
-                        "Actualización: {{document_name}} actualizado. "
-                        "Revise el portal."
-                    ),
+                    "sms": ("Actualización: {{document_name}} actualizado. " "Revise el portal."),
                 },
             },
         }
@@ -98,9 +93,7 @@ class TemplateEngine:
 
         # Fallback to English if locale not found
         if locale not in template["locales"]:
-            logger.warning(
-                "Locale %s not found for %s, using en", locale, template_id
-            )
+            logger.warning("Locale %s not found for %s, using en", locale, template_id)
             locale = "en"
 
         locale_templates = template["locales"][locale]

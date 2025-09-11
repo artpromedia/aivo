@@ -27,9 +27,7 @@ class PushService:
         if not settings.VAPID_PRIVATE_KEY:
             vapid = Vapid()
             vapid.generate_keys()
-            logger.warning(
-                "Generated VAPID keys. Public key: %s", vapid.public_key
-            )
+            logger.warning("Generated VAPID keys. Public key: %s", vapid.public_key)
         else:
             logger.info("Using configured VAPID keys")
 
@@ -70,9 +68,7 @@ class PushService:
             return False
 
         subscriptions = self.subscriptions[user_id]
-        self.subscriptions[user_id] = [
-            sub for sub in subscriptions if sub.endpoint != endpoint
-        ]
+        self.subscriptions[user_id] = [sub for sub in subscriptions if sub.endpoint != endpoint]
 
         logger.info("Removed push subscription for %s", user_id)
 

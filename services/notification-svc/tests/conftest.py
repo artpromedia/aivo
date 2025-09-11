@@ -8,6 +8,7 @@ import tempfile
 from unittest.mock import patch
 
 import pytest
+
 from app.config import Settings
 
 
@@ -48,10 +49,7 @@ def mock_settings(email_storage_dir):  # pylint: disable=redefined-outer-name
 
     with patch("app.config.get_settings", return_value=test_settings):
         with patch("app.main.get_settings", return_value=test_settings):
-            with patch(
-                "app.template_service.get_settings",
-                return_value=test_settings
-            ):
+            with patch("app.template_service.get_settings", return_value=test_settings):
                 with patch(
                     "app.email_service.get_settings",
                     return_value=test_settings,

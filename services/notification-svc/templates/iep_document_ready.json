@@ -1,0 +1,21 @@
+﻿{
+  "id": "iep_document_ready",
+  "name": "IEP Document Ready",
+  "category": "iep_reminders",
+  "description": "Notification when IEP documents are ready for review",
+  "required_data": ["student_name", "document_type"],
+  "supported_locales": ["en-US", "es-US"],
+  "websocket_template": {
+    "title": "IEP Document Ready",
+    "message": "{{document_type}} for {{student_name}} is ready for review",
+    "icon": "",
+    "type": "iep_document_ready"
+  },
+  "push_template": {
+    "title": "Document Ready: {{student_name}}",
+    "body": "{{document_type}} is ready for your review. Tap to view.",
+    "icon": "/icons/document-ready.png",
+    "url": "/iep/document/{{iep_id}}"
+  },
+  "sms_template": "{{document_type}} for {{student_name}} is ready for review. Access online portal."
+}

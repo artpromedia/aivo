@@ -21,15 +21,11 @@ class NotificationRequest(BaseModel):
 
     to: EmailStr = Field(..., description="Recipient email address")
     template_id: TemplateId = Field(..., description="Template identifier")
-    data: dict[str, Any] = Field(
-        default_factory=dict, description="Template data"
-    )
+    data: dict[str, Any] = Field(default_factory=dict, description="Template data")
 
     # Optional overrides
     subject: str | None = Field(None, description="Override subject line")
-    from_email: EmailStr | None = Field(
-        None, description="Override from email"
-    )
+    from_email: EmailStr | None = Field(None, description="Override from email")
     from_name: str | None = Field(None, description="Override from name")
 
     # Metadata
@@ -41,19 +37,13 @@ class NotificationRequest(BaseModel):
 class BulkNotificationRequest(BaseModel):
     """Request schema for sending bulk notifications."""
 
-    to: list[EmailStr] = Field(
-        ..., description="List of recipient email addresses"
-    )
+    to: list[EmailStr] = Field(..., description="List of recipient email addresses")
     template_id: TemplateId = Field(..., description="Template identifier")
-    data: dict[str, Any] = Field(
-        default_factory=dict, description="Template data"
-    )
+    data: dict[str, Any] = Field(default_factory=dict, description="Template data")
 
     # Optional overrides
     subject: str | None = Field(None, description="Override subject line")
-    from_email: EmailStr | None = Field(
-        None, description="Override from email"
-    )
+    from_email: EmailStr | None = Field(None, description="Override from email")
     from_name: str | None = Field(None, description="Override from name")
 
     # Metadata
@@ -63,9 +53,7 @@ class BulkNotificationRequest(BaseModel):
 class NotificationResponse(BaseModel):
     """Response schema for notification requests."""
 
-    success: bool = Field(
-        ..., description="Whether the notification was sent successfully"
-    )
+    success: bool = Field(..., description="Whether the notification was sent successfully")
     message_id: str | None = Field(None, description="Message identifier")
     error: str | None = Field(None, description="Error message if failed")
 
@@ -74,12 +62,8 @@ class BulkNotificationResponse(BaseModel):
     """Response schema for bulk notification requests."""
 
     total_sent: int = Field(..., description="Total number of emails sent")
-    successful: list[str] = Field(
-        ..., description="Successfully sent email addresses"
-    )
-    failed: list[dict[str, str]] = Field(
-        ..., description="Failed email addresses with errors"
-    )
+    successful: list[str] = Field(..., description="Successfully sent email addresses")
+    failed: list[dict[str, str]] = Field(..., description="Failed email addresses with errors")
 
 
 class TemplateInfo(BaseModel):
@@ -89,26 +73,20 @@ class TemplateInfo(BaseModel):
     name: str = Field(..., description="Template display name")
     description: str = Field(..., description="Template description")
     required_data: list[str] = Field(..., description="Required data fields")
-    optional_data: list[str] = Field(
-        default_factory=list, description="Optional data fields"
-    )
+    optional_data: list[str] = Field(default_factory=list, description="Optional data fields")
 
 
 class TemplateListResponse(BaseModel):
     """Response schema for template listing."""
 
-    templates: list[TemplateInfo] = Field(
-        ..., description="Available templates"
-    )
+    templates: list[TemplateInfo] = Field(..., description="Available templates")
 
 
 class RenderTemplateRequest(BaseModel):
     """Request schema for template rendering (dev/testing)."""
 
     template_id: TemplateId = Field(..., description="Template identifier")
-    data: dict[str, Any] = Field(
-        default_factory=dict, description="Template data"
-    )
+    data: dict[str, Any] = Field(default_factory=dict, description="Template data")
 
 
 class RenderTemplateResponse(BaseModel):
@@ -124,9 +102,5 @@ class HealthResponse(BaseModel):
 
     status: str = Field(..., description="Service status")
     version: str = Field(..., description="Service version")
-    smtp_configured: bool = Field(
-        ..., description="Whether SMTP is configured"
-    )
-    templates_loaded: int = Field(
-        ..., description="Number of templates loaded"
-    )
+    smtp_configured: bool = Field(..., description="Whether SMTP is configured")
+    templates_loaded: int = Field(..., description="Number of templates loaded")

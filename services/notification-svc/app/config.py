@@ -12,9 +12,7 @@ class Settings(BaseSettings):
     WEBSOCKET_PORT: int = 8000
 
     # JWT
-    JWT_SECRET: str = Field(
-        "dev-secret-key-change-in-production", env="JWT_SECRET"
-    )
+    JWT_SECRET: str = Field("dev-secret-key-change-in-production", env="JWT_SECRET")
     JWT_ALGORITHM: str = "HS256"
 
     # Redis

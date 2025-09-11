@@ -23,9 +23,7 @@ class MessageQueue:
 
     async def init(self) -> None:
         """Initialize Redis connection."""
-        self.redis = redis.from_url(
-            settings.REDIS_URL, encoding="utf-8", decode_responses=True
-        )
+        self.redis = redis.from_url(settings.REDIS_URL, encoding="utf-8", decode_responses=True)
 
     async def close(self) -> None:
         """Close Redis connection."""
@@ -106,9 +104,7 @@ class MessageQueue:
                 notification = json.loads(data)
                 messages.append(notification)
 
-        logger.info(
-            "Retrieved %s missed messages for %s", len(messages), user_id
-        )
+        logger.info("Retrieved %s missed messages for %s", len(messages), user_id)
 
         return messages
 
@@ -145,9 +141,7 @@ class MessageQueue:
 
         if retry_count >= len(self.retry_delays):
             # Max retries exceeded
-            logger.warning(
-                "Max retries exceeded for %s (%s)", notification_id, user_id
-            )
+            logger.warning("Max retries exceeded for %s (%s)", notification_id, user_id)
             await self.mark_delivered(user_id, notification_id)
             return False
 

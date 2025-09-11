@@ -1,0 +1,26 @@
+﻿{
+  "id": "iep_deadline_warning",
+  "name": "IEP Deadline Warning",
+  "category": "iep_reminders", 
+  "description": "Warning for approaching IEP review deadlines",
+  "required_data": ["student_name", "deadline_date", "days_remaining", "action_required"],
+  "supported_locales": ["en-US", "es-US"],
+  "websocket_template": {
+    "title": "IEP Deadline Warning",
+    "message": "IEP review for {{student_name}} is due in {{days_remaining}} days ({{deadline_date}}). Action required: {{action_required}}",
+    "icon": "",
+    "type": "iep_deadline_warning",
+    "urgency": "high"
+  },
+  "push_template": {
+    "title": "IEP Deadline: {{student_name}}",
+    "body": "Review due in {{days_remaining}} days. {{action_required}}",
+    "icon": "/icons/deadline-warning.png",
+    "url": "/iep/review/{{iep_id}}",
+    "actions": [
+      {"action": "review", "title": "Review IEP"},
+      {"action": "schedule", "title": "Schedule Meeting"}
+    ]
+  },
+  "sms_template": "URGENT: IEP review for {{student_name}} due in {{days_remaining}} days. {{action_required}}"
+}

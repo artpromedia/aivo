@@ -24,9 +24,7 @@ class TemplateService:
         self.settings = get_settings()
         self.templates_dir = Path(self.settings.templates_path)
         self.templates_path = self.templates_dir  # Backward compatibility
-        self.jinja_env = Environment(
-            loader=FileSystemLoader(str(self.templates_dir))
-        )
+        self.jinja_env = Environment(loader=FileSystemLoader(str(self.templates_dir)))
         self._template_configs: dict[TemplateId, dict[str, Any]] = {}
         self._loaded = False
 
@@ -51,13 +49,9 @@ class TemplateService:
                 async with aiofiles.open(config_path) as f:
                     content = await f.read()
                     self._template_configs[template_id] = json.loads(content)
-                    logger.debug(
-                        "Loaded config for template: %s", template_id.value
-                    )
+                    logger.debug("Loaded config for template: %s", template_id.value)
             else:
-                logger.warning(
-                    "No config found for template: %s", template_id.value
-                )
+                logger.warning("No config found for template: %s", template_id.value)
 
     async def render_template(
         self, template_id: TemplateId, data: dict[str, Any]
@@ -69,15 +63,11 @@ class TemplateService:
         # Get template configuration
         config = self._template_configs.get(template_id)
         if not config:
-            raise ValueError(
-                f"Template configuration not found: {template_id.value}"
-            )
+            raise ValueError(f"Template configuration not found: {template_id.value}")
 
         # Validate required data
         required_fields = config.get("required_data", [])
-        missing_fields = [
-            field for field in required_fields if field not in data
-        ]
+        missing_fields = [field for field in required_fields if field not in data]
         if missing_fields:
             raise ValueError(f"Missing required data fields: {missing_fields}")
 
@@ -112,9 +102,7 @@ class TemplateService:
 
         return {"html": html_result.get("html", ""), "subject": subject}
 
-    def get_template_info(
-        self, template_id: TemplateId
-    ) -> TemplateInfo | None:
+    def get_template_info(self, template_id: TemplateId) -> TemplateInfo | None:
         """Get information about a template."""
         config = self._template_configs.get(template_id)
         if not config:
@@ -137,9 +125,7 @@ class TemplateService:
                 templates.append(info)
         return templates
 
-    def validate_template_data(
-        self, template_id: TemplateId, data: dict[str, Any]
-    ) -> bool:
+    def validate_template_data(self, template_id: TemplateId, data: dict[str, Any]) -> bool:
         """Validate that provided data meets template requirements."""
         config = self._template_configs.get(template_id)
         if not config:

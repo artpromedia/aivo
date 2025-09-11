@@ -6,11 +6,12 @@ from datetime import datetime, timedelta
 from unittest.mock import AsyncMock, Mock, patch
 
 import pytest
+from fastapi.testclient import TestClient
+
 from app.config import get_settings
 from app.email_service import EmailService
 from app.main import app
 from app.template_service import TemplateService
-from fastapi.testclient import TestClient
 
 
 @pytest.fixture

@@ -35,10 +35,7 @@ class EmailService:
                 self.dev_email_path,
             )
         else:
-            logger.info(
-                "Email service in production mode - "
-                "emails will be sent via SMTP"
-            )
+            logger.info("Email service in production mode - " "emails will be sent via SMTP")
 
     async def send_email(
         self,
@@ -111,16 +108,12 @@ class EmailService:
 
         return results
 
-    async def _save_dev_email(
-        self, email_data: dict[str, Any]
-    ) -> dict[str, Any]:
+    async def _save_dev_email(self, email_data: dict[str, Any]) -> dict[str, Any]:
         """Save email to file system for development."""
         try:
             # Generate filename with timestamp
             timestamp = datetime.utcnow().strftime("%Y%m%d_%H%M%S_%f")
-            safe_email = (
-                email_data["to"].replace("@", "_at_").replace(".", "_")
-            )
+            safe_email = email_data["to"].replace("@", "_at_").replace(".", "_")
             filename = f"email_{timestamp}_{safe_email}.json"
             filepath = self.dev_email_path / filename
 
@@ -143,9 +136,7 @@ class EmailService:
                 "error": "Failed to save development email: " + str(e),
             }
 
-    async def _send_smtp_email(
-        self, email_data: dict[str, Any]
-    ) -> dict[str, Any]:
+    async def _send_smtp_email(self, email_data: dict[str, Any]) -> dict[str, Any]:
         """Send email via SMTP."""
         try:
             if not self.settings.smtp_server:
@@ -154,9 +145,7 @@ class EmailService:
             # Create message
             msg = MIMEMultipart("alternative")
             msg["Subject"] = email_data["subject"]
-            msg["From"] = (
-                f"{email_data['from_name']} <{email_data['from_email']}>"
-            )
+            msg["From"] = f"{email_data['from_name']} <{email_data['from_email']}>"
             msg["To"] = email_data["to"]
 
             # Attach HTML content

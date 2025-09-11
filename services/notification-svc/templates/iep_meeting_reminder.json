@@ -1,0 +1,21 @@
+﻿{
+  "id": "iep_meeting_reminder",
+  "name": "IEP Meeting Reminder",
+  "category": "iep_reminders",
+  "description": "Reminder for upcoming IEP meetings",
+  "required_data": ["student_name", "meeting_date", "location"],
+  "supported_locales": ["en-US", "es-US"],
+  "websocket_template": {
+    "title": "IEP Meeting Reminder",
+    "message": "IEP meeting for {{student_name}} is scheduled for {{meeting_date}} at {{location}}",
+    "icon": "",
+    "type": "iep_meeting_reminder"
+  },
+  "push_template": {
+    "title": "IEP Meeting: {{student_name}}",
+    "body": "Meeting scheduled for {{meeting_date}} at {{location}}. Tap to view details.",
+    "icon": "/icons/iep-meeting.png",
+    "url": "/iep/meeting/{{iep_id}}"
+  },
+  "sms_template": "IEP meeting for {{student_name}} on {{meeting_date}} at {{location}}. Contact school for details."
+}
