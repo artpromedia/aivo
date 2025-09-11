@@ -1,205 +1,272 @@
-# AIVO Scripts Directory
+﻿# S2B-14 Stage-2B Verifier
 
-This directory contains automation scripts for maintaining and securing the
-AIVO monorepo infrastructure.
+End-to-end smoke testing across communications, compliance, accessibility, gateway, and RAI.
 
-## Docker Security Scripts
+## Overview
 
-### `docker-security-scan-fix.ps1` (Windows PowerShell)
+The Stage-2B Verifier performs comprehensive end-to-end testing of the AIVO educational AI infrastructure, ensuring all critical systems are functioning correctly and meet compliance requirements.
 
-Comprehensive Docker security scanning and fixing script for Windows.
+## Test Flow
 
-**Usage:**
-
-```powershell
-# Run with default settings
-.\scripts\docker-security-scan-fix.ps1
-
-# Skip creating backup files
-.\scripts\docker-security-scan-fix.ps1 -SkipBackups
-
-# Run with verbose output
-.\scripts\docker-security-scan-fix.ps1 -Verbose
+```
+roster sync  lessons/ingest/search  chat (parent toggle)  evidence attach  
+HLS playback  compliance export  Looker schedule  bias audit dry-run  Axe CI
 ```
 
-**Features:**
+## Features
 
-- ✅ Docker Scout vulnerability scanning
-- ✅ SBOM (Software Bill of Materials) generation
-- ✅ Security recommendations
-- ✅ Automatic Dockerfile fixes
-- ✅ Docker Compose format updates
-- ✅ Node.js version standardization
+###  **Comprehensive Testing**
+- **Roster Sync**: Student/parent/teacher data synchronization
+- **Lesson Management**: Content upload, indexing, and search
+- **Communication**: Real-time chat with parent notification controls
+- **Evidence Processing**: File upload and attachment handling
+- **Media Streaming**: HLS video playback verification
+- **Compliance Export**: FERPA/GDPR data export validation
+- **Analytics**: Looker dashboard generation and scheduling
+- **Responsible AI**: Bias audit and fairness assessment
+- **Accessibility**: Axe CI compliance verification
+- **Code Quality**: Python lint hygiene checks
 
-### `docker-security-scan-fix.sh` (Cross-platform Bash)
+###  **Compliance Verification**
+-  FERPA compliance validation
+-  GDPR data protection verification
+-  Accessibility standards (WCAG 2.1)
+-  AI bias and fairness auditing
+-  Educational equity assessment
 
-Cross-platform version of the security script for Linux/macOS/WSL.
+###  **Educational Focus**
+- Student data privacy protection
+- Parent communication controls
+- Teacher dashboard functionality
+- Learning content management
+- Performance analytics
+- Special needs accommodation
 
-**Usage:**
+## Usage
+
+### Prerequisites
+```bash
+# Install Node.js dependencies
+npm install
+
+# Install Python dependencies (if running Python services)
+pip install ruff
+
+# Install Axe CLI for accessibility testing
+npm install -g @axe-core/cli
+```
+
+### Running the Verifier
+```bash
+# Run full verification suite
+npm run verify
+
+# Run with development watching
+npm run verify:dev
+
+# Run only lint checks
+npm run lint
+```
+
+### Manual Execution
+```bash
+# Direct TypeScript execution
+tsx verify-stage2b.ts
+
+# With specific environment
+NODE_ENV=staging tsx verify-stage2b.ts
+```
+
+## Configuration
+
+The verifier supports configuration through environment variables:
 
 ```bash
-# Make executable and run
-chmod +x scripts/docker-security-scan-fix.sh
-./scripts/docker-security-scan-fix.sh
+# Service endpoints
+GATEWAY_URL=http://localhost:8080
+ROSTER_URL=http://localhost:8001
+LESSONS_URL=http://localhost:8002
+CHAT_URL=http://localhost:8003
+EVIDENCE_URL=http://localhost:8004
+HLS_URL=http://localhost:8005
+COMPLIANCE_URL=http://localhost:8006
+LOOKER_URL=http://localhost:8007
+RAI_URL=http://localhost:8008
+
+# Test configuration
+TEST_STUDENT_ID=test-student-12345
+TEST_PARENT_ID=test-parent-67890
+TEST_TEACHER_ID=test-teacher-54321
+
+# Timeout settings
+SERVICE_TIMEOUT=5000
+WEBSOCKET_TIMEOUT=3000
+HLS_TIMEOUT=10000
+EXPORT_TIMEOUT=15000
 ```
 
-## Existing Docker Scripts
+## Test Results
 
-### `docker-improvements-summary.ps1`
+### Report Structure
+```json
+{
+  "timestamp": "2025-09-11T18:30:00.000Z",
+  "environment": "development",
+  "totalTests": 10,
+  "passed": 8,
+  "failed": 1,
+  "skipped": 1,
+  "duration": 45230,
+  "compliance": {
+    "ferpa": true,
+    "gdpr": true,
+    "accessibility": true,
+    "bias_audit": true
+  },
+  "results": [...]
+}
+```
 
-Shows a summary of all Docker improvements completed in the monorepo.
+### Compliance Status
+- **FERPA**: Student data privacy compliance
+- **GDPR**: European data protection compliance  
+- **Accessibility**: WCAG 2.1 AA compliance
+- **Bias Audit**: AI fairness and equity assessment
 
-### `update-dockerfiles.ps1`
+## Integration
 
-Updates all Dockerfiles with latest Node.js versions and security improvements.
+### CI/CD Pipeline
+```yaml
+# .github/workflows/stage2b-verify.yml
+name: Stage-2B Verification
+on: [push, pull_request]
 
-### `fix-npm-vulnerabilities.ps1`
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+      - name: Install dependencies
+        run: |
+          cd scripts
+          npm install
+      - name: Run verification
+        run: |
+          cd scripts
+          npm run verify
+      - name: Upload report
+        uses: actions/upload-artifact@v4
+        with:
+          name: verification-report
+          path: scripts/verification-report.json
+```
 
-Scans and fixes npm security vulnerabilities across all Node.js projects.
-
-### `add-hadolint-ignore.ps1`
-
-Adds hadolint ignore comments to Dockerfiles for known acceptable warnings.
-
-## Prerequisites
-
-### For Docker Scout Features:
-
-- Docker Desktop 4.17.0 or later
-- Docker Scout enabled (included in Docker Desktop 4.25.0+)
-- Organization enrolled in Docker Scout (script will attempt to enroll)
-
-### For General Docker Operations:
-
-- Docker Desktop or Docker Engine
-- PowerShell 5.1+ (for .ps1 scripts)
-- Bash (for .sh scripts)
-
-## Security Scanning Workflow
-
-1. **Run the security scan script:**
-
-   ```powershell
-   .\scripts\docker-security-scan-fix.ps1
-   ```
-
-2. **Review generated files:**
-   - `*-sbom.json` - Software Bill of Materials for each scanned image
-   - Console output with vulnerability reports and recommendations
-
-3. **Address critical vulnerabilities:**
-   - Update base images
-   - Update dependencies
-   - Apply security patches
-
-4. **Integrate into CI/CD:**
-   - Use Docker Scout in GitHub Actions
-   - Set up automated vulnerability scanning
-   - Create security policies
-
-## Common Docker Scout Commands
-
+### Pre-deployment Check
 ```bash
-# Quick vulnerability overview
-docker scout quickview
-
-# Scan specific image
-docker scout cves your-image:tag
-
-# Generate SBOM
-docker scout sbom your-image:tag
-
-# Get security recommendations
-docker scout recommendations your-image:tag
-
-# Compare images
-docker scout compare your-image:v1 your-image:v2
+# Add to deployment pipeline
+cd scripts && npm run verify || exit 1
 ```
+
+## Educational Compliance
+
+### FERPA Compliance
+- Student record protection
+- Parental consent management
+- Educational purpose validation
+- Access logging and auditing
+
+### GDPR Compliance
+- Data minimization principles
+- Consent management
+- Right to erasure
+- Cross-border data transfer controls
+
+### Accessibility Standards
+- WCAG 2.1 AA compliance
+- Screen reader compatibility
+- Keyboard navigation support
+- Color contrast validation
+- Alternative text verification
+
+### AI Ethics and Bias Auditing
+- Demographic parity assessment
+- Equal opportunity validation
+- Educational equity measurement
+- Protected attribute testing
+- Stakeholder impact analysis
 
 ## Troubleshooting
 
-### Docker Scout Not Available
+### Common Issues
 
-- Update Docker Desktop to 4.17.0 or later
-- Ensure Docker Scout is enabled in Docker Desktop settings
-
-### Permission Errors
-
-- Run PowerShell as Administrator (Windows)
-- Use `sudo` for Docker commands (Linux/macOS)
-- Check Docker daemon is running
-
-### Image Not Found
-
-- Build the image first: `docker build -t your-image .`
-- Or scan existing images: `docker images` to list available images
-
-## Integration with CI/CD
-
-The scripts can be integrated into your CI/CD pipeline:
-
-### GitHub Actions Example:
-
-```yaml
-- name: Run Docker Security Scan
-  run: |
-    chmod +x scripts/docker-security-scan-fix.sh
-    ./scripts/docker-security-scan-fix.sh
-```
-
-### PowerShell in CI:
-
-```yaml
-- name: Run Docker Security Scan (Windows)
-  shell: pwsh
-  run: |
-    .\scripts\docker-security-scan-fix.ps1 -SkipBackups
-```
-
-## Stage Verification Scripts
-
-### `verify-stage2a.ts` (TypeScript/Node.js)
-
-Comprehensive end-to-end verification script for Stage 2A services and workflows.
-
-**Usage:**
-
+**Service Connection Errors**
 ```bash
-# Run the complete S2A verification
-npx ts-node scripts/verify-stage2a.ts
+# Check if services are running
+curl http://localhost:8080/health
 
-# Or with Node.js directly
-node --loader ts-node/esm scripts/verify-stage2a.ts
+# Start required services
+docker-compose up -d
 ```
 
-**What it tests:**
+**WebSocket Connection Failures**
+```bash
+# Verify WebSocket endpoints
+wscat -c ws://localhost:8003/ws
+```
 
-1. **Problem Session Pipeline:**
-   - Start problem session → capture ink input → recognize math → solve →
-     grade → results
-   - Tests: ink-svc, math-recognizer-svc, science-solver-svc, ela-eval-svc,
-     slp-sel-svc, problem-session-svc
+**Accessibility Test Failures**
+```bash
+# Install Axe CLI if missing
+npm install -g @axe-core/cli
 
-2. **Device Management Pipeline:**
-   - Enroll mock device → create policy → assign policy → request bundle
-   - Tests: device-enroll-svc, device-policy-svc, edge-bundler-svc,
-     device-ota-svc
+# Run manual accessibility check
+axe http://localhost:8080 --timeout 10000
+```
 
-**Prerequisites:**
+**Python Lint Errors**
+```bash
+# Fix formatting issues
+ruff format .
 
-- All S2A services running (via Docker Compose)
-- Authentication service available
-- Services healthy and responding on expected ports
+# Fix linting issues
+ruff check . --fix
+```
 
-**Services Tested:**
+### Debug Mode
+```bash
+# Enable verbose logging
+DEBUG=* tsx verify-stage2b.ts
 
-- `ink-svc` (port 8100)
-- `math-recognizer-svc` (port 8101)
-- `science-solver-svc` (port 8102)
-- `ela-eval-svc` (port 8103)
-- `slp-sel-svc` (port 8104)
-- `problem-session-svc` (port 8105)
-- `device-enroll-svc` (port 8106)
-- `device-policy-svc` (port 8107)
-- `edge-bundler-svc` (port 8108)
-- `device-ota-svc` (port 8109)
+# Test specific components
+tsx verify-stage2b.ts --test=bias_audit
+```
+
+## Contributing
+
+### Adding New Tests
+1. Implement test method in `Stage2BVerifier` class
+2. Add test to the `tests` array in `runVerification()`
+3. Update compliance validation logic
+4. Add configuration options if needed
+5. Update documentation
+
+### Test Guidelines
+- Each test should be independent and atomic
+- Use appropriate timeouts for network operations
+- Include comprehensive error handling
+- Validate both success and failure scenarios
+- Document expected compliance outcomes
+
+## License
+
+MIT License - See LICENSE file for details.
+
+## Support
+
+For issues and questions:
+- **Documentation**: https://docs.aivo.education/verification
+- **Issues**: https://github.com/aivo-education/aivo/issues
+- **Email**: support@aivo.education
