@@ -1,0 +1,141 @@
+﻿{
+  "api_version": "2.0",
+  "base_endpoints": {
+    "districts": "/districts",
+    "schools": "/schools",
+    "teachers": "/teachers",
+    "students": "/students",
+    "sections": "/sections",
+    "courses": "/courses",
+    "school_admins": "/school_admins",
+    "district_admins": "/district_admins",
+    "events": "/events"
+  },
+  "user_mappings": {
+    "id": "id",
+    "email": "email",
+    "name": {
+      "first": "first_name",
+      "middle": "middle_name",
+      "last": "last_name"
+    },
+    "title": "title",
+    "state_id": "state_id",
+    "sis_id": "sis_id",
+    "username": "username",
+    "roles": {
+      "student": "student",
+      "teacher": "teacher", 
+      "school_admin": "admin",
+      "district_admin": "district_admin"
+    },
+    "school": "school_id",
+    "district": "district_id",
+    "graduation_year": "graduation_year",
+    "grade": "grade_level",
+    "created": "created_at",
+    "last_modified": "updated_at"
+  },
+  "school_mappings": {
+    "id": "id",
+    "name": "name",
+    "district": "district_id",
+    "high_grade": "high_grade",
+    "low_grade": "low_grade",
+    "nces_id": "nces_id",
+    "sis_id": "sis_id",
+    "state_id": "state_id",
+    "phone": "phone",
+    "address": {
+      "street": "address_street",
+      "city": "address_city", 
+      "state": "address_state",
+      "zip": "address_zip"
+    },
+    "created": "created_at",
+    "last_modified": "updated_at"
+  },
+  "district_mappings": {
+    "id": "id",
+    "name": "name",
+    "nces_id": "nces_id",
+    "sis_id": "sis_id",
+    "state_id": "state_id",
+    "created": "created_at",
+    "last_modified": "updated_at"
+  },
+  "section_mappings": {
+    "id": "id",
+    "name": "name",
+    "section_number": "section_number",
+    "grade": "grade_level",
+    "course": "course_id",
+    "school": "school_id",
+    "district": "district_id",
+    "sis_id": "sis_id",
+    "subject": "subject",
+    "period": "period",
+    "teacher": "primary_teacher_id",
+    "teachers": "teacher_ids",
+    "students": "student_ids",
+    "created": "created_at",
+    "last_modified": "updated_at",
+    "term": {
+      "name": "term_name",
+      "start_date": "term_start_date",
+      "end_date": "term_end_date"
+    }
+  },
+  "course_mappings": {
+    "id": "id",
+    "name": "name",
+    "number": "course_number",
+    "subject": "subject",
+    "grade": "grade_level",
+    "district": "district_id",
+    "sis_id": "sis_id",
+    "created": "created_at",
+    "last_modified": "updated_at"
+  },
+  "validation": {
+    "required_fields": {
+      "student": ["id", "name", "email", "school", "district"],
+      "teacher": ["id", "name", "email", "school", "district"],
+      "school": ["id", "name", "district"],
+      "district": ["id", "name"],
+      "section": ["id", "name", "course", "school", "district"],
+      "course": ["id", "name", "district"]
+    },
+    "grade_levels": ["PreK", "K", "1", "2", "3", "4", "5", "6", "7", "8", "9", "10", "11", "12"],
+    "subjects": [
+      "english", "math", "science", "social studies", "language",
+      "homeroom", "physical education", "arts", "other"
+    ]
+  },
+  "pagination": {
+    "default_limit": 1000,
+    "max_limit": 10000,
+    "starting_after_param": "starting_after",
+    "ending_before_param": "ending_before",
+    "limit_param": "limit"
+  },
+  "error_handling": {
+    "retry_attempts": 3,
+    "retry_delay": 5,
+    "timeout": 30,
+    "rate_limit": 1000
+  },
+  "webhook_events": [
+    "students.created",
+    "students.updated", 
+    "students.deleted",
+    "teachers.created",
+    "teachers.updated",
+    "teachers.deleted",
+    "schools.created",
+    "schools.updated",
+    "sections.created",
+    "sections.updated",
+    "sections.deleted"
+  ]
+}

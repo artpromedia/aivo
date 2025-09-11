@@ -1,0 +1,124 @@
+﻿# OneRoster API field mappings
+version: "1.2"
+base_endpoints:
+  orgs: "/orgs"
+  schools: "/schools"
+  courses: "/courses"
+  classes: "/classes"
+  users: "/users"
+  enrollments: "/enrollments"
+  demographics: "/demographics"
+
+user_mappings:
+  sourcedId: "id"
+  username: "username"
+  userIds:
+    - type: "email"
+      identifier: "email"
+  givenName: "first_name"
+  familyName: "last_name"
+  email: "email"
+  role: "role"
+  status: "status"
+  dateLastModified: "updated_at"
+  
+  # Role mappings
+  role_mappings:
+    student: "student"
+    teacher: "teacher"
+    administrator: "admin"
+    aide: "aide"
+    guardian: "parent"
+    parent: "parent"
+    relative: "guardian"
+
+org_mappings:
+  sourcedId: "id"
+  name: "name"
+  type: "type"
+  identifier: "external_id"
+  status: "status"
+  dateLastModified: "updated_at"
+  parent:
+    sourcedId: "parent_id"
+
+school_mappings:
+  sourcedId: "id"
+  name: "name"
+  type: "type"
+  identifier: "external_id"
+  status: "status"
+  dateLastModified: "updated_at"
+  org:
+    sourcedId: "organization_id"
+
+course_mappings:
+  sourcedId: "id"
+  title: "name"
+  courseCode: "course_code"
+  status: "status"
+  dateLastModified: "updated_at"
+  org:
+    sourcedId: "organization_id"
+  school:
+    sourcedId: "school_id"
+  subjects:
+    - "subject"
+
+class_mappings:
+  sourcedId: "id"
+  title: "name"
+  classCode: "class_code"
+  classType: "class_type"
+  location: "location"
+  status: "status"
+  dateLastModified: "updated_at"
+  course:
+    sourcedId: "course_id"
+  school:
+    sourcedId: "school_id"
+  terms:
+    - sourcedId: "term_id"
+
+enrollment_mappings:
+  sourcedId: "id"
+  status: "status"
+  dateLastModified: "updated_at"
+  beginDate: "start_date"
+  endDate: "end_date"
+  user:
+    sourcedId: "user_id"
+  class:
+    sourcedId: "class_id"
+  school:
+    sourcedId: "school_id"
+  role: "role"
+  primary: "is_primary"
+
+# Validation rules
+validation:
+  required_fields:
+    user: ["sourcedId", "username", "role", "status"]
+    org: ["sourcedId", "name", "type"]
+    school: ["sourcedId", "name", "org"]
+    course: ["sourcedId", "title", "org"]
+    class: ["sourcedId", "title", "course", "school"]
+    enrollment: ["sourcedId", "user", "class", "role"]
+
+  status_values: ["active", "tobedeleted", "inactive"]
+  role_values: ["student", "teacher", "administrator", "aide", "guardian", "parent", "relative"]
+  class_types: ["homeroom", "scheduled", "other"]
+
+# Pagination settings
+pagination:
+  default_limit: 1000
+  max_limit: 10000
+  offset_param: "offset"
+  limit_param: "limit"
+
+# Error handling
+error_handling:
+  retry_attempts: 3
+  retry_delay: 5  # seconds
+  timeout: 30  # seconds
+  rate_limit: 100  # requests per minute

@@ -1,0 +1,207 @@
+﻿# CSV format mappings and validation schemas
+formats:
+  default:
+    description: "Standard CSV format for roster imports"
+    encoding: "utf-8"
+    delimiter: ","
+    quote_char: "\""
+    escape_char: "\\"
+    has_header: true
+    skip_initial_space: true
+
+  # User/Student CSV mapping
+  users:
+    file_pattern: "*users*.csv|*students*.csv|*staff*.csv"
+    required_columns:
+      - "id" 
+      - "email"
+      - "first_name"
+      - "last_name"
+      - "role"
+    optional_columns:
+      - "username"
+      - "middle_name"
+      - "title"
+      - "grade_level"
+      - "graduation_year"
+      - "state_id"
+      - "sis_id"
+      - "school_id"
+      - "district_id"
+      - "phone"
+      - "address"
+      - "birth_date"
+      - "gender"
+      - "status"
+      - "created_at"
+      - "updated_at"
+    
+    column_mappings:
+      # Core fields
+      "id": ["id", "user_id", "student_id", "staff_id"]
+      "email": ["email", "email_address", "mail"]
+      "first_name": ["first_name", "firstname", "given_name", "fname"]
+      "last_name": ["last_name", "lastname", "family_name", "surname", "lname"]
+      "role": ["role", "user_type", "type", "user_role"]
+      
+      # Optional fields
+      "username": ["username", "login", "user_name", "uid"]
+      "middle_name": ["middle_name", "middlename", "middle_initial", "mname"]
+      "title": ["title", "prefix", "salutation"]
+      "grade_level": ["grade", "grade_level", "current_grade", "gradelevel"]
+      "graduation_year": ["graduation_year", "grad_year", "expected_graduation"]
+      "state_id": ["state_id", "state_student_id", "ssid"]
+      "sis_id": ["sis_id", "local_id", "student_number"]
+      "school_id": ["school_id", "school", "home_school_id"]
+      "district_id": ["district_id", "district", "lea_id"]
+      "status": ["status", "active", "enabled", "is_active"]
+
+    validation:
+      role_values: ["student", "teacher", "admin", "staff", "parent", "guardian"]
+      grade_levels: ["PreK", "K", "1", "2", "3", "4", "5", "6", "7", "8", "9", "10", "11", "12"]
+      status_values: ["active", "inactive", "deleted", "suspended"]
+      email_required: true
+      max_length:
+        first_name: 50
+        last_name: 50
+        email: 100
+        username: 50
+
+  # Schools CSV mapping  
+  schools:
+    file_pattern: "*schools*.csv|*school*.csv"
+    required_columns:
+      - "id"
+      - "name"
+      - "district_id"
+    optional_columns:
+      - "sis_id"
+      - "state_id"
+      - "nces_id"
+      - "low_grade"
+      - "high_grade"
+      - "phone"
+      - "address_street"
+      - "address_city"
+      - "address_state"
+      - "address_zip"
+      - "principal_name"
+      - "principal_email"
+      - "status"
+      
+    column_mappings:
+      "id": ["id", "school_id"]
+      "name": ["name", "school_name", "title"]
+      "district_id": ["district_id", "district", "lea_id"]
+      "sis_id": ["sis_id", "local_id", "school_code"]
+      "state_id": ["state_id", "state_school_id"]
+      "nces_id": ["nces_id", "nces_school_id"]
+      "low_grade": ["low_grade", "min_grade", "lowest_grade"]
+      "high_grade": ["high_grade", "max_grade", "highest_grade"]
+      "phone": ["phone", "phone_number", "telephone"]
+
+  # Classes/Sections CSV mapping
+  classes:
+    file_pattern: "*classes*.csv|*sections*.csv|*courses*.csv"
+    required_columns:
+      - "id"
+      - "name"
+      - "school_id"
+    optional_columns:
+      - "course_id"
+      - "course_name"
+      - "course_code"
+      - "section_number"
+      - "subject"
+      - "grade_level"
+      - "teacher_id"
+      - "teacher_ids"
+      - "period"
+      - "room"
+      - "term_name"
+      - "start_date"
+      - "end_date"
+      - "status"
+      
+    column_mappings:
+      "id": ["id", "class_id", "section_id"]
+      "name": ["name", "class_name", "section_name", "title"]
+      "school_id": ["school_id", "school"]
+      "course_id": ["course_id", "course"]
+      "course_name": ["course_name", "course_title"]
+      "course_code": ["course_code", "course_number"]
+      "teacher_id": ["teacher_id", "primary_teacher", "instructor_id"]
+      "teacher_ids": ["teacher_ids", "teachers", "all_teachers"]
+      "subject": ["subject", "subject_area", "discipline"]
+      "grade_level": ["grade_level", "grade", "target_grade"]
+
+  # Enrollments CSV mapping
+  enrollments:
+    file_pattern: "*enrollments*.csv|*enrollment*.csv|*roster*.csv"
+    required_columns:
+      - "user_id"
+      - "class_id"
+      - "role"
+    optional_columns:
+      - "id"
+      - "school_id"
+      - "start_date"
+      - "end_date"
+      - "status"
+      - "is_primary"
+      
+    column_mappings:
+      "id": ["id", "enrollment_id"]
+      "user_id": ["user_id", "student_id", "teacher_id", "staff_id"]
+      "class_id": ["class_id", "section_id", "course_id"]
+      "school_id": ["school_id", "school"]
+      "role": ["role", "enrollment_type", "type"]
+      "start_date": ["start_date", "begin_date", "enrollment_date"]
+      "end_date": ["end_date", "exit_date", "withdrawal_date"]
+      "status": ["status", "active", "enrollment_status"]
+      "is_primary": ["is_primary", "primary", "primary_teacher"]
+
+# Processing options
+processing:
+  batch_size: 1000
+  max_file_size: "100MB"
+  supported_encodings: ["utf-8", "utf-8-sig", "latin-1", "cp1252"]
+  date_formats:
+    - "%Y-%m-%d"
+    - "%m/%d/%Y" 
+    - "%m-%d-%Y"
+    - "%Y/%m/%d"
+    - "%d/%m/%Y"
+  
+  # Data cleaning rules
+  cleaning:
+    trim_whitespace: true
+    normalize_case: false
+    remove_empty_rows: true
+    standardize_phone: true
+    validate_email: true
+    
+  # Error handling
+  error_handling:
+    max_errors: 100
+    stop_on_critical: true
+    log_all_errors: true
+    create_error_report: true
+
+# Template generation
+templates:
+  users_template:
+    filename: "users_template.csv"
+    headers: ["id", "email", "first_name", "last_name", "role", "username", "grade_level", "school_id", "district_id"]
+    
+  schools_template:
+    filename: "schools_template.csv" 
+    headers: ["id", "name", "district_id", "sis_id", "low_grade", "high_grade", "phone"]
+    
+  classes_template:
+    filename: "classes_template.csv"
+    headers: ["id", "name", "school_id", "course_code", "subject", "teacher_id", "grade_level"]
+    
+  enrollments_template:
+    filename: "enrollments_template.csv"
+    headers: ["user_id", "class_id", "role", "school_id", "start_date", "status"]
