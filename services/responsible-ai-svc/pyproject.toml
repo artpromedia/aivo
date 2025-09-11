@@ -1,0 +1,341 @@
+﻿[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[project]
+name = "responsible-ai-svc"
+version = "1.0.0"
+description = "S2B-13: Responsible AI Service for comprehensive AI ethics, bias auditing, and educational transparency"
+authors = [
+    {name = "AIVO Education Team", email = "responsible-ai@aivo.education"},
+]
+readme = "README.md"
+license = {text = "MIT"}
+keywords = ["responsible-ai", "education", "bias-detection", "ethics", "explainable-ai", "microservices"]
+classifiers = [
+    "Development Status :: 5 - Production/Stable",
+    "Intended Audience :: Education",
+    "License :: OSI Approved :: MIT License",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.11",
+    "Topic :: Education",
+    "Topic :: Scientific/Engineering :: Artificial Intelligence",
+    "Topic :: Software Development :: Quality Assurance",
+]
+requires-python = ">=3.11"
+dependencies = [
+    "fastapi[all]>=0.104.0",
+    "uvicorn[standard]>=0.24.0",
+    "pydantic>=2.5.0",
+    "numpy>=1.25.2",
+    "pandas>=2.1.3",
+    "scikit-learn>=1.3.2",
+    "matplotlib>=3.8.2",
+    "seaborn>=0.13.0",
+    "plotly>=5.17.0",
+    "sqlalchemy>=2.0.23",
+    "databases[postgresql]>=0.8.0",
+    "alembic>=1.13.0",
+    "asyncpg>=0.29.0",
+    "redis>=5.0.1",
+    "celery>=5.3.4",
+    "mlflow>=2.8.1",
+    "shap>=0.44.0",
+    "lime>=0.2.0.1",
+    "fairlearn>=0.10.0",
+    "aif360>=0.5.0",
+    "jupyter>=1.0.0",
+    "boto3>=1.34.0",
+    "azure-storage-blob>=12.19.0",
+    "google-cloud-storage>=2.12.0",
+    "cryptography>=41.0.7",
+    "python-jose[cryptography]>=3.3.0",
+    "httpx>=0.25.2",
+    "structlog>=23.2.0",
+    "prometheus-client>=0.19.0",
+    "opentelemetry-api>=1.21.0",
+    "opentelemetry-instrumentation-fastapi>=0.42b0"
+]
+
+[project.optional-dependencies]
+dev = [
+    "pytest>=7.4.3",
+    "pytest-asyncio>=0.21.1",
+    "pytest-cov>=4.1.0",
+    "httpx>=0.25.2",
+    "factory-boy>=3.3.0",
+    "faker>=20.1.0"
+]
+lint = [
+    "ruff>=0.1.6",
+    "black>=23.11.0",
+    "mypy>=1.7.1",
+    "pre-commit>=3.6.0"
+]
+docs = [
+    "mkdocs>=1.5.3",
+    "mkdocs-material>=9.4.8",
+    "mkdocstrings[python]>=0.24.0"
+]
+ml = [
+    "torch>=2.1.1",
+    "transformers>=4.36.0",
+    "datasets>=2.15.0",
+    "evaluate>=0.4.1"
+]
+
+[project.urls]
+Homepage = "https://github.com/aivo-education/aivo"
+Documentation = "https://docs.aivo.education/responsible-ai"
+Repository = "https://github.com/aivo-education/aivo"
+Issues = "https://github.com/aivo-education/aivo/issues"
+
+[project.scripts]
+responsible-ai = "app.main:main"
+
+# Ruff configuration for responsible AI code quality
+[tool.ruff]
+target-version = "py311"
+line-length = 120
+select = [
+    "E",  # pycodestyle errors
+    "W",  # pycodestyle warnings
+    "F",  # pyflakes
+    "I",  # isort
+    "B",  # flake8-bugbear
+    "C4", # flake8-comprehensions
+    "UP", # pyupgrade
+    "ARG", # flake8-unused-arguments
+    "SIM", # flake8-simplify
+    "TCH", # flake8-type-checking
+    "PIE", # flake8-pie
+    "A",   # flake8-builtins
+    "COM", # flake8-commas
+    "ISC", # flake8-implicit-str-concat
+    "T20", # flake8-print
+    "PT",  # flake8-pytest-style
+    "Q",   # flake8-quotes
+    "RSE", # flake8-raise
+    "RET", # flake8-return
+    "TID", # flake8-tidy-imports
+    "ICN", # flake8-import-conventions
+    "ERA", # eradicate
+    "PGH", # pygrep-hooks
+    "PLC", # pylint convention
+    "PLE", # pylint errors  
+    "PLR", # pylint refactor
+    "PLW", # pylint warnings
+    "RUF", # ruff-specific rules
+]
+ignore = [
+    "E501",   # line too long, handled by black
+    "B008",   # do not perform function calls in argument defaults
+    "PLR0913", # too many arguments to function call
+    "PLR2004", # magic value used in comparison
+    "COM812",  # trailing comma missing
+    "ISC001",  # implicitly concatenated string literals
+]
+
+[tool.ruff.format]
+quote-style = "double"
+indent-style = "space"
+skip-magic-trailing-comma = false
+line-ending = "auto"
+
+[tool.ruff.isort]
+known-first-party = ["app"]
+force-single-line = false
+force-sort-within-sections = false
+split-on-trailing-comma = true
+
+[tool.ruff.per-file-ignores]
+"__init__.py" = ["F401"]
+"tests/*" = ["ARG", "S101", "PLR2004"]
+
+# Black code formatting for responsible AI standards
+[tool.black]
+line-length = 120
+target-version = ["py311"]
+include = '\.pyi?$'
+extend-exclude = '''
+/(
+  # directories
+  \.eggs
+  | \.git
+  | \.hg
+  | \.mypy_cache
+  | \.tox
+  | \.venv
+  | build
+  | dist
+  | migrations
+)/
+'''
+
+# MyPy type checking for AI ethics safety
+[tool.mypy]
+python_version = "3.11"
+warn_return_any = true
+warn_unused_configs = true
+disallow_untyped_defs = true
+disallow_incomplete_defs = true
+check_untyped_defs = true
+disallow_untyped_decorators = true
+no_implicit_optional = true
+warn_redundant_casts = true
+warn_unused_ignores = true
+warn_no_return = true
+warn_unreachable = true
+strict_equality = true
+show_error_codes = true
+
+# AI/ML library modules
+[[tool.mypy.overrides]]
+module = [
+    "sklearn.*",
+    "numpy.*",
+    "pandas.*",
+    "matplotlib.*",
+    "seaborn.*",
+    "plotly.*",
+    "shap.*",
+    "lime.*",
+    "fairlearn.*",
+    "aif360.*",
+    "mlflow.*",
+    "redis.*",
+    "celery.*",
+    "prometheus_client.*"
+]
+ignore_missing_imports = true
+
+# Pytest configuration for responsible AI testing
+[tool.pytest.ini_options]
+minversion = "7.0"
+addopts = [
+    "-ra",
+    "--strict-markers",
+    "--strict-config",
+    "--cov=app",
+    "--cov-report=term-missing",
+    "--cov-report=html",
+    "--cov-report=xml"
+]
+testpaths = ["tests"]
+pythonpath = ["."]
+markers = [
+    "slow: marks tests as slow (deselect with '-m \"not slow\"')",
+    "integration: marks tests as integration tests",
+    "bias_audit: marks tests that validate bias detection capabilities",
+    "model_card: marks tests that validate model documentation",
+    "explainability: marks tests that validate AI explanation generation",
+    "ethics: marks tests that validate ethical AI compliance",
+    "performance: marks tests that validate performance requirements"
+]
+
+# Coverage configuration for responsible AI code quality
+[tool.coverage.run]
+source = ["app"]
+omit = [
+    "*/tests/*",
+    "*/migrations/*",
+    "*/venv/*",
+    "*/__pycache__/*"
+]
+
+[tool.coverage.report]
+exclude_lines = [
+    "pragma: no cover",
+    "def __repr__",
+    "if self.debug:",
+    "if settings.DEBUG",
+    "raise AssertionError",
+    "raise NotImplementedError",
+    "if 0:",
+    "if __name__ == .__main__.:"
+]
+show_missing = true
+precision = 2
+
+[tool.coverage.html]
+directory = "htmlcov"
+
+# Hatch build configuration
+[tool.hatch.version]
+path = "app/__init__.py"
+
+[tool.hatch.build.targets.sdist]
+include = [
+    "/app",
+    "/tests",
+    "/README.md",
+    "/LICENSE"
+]
+
+[tool.hatch.build.targets.wheel]
+packages = ["app"]
+
+# Responsible AI environment configuration
+[tool.hatch.envs.default]
+dependencies = [
+    "pytest",
+    "pytest-cov",
+    "pytest-asyncio"
+]
+
+[tool.hatch.envs.default.scripts]
+test = "pytest {args:tests}"
+test-cov = "pytest --cov-report=term-missing --cov-config=pyproject.toml --cov=app --cov=tests {args}"
+cov-report = ["test-cov", "coverage html"]
+
+[tool.hatch.envs.lint]
+detached = true
+dependencies = [
+    "black>=23.1.0",
+    "mypy>=1.0.0",
+    "ruff>=0.0.243",
+]
+
+[tool.hatch.envs.lint.scripts]
+typing = "mypy --install-types --non-interactive {args:app tests}"
+style = [
+    "ruff {args:.}",
+    "black --check --diff {args:.}",
+]
+fmt = [
+    "black {args:.}",
+    "ruff --fix {args:.}",
+    "style",
+]
+all = [
+    "style",
+    "typing",
+]
+
+# ML experiment environment
+[tool.hatch.envs.ml]
+dependencies = [
+    "torch>=2.1.0",
+    "transformers>=4.35.0",
+    "datasets>=2.14.0",
+    "jupyter>=1.0.0",
+    "ipykernel>=6.26.0"
+]
+
+[tool.hatch.envs.ml.scripts]
+notebook = "jupyter lab --ip=0.0.0.0 --allow-root --no-browser"
+bias-audit = "python -m app.bias_audit {args}"
+model-card = "python -m app.model_card {args}"
+
+# Educational documentation environment
+[tool.hatch.envs.docs]
+dependencies = [
+    "mkdocs>=1.4.2",
+    "mkdocs-material>=9.0.0",
+    "mkdocstrings[python]>=0.20.0"
+]
+
+[tool.hatch.envs.docs.scripts]
+build = "mkdocs build --clean --strict"
+serve = "mkdocs serve --dev-addr localhost:8001"
+deploy = "mkdocs gh-deploy --force"
