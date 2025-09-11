@@ -1,0 +1,43 @@
+﻿version: '3.8'
+
+services:
+  evidence-svc:
+    build: .
+    ports:
+      - "8000:8000"
+    environment:
+      - DATABASE_URL=postgresql+asyncpg://evidence_user:evidence_pass@postgres:5432/evidence_db
+      - AWS_REGION=us-east-1
+      - S3_BUCKET=evidence-uploads
+      - OPENAI_API_KEY=${OPENAI_API_KEY}
+      - AUDIT_PRIVATE_KEY_PATH=/app/keys/audit_private.pem
+      - AUDIT_PUBLIC_KEY_PATH=/app/keys/audit_public.pem
+    volumes:
+      - ./keys:/app/keys:ro
+    depends_on:
+      - postgres
+    restart: unless-stopped
+
+  postgres:
+    image: postgres:15-alpine
+    environment:
+      - POSTGRES_DB=evidence_db
+      - POSTGRES_USER=evidence_user
+      - POSTGRES_PASSWORD=evidence_pass
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    ports:
+      - "5432:5432"
+    restart: unless-stopped
+
+  redis:
+    image: redis:7-alpine
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+    restart: unless-stopped
+
+volumes:
+  postgres_data:
+  redis_data:
