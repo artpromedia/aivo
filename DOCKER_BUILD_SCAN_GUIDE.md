@@ -1,8 +1,10 @@
 # Docker Build and Security Scan Instructions
 
 ## Prerequisites
+
 1. **Docker Desktop**: Install Docker Desktop for Windows
 2. **Trivy**: Install Trivy security scanner
+
    ```powershell
    # Install via winget
    winget install aquasec.trivy
@@ -14,6 +16,7 @@
 ## Build and Scan Commands
 
 ### 1. Build the Payment Service
+
 ```bash
 # Navigate to workspace root
 cd C:\Users\ofema\aivo
@@ -23,6 +26,7 @@ docker build -t aivo/payment-svc:ci services/payment-svc
 ```
 
 ### 2. Security Scan with Trivy
+
 ```bash
 # Scan for HIGH and CRITICAL vulnerabilities only
 trivy image --severity HIGH,CRITICAL --ignore-unfixed aivo/payment-svc:ci
@@ -39,16 +43,19 @@ trivy image --severity HIGH,CRITICAL --ignore-unfixed --format json --output pay
 With our security hardening, you should see:
 
 ### ✅ Reduced Vulnerabilities
+
 - **Base Image**: Pinned `python:3.11-slim-bookworm@sha256:...` reduces floating tag risks
 - **Security Updates**: `apt-get upgrade -y` applies latest patches
 - **Updated Tools**: Latest pip/setuptools/wheel versions fix known CVEs
 
 ### ✅ Best Practices Applied
+
 - **Non-root User**: Runs as UID 10001 (not root)
 - **Fixed Dependencies**: Pinned base image prevents supply chain attacks
 - **Optimized Layers**: Cache mounts improve build performance
 
 ### 🔍 What Trivy Will Check
+
 1. **OS Vulnerabilities**: Debian package CVEs
 2. **Python Package CVEs**: pip package vulnerabilities
 3. **Application Dependencies**: requirements.txt security issues
@@ -56,7 +63,7 @@ With our security hardening, you should see:
 
 ## Sample Expected Output
 
-```
+```text
 aivo/payment-svc:ci (debian 12.1)
 ==========================================
 Total: 0 (HIGH: 0, CRITICAL: 0)
