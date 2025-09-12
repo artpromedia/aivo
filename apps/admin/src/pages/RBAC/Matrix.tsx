@@ -117,21 +117,22 @@ export default function Matrix({ tenantId }: PermissionMatrixProps) {
       });
 
       setPendingChanges(prev => {
-         
-        const { [roleId]: _removed, ...rest } = prev;
-        return rest;
+        // Remove the roleId from pending changes
+        const newChanges = { ...prev };
+        delete newChanges[roleId];
+        return newChanges;
       });
-       
-    } catch (error) {
+    } catch {
       // Silent error handling for demo
     }
   };
 
   const handleCancelChanges = (roleId: string) => {
     setPendingChanges(prev => {
-       
-      const { [roleId]: _removed, ...rest } = prev;
-      return rest;
+      // Remove the roleId from pending changes
+      const newChanges = { ...prev };
+      delete newChanges[roleId];
+      return newChanges;
     });
   };
 
