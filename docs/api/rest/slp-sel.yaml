@@ -12,7 +12,7 @@ info:
     email: support@artpromedia.com
   license:
     name: Proprietary
-    
+
 servers:
   - url: http://localhost:8000
     description: Development server
@@ -228,7 +228,7 @@ paths:
                 $ref: '#/components/schemas/JournalEntryResponse'
         '404':
           description: Entry not found or access denied
-          
+
     delete:
       summary: Delete journal entry
       description: Securely delete a journal entry with audit logging

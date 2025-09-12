@@ -2,16 +2,16 @@ openapi: 3.1.0
 info:
   title: ELA Evaluator Service API
   description: |
-    API for evaluating English Language Arts writing submissions using 
+    API for evaluating English Language Arts writing submissions using
     rubric-based scoring with PII moderation and content safety.
-    
+
     ## Features
     - Rubric-based scoring across multiple criteria
     - Grade band specific evaluation (K-2, 3-5, 6-8, 9-12)
     - PII detection and anonymization
     - Content moderation and safety filtering
     - AI-powered assessment with teacher notes
-    
+
   version: 0.1.0
   contact:
     name: Aivo Team
@@ -216,7 +216,7 @@ components:
       description: |
         Rubric scoring levels:
         1 - Beginning
-        2 - Developing  
+        2 - Developing
         3 - Proficient
         4 - Advanced
 

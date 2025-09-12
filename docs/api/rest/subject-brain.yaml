@@ -3,32 +3,32 @@ info:
   title: Subject-Brain Service API
   description: |
     AI-powered planner and runtime for per-learner-subject GPU pods with autoscaling.
-    
+
     This service provides:
     - Personalized activity planning based on learner baseline and mastery levels
     - Per-learner-subject runtime pods with GPU autoscaling
     - Kubernetes HPA based on GPU queue depth and resource utilization
     - TTL-based scale-to-zero for cost optimization
-    
+
     ## Features
-    
+
     ### Planner
     - Analyzes learner baseline and mastery levels
-    - Considers coursework topics and teacher constraints  
+    - Considers coursework topics and teacher constraints
     - Generates optimal activity sequences for learning sessions
     - Supports multiple subjects and activity types
-    
+
     ### Runtime Manager
     - Creates ephemeral pods per active learner-subject
     - GPU resource allocation and management
     - Horizontal Pod Autoscaling based on queue depth
     - Automatic cleanup of idle runtimes (TTL scale-to-zero)
-    
+
     ### Monitoring
     - Real-time metrics for scaling decisions
     - Runtime status tracking
     - Performance analytics for optimization
-    
+
   version: 1.0.0
   contact:
     name: AI Learning Platform Team
@@ -196,7 +196,7 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Error'
-    
+
     delete:
       summary: Terminate runtime
       description: Manually terminate a specific runtime pod
@@ -559,7 +559,7 @@ components:
 tags:
   - name: Health
     description: Service health monitoring
-  - name: Monitoring  
+  - name: Monitoring
     description: Metrics and performance monitoring
   - name: Planner
     description: AI-powered activity planning

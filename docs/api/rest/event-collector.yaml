@@ -4,7 +4,7 @@ info:
   description: |
     High-performance microservice for collecting learner events via HTTP and gRPC,
     with reliable buffering and publishing to Redpanda/Kafka.
-    
+
     ## Features
     - **Dual Protocol Support**: HTTP REST API and gRPC streaming
     - **Reliable Buffering**: 24-hour on-disk event buffering with automatic cleanup
@@ -42,18 +42,18 @@ paths:
         Accept a batch of learner events with optional gzip compression.
         Events are validated, buffered on disk for reliability, and published to the `events_raw` topic
         in Redpanda/Kafka with `learner_id` as the partition key.
-        
+
         ## Request Format
         - **Content-Type**: `application/json`
         - **Content-Encoding** (optional): `gzip` for compression
         - **Authorization** (optional): `Bearer <api_key>` if API key authentication is enabled
-        
+
         ## Batch Processing
         - Maximum batch size: 1000 events
         - Maximum request size: 10MB
         - Events are processed asynchronously with 24-hour disk buffering
         - Failed events are automatically sent to the dead letter queue
-        
+
         ## Response Codes
         - **200**: All events accepted successfully
         - **207**: Partial success (some events rejected)

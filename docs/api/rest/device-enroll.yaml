@@ -3,16 +3,16 @@ info:
   title: Device Enrollment & Attestation API
   description: |
     API for Aivo Pad device enrollment and certificate attestation.
-    
+
     ## Overview
     This service handles the enrollment of Aivo Pad devices and provides
     attestation capabilities for device identity verification.
-    
+
     ## Workflow
     1. **Enrollment**: Register device with serial number and hardware fingerprint
     2. **Challenge**: Request attestation challenge for device verification
     3. **Attestation**: Submit signed challenge to receive device certificate
-    
+
     ## Authentication
     - Bootstrap tokens are issued during enrollment for initial authentication
     - Device certificates are used for ongoing authentication after attestation
@@ -22,7 +22,7 @@ info:
     email: dev@aivo.com
   license:
     name: Proprietary
-    
+
 servers:
   - url: http://localhost:8000/api/v1
     description: Development server
