@@ -36,17 +36,21 @@ pip-audit -r requirements.txt
 ### All Security-Hardened Services
 
 #### Services Ready for Audit
+
 1. **payment-svc** (pip-based)
+
    ```bash
    pip-audit -r services/payment-svc/requirements.txt
    ```
 
 2. **search-svc** (pip-based)
+
    ```bash
    pip-audit -r services/search-svc/requirements.txt
    ```
 
 3. **notification-svc** (Poetry-based)
+
    ```bash
    cd services/notification-svc
    poetry export -f requirements.txt -o requirements.txt --without-hashes
@@ -54,6 +58,7 @@ pip-audit -r requirements.txt
    ```
 
 4. **ink-svc** (Poetry-based)
+
    ```bash
    cd services/ink-svc
    poetry export -f requirements.txt -o requirements.txt --without-hashes
@@ -61,11 +66,13 @@ pip-audit -r requirements.txt
    ```
 
 5. **learner-svc** (pip-based)
+
    ```bash
    pip-audit -r services/learner-svc/requirements.txt
    ```
 
 6. **event-collector-svc** (pip-based)
+
    ```bash
    pip-audit -r services/event-collector-svc/requirements.txt
    ```
@@ -74,8 +81,9 @@ pip-audit -r requirements.txt
 
 ### Payment Service Dependencies Analysis
 
-#### Current Dependencies (services/payment-svc/requirements.txt):
-```
+#### Current Dependencies (services/payment-svc/requirements.txt)
+
+```text
 fastapi>=0.104.0          # Web framework
 uvicorn[standard]>=0.24.0 # ASGI server
 pydantic>=2.5.0           # Data validation
@@ -91,7 +99,8 @@ python-jose[cryptography]>=3.3.0  # JWT handling
 python-multipart>=0.0.6  # Form parsing
 ```
 
-#### Security Considerations:
+#### Security Considerations
+
 - **FastAPI**: Generally secure, regularly updated
 - **SQLAlchemy**: Mature ORM with good security practices
 - **Stripe**: Official SDK, well-maintained
@@ -100,8 +109,9 @@ python-multipart>=0.0.6  # Form parsing
 
 ### Expected pip-audit Results
 
-#### Best Case Scenario (With Security Hardening):
-```
+#### Best Case Scenario (With Security Hardening)
+
+```text
 No known vulnerabilities found
 ┏━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┓
 ┃                                    Summary                                                  ┃
@@ -111,8 +121,9 @@ No known vulnerabilities found
 └─────────────────────────────────────────────────────────────────────────────────────────┘
 ```
 
-#### Potential Issues (Before Hardening):
-```
+#### Potential Issues (Before Hardening)
+
+```text
 Found 3 known vulnerabilities in 2 packages
 ┏━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┓
 ┃                                  Vulnerabilities                                           ┃
@@ -125,19 +136,22 @@ Found 3 known vulnerabilities in 2 packages
 
 ## 🔒 Security Benefits of Our Hardening
 
-### Docker Security Improvements Applied:
+### Docker Security Improvements Applied
+
 1. **Base Image**: `python:3.11-slim-bookworm@sha256:...` (pinned, secure)
 2. **Security Updates**: `apt-get upgrade -y` (latest OS patches)
 3. **Python Tools**: Updated pip/setuptools/wheel (package manager CVEs fixed)
 4. **User Security**: Non-root UID 10001
 
-### Expected Improvement:
+### Expected Improvement
+
 - **Before Hardening**: 10-15 vulnerabilities typically found
 - **After Hardening**: 0-2 vulnerabilities expected (latest versions + patches)
 
 ## 🚀 Alternative Security Tools
 
 ### Safety (PyUp.io database)
+
 ```bash
 # Install safety
 pip install safety
@@ -150,6 +164,7 @@ safety check -r services/payment-svc/requirements.txt --json --output=safety-rep
 ```
 
 ### Bandit (Static Analysis)
+
 ```bash
 # Install bandit
 pip install bandit
@@ -159,6 +174,7 @@ bandit -r services/payment-svc/app/ -f json -o payment-svc-bandit.json
 ```
 
 ### Semgrep (Advanced Static Analysis)
+
 ```bash
 # Install semgrep
 pip install semgrep
