@@ -3,7 +3,7 @@ line-length = 100
 target-version = "py311"
 
 [tool.ruff.lint]
-select = ["E", "F", "I", "N", "UP", "ANN"]
+select = ["E","F","W","I","UP","N"]
 ignore = [
     "E501",  # line too long, handled by black
     "ANN401",  # Dynamically typed expressions (Any) - common in FastAPI

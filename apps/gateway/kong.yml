@@ -1,4 +1,4 @@
-_format_version: '3.0'
+﻿_format_version: '3.0'
 _transform: true
 
 # Services Configuration
@@ -66,6 +66,211 @@ services:
     retries: 5
     tags: ["inference", "s1"]
 
+  # Stage-2/2A/2B Services
+  # Content & Learning Services
+  - name: lesson-registry-service
+    url: http://lesson-registry-svc:8100
+    connect_timeout: 60000
+    write_timeout: 60000
+    read_timeout: 60000
+    retries: 5
+    tags: ["lesson", "s2"]
+
+  - name: coursework-ingest-service
+    url: http://coursework-ingest-svc:8101
+    connect_timeout: 60000
+    write_timeout: 60000
+    read_timeout: 60000
+    retries: 5
+    tags: ["coursework", "s2"]
+
+  - name: event-collector-service
+    url: http://event-collector-svc:8102
+    connect_timeout: 60000
+    write_timeout: 60000
+    read_timeout: 60000
+    retries: 5
+    tags: ["events", "s2"]
+
+  - name: analytics-service
+    url: http://analytics-svc:8103
+    connect_timeout: 60000
+    write_timeout: 60000
+    read_timeout: 60000
+    retries: 5
+    tags: ["analytics", "s2"]
+
+  - name: search-service
+    url: http://search-svc:8104
+    connect_timeout: 60000
+    write_timeout: 60000
+    read_timeout: 60000
+    retries: 5
+    tags: ["search", "s2"]
+
+  # AI & Subject Services
+  - name: subject-brain-service
+    url: http://subject-brain-svc:8105
+    connect_timeout: 60000
+    write_timeout: 60000
+    read_timeout: 60000
+    retries: 5
+    tags: ["ai", "s2a"]
+
+  - name: game-gen-service
+    url: http://game-gen-svc:8106
+    connect_timeout: 60000
+    write_timeout: 60000
+    read_timeout: 60000
+    retries: 5
+    tags: ["games", "s2a"]
+
+  - name: model-dispatch-service
+    url: http://model-dispatch-svc:8107
+    connect_timeout: 60000
+    write_timeout: 60000
+    read_timeout: 60000
+    retries: 5
+    tags: ["ml", "s2a"]
+
+  - name: ink-service
+    url: http://ink-svc:8108
+    connect_timeout: 60000
+    write_timeout: 60000
+    read_timeout: 60000
+    retries: 5
+    tags: ["ink", "s2a"]
+
+  - name: math-recognizer-service
+    url: http://math-recognizer-svc:8109
+    connect_timeout: 60000
+    write_timeout: 60000
+    read_timeout: 60000
+    retries: 5
+    tags: ["math", "s2a"]
+
+  - name: science-solver-service
+    url: http://science-solver-svc:8110
+    connect_timeout: 60000
+    write_timeout: 60000
+    read_timeout: 60000
+    retries: 5
+    tags: ["science", "s2a"]
+
+  - name: ela-eval-service
+    url: http://ela-eval-svc:8111
+    connect_timeout: 60000
+    write_timeout: 60000
+    read_timeout: 60000
+    retries: 5
+    tags: ["ela", "s2a"]
+
+  - name: slp-sel-service
+    url: http://slp-sel-svc:8112
+    connect_timeout: 60000
+    write_timeout: 60000
+    read_timeout: 60000
+    retries: 5
+    tags: ["slp", "s2a"]
+
+  - name: problem-session-service
+    url: http://problem-session-svc:8113
+    connect_timeout: 60000
+    write_timeout: 60000
+    read_timeout: 60000
+    retries: 5
+    tags: ["sessions", "s2a"]
+
+  # Device & Edge Services
+  - name: device-enroll-service
+    url: http://device-enroll-svc:8114
+    connect_timeout: 60000
+    write_timeout: 60000
+    read_timeout: 60000
+    retries: 5
+    tags: ["device", "s2b"]
+
+  - name: device-policy-service
+    url: http://device-policy-svc:8115
+    connect_timeout: 60000
+    write_timeout: 60000
+    read_timeout: 60000
+    retries: 5
+    tags: ["policy", "s2b"]
+
+  - name: edge-bundler-service
+    url: http://edge-bundler-svc:8116
+    connect_timeout: 60000
+    write_timeout: 60000
+    read_timeout: 60000
+    retries: 5
+    tags: ["edge", "s2b"]
+
+  - name: device-ota-service
+    url: http://device-ota-svc:8117
+    connect_timeout: 60000
+    write_timeout: 60000
+    read_timeout: 60000
+    retries: 5
+    tags: ["ota", "s2b"]
+
+  # Communication & Data Services
+  - name: chat-service
+    url: http://chat-svc:8118
+    connect_timeout: 60000
+    write_timeout: 60000
+    read_timeout: 60000
+    retries: 5
+    tags: ["chat", "s2"]
+
+  - name: evidence-service
+    url: http://evidence-svc:8119
+    connect_timeout: 60000
+    write_timeout: 60000
+    read_timeout: 60000
+    retries: 5
+    tags: ["evidence", "s2"]
+
+  - name: media-service
+    url: http://media-svc:8120
+    connect_timeout: 60000
+    write_timeout: 60000
+    read_timeout: 60000
+    retries: 5
+    tags: ["media", "s2"]
+
+  - name: roster-sync-service
+    url: http://roster-sync-svc:8121
+    connect_timeout: 60000
+    write_timeout: 60000
+    read_timeout: 60000
+    retries: 5
+    tags: ["roster", "s2"]
+
+  - name: compliance-export-service
+    url: http://compliance-export-svc:8122
+    connect_timeout: 60000
+    write_timeout: 60000
+    read_timeout: 60000
+    retries: 5
+    tags: ["compliance", "s2"]
+
+  - name: consent-ledger-service
+    url: http://consent-ledger-svc:8123
+    connect_timeout: 60000
+    write_timeout: 60000
+    read_timeout: 60000
+    retries: 5
+    tags: ["consent", "s2"]
+
+  - name: i18n-service
+    url: http://i18n-svc:8124
+    connect_timeout: 60000
+    write_timeout: 60000
+    read_timeout: 60000
+    retries: 5
+    tags: ["i18n", "s2"]
+
 # Routes Configuration
 routes:
   # Public Authentication Routes
@@ -94,7 +299,678 @@ routes:
     preserve_host: false
     tags: ["auth", "public"]
 
-  # Tenant Management Routes (Admin only)
+  # Admin Portal Routes (Admin only)
+  - name: admin-portal-routes
+    service: admin-portal-service
+    paths: ["/admin"]
+    methods: ["GET"]
+    strip_path: true
+    preserve_host: false
+    tags: ["admin", "dashboard"]
+    plugins:
+      - name: jwt
+        config:
+          uri_param_names: ["token"]
+          header_names: ["Authorization"]
+          claims_to_verify: ["exp"]
+          run_on_preflight: false
+      - name: request-transformer
+        config:
+          add:
+            headers:
+              - "X-Required-Roles: staff,district_admin"
+      - name: rate-limiting
+        config:
+          minute: 10
+          hour: 100
+          day: 1000
+          policy: "local"
+          fault_tolerant: true
+          hide_client_headers: false
+
+  # Stage-2 Content & Learning Routes
+  - name: lesson-registry-routes
+    service: lesson-registry-service
+    paths: ["/admin/lessons"]
+    methods: ["GET", "POST", "PUT", "DELETE"]
+    strip_path: false
+    preserve_host: false
+    tags: ["lesson", "admin"]
+    plugins:
+      - name: jwt
+        config:
+          uri_param_names: ["token"]
+          header_names: ["Authorization"]
+          claims_to_verify: ["exp"]
+          run_on_preflight: false
+      - name: request-transformer
+        config:
+          add:
+            headers:
+              - "X-Required-Roles: staff,district_admin"
+      - name: rate-limiting
+        config:
+          minute: 60
+          hour: 1000
+          day: 10000
+          policy: "local"
+          fault_tolerant: true
+          hide_client_headers: false
+
+  - name: coursework-ingest-routes
+    service: coursework-ingest-service
+    paths: ["/admin/ingest"]
+    methods: ["POST", "PUT"]
+    strip_path: false
+    preserve_host: false
+    tags: ["coursework", "admin"]
+    plugins:
+      - name: jwt
+        config:
+          uri_param_names: ["token"]
+          header_names: ["Authorization"]
+          claims_to_verify: ["exp"]
+          run_on_preflight: false
+      - name: request-transformer
+        config:
+          add:
+            headers:
+              - "X-Required-Roles: staff,district_admin"
+      - name: rate-limiting
+        config:
+          minute: 10
+          hour: 100
+          day: 1000
+          policy: "local"
+          fault_tolerant: true
+          hide_client_headers: false
+
+  - name: event-collector-routes
+    service: event-collector-service
+    paths: ["/events"]
+    methods: ["POST"]
+    strip_path: false
+    preserve_host: false
+    tags: ["events", "public"]
+    plugins:
+      - name: rate-limiting
+        config:
+          minute: 60
+          hour: 1000
+          day: 10000
+          policy: "local"
+          fault_tolerant: true
+          hide_client_headers: false
+
+  - name: analytics-routes
+    service: analytics-service
+    paths: ["/admin/analytics"]
+    methods: ["GET"]
+    strip_path: false
+    preserve_host: false
+    tags: ["analytics", "admin"]
+    plugins:
+      - name: jwt
+        config:
+          uri_param_names: ["token"]
+          header_names: ["Authorization"]
+          claims_to_verify: ["exp"]
+          run_on_preflight: false
+      - name: request-transformer
+        config:
+          add:
+            headers:
+              - "X-Required-Roles: staff,district_admin"
+      - name: rate-limiting
+        config:
+          minute: 60
+          hour: 1000
+          day: 10000
+          policy: "local"
+          fault_tolerant: true
+          hide_client_headers: false
+
+  - name: search-routes
+    service: search-service
+    paths: ["/search"]
+    methods: ["GET", "POST"]
+    strip_path: false
+    preserve_host: false
+    tags: ["search", "public"]
+    plugins:
+      - name: rate-limiting
+        config:
+          minute: 60
+          hour: 1000
+          day: 10000
+          policy: "local"
+          fault_tolerant: true
+          hide_client_headers: false
+
+  # Stage-2A AI & Subject Routes
+  - name: subject-brain-routes
+    service: subject-brain-service
+    paths: ["/ai/subject"]
+    methods: ["POST"]
+    strip_path: false
+    preserve_host: false
+    tags: ["ai", "protected"]
+    plugins:
+      - name: jwt
+        config:
+          uri_param_names: ["token"]
+          header_names: ["Authorization"]
+          claims_to_verify: ["exp"]
+          run_on_preflight: false
+      - name: rate-limiting
+        config:
+          minute: 60
+          hour: 1000
+          day: 10000
+          policy: "local"
+          fault_tolerant: true
+          hide_client_headers: false
+
+  - name: game-gen-routes
+    service: game-gen-service
+    paths: ["/ai/games"]
+    methods: ["POST"]
+    strip_path: false
+    preserve_host: false
+    tags: ["games", "protected"]
+    plugins:
+      - name: jwt
+        config:
+          uri_param_names: ["token"]
+          header_names: ["Authorization"]
+          claims_to_verify: ["exp"]
+          run_on_preflight: false
+      - name: rate-limiting
+        config:
+          minute: 60
+          hour: 1000
+          day: 10000
+          policy: "local"
+          fault_tolerant: true
+          hide_client_headers: false
+
+  - name: model-dispatch-routes
+    service: model-dispatch-service
+    paths: ["/ai/dispatch"]
+    methods: ["POST"]
+    strip_path: false
+    preserve_host: false
+    tags: ["ml", "protected"]
+    plugins:
+      - name: jwt
+        config:
+          uri_param_names: ["token"]
+          header_names: ["Authorization"]
+          claims_to_verify: ["exp"]
+          run_on_preflight: false
+      - name: rate-limiting
+        config:
+          minute: 60
+          hour: 1000
+          day: 10000
+          policy: "local"
+          fault_tolerant: true
+          hide_client_headers: false
+
+  - name: ink-routes
+    service: ink-service
+    paths: ["/admin/ink"]
+    methods: ["GET", "POST", "PUT", "DELETE"]
+    strip_path: false
+    preserve_host: false
+    tags: ["ink", "admin"]
+    plugins:
+      - name: jwt
+        config:
+          uri_param_names: ["token"]
+          header_names: ["Authorization"]
+          claims_to_verify: ["exp"]
+          run_on_preflight: false
+      - name: request-transformer
+        config:
+          add:
+            headers:
+              - "X-Required-Roles: staff,district_admin"
+      - name: rate-limiting
+        config:
+          minute: 60
+          hour: 1000
+          day: 10000
+          policy: "local"
+          fault_tolerant: true
+          hide_client_headers: false
+
+  - name: math-recognizer-routes
+    service: math-recognizer-service
+    paths: ["/ai/math"]
+    methods: ["POST"]
+    strip_path: false
+    preserve_host: false
+    tags: ["math", "protected"]
+    plugins:
+      - name: jwt
+        config:
+          uri_param_names: ["token"]
+          header_names: ["Authorization"]
+          claims_to_verify: ["exp"]
+          run_on_preflight: false
+      - name: rate-limiting
+        config:
+          minute: 60
+          hour: 1000
+          day: 10000
+          policy: "local"
+          fault_tolerant: true
+          hide_client_headers: false
+
+  - name: science-solver-routes
+    service: science-solver-service
+    paths: ["/ai/science"]
+    methods: ["POST"]
+    strip_path: false
+    preserve_host: false
+    tags: ["science", "protected"]
+    plugins:
+      - name: jwt
+        config:
+          uri_param_names: ["token"]
+          header_names: ["Authorization"]
+          claims_to_verify: ["exp"]
+          run_on_preflight: false
+      - name: rate-limiting
+        config:
+          minute: 60
+          hour: 1000
+          day: 10000
+          policy: "local"
+          fault_tolerant: true
+          hide_client_headers: false
+
+  - name: ela-eval-routes
+    service: ela-eval-service
+    paths: ["/ai/ela"]
+    methods: ["POST"]
+    strip_path: false
+    preserve_host: false
+    tags: ["ela", "protected"]
+    plugins:
+      - name: jwt
+        config:
+          uri_param_names: ["token"]
+          header_names: ["Authorization"]
+          claims_to_verify: ["exp"]
+          run_on_preflight: false
+      - name: rate-limiting
+        config:
+          minute: 60
+          hour: 1000
+          day: 10000
+          policy: "local"
+          fault_tolerant: true
+          hide_client_headers: false
+
+  - name: slp-sel-routes
+    service: slp-sel-service
+    paths: ["/ai/slp"]
+    methods: ["POST"]
+    strip_path: false
+    preserve_host: false
+    tags: ["slp", "protected"]
+    plugins:
+      - name: jwt
+        config:
+          uri_param_names: ["token"]
+          header_names: ["Authorization"]
+          claims_to_verify: ["exp"]
+          run_on_preflight: false
+      - name: rate-limiting
+        config:
+          minute: 60
+          hour: 1000
+          day: 10000
+          policy: "local"
+          fault_tolerant: true
+          hide_client_headers: false
+
+  - name: problem-session-routes
+    service: problem-session-service
+    paths: ["/sessions"]
+    methods: ["GET", "POST", "PUT"]
+    strip_path: false
+    preserve_host: false
+    tags: ["sessions", "protected"]
+    plugins:
+      - name: jwt
+        config:
+          uri_param_names: ["token"]
+          header_names: ["Authorization"]
+          claims_to_verify: ["exp"]
+          run_on_preflight: false
+      - name: rate-limiting
+        config:
+          minute: 60
+          hour: 1000
+          day: 10000
+          policy: "local"
+          fault_tolerant: true
+          hide_client_headers: false
+
+  # Stage-2B Device & Edge Routes
+  - name: device-enroll-routes
+    service: device-enroll-service
+    paths: ["/admin/devices/enroll"]
+    methods: ["POST", "PUT"]
+    strip_path: false
+    preserve_host: false
+    tags: ["device", "admin"]
+    plugins:
+      - name: jwt
+        config:
+          uri_param_names: ["token"]
+          header_names: ["Authorization"]
+          claims_to_verify: ["exp"]
+          run_on_preflight: false
+      - name: request-transformer
+        config:
+          add:
+            headers:
+              - "X-Required-Roles: staff,district_admin"
+      - name: rate-limiting
+        config:
+          minute: 10
+          hour: 100
+          day: 1000
+          policy: "local"
+          fault_tolerant: true
+          hide_client_headers: false
+
+  - name: device-policy-routes
+    service: device-policy-service
+    paths: ["/admin/devices/policy"]
+    methods: ["GET", "POST", "PUT", "DELETE"]
+    strip_path: false
+    preserve_host: false
+    tags: ["policy", "admin"]
+    plugins:
+      - name: jwt
+        config:
+          uri_param_names: ["token"]
+          header_names: ["Authorization"]
+          claims_to_verify: ["exp"]
+          run_on_preflight: false
+      - name: request-transformer
+        config:
+          add:
+            headers:
+              - "X-Required-Roles: staff,district_admin"
+      - name: rate-limiting
+        config:
+          minute: 10
+          hour: 100
+          day: 1000
+          policy: "local"
+          fault_tolerant: true
+          hide_client_headers: false
+
+  - name: edge-bundler-routes
+    service: edge-bundler-service
+    paths: ["/edge/bundle"]
+    methods: ["POST"]
+    strip_path: false
+    preserve_host: false
+    tags: ["edge", "device"]
+    plugins:
+      - name: jwt
+        config:
+          uri_param_names: ["token"]
+          header_names: ["Authorization"]
+          claims_to_verify: ["exp"]
+          run_on_preflight: false
+      - name: request-transformer
+        config:
+          add:
+            headers:
+              - "X-Required-Roles: device,staff,district_admin"
+      - name: rate-limiting
+        config:
+          minute: 60
+          hour: 1000
+          day: 10000
+          policy: "local"
+          fault_tolerant: true
+          hide_client_headers: false
+
+  - name: device-ota-routes
+    service: device-ota-service
+    paths: ["/admin/devices/ota"]
+    methods: ["GET", "POST", "PUT"]
+    strip_path: false
+    preserve_host: false
+    tags: ["ota", "admin"]
+    plugins:
+      - name: jwt
+        config:
+          uri_param_names: ["token"]
+          header_names: ["Authorization"]
+          claims_to_verify: ["exp"]
+          run_on_preflight: false
+      - name: request-transformer
+        config:
+          add:
+            headers:
+              - "X-Required-Roles: staff,district_admin"
+      - name: rate-limiting
+        config:
+          minute: 10
+          hour: 100
+          day: 1000
+          policy: "local"
+          fault_tolerant: true
+          hide_client_headers: false
+
+  # Communication & Data Routes
+  - name: chat-routes
+    service: chat-service
+    paths: ["/chat"]
+    methods: ["GET", "POST"]
+    strip_path: false
+    preserve_host: false
+    tags: ["chat", "protected"]
+    plugins:
+      - name: jwt
+        config:
+          uri_param_names: ["token"]
+          header_names: ["Authorization"]
+          claims_to_verify: ["exp"]
+          run_on_preflight: false
+      - name: rate-limiting
+        config:
+          minute: 60
+          hour: 1000
+          day: 10000
+          policy: "local"
+          fault_tolerant: true
+          hide_client_headers: false
+
+  - name: evidence-routes
+    service: evidence-service
+    paths: ["/evidence"]
+    methods: ["GET", "POST", "PUT"]
+    strip_path: false
+    preserve_host: false
+    tags: ["evidence", "protected"]
+    plugins:
+      - name: jwt
+        config:
+          uri_param_names: ["token"]
+          header_names: ["Authorization"]
+          claims_to_verify: ["exp"]
+          run_on_preflight: false
+      - name: rate-limiting
+        config:
+          minute: 60
+          hour: 1000
+          day: 10000
+          policy: "local"
+          fault_tolerant: true
+          hide_client_headers: false
+
+  - name: media-routes
+    service: media-service
+    paths: ["/media"]
+    methods: ["GET", "POST", "PUT", "DELETE"]
+    strip_path: false
+    preserve_host: false
+    tags: ["media", "protected"]
+    plugins:
+      - name: jwt
+        config:
+          uri_param_names: ["token"]
+          header_names: ["Authorization"]
+          claims_to_verify: ["exp"]
+          run_on_preflight: false
+      - name: rate-limiting
+        config:
+          minute: 60
+          hour: 1000
+          day: 10000
+          policy: "local"
+          fault_tolerant: true
+          hide_client_headers: false
+
+  - name: roster-sync-routes
+    service: roster-sync-service
+    paths: ["/admin/roster"]
+    methods: ["GET", "POST", "PUT"]
+    strip_path: false
+    preserve_host: false
+    tags: ["roster", "admin"]
+    plugins:
+      - name: jwt
+        config:
+          uri_param_names: ["token"]
+          header_names: ["Authorization"]
+          claims_to_verify: ["exp"]
+          run_on_preflight: false
+      - name: request-transformer
+        config:
+          add:
+            headers:
+              - "X-Required-Roles: staff,district_admin"
+      - name: rate-limiting
+        config:
+          minute: 60
+          hour: 1000
+          day: 10000
+          policy: "local"
+          fault_tolerant: true
+          hide_client_headers: false
+
+  - name: compliance-export-routes
+    service: compliance-export-service
+    paths: ["/admin/compliance"]
+    methods: ["GET", "POST"]
+    strip_path: false
+    preserve_host: false
+    tags: ["compliance", "admin"]
+    plugins:
+      - name: jwt
+        config:
+          uri_param_names: ["token"]
+          header_names: ["Authorization"]
+          claims_to_verify: ["exp"]
+          run_on_preflight: false
+      - name: request-transformer
+        config:
+          add:
+            headers:
+              - "X-Required-Roles: staff,district_admin"
+      - name: rate-limiting
+        config:
+          minute: 60
+          hour: 1000
+          day: 10000
+          policy: "local"
+          fault_tolerant: true
+          hide_client_headers: false
+
+  - name: consent-ledger-routes
+    service: consent-ledger-service
+    paths: ["/consent"]
+    methods: ["GET", "POST", "PUT"]
+    strip_path: false
+    preserve_host: false
+    tags: ["consent", "protected"]
+    plugins:
+      - name: jwt
+        config:
+          uri_param_names: ["token"]
+          header_names: ["Authorization"]
+          claims_to_verify: ["exp"]
+          run_on_preflight: false
+      - name: rate-limiting
+        config:
+          minute: 60
+          hour: 1000
+          day: 10000
+          policy: "local"
+          fault_tolerant: true
+          hide_client_headers: false
+
+  - name: i18n-routes
+    service: i18n-service
+    paths: ["/i18n"]
+    methods: ["GET"]
+    strip_path: false
+    preserve_host: false
+    tags: ["i18n", "public"]
+    plugins:
+      - name: rate-limiting
+        config:
+          minute: 60
+          hour: 1000
+          day: 10000
+          policy: "local"
+          fault_tolerant: true
+          hide_client_headers: false
+
+  # WebSocket Route for Notifications
+  - name: notification-websocket
+    service: notification-service
+    paths: ["/ws/notify"]
+    methods: ["GET"]
+    strip_path: false
+    preserve_host: false
+    tags: ["notification", "websocket"]
+    protocols: ["http", "https"]
+    plugins:
+      - name: jwt
+        config:
+          uri_param_names: ["token"]
+          header_names: ["Authorization"]
+          claims_to_verify: ["exp"]
+          run_on_preflight: false
+      - name: request-transformer
+        config:
+          add:
+            headers:
+              - "Upgrade: websocket"
+              - "Connection: Upgrade"
+      - name: rate-limiting
+        config:
+          minute: 60
+          hour: 1000
+          day: 10000
+          policy: "local"
+          fault_tolerant: true
+          hide_client_headers: false
+
+  # Legacy Routes (maintain compatibility)
   - name: tenant-routes
     service: tenant-service
     paths: ["/tenant"]
@@ -115,7 +991,6 @@ routes:
             headers:
               - "X-Required-Roles: staff,district_admin"
 
-  # Payment Routes (Admin only)
   - name: payment-routes
     service: payment-service
     paths: ["/payment"]
@@ -136,7 +1011,6 @@ routes:
             headers:
               - "X-Required-Roles: staff,district_admin"
 
-  # Approval Workflow Routes (Staff and Admin)
   - name: approval-routes
     service: approval-service
     paths: ["/approval"]
@@ -157,7 +1031,6 @@ routes:
             headers:
               - "X-Required-Roles: staff,district_admin"
 
-  # Notification Routes (Staff and Admin)
   - name: notification-routes
     service: notification-service
     paths: ["/notification", "/notify"]
@@ -178,28 +1051,6 @@ routes:
             headers:
               - "X-Required-Roles: staff,district_admin"
 
-  # Admin Portal Dashboard Routes (Admin only)
-  - name: admin-portal-routes
-    service: admin-portal-service
-    paths: ["/admin"]
-    methods: ["GET"]
-    strip_path: true
-    preserve_host: false
-    tags: ["admin", "dashboard"]
-    plugins:
-      - name: jwt
-        config:
-          uri_param_names: ["token"]
-          header_names: ["Authorization"]
-          claims_to_verify: ["exp"]
-          run_on_preflight: false
-      - name: request-transformer
-        config:
-          add:
-            headers:
-              - "X-Required-Roles: staff,district_admin"
-
-  # Inference Gateway Routes (Rate Limited)
   - name: inference-routes
     service: inference-gateway-service
     paths: ["/inference"]
@@ -227,8 +1078,8 @@ routes:
 plugins:
   - name: cors
     config:
-      origins: ["*"]
-      methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"]
+      origins: ["https://admin.aivo.local"]
+      methods: ["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"]
       headers:
         - "Accept"
         - "Accept-Version"
@@ -274,5 +1125,13 @@ consumers:
       - algorithm: "HS256"
         key: "staff-jwt-key"
         secret: "your-jwt-secret-key-for-staff"
+
+  - username: "device-client"
+    custom_id: "device-001"
+    tags: ["device", "client"]
+    jwt_secrets:
+      - algorithm: "HS256"
+        key: "device-jwt-key"
+        secret: "your-jwt-secret-key-for-device"
 
 upstreams: []
