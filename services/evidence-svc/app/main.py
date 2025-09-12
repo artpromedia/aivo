@@ -1,9 +1,9 @@
-﻿"""Main FastAPI application for Evidence Service."""
+"""Main FastAPI application for Evidence Service."""
+
 import logging
 import os
 import uuid
 from contextlib import asynccontextmanager
-from typing import Any, Dict, List, Optional
 
 import uvicorn
 from fastapi import Depends, FastAPI, File, HTTPException, UploadFile, status
@@ -48,36 +48,36 @@ async def lifespan(app: FastAPI):
     """Application lifespan events."""
     global textract_extractor, whisper_extractor, keyword_extractor
     global iep_goal_linker, audit_chain
-    
+
     # Startup
     logger.info("Starting Evidence Service")
-    
+
     # Initialize extractors
     textract_extractor = TextractExtractor(
         aws_region=os.getenv("AWS_REGION", "us-east-1"),
         s3_bucket=os.getenv("S3_BUCKET", "evidence-uploads"),
     )
-    
+
     whisper_extractor = WhisperExtractor(
         openai_api_key=os.getenv("OPENAI_API_KEY"),
         s3_bucket=os.getenv("S3_BUCKET", "evidence-uploads"),
         aws_region=os.getenv("AWS_REGION", "us-east-1"),
     )
-    
+
     # Initialize processors
     keyword_extractor = KeywordExtractor()
     iep_goal_linker = IEPGoalLinker()
-    
+
     # Initialize audit chain
     audit_chain = AuditChain(
         private_key_path=os.getenv("AUDIT_PRIVATE_KEY_PATH"),
         public_key_path=os.getenv("AUDIT_PUBLIC_KEY_PATH"),
     )
-    
+
     logger.info("Evidence Service initialized successfully")
-    
+
     yield
-    
+
     # Shutdown
     logger.info("Shutting down Evidence Service")
 
@@ -114,13 +114,13 @@ async def upload_evidence(
     db: AsyncSession = Depends(get_db),
 ):
     """Upload evidence file for processing.
-    
+
     Args:
         file: Uploaded file
         learner_id: ID of learner
         uploaded_by: ID of user uploading
         db: Database session
-        
+
     Returns:
         Upload details
     """
@@ -141,13 +141,13 @@ async def upload_evidence(
 
         # Read file content
         content = await file.read()
-        
+
         # Determine file type
         file_extension = file.filename.split(".")[-1].lower()
-        
+
         supported_document_types = ["pdf", "png", "jpg", "jpeg", "tiff", "bmp"]
         supported_audio_types = ["mp3", "wav", "m4a", "aac", "flac", "ogg"]
-        
+
         if file_extension in supported_document_types:
             file_type = "document"
         elif file_extension in supported_audio_types:
@@ -179,7 +179,7 @@ async def upload_evidence(
 
         # Store file in S3 (using upload ID as key)
         s3_key = f"uploads/{upload.learner_id}/{upload.id}/{file.filename}"
-        
+
         # Update S3 key in database
         upload.s3_key = s3_key
         await db.commit()
@@ -215,12 +215,12 @@ async def upload_evidence(
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail=f"Upload failed: {str(e)}",
-        )
+        ) from e
 
 
 async def process_evidence_async(upload_id: uuid.UUID, db: AsyncSession):
     """Process uploaded evidence asynchronously.
-    
+
     Args:
         upload_id: ID of uploaded evidence
         db: Database session
@@ -231,7 +231,7 @@ async def process_evidence_async(upload_id: uuid.UUID, db: AsyncSession):
             select(EvidenceUpload).where(EvidenceUpload.id == upload_id),
         )
         upload = result.scalar_one_or_none()
-        
+
         if not upload:
             logger.error("Upload not found: %s", upload_id)
             return
@@ -304,8 +304,10 @@ async def process_evidence_async(upload_id: uuid.UUID, db: AsyncSession):
             action_details={
                 "linked_goals_count": len(linkage_results),
                 "average_confidence": (
-                    sum(r.confidence_score for r in linkage_results) / len(linkage_results)
-                    if linkage_results else 0
+                    sum(r.confidence_score for r in linkage_results)
+                    / len(linkage_results)
+                    if linkage_results
+                    else 0
                 ),
             },
             performed_by=upload.uploaded_by,
@@ -320,7 +322,7 @@ async def process_evidence_async(upload_id: uuid.UUID, db: AsyncSession):
 
     except Exception as e:
         logger.error("Evidence processing failed for upload %s: %s", upload_id, e)
-        
+
         # Create error audit entry
         await audit_chain.create_audit_entry(
             db=db,
@@ -338,11 +340,11 @@ async def process_evidence_async(upload_id: uuid.UUID, db: AsyncSession):
 @app.get("/uploads/{upload_id}", response_model=EvidenceUploadResponse)
 async def get_upload(upload_id: str, db: AsyncSession = Depends(get_db)):
     """Get upload details by ID.
-    
+
     Args:
         upload_id: Upload ID
         db: Database session
-        
+
     Returns:
         Upload details
     """
@@ -351,7 +353,7 @@ async def get_upload(upload_id: str, db: AsyncSession = Depends(get_db)):
             select(EvidenceUpload).where(EvidenceUpload.id == uuid.UUID(upload_id)),
         )
         upload = result.scalar_one_or_none()
-        
+
         if not upload:
             raise HTTPException(
                 status_code=status.HTTP_404_NOT_FOUND,
@@ -364,17 +366,17 @@ async def get_upload(upload_id: str, db: AsyncSession = Depends(get_db)):
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
             detail="Invalid upload ID format",
-        )
+        ) from None
 
 
 @app.get("/uploads/{upload_id}/extraction", response_model=EvidenceExtractionResponse)
 async def get_extraction(upload_id: str, db: AsyncSession = Depends(get_db)):
     """Get extraction results for an upload.
-    
+
     Args:
         upload_id: Upload ID
         db: Database session
-        
+
     Returns:
         Extraction results
     """
@@ -390,17 +392,17 @@ async def get_extraction(upload_id: str, db: AsyncSession = Depends(get_db)):
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
             detail="Invalid upload ID format",
-        )
+        ) from None
 
 
 @app.get("/uploads/{upload_id}/keywords", response_model=KeywordExtractionResponse)
 async def get_keywords(upload_id: str, db: AsyncSession = Depends(get_db)):
     """Get keyword extraction results for an upload.
-    
+
     Args:
         upload_id: Upload ID
         db: Database session
-        
+
     Returns:
         Keyword extraction results
     """
@@ -416,7 +418,7 @@ async def get_keywords(upload_id: str, db: AsyncSession = Depends(get_db)):
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
             detail="Invalid upload ID format",
-        )
+        ) from None
 
 
 @app.post("/iep-goals", response_model=IEPGoalResponse)
@@ -425,11 +427,11 @@ async def create_iep_goal(
     db: AsyncSession = Depends(get_db),
 ):
     """Create new IEP goal.
-    
+
     Args:
         goal_data: IEP goal data
         db: Database session
-        
+
     Returns:
         Created IEP goal
     """
@@ -448,20 +450,20 @@ async def create_iep_goal(
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail=f"Failed to create IEP goal: {str(e)}",
-        )
+        ) from e
 
 
-@app.get("/learners/{learner_id}/iep-goals", response_model=List[IEPGoalResponse])
+@app.get("/learners/{learner_id}/iep-goals", response_model=list[IEPGoalResponse])
 async def get_learner_iep_goals(
     learner_id: str,
     db: AsyncSession = Depends(get_db),
 ):
     """Get IEP goals for a learner.
-    
+
     Args:
         learner_id: Learner ID
         db: Database session
-        
+
     Returns:
         List of IEP goals
     """
@@ -469,7 +471,7 @@ async def get_learner_iep_goals(
         result = await db.execute(
             select(IEPGoal)
             .where(IEPGoal.learner_id == uuid.UUID(learner_id))
-            .where(IEPGoal.is_active == True),
+            .where(IEPGoal.is_active is True),
         )
         goals = result.scalars().all()
 
@@ -479,27 +481,28 @@ async def get_learner_iep_goals(
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
             detail="Invalid learner ID format",
-        )
+        ) from None
 
 
-@app.get("/uploads/{upload_id}/linkages", response_model=List[IEPGoalLinkageResponse])
+@app.get("/uploads/{upload_id}/linkages", response_model=list[IEPGoalLinkageResponse])
 async def get_upload_linkages(
     upload_id: str,
     db: AsyncSession = Depends(get_db),
 ):
     """Get IEP goal linkages for an upload.
-    
+
     Args:
         upload_id: Upload ID
         db: Database session
-        
+
     Returns:
         List of goal linkages
     """
     try:
         result = await db.execute(
-            select(IEPGoalLinkage)
-            .where(IEPGoalLinkage.upload_id == uuid.UUID(upload_id)),
+            select(IEPGoalLinkage).where(
+                IEPGoalLinkage.upload_id == uuid.UUID(upload_id)
+            ),
         )
         linkages = result.scalars().all()
 
@@ -509,7 +512,7 @@ async def get_upload_linkages(
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
             detail="Invalid upload ID format",
-        )
+        ) from None
 
 
 @app.post("/linkages/{linkage_id}/validate")
@@ -520,23 +523,22 @@ async def validate_linkage(
     db: AsyncSession = Depends(get_db),
 ):
     """Validate an IEP goal linkage.
-    
+
     Args:
         linkage_id: Linkage ID
         is_valid: Whether linkage is valid
         validated_by: ID of user validating
         db: Database session
-        
+
     Returns:
         Validation result
     """
     try:
         result = await db.execute(
-            select(IEPGoalLinkage)
-            .where(IEPGoalLinkage.id == uuid.UUID(linkage_id)),
+            select(IEPGoalLinkage).where(IEPGoalLinkage.id == uuid.UUID(linkage_id)),
         )
         linkage = result.scalar_one_or_none()
-        
+
         if not linkage:
             raise HTTPException(
                 status_code=status.HTTP_404_NOT_FOUND,
@@ -547,7 +549,7 @@ async def validate_linkage(
         linkage.teacher_validated = is_valid
         linkage.validated_by = uuid.UUID(validated_by) if validated_by else None
         linkage.validation_timestamp = None  # Would be set automatically by database
-        
+
         await db.commit()
 
         # Create audit entry for validation
@@ -582,24 +584,24 @@ async def validate_linkage(
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
             detail="Invalid ID format",
-        )
+        ) from None
 
 
 @app.get("/learners/{learner_id}/audit-trail")
 async def get_audit_trail(
     learner_id: str,
-    action_type: Optional[str] = None,
+    action_type: str | None = None,
     limit: int = 100,
     db: AsyncSession = Depends(get_db),
 ):
     """Get audit trail for a learner.
-    
+
     Args:
         learner_id: Learner ID
         action_type: Optional action type filter
         limit: Maximum entries to return
         db: Database session
-        
+
     Returns:
         Audit trail entries
     """
@@ -633,7 +635,7 @@ async def get_audit_trail(
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
             detail="Invalid learner ID format",
-        )
+        ) from None
 
 
 @app.get("/learners/{learner_id}/audit-verification")
@@ -643,12 +645,12 @@ async def verify_audit_chain(
     db: AsyncSession = Depends(get_db),
 ):
     """Verify audit chain integrity for a learner.
-    
+
     Args:
         learner_id: Learner ID
         verify_signatures: Whether to verify signatures
         db: Database session
-        
+
     Returns:
         Chain verification results
     """
@@ -668,26 +670,26 @@ async def verify_audit_chain(
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
             detail="Invalid learner ID format",
-        )
+        ) from None
 
 
 @app.get("/audit/statistics")
 async def get_audit_statistics(
-    learner_id: Optional[str] = None,
+    learner_id: str | None = None,
     db: AsyncSession = Depends(get_db),
 ):
     """Get audit chain statistics.
-    
+
     Args:
         learner_id: Optional learner filter
         db: Database session
-        
+
     Returns:
         Audit statistics
     """
     try:
         learner_uuid = uuid.UUID(learner_id) if learner_id else None
-        
+
         stats = await audit_chain.get_audit_statistics(
             db=db,
             learner_id=learner_uuid,
@@ -699,7 +701,7 @@ async def get_audit_statistics(
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
             detail="Invalid learner ID format",
-        )
+        ) from None
 
 
 if __name__ == "__main__":
