@@ -1,11 +1,11 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 
 // RBAC API functions (simplified for prototype)
- 
+// Note: Parameters are intentionally unused in mock implementation
 const RBACAPI = {
-  getPermissionMatrix: async (_tenantId?: string) => {
+  getPermissionMatrix: async (tenantId?: string) => {
     return {
-      tenant_id: _tenantId,
+      tenant_id: tenantId,
       roles: [],
       permission_groups: [],
       matrix: {},
@@ -18,7 +18,10 @@ const RBACAPI = {
     };
   },
 
-  getRoles: async (_tenantId?: string, _includePermissions = false) => {
+  getRoles: async (tenantId?: string, includePermissions = false) => {
+    // Mock implementation - parameters intentionally unused
+    void tenantId;
+    void includePermissions;
     return {
       success: true,
       data: { roles: [], summary: {} },
@@ -26,27 +29,41 @@ const RBACAPI = {
   },
 
   createCustomRole: async (
-    _name: string,
-    _displayName: string,
-    _description?: string,
-    _tenantId?: string
+    name: string,
+    displayName: string,
+    description?: string,
+    tenantId?: string
   ) => {
+    // Mock implementation - parameters intentionally unused
+    void name;
+    void displayName;
+    void description;
+    void tenantId;
     return { success: true };
   },
 
   updateRole: async (
-    _roleId: string,
-    _updates: Record<string, unknown>,
-    _tenantId?: string
+    roleId: string,
+    updates: Record<string, unknown>,
+    tenantId?: string
   ) => {
+    // Mock implementation - parameters intentionally unused
+    void roleId;
+    void updates;
+    void tenantId;
     return { success: true };
   },
 
-  deleteRole: async (_roleId: string, _tenantId?: string) => {
+  deleteRole: async (roleId: string, tenantId?: string) => {
+    // Mock implementation - parameters intentionally unused
+    void roleId;
+    void tenantId;
     return { success: true };
   },
 
-  getPermissions: async (_tenantId?: string) => {
+  getPermissions: async (tenantId?: string) => {
+    // Mock implementation - parameters intentionally unused
+    void tenantId;
     return {
       success: true,
       data: { grouped_permissions: [], all_permissions: [], summary: {} },
@@ -54,23 +71,35 @@ const RBACAPI = {
   },
 
   updateRolePermissions: async (
-    _roleId: string,
-    _permissionIds: string[],
-    _tenantId?: string
+    roleId: string,
+    permissionIds: string[],
+    tenantId?: string
   ) => {
+    // Mock implementation - parameters intentionally unused
+    void roleId;
+    void permissionIds;
+    void tenantId;
     return { success: true };
   },
 
   assignUserRole: async (
-    _userId: string,
-    _roleId: string,
-    _tenantId?: string,
-    _expiresAt?: string
+    userId: string,
+    roleId: string,
+    tenantId?: string,
+    expiresAt?: string
   ) => {
+    // Mock implementation - parameters intentionally unused
+    void userId;
+    void roleId;
+    void tenantId;
+    void expiresAt;
     return { success: true };
   },
 
-  revokeUserRole: async (_userRoleId: string, _tenantId?: string) => {
+  revokeUserRole: async (userRoleId: string, tenantId?: string) => {
+    // Mock implementation - parameters intentionally unused
+    void userRoleId;
+    void tenantId;
     return { success: true };
   },
 
@@ -90,16 +119,25 @@ const RBACAPI = {
 
   createAccessReview: async (
     title: string,
-    _description?: string,
-    _tenantId?: string,
-    _scope = 'admin',
-    _targetRoleId?: string,
-    _dueDays = 30
+    description?: string,
+    tenantId?: string,
+    scope = 'admin',
+    targetRoleId?: string,
+    dueDays = 30
   ) => {
+    // Mock implementation - most parameters intentionally unused
+    void description;
+    void tenantId;
+    void scope;
+    void targetRoleId;
+    void dueDays;
     return { success: true, data: { id: '1', title } };
   },
 
-  getAccessReviews: async (_tenantId?: string, _status?: string) => {
+  getAccessReviews: async (tenantId?: string, status?: string) => {
+    // Mock implementation - parameters intentionally unused
+    void tenantId;
+    void status;
     return {
       success: true,
       data: { reviews: [], summary: {} },
@@ -108,9 +146,12 @@ const RBACAPI = {
 
   getReviewItems: async (
     reviewId: string,
-    _tenantId?: string,
-    _status?: string
+    tenantId?: string,
+    status?: string
   ) => {
+    // Mock implementation - some parameters intentionally unused
+    void tenantId;
+    void status;
     return {
       success: true,
       data: { review_id: reviewId, items: [], summary: {} },
@@ -118,26 +159,37 @@ const RBACAPI = {
   },
 
   submitReviewDecision: async (
-    _reviewId: string,
-    _itemId: string,
-    _decision: string,
-    _notes?: string,
-    _justification?: string,
-    _tenantId?: string
+    reviewId: string,
+    itemId: string,
+    decision: string,
+    notes?: string,
+    justification?: string,
+    tenantId?: string
   ) => {
+    // Mock implementation - parameters intentionally unused
+    void reviewId;
+    void itemId;
+    void decision;
+    void notes;
+    void justification;
+    void tenantId;
     return { success: true };
   },
 
   getAuditLogs: async (
-    _tenantId?: string,
-    _entityType?: string,
-    _entityId?: string,
-    _limit = 100
+    tenantId?: string,
+    entityType?: string,
+    entityId?: string,
+    limit = 100
   ) => {
+    // Mock implementation - parameters intentionally unused
+    void tenantId;
+    void entityType;
+    void entityId;
+    void limit;
     return { success: true, data: [] };
   },
 };
- 
 
 // Permission Matrix hooks
 export const usePermissionMatrix = (tenantId?: string) => {
