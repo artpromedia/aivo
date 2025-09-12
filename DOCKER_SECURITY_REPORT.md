@@ -3,19 +3,23 @@
 ## Security Improvements Applied
 
 ### Base Image Security
+
 - **FROM**: Changed from `python:3.11-slim` (floating tag) to `python:3.11-slim-bookworm@sha256:edaf703dce209d351e2c8f64a2e93b73f0f3d0f2e7b7c8b0e1b2e6a5dd77a5f4`
 - **Reason**: Pin by digest to prevent supply chain attacks and use Debian Bookworm which has better CVE coverage than Alpine
 
 ### System Security
+
 - **Security Updates**: Added `apt-get upgrade -y` to install latest security patches
 - **Package Management**: Updated pip/setuptools/wheel to latest versions (fixes CVEs in resolvers/wheels)
 - **Environment Variables**: Added `PYTHONDONTWRITEBYTECODE=1`, `PYTHONUNBUFFERED=1`, `PIP_DISABLE_PIP_VERSION_CHECK=1`
 
 ### Build Optimizations
+
 - **Cache Mounts**: Added `--mount=type=cache,target=/root/.cache/pip` for faster builds and reduced layer sizes
 - **Layer Optimization**: Separated security updates from application dependencies
 
 ### User Security
+
 - **Fixed UID**: Changed from random UIDs (1000, 1001) to fixed UID 10001 for consistency
 - **Non-root**: Ensured all services run as non-root users with proper file ownership
 
@@ -43,7 +47,7 @@
 
 4. **payment-svc**: Python FastAPI service
    - Base image pinned by digest
-   - Security updates added (curl dependency) 
+   - Security updates added (curl dependency)
    - Cache mounts enabled
    - Fixed UID 10001 (added non-root user)
 
@@ -63,6 +67,7 @@
 ## Remaining Work
 
 ### 🔄 Python Services Pending Update (~58 remaining)
+
 - tenant-svc
 - subject-brain-svc  
 - science-solver-svc
@@ -82,11 +87,13 @@
 ## Security Impact
 
 ### CVE Mitigation
+
 - **Base Image CVEs**: Eliminated by pinning digest and using Debian Bookworm
 - **Package CVEs**: Reduced by upgrading pip/setuptools/wheel and system packages
 - **Supply Chain**: Protected against image tampering via digest pinning
 
 ### Operational Benefits
+
 - **Consistent UIDs**: Fixed UID 10001 across all services
 - **Faster Builds**: Cache mounts reduce build time and image size
 - **Security Posture**: Latest security patches applied automatically
@@ -102,6 +109,7 @@
 ## Automation Script
 
 A Python script `scripts/update-docker-security.py` has been created to automate this process across all remaining services. The script can:
+
 - Find all Python Dockerfiles
 - Extract existing system dependencies
 - Apply security hardening pattern
