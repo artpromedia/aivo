@@ -1,4 +1,4 @@
-openapi: 3.0.3
+openapi: 3.1.0
 info:
   title: Subject-Brain Service API
   description: |
@@ -48,7 +48,7 @@ paths:
     get:
       summary: Health check
       description: Check service health status
-      operationId: healthCheck
+      operationId: subjectBrainHealthCheck
       tags:
         - Health
       responses:

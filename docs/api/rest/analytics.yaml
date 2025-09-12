@@ -1,4 +1,4 @@
-openapi: 3.0.3
+openapi: 3.1.0
 info:
   title: Analytics Service API
   description: REST API for analytics data aggregation and reporting
@@ -18,7 +18,7 @@ paths:
     get:
       summary: Health check endpoint
       description: Returns the health status of the analytics service
-      operationId: getHealth
+      operationId: analyticsServiceGetHealth
       responses:
         '200':
           description: Service is healthy

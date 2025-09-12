@@ -1,4 +1,4 @@
-openapi: 3.0.3
+openapi: 3.1.0
 info:
   title: Event Collector Service API
   description: |
@@ -181,7 +181,7 @@ paths:
       description: |
         Returns the current health status of the service.
         Used by load balancers and monitoring systems for health checks.
-      operationId: getHealth
+      operationId: eventCollectorGetHealth
       tags:
         - Health
       security: []

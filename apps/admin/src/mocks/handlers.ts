@@ -1,9 +1,12 @@
 import { adminPortalHandlers } from './handlers/admin-portal';
 import { authHandlers } from './handlers/auth';
+import { billingHandlers } from './handlers/billing';
 import { deviceHandlers } from './handlers/device';
 import { inkHandlers } from './handlers/ink';
+import { namespacesHandlers } from './handlers/namespaces';
 import { otaHandlers } from './handlers/ota';
 import { policyHandlers } from './handlers/policy';
+import { subscriptionHandlers } from './handlers/subscriptions';
 import { tenantHandlers } from './handlers/tenant';
 import { userHandlers } from './handlers/users';
 
@@ -14,11 +17,14 @@ import { userHandlers } from './handlers/users';
 export const handlers = [
   ...adminPortalHandlers,
   ...authHandlers,
-  ...tenantHandlers,
+  ...billingHandlers,
   ...deviceHandlers,
   ...inkHandlers,
-  ...policyHandlers,
+  ...namespacesHandlers,
   ...otaHandlers,
+  ...policyHandlers,
+  ...subscriptionHandlers,
+  ...tenantHandlers,
   ...userHandlers,
 ];
 

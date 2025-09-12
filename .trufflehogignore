@@ -1,0 +1,7 @@
+# Ignore docs and test fixtures with fake keys
+^docs/
+^tests/fixtures/
+^apps/admin/public/
+.*\.sample$
+.*_example\..*$
+.*-fixture\..*$

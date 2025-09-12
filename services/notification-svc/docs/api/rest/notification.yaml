@@ -1,24 +1,24 @@
-﻿openapi: 3.0.3
+﻿openapi: 3.1.0
 info:
   title: Realtime Notification Service
   description: |
     WebSocket, Web Push, and SMS notification service for IEP reminders and educational alerts.
-    
+
     ## Features
     - **WebSocket**: Real-time bidirectional communication with JWT auth
-    - **Web Push**: Browser push notifications for offline users  
+    - **Web Push**: Browser push notifications for offline users
     - **SMS Fallback**: Critical notifications via SMS when other channels fail
     - **IEP Reminders**: Specialized templates for IEP meetings and deadlines
     - **Localized Templates**: Multi-language support for notifications
-    
+
     ## Authentication
     - JWT tokens required for WebSocket connections
     - Bearer token authentication for REST endpoints
-    
+
     ## Message Flow
     ```
     Client  WebSocket  Notification Service  Message Queue
-                                      
+
            Web Push API            SMS Provider
     ```
   version: 1.0.0
@@ -42,14 +42,14 @@ paths:
       description: |
         Establishes WebSocket connection for real-time notification delivery.
         Requires JWT token in query parameter or Authorization header.
-        
+
         **Features:**
         - JWT authentication with user context
         - Heartbeat mechanism (ping/pong every 30s)
         - Message replay with replay-id for missed messages
         - Automatic reconnection handling
         - IEP reminder delivery
-        
+
         **Message Format:**
         ```json
         {
@@ -157,15 +157,15 @@ paths:
       description: |
         Send notifications through available channels (WebSocket, Push, SMS).
         Supports IEP reminders, meeting alerts, and educational notifications.
-        
+
         **Channel Priority:**
         1. WebSocket (if user is online)
         2. Web Push (if subscription exists)
         3. SMS (for critical notifications only)
-        
+
         **IEP Reminder Types:**
         - `iep_meeting_reminder`: Upcoming IEP meeting notifications
-        - `iep_deadline_warning`: IEP review deadline alerts  
+        - `iep_deadline_warning`: IEP review deadline alerts
         - `iep_document_ready`: IEP documentation completion
         - `iep_parent_consent`: Parent consent requests
       security:
@@ -357,7 +357,7 @@ components:
         template_id:
           type: string
           description: Notification template identifier
-          enum: 
+          enum:
             - iep_meeting_reminder
             - iep_deadline_warning
             - iep_document_ready

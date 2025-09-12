@@ -380,7 +380,7 @@ paths:
   /health:
     get:
       summary: Health check
-      operationId: healthCheck
+      operationId: chatServiceHealthCheck
       tags:
         - Health
       security: []

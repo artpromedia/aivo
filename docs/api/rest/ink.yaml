@@ -148,7 +148,7 @@ paths:
   /healthz:
     get:
       summary: Health check
-      operationId: healthCheck
+      operationId: inkServiceHealthCheck
       tags:
         - System
       description: Check service health and dependency status

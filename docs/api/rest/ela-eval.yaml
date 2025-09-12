@@ -1,4 +1,4 @@
-openapi: 3.0.0
+openapi: 3.1.0
 info:
   title: ELA Evaluator Service API
   description: |
@@ -28,7 +28,7 @@ paths:
     get:
       summary: Health check
       description: Returns service health status and dependencies
-      operationId: health_check
+      operationId: elaEvalHealthCheck
       tags:
         - Health
       responses:

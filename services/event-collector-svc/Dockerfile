@@ -1,20 +1,28 @@
-﻿# hadolint ignore=DL3007,DL3008
+﻿# BEFORE: python:3.11-slim (floating) or alpine with many unfixed CVEs
+# AFTER: pin by digest; bookworm slim
 # Event Collector Service Dockerfile
-FROM python:3.11-slim
+FROM python:3.11-slim-bookworm@sha256:edaf703dce209d351e2c8f64a2e93b73f0f3d0f2e7b7c8b0e1b2e6a5dd77a5f4
+
+ENV PYTHONDONTWRITEBYTECODE=1 PYTHONUNBUFFERED=1 PIP_DISABLE_PIP_VERSION_CHECK=1
 
 # Set working directory
 WORKDIR /app
 
-# Install system dependencies
-RUN apt-get update && apt-get install -y --no-install-recommends \
-    gcc \
-    && rm -rf /var/lib/apt/lists/*
+# Security updates
+RUN apt-get update \
+ && apt-get upgrade -y --no-install-recommends \
+ && apt-get install -y --no-install-recommends gcc \
+ && rm -rf /var/lib/apt/lists/*
+
+# Keep pip/setuptools current (often fixes CVEs in resolvers/wheels)
+RUN python -m pip install --upgrade pip setuptools wheel
 
 # Copy dependency files
 COPY pyproject.toml requirements.txt ./
 
 # Install Python dependencies
-RUN pip install --no-cache-dir -r requirements.txt
+RUN --mount=type=cache,target=/root/.cache/pip \
+    pip install --no-cache-dir -r requirements.txt
 
 # Copy application code
 COPY app/ ./app/
@@ -30,8 +38,8 @@ RUN python -m grpc_tools.protoc \
     mkdir -p /app/buffer
 
 # Create non-root user and change ownership
-RUN addgroup --system --gid 1001 eventcollector && \
-    adduser --system --uid 1001 --gid 1001 eventcollector && \
+RUN addgroup --system --gid 10001 eventcollector && \
+    adduser --system --uid 10001 --gid 10001 eventcollector && \
     chown -R eventcollector:eventcollector /app
 
 # Switch to non-root user

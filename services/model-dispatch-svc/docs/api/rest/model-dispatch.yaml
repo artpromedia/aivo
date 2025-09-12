@@ -1,21 +1,21 @@
-﻿openapi: 3.0.3
+﻿openapi: 3.1.0
 info:
   title: Model Dispatch Service API
   description: |
     LLM provider selection and dispatch service based on subject, grade band, and region.
-    
+
     ## Features
     - **Subject/Grade/Region Policy**: Automatic provider selection
-    - **Data Residency**: Regional routing compliance 
+    - **Data Residency**: Regional routing compliance
     - **Teacher Override**: Manual provider selection capability
     - **Analytics**: Dispatch metrics and performance tracking
-    
+
     ## Workflow
     1. Submit dispatch request with `{subject, grade_band, region}`
     2. Service evaluates policies and selects appropriate provider
     3. Returns `{provider, templateIds, moderation_threshold}`
     4. Optional teacher override with justification
-    
+
   version: 1.0.0
   contact:
     name: AIVO Engineering
@@ -62,18 +62,18 @@ paths:
       summary: Dispatch model request
       description: |
         Select appropriate LLM provider based on subject, grade band, and region.
-        
+
         **Policy Resolution Order:**
         1. Exact match (subject + grade + region)
-        2. Subject + grade (any region) 
+        2. Subject + grade (any region)
         3. Subject only (any grade/region)
         4. Default policy (fallback)
-        
+
         **Teacher Override:**
         - Allows manual provider selection
         - Requires justification reason
         - Logged for audit purposes
-        
+
       parameters:
         - name: request_id
           in: query
@@ -94,7 +94,7 @@ paths:
                 summary: Basic dispatch request
                 value:
                   subject: "mathematics"
-                  grade_band: "elementary" 
+                  grade_band: "elementary"
                   region: "us_east"
               teacher_override:
                 summary: Teacher override request

@@ -1,1 +1,14 @@
+#!/bin/sh
+. "$(dirname "$0")/_/husky.sh"
+
+# Add local Node.js to PATH
+export PATH="$PWD/node-v20.19.4-win-x64:$PATH"
+
+# Check if npx is available
+if ! command -v npx >/dev/null 2>&1; then
+  echo "Warning: npx not found, skipping commit message validation"
+  exit 0
+fi
+
+# Run commitlint
 npx --no-install commitlint --edit "$1"
