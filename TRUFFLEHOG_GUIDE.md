@@ -5,16 +5,19 @@
 ### Installation Options
 
 #### Option 1: winget (Recommended)
+
 ```powershell
 winget install trufflesecurity.trufflehog
 ```
 
 #### Option 2: Chocolatey
+
 ```powershell
 choco install trufflehog
 ```
 
 #### Option 3: Direct Download
+
 ```powershell
 # Download latest release
 $url = "https://github.com/trufflesecurity/trufflehog/releases/latest/download/trufflehog_windows_amd64.exe"
@@ -33,6 +36,7 @@ trufflehog filesystem --entropy=False .
 ### Alternative TruffleHog Commands
 
 #### Basic Scans
+
 ```bash
 # Scan with verified secrets only
 trufflehog filesystem --only-verified .
@@ -48,6 +52,7 @@ trufflehog filesystem --entropy=False --format=json .
 ```
 
 #### Advanced Scans
+
 ```bash
 # Scan with custom output file
 trufflehog filesystem --entropy=False --output=secrets-report.json --format=json .
@@ -63,7 +68,8 @@ trufflehog filesystem --detectors=aws,github,stripe .
 
 With our `.trufflehogignore` configuration, the following should be ignored:
 
-### Ignored Paths:
+### Ignored Paths
+
 - `^docs/` - Documentation with example keys
 - `^tests/fixtures/` - Test fixtures with fake credentials  
 - `^apps/admin/public/` - Public admin assets
@@ -71,8 +77,9 @@ With our `.trufflehogignore` configuration, the following should be ignored:
 - `.*_example\..*$` - Example files
 - `.*-fixture\..*$` - Fixture files
 
-### Typical Scan Output (Clean Repository):
-```
+### Typical Scan Output (Clean Repository)
+
+```text
 🔍 TruffleHog Filesystem Scan
 ============================
 Found verified result 🐷🔑
@@ -93,7 +100,8 @@ Found 0 verified secrets
 Found 3 unverified secrets (ignored due to --only-verified)
 ```
 
-### Common Secret Types Detected:
+### Common Secret Types Detected
+
 - **AWS Keys**: AKIA..., aws_access_key_id
 - **GitHub Tokens**: ghp_..., github_pat_...
 - **Stripe Keys**: sk_live_..., pk_live_...
@@ -104,6 +112,7 @@ Found 3 unverified secrets (ignored due to --only-verified)
 ## 🛠️ Integration with AIVO Security
 
 ### CI/CD Integration
+
 ```yaml
 # GitHub Actions example
 - name: Run TruffleHog
@@ -116,6 +125,7 @@ Found 3 unverified secrets (ignored due to --only-verified)
 ```
 
 ### Pre-commit Hook
+
 ```bash
 # Add to .pre-commit-config.yaml
 repos:
@@ -131,6 +141,7 @@ repos:
 If TruffleHog is not available, you can use basic pattern matching:
 
 ### PowerShell Secret Search
+
 ```powershell
 # Search for common secret patterns
 Get-ChildItem -Recurse -File | Select-String -Pattern "AKIA[0-9A-Z]{16}" | Select-Object Filename, LineNumber, Line
@@ -139,6 +150,7 @@ Get-ChildItem -Recurse -File | Select-String -Pattern "ghp_[0-9A-Za-z]{36}" | Se
 ```
 
 ### Git Secret History Scan
+
 ```bash
 # Scan git history for secrets
 git log --all --grep="password\|secret\|key" --oneline
@@ -147,13 +159,15 @@ git log -p --all -S "AKIA" --source --all
 
 ## 📊 Security Assessment
 
-### Current AIVO Security Posture:
+### Current AIVO Security Posture
+
 - ✅ `.trufflehogignore` configured to reduce false positives
 - ✅ Docker secrets managed via environment variables
 - ✅ Development configs use `.env` files (gitignored)
 - ✅ Production secrets externalized to secure vaults
 
-### Recommendations:
+### Recommendations
+
 1. **Install TruffleHog**: Add to developer toolchain
 2. **CI/CD Integration**: Run on every commit/PR
 3. **Regular Scans**: Weekly secret audits
