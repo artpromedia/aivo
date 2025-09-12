@@ -132,6 +132,32 @@ paths:
         '403':
           $ref: '#/components/responses/Forbidden'
 
+    delete:
+      summary: Delete chat data
+      operationId: deleteChatData
+      tags:
+        - Data Management
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ChatDeleteRequest'
+      responses:
+        '200':
+          description: Deletion completed
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                  deleted_count:
+                    type: integer
+                  hard_delete:
+                    type: boolean
+
   /sessions/{sessionId}/messages:
     get:
       summary: Get messages for session
@@ -276,33 +302,6 @@ paths:
                       type: string
                   total_messages:
                     type: integer
-
-  /messages:
-    delete:
-      summary: Delete chat data
-      operationId: deleteChatData
-      tags:
-        - Data Management
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/ChatDeleteRequest'
-      responses:
-        '200':
-          description: Deletion completed
-          content:
-            application/json:
-              schema:
-                type: object
-                properties:
-                  message:
-                    type: string
-                  deleted_count:
-                    type: integer
-                  hard_delete:
-                    type: boolean
 
   /stats/moderation:
     get:

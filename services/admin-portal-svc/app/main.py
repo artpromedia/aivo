@@ -29,6 +29,7 @@ from .schemas import (
     UsageResponse,
 )
 from .service_aggregator import service_aggregator
+from .routes_rbac import router as rbac_router
 
 # Configure logging
 logging.basicConfig(level=logging.INFO)
@@ -76,6 +77,9 @@ app.add_middleware(
 
 # Initialize OpenTelemetry instrumentation
 FastAPIInstrumentor.instrument_app(app)
+
+# Include RBAC router
+app.include_router(rbac_router)
 
 
 # Dependency for tenant ID validation

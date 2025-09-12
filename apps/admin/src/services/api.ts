@@ -258,3 +258,373 @@ export class AuthAPI {
     });
   }
 }
+
+// RBAC API class
+export class RBACAPI {
+  // Permission Matrix endpoints
+  static async getPermissionMatrix(tenantId?: string) {
+    const params = tenantId ? `?tenant_id=${tenantId}` : '';
+    return apiRequest<{
+      tenant_id?: string;
+      roles: Array<{
+        id: string;
+        name: string;
+        display_name: string;
+        description?: string;
+        is_system: boolean;
+        is_active: boolean;
+        permission_count: number;
+        permissions: string[];
+      }>;
+      permission_groups: Array<{
+        resource: string;
+        permissions: Array<{
+          id: string;
+          name: string;
+          display_name: string;
+          action: string;
+          scope: string;
+        }>;
+      }>;
+      matrix: Record<string, string[]>;
+      summary: {
+        total_roles: number;
+        total_permissions: number;
+        system_roles: number;
+        custom_roles: number;
+      };
+    }>(`/admin/rbac/roles/matrix${params}`);
+  }
+
+  // Role management endpoints
+  static async getRoles(tenantId?: string, includePermissions = false) {
+    const params = new URLSearchParams();
+    if (tenantId) params.append('tenant_id', tenantId);
+    if (includePermissions) params.append('include_permissions', 'true');
+
+    return apiRequest<{
+      success: boolean;
+      data: {
+        roles: Array<{
+          id: string;
+          name: string;
+          display_name: string;
+          description?: string;
+          tenant_id?: string;
+          is_system: boolean;
+          is_active: boolean;
+          can_edit: boolean;
+          can_delete: boolean;
+          user_count: number;
+          permissions?: Array<{
+            id: string;
+            name: string;
+            display_name: string;
+            resource: string;
+            action: string;
+            scope: string;
+          }>;
+        }>;
+        summary: {
+          total: number;
+          system_roles: number;
+          custom_roles: number;
+          active_roles: number;
+        };
+      };
+    }>(`/admin/rbac/roles?${params.toString()}`);
+  }
+
+  static async createCustomRole(
+    name: string,
+    displayName: string,
+    description?: string,
+    tenantId?: string
+  ) {
+    const params = tenantId ? `?tenant_id=${tenantId}` : '';
+    return apiRequest(`/admin/rbac/roles/custom${params}`, {
+      method: 'POST',
+      body: JSON.stringify({
+        name,
+        display_name: displayName,
+        description,
+        tenant_id: tenantId,
+      }),
+    });
+  }
+
+  static async updateRole(
+    roleId: string,
+    updates: Record<string, unknown>,
+    tenantId?: string
+  ) {
+    const params = tenantId ? `?tenant_id=${tenantId}` : '';
+    return apiRequest(`/admin/rbac/roles/${roleId}${params}`, {
+      method: 'PUT',
+      body: JSON.stringify(updates),
+    });
+  }
+
+  static async deleteRole(roleId: string, tenantId?: string) {
+    const params = tenantId ? `?tenant_id=${tenantId}` : '';
+    return apiRequest(`/admin/rbac/roles/${roleId}${params}`, {
+      method: 'DELETE',
+    });
+  }
+
+  // Permission management endpoints
+  static async getPermissions(tenantId?: string) {
+    const params = tenantId ? `?tenant_id=${tenantId}` : '';
+    return apiRequest<{
+      success: boolean;
+      data: {
+        grouped_permissions: Array<{
+          resource: string;
+          permissions: Array<{
+            id: string;
+            name: string;
+            display_name: string;
+            resource: string;
+            action: string;
+            scope: string;
+          }>;
+        }>;
+        all_permissions: Array<{
+          id: string;
+          name: string;
+          display_name: string;
+          resource: string;
+          action: string;
+          scope: string;
+        }>;
+        summary: {
+          total_permissions: number;
+          resources: number;
+        };
+      };
+    }>(`/admin/rbac/permissions${params}`);
+  }
+
+  static async updateRolePermissions(
+    roleId: string,
+    permissionIds: string[],
+    tenantId?: string
+  ) {
+    const params = tenantId ? `?tenant_id=${tenantId}` : '';
+    return apiRequest(`/admin/rbac/roles/${roleId}/permissions${params}`, {
+      method: 'PUT',
+      body: JSON.stringify({ permission_ids: permissionIds }),
+    });
+  }
+
+  // User role assignment endpoints
+  static async assignUserRole(
+    userId: string,
+    roleId: string,
+    tenantId?: string,
+    expiresAt?: string
+  ) {
+    const params = tenantId ? `?tenant_id=${tenantId}` : '';
+    return apiRequest(`/admin/rbac/users/roles/assign${params}`, {
+      method: 'POST',
+      body: JSON.stringify({
+        user_id: userId,
+        role_id: roleId,
+        tenant_id: tenantId,
+        expires_at: expiresAt,
+      }),
+    });
+  }
+
+  static async revokeUserRole(userRoleId: string, tenantId?: string) {
+    const params = tenantId ? `?tenant_id=${tenantId}` : '';
+    return apiRequest(`/admin/rbac/users/roles/${userRoleId}${params}`, {
+      method: 'DELETE',
+    });
+  }
+
+  static async getUserRoles(userId: string, tenantId?: string) {
+    const params = new URLSearchParams();
+    if (tenantId) params.append('tenant_id', tenantId);
+
+    return apiRequest<{
+      success: boolean;
+      data: {
+        user_id: string;
+        tenant_id?: string;
+        roles: Array<{
+          id: string;
+          name: string;
+          display_name: string;
+          expires_at?: string;
+        }>;
+      };
+    }>(`/admin/rbac/users/${userId}/roles?${params.toString()}`);
+  }
+
+  static async getUserPermissions(userId: string, tenantId?: string) {
+    const params = new URLSearchParams();
+    if (tenantId) params.append('tenant_id', tenantId);
+
+    return apiRequest<{
+      success: boolean;
+      data: {
+        user_id: string;
+        tenant_id?: string;
+        permissions: string[];
+      };
+    }>(`/admin/rbac/users/${userId}/permissions?${params.toString()}`);
+  }
+
+  // Access Review endpoints
+  static async createAccessReview(
+    title: string,
+    description?: string,
+    tenantId?: string,
+    scope = 'admin',
+    targetRoleId?: string,
+    dueDays = 30
+  ) {
+    const params = tenantId ? `?tenant_id=${tenantId}` : '';
+    return apiRequest(`/admin/rbac/access-reviews/start${params}`, {
+      method: 'POST',
+      body: JSON.stringify({
+        title,
+        description,
+        tenant_id: tenantId,
+        scope,
+        target_role_id: targetRoleId,
+        due_days: dueDays,
+      }),
+    });
+  }
+
+  static async getAccessReviews(tenantId?: string, status?: string) {
+    const params = new URLSearchParams();
+    if (tenantId) params.append('tenant_id', tenantId);
+    if (status) params.append('status', status);
+
+    return apiRequest<{
+      success: boolean;
+      data: {
+        reviews: Array<{
+          id: string;
+          title: string;
+          description?: string;
+          tenant_id?: string;
+          scope: string;
+          status: string;
+          total_items: number;
+          reviewed_items: number;
+          approved_items: number;
+          revoked_items: number;
+          due_date: string;
+          created_at: string;
+          started_at?: string;
+          completed_at?: string;
+          progress_percentage: number;
+          is_overdue: boolean;
+          days_remaining?: number;
+          can_complete: boolean;
+          urgency_level: string;
+        }>;
+        summary: {
+          total: number;
+          active: number;
+          completed: number;
+          overdue: number;
+        };
+      };
+    }>(`/admin/rbac/access-reviews?${params.toString()}`);
+  }
+
+  static async getReviewItems(
+    reviewId: string,
+    tenantId?: string,
+    status?: string
+  ) {
+    const params = new URLSearchParams();
+    if (tenantId) params.append('tenant_id', tenantId);
+    if (status) params.append('status', status);
+
+    return apiRequest<{
+      success: boolean;
+      data: {
+        review_id: string;
+        items: Array<{
+          id: string;
+          user_id: string;
+          user_name: string;
+          role_id: string;
+          role_name: string;
+          status: string;
+          last_access_date?: string;
+          role_privileges: string[];
+          needs_attention: boolean;
+          risk_level: string;
+          formatted_last_access: string;
+        }>;
+        summary: {
+          total: number;
+          pending: number;
+          approved: number;
+          revoked: number;
+        };
+      };
+    }>(`/admin/rbac/access-reviews/${reviewId}/items?${params.toString()}`);
+  }
+
+  static async submitReviewDecision(
+    reviewId: string,
+    itemId: string,
+    decision: string,
+    notes?: string,
+    justification?: string,
+    tenantId?: string
+  ) {
+    const params = new URLSearchParams();
+    params.append('item_id', itemId);
+    if (tenantId) params.append('tenant_id', tenantId);
+
+    return apiRequest(
+      `/admin/rbac/access-reviews/${reviewId}/decision?${params.toString()}`,
+      {
+        method: 'POST',
+        body: JSON.stringify({
+          decision,
+          notes,
+          justification,
+        }),
+      }
+    );
+  }
+
+  // Audit logs endpoint
+  static async getAuditLogs(
+    tenantId?: string,
+    entityType?: string,
+    entityId?: string,
+    limit = 100
+  ) {
+    const params = new URLSearchParams();
+    if (tenantId) params.append('tenant_id', tenantId);
+    if (entityType) params.append('entity_type', entityType);
+    if (entityId) params.append('entity_id', entityId);
+    params.append('limit', limit.toString());
+
+    return apiRequest<{
+      success: boolean;
+      data: Array<{
+        id: string;
+        event_type: string;
+        entity_type: string;
+        entity_id: string;
+        actor_id: string;
+        tenant_id?: string;
+        event_data: Record<string, unknown>;
+        changes: Record<string, unknown>;
+        timestamp: string;
+      }>;
+    }>(`/admin/rbac/audit-logs?${params.toString()}`);
+  }
+}
