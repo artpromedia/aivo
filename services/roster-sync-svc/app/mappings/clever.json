@@ -25,7 +25,7 @@
     "username": "username",
     "roles": {
       "student": "student",
-      "teacher": "teacher", 
+      "teacher": "teacher",
       "school_admin": "admin",
       "district_admin": "district_admin"
     },
@@ -48,7 +48,7 @@
     "phone": "phone",
     "address": {
       "street": "address_street",
-      "city": "address_city", 
+      "city": "address_city",
       "state": "address_state",
       "zip": "address_zip"
     },
@@ -106,10 +106,32 @@
       "section": ["id", "name", "course", "school", "district"],
       "course": ["id", "name", "district"]
     },
-    "grade_levels": ["PreK", "K", "1", "2", "3", "4", "5", "6", "7", "8", "9", "10", "11", "12"],
+    "grade_levels": [
+      "PreK",
+      "K",
+      "1",
+      "2",
+      "3",
+      "4",
+      "5",
+      "6",
+      "7",
+      "8",
+      "9",
+      "10",
+      "11",
+      "12"
+    ],
     "subjects": [
-      "english", "math", "science", "social studies", "language",
-      "homeroom", "physical education", "arts", "other"
+      "english",
+      "math",
+      "science",
+      "social studies",
+      "language",
+      "homeroom",
+      "physical education",
+      "arts",
+      "other"
     ]
   },
   "pagination": {
@@ -127,7 +149,7 @@
   },
   "webhook_events": [
     "students.created",
-    "students.updated", 
+    "students.updated",
     "students.deleted",
     "teachers.created",
     "teachers.updated",

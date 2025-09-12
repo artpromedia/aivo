@@ -39,8 +39,8 @@ class TestBulkEnrollResponse(unittest.TestCase):
                 total = 100,
                 errors = [
                     aivo_sdk.models.bulk_enroll_response_errors_inner.BulkEnrollResponse_errors_inner(
-                        learner_id = '', 
-                        error = '', 
+                        learner_id = '',
+                        error = '',
                         message = '', )
                     ]
             )

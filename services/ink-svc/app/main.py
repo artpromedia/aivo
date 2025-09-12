@@ -5,6 +5,7 @@ This module provides the main FastAPI application with endpoints for
 capturing stylus/finger strokes, storing them in S3, and triggering
 recognition jobs.
 """
+
 import logging
 from contextlib import asynccontextmanager
 from typing import Any
@@ -112,9 +113,9 @@ async def health_check_endpoint() -> HealthResponse:
     dependencies = await health_check()
 
     return HealthResponse(
-        status="healthy" if all(
-            status == "healthy" for status in dependencies.values()
-        ) else "unhealthy",
+        status="healthy"
+        if all(status == "healthy" for status in dependencies.values())
+        else "unhealthy",
         version=__version__,
         dependencies=dependencies,
     )
@@ -213,9 +214,7 @@ async def submit_strokes(
 
 
 @app.get("/sessions/{session_id}/status")
-async def get_session_status(
-    session_id: str, db: AsyncSession = Depends(get_db)
-) -> dict[str, Any]:
+async def get_session_status(session_id: str, db: AsyncSession = Depends(get_db)) -> dict[str, Any]:
     """
     Get status information for an ink capture session.
 
@@ -231,18 +230,13 @@ async def get_session_status(
     """
     try:
         session_uuid = UUID(session_id)
-        result = await db.execute(
-            select(InkSession).where(InkSession.session_id == session_uuid)
-        )
+        result = await db.execute(select(InkSession).where(InkSession.session_id == session_uuid))
         session = result.scalar_one_or_none()
 
         if not session:
             raise HTTPException(
                 status_code=status.HTTP_404_NOT_FOUND,
-                detail={
-                    "error": "session_not_found",
-                    "message": "Session not found"
-                },
+                detail={"error": "session_not_found", "message": "Session not found"},
             )
 
         return {

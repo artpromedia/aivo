@@ -104,7 +104,10 @@ class CASService:
         }
 
     def are_equivalent(
-        self, expr1: sp.Expr, expr2: sp.Expr, tolerance: float = 1e-6,
+        self,
+        expr1: sp.Expr,
+        expr2: sp.Expr,
+        tolerance: float = 1e-6,
     ) -> bool:
         """Check if two expressions are mathematically equivalent.
 
@@ -153,7 +156,9 @@ class CASService:
             return True
 
     def solve_step_by_step(
-        self, equation: str, variable: str | None = None,
+        self,
+        equation: str,
+        variable: str | None = None,
     ) -> list[GradingStep]:
         """Solve equation step by step.
 
@@ -240,7 +245,9 @@ class CASService:
         return steps
 
     def evaluate_numerical(
-        self, expression: sp.Expr, substitutions: dict[str, float],
+        self,
+        expression: sp.Expr,
+        substitutions: dict[str, float],
     ) -> float | None:
         """Evaluate expression numerically with given substitutions.
 

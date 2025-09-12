@@ -314,8 +314,10 @@ def _identify_reaction_type(
         return "decomposition"
     if len(reactants) > 1 and len(products) == 1:
         return "synthesis"
-    if (len(reactants) == DUAL_REACTANT_PRODUCTS
-            and len(products) == DUAL_REACTANT_PRODUCTS):
+    if (
+        len(reactants) == DUAL_REACTANT_PRODUCTS
+        and len(products) == DUAL_REACTANT_PRODUCTS
+    ):
         return "single_replacement"
     return "unknown"
 
@@ -348,17 +350,19 @@ def _detect_objects(
     for i, contour in enumerate(contours[:5]):  # Limit to 5 objects
         x, y, w, h = cv2.boundingRect(contour)
         if w > MIN_OBJECT_SIZE and h > MIN_OBJECT_SIZE:  # Filter small
-            detected.append(DetectedObject(
-                label=f"object_{i}",
-                bbox=BoundingBox(
-                    x=float(x),
-                    y=float(y),
-                    width=float(w),
-                    height=float(h),
-                    confidence=0.8,
+            detected.append(
+                DetectedObject(
+                    label=f"object_{i}",
+                    bbox=BoundingBox(
+                        x=float(x),
+                        y=float(y),
+                        width=float(w),
+                        height=float(h),
+                        confidence=0.8,
+                    ),
+                    properties={"area": w * h},
                 ),
-                properties={"area": w * h},
-            ))
+            )
 
     return detected
 

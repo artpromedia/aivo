@@ -36,10 +36,10 @@ class TestUpdateLearnerProfileRequest(unittest.TestCase):
             return UpdateLearnerProfileRequest(
                 bio = 'Passionate software engineer with 5 years of experience',
                 preferences = aivo_sdk.models.update_learner_profile_request_preferences.UpdateLearnerProfileRequest_preferences(
-                    learning_style = 'visual', 
-                    difficulty_level = 'beginner', 
-                    notifications_enabled = True, 
-                    email_digest = True, 
+                    learning_style = 'visual',
+                    difficulty_level = 'beginner',
+                    notifications_enabled = True,
+                    email_digest = True,
                     preferred_learning_time = 'morning', ),
                 interests = [
                     ''

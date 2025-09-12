@@ -1,7 +1,6 @@
 """Unit tests for policy management."""
 # flake8: noqa: E501
 
-
 from app.models import PolicyStatus, PolicyType
 from app.schemas import (
     KioskPolicyConfig,

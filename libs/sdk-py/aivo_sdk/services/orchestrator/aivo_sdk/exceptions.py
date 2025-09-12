@@ -13,7 +13,7 @@ Do not edit the class manually.
 from typing import Any, Self
 
 
-class OpenApiException(Exception):
+class OpenApiException(Exception):  # noqa: N818
     """The base exception class for all OpenAPIExceptions"""
 
 

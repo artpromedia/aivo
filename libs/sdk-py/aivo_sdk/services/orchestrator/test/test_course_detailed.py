@@ -57,51 +57,51 @@ class TestCourseDetailed(unittest.TestCase):
                 updated_at = '2023-12-01T10:30:00Z',
                 modules = [
                     aivo_sdk.models.module.Module(
-                        id = 'mod_123e4567-e89b-12d3-a456-426614174000', 
-                        course_id = 'course_123e4567-e89b-12d3-a456-426614174000', 
-                        title = 'Closures and Scope', 
-                        description = 'Understanding JavaScript closures and lexical scope', 
-                        type = 'video', 
-                        order = 1, 
-                        estimated_duration = 45, 
-                        content_url = 'https://example.com/content/module1.mp4', 
-                        transcript_url = 'https://example.com/transcripts/module1.vtt', 
+                        id = 'mod_123e4567-e89b-12d3-a456-426614174000',
+                        course_id = 'course_123e4567-e89b-12d3-a456-426614174000',
+                        title = 'Closures and Scope',
+                        description = 'Understanding JavaScript closures and lexical scope',
+                        type = 'video',
+                        order = 1,
+                        estimated_duration = 45,
+                        content_url = 'https://example.com/content/module1.mp4',
+                        transcript_url = 'https://example.com/transcripts/module1.vtt',
                         resources = [
                             aivo_sdk.models.module_resources_inner.Module_resources_inner(
-                                title = '', 
-                                url = '', 
+                                title = '',
+                                url = '',
                                 type = 'pdf', )
-                            ], 
-                        is_optional = True, 
+                            ],
+                        is_optional = True,
                         prerequisites = [
                             ''
-                            ], 
-                        metadata = { }, 
-                        created_at = '2023-01-01T00:00:00Z', 
+                            ],
+                        metadata = { },
+                        created_at = '2023-01-01T00:00:00Z',
                         updated_at = '2023-12-01T10:30:00Z', )
                     ],
                 assessments = [
                     aivo_sdk.models.assessment.Assessment(
-                        id = 'assess_123e4567-e89b-12d3-a456-426614174000', 
-                        title = 'JavaScript Fundamentals Quiz', 
-                        description = 'Test your knowledge of JavaScript fundamentals', 
-                        type = 'quiz', 
-                        course_id = 'course_123e4567-e89b-12d3-a456-426614174000', 
-                        module_id = 'mod_123e4567-e89b-12d3-a456-426614174000', 
-                        max_score = 100, 
-                        passing_score = 70, 
-                        time_limit = 60, 
-                        attempts_allowed = 3, 
-                        question_count = 20, 
-                        is_required = True, 
-                        metadata = { }, 
-                        created_at = '2023-01-01T00:00:00Z', 
+                        id = 'assess_123e4567-e89b-12d3-a456-426614174000',
+                        title = 'JavaScript Fundamentals Quiz',
+                        description = 'Test your knowledge of JavaScript fundamentals',
+                        type = 'quiz',
+                        course_id = 'course_123e4567-e89b-12d3-a456-426614174000',
+                        module_id = 'mod_123e4567-e89b-12d3-a456-426614174000',
+                        max_score = 100,
+                        passing_score = 70,
+                        time_limit = 60,
+                        attempts_allowed = 3,
+                        question_count = 20,
+                        is_required = True,
+                        metadata = { },
+                        created_at = '2023-01-01T00:00:00Z',
                         updated_at = '2023-12-01T10:30:00Z', )
                     ],
                 requirements = aivo_sdk.models.course_detailed_all_of_requirements.CourseDetailed_allOf_requirements(
                     system_requirements = [
                         ''
-                        ], 
+                        ],
                     software_requirements = [
                         ''
                         ], )

@@ -56,10 +56,7 @@ async def lifespan(_app: FastAPI) -> AsyncGenerator[None, None]:
 # FastAPI app configuration
 app = FastAPI(
     title="Device Policy & MDM Service",
-    description=(
-        "Aivo Pad device policy management, kiosk mode, and "
-        "network allowlist service"
-    ),
+    description=("Aivo Pad device policy management, kiosk mode, and " "network allowlist service"),
     version="1.0.0",
     docs_url="/docs",
     redoc_url="/redoc",

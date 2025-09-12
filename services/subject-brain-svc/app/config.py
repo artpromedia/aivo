@@ -25,10 +25,7 @@ class Settings(BaseSettings):
         default="postgresql://user:pass@localhost:5432/subject_brain",
         description="PostgreSQL database URL",
     )
-    redis_url: str = Field(
-        default="redis://localhost:6379/0",
-        description="Redis cache URL"
-    )
+    redis_url: str = Field(default="redis://localhost:6379/0", description="Redis cache URL")
 
     # Kubernetes Configuration
     k8s_namespace: str = "subject-brain"
@@ -39,12 +36,8 @@ class Settings(BaseSettings):
     gpu_node_selector: dict[str, str] = Field(
         default_factory=lambda: {"accelerator": "nvidia-tesla-v100"}
     )
-    gpu_resource_requests: dict[str, str] = Field(
-        default_factory=lambda: {"nvidia.com/gpu": "1"}
-    )
-    gpu_resource_limits: dict[str, str] = Field(
-        default_factory=lambda: {"nvidia.com/gpu": "1"}
-    )
+    gpu_resource_requests: dict[str, str] = Field(default_factory=lambda: {"nvidia.com/gpu": "1"})
+    gpu_resource_limits: dict[str, str] = Field(default_factory=lambda: {"nvidia.com/gpu": "1"})
 
     # Autoscaling Configuration
     hpa_enabled: bool = True

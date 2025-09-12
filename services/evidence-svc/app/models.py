@@ -1,9 +1,9 @@
-﻿"""Database models for Evidence Service."""
+"""Database models for Evidence Service."""
+
 import uuid
 from datetime import datetime
-from typing import Optional
 
-from sqlalchemy import Boolean, DateTime, Float, Integer, JSON, String, Text, func
+from sqlalchemy import JSON, Boolean, DateTime, Float, Integer, String, Text, func
 from sqlalchemy.dialects.postgresql import UUID
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
@@ -12,9 +12,9 @@ from .database import Base
 
 class EvidenceUpload(Base):
     """Evidence upload records."""
-    
+
     __tablename__ = "evidence_uploads"
-    
+
     id: Mapped[uuid.UUID] = mapped_column(
         UUID(as_uuid=True),
         primary_key=True,
@@ -28,7 +28,7 @@ class EvidenceUpload(Base):
     original_filename: Mapped[str] = mapped_column(String(255), nullable=False)
     file_type: Mapped[str] = mapped_column(String(50), nullable=False)
     file_size: Mapped[int] = mapped_column(Integer, nullable=False)
-    s3_key: Mapped[Optional[str]] = mapped_column(String(500), nullable=True)
+    s3_key: Mapped[str | None] = mapped_column(String(500), nullable=True)
     content_hash: Mapped[str] = mapped_column(String(64), nullable=False)
     upload_timestamp: Mapped[datetime] = mapped_column(
         DateTime(timezone=True),
@@ -42,7 +42,7 @@ class EvidenceUpload(Base):
         String(50),
         default="pending",
     )
-    
+
     # Relationships
     extractions: Mapped[list["EvidenceExtraction"]] = relationship(
         back_populates="upload",
@@ -60,9 +60,9 @@ class EvidenceUpload(Base):
 
 class EvidenceExtraction(Base):
     """Text extraction results from evidence."""
-    
+
     __tablename__ = "evidence_extractions"
-    
+
     id: Mapped[uuid.UUID] = mapped_column(
         UUID(as_uuid=True),
         primary_key=True,
@@ -75,7 +75,7 @@ class EvidenceExtraction(Base):
     )
     extraction_method: Mapped[str] = mapped_column(String(50), nullable=False)
     extracted_text: Mapped[str] = mapped_column(Text, nullable=False)
-    confidence_score: Mapped[Optional[float]] = mapped_column(Float, nullable=True)
+    confidence_score: Mapped[float | None] = mapped_column(Float, nullable=True)
     metadata: Mapped[dict] = mapped_column(JSON, default=dict)
     keywords: Mapped[list] = mapped_column(JSON, default=list)
     subject_tags: Mapped[list] = mapped_column(JSON, default=list)
@@ -83,16 +83,16 @@ class EvidenceExtraction(Base):
         DateTime(timezone=True),
         server_default=func.now(),
     )
-    
+
     # Relationships
     upload: Mapped["EvidenceUpload"] = relationship(back_populates="extractions")
 
 
 class IEPGoal(Base):
     """IEP learning goals and objectives."""
-    
+
     __tablename__ = "iep_goals"
-    
+
     id: Mapped[uuid.UUID] = mapped_column(
         UUID(as_uuid=True),
         primary_key=True,
@@ -117,7 +117,7 @@ class IEPGoal(Base):
         UUID(as_uuid=True),
         nullable=False,
     )
-    
+
     # Relationships
     evidence_linkages: Mapped[list["IEPGoalLinkage"]] = relationship(
         back_populates="goal",
@@ -127,9 +127,9 @@ class IEPGoal(Base):
 
 class IEPGoalLinkage(Base):
     """Links between evidence and IEP goals."""
-    
+
     __tablename__ = "iep_goal_linkages"
-    
+
     id: Mapped[uuid.UUID] = mapped_column(
         UUID(as_uuid=True),
         primary_key=True,
@@ -153,12 +153,12 @@ class IEPGoalLinkage(Base):
     confidence_score: Mapped[float] = mapped_column(Float, nullable=False)
     linkage_reason: Mapped[str] = mapped_column(Text, nullable=True)
     matching_keywords: Mapped[list] = mapped_column(JSON, default=list)
-    teacher_validated: Mapped[Optional[bool]] = mapped_column(Boolean, nullable=True)
-    validated_by: Mapped[Optional[uuid.UUID]] = mapped_column(
+    teacher_validated: Mapped[bool | None] = mapped_column(Boolean, nullable=True)
+    validated_by: Mapped[uuid.UUID | None] = mapped_column(
         UUID(as_uuid=True),
         nullable=True,
     )
-    validation_timestamp: Mapped[Optional[datetime]] = mapped_column(
+    validation_timestamp: Mapped[datetime | None] = mapped_column(
         DateTime(timezone=True),
         nullable=True,
     )
@@ -166,7 +166,7 @@ class IEPGoalLinkage(Base):
         DateTime(timezone=True),
         server_default=func.now(),
     )
-    
+
     # Relationships
     upload: Mapped["EvidenceUpload"] = relationship(back_populates="goal_linkages")
     goal: Mapped["IEPGoal"] = relationship(back_populates="evidence_linkages")
@@ -174,9 +174,9 @@ class IEPGoalLinkage(Base):
 
 class EvidenceAuditEntry(Base):
     """Audit trail entries for evidence processing."""
-    
+
     __tablename__ = "evidence_audit_entries"
-    
+
     id: Mapped[uuid.UUID] = mapped_column(
         UUID(as_uuid=True),
         primary_key=True,
@@ -203,12 +203,12 @@ class EvidenceAuditEntry(Base):
         server_default=func.now(),
         index=True,
     )
-    
+
     # SHA-256 audit chain fields
     content_hash: Mapped[str] = mapped_column(String(64), nullable=False)
-    previous_hash: Mapped[Optional[str]] = mapped_column(String(64), nullable=True)
+    previous_hash: Mapped[str | None] = mapped_column(String(64), nullable=True)
     chain_hash: Mapped[str] = mapped_column(String(64), nullable=False, unique=True)
-    signature: Mapped[Optional[str]] = mapped_column(Text, nullable=True)
-    
+    signature: Mapped[str | None] = mapped_column(Text, nullable=True)
+
     # Relationships
     upload: Mapped["EvidenceUpload"] = relationship(back_populates="audit_entries")

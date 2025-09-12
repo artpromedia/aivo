@@ -109,9 +109,7 @@ class InkSubmissionRequest(BaseModel):
 
     session_id: UUID = Field(..., description="Session identifier")
     page_number: int = Field(default=1, description="Page number")
-    strokes: list[dict[str, Any]] = Field(
-        ..., description="Ink stroke data"
-    )
+    strokes: list[dict[str, Any]] = Field(..., description="Ink stroke data")
     metadata: dict[str, Any] = Field(
         default_factory=dict, description="Additional metadata"
     )
@@ -134,9 +132,7 @@ class RecognitionResult(BaseModel):
 
     success: bool = Field(..., description="Recognition success status")
     confidence: float = Field(..., description="Recognition confidence")
-    expression: str | None = Field(
-        None, description="Recognized expression"
-    )
+    expression: str | None = Field(None, description="Recognized expression")
     latex: str | None = Field(None, description="LaTeX representation")
     ast: dict[str, Any] | None = Field(
         None, description="Abstract syntax tree"
@@ -158,12 +154,8 @@ class GradingResult(BaseModel):
     is_equivalent: bool | None = Field(
         None, description="Mathematical equivalence"
     )
-    expected_answer: str | None = Field(
-        None, description="Expected answer"
-    )
-    steps: list[str] | None = Field(
-        None, description="Solution steps"
-    )
+    expected_answer: str | None = Field(None, description="Expected answer")
+    steps: list[str] | None = Field(None, description="Solution steps")
 
 
 class SessionResultEvent(BaseModel):

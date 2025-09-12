@@ -1,11 +1,11 @@
-﻿"""AWS Textract integration for text extraction from documents."""
+"""AWS Textract integration for text extraction from documents."""
+
 import asyncio
-import json
 import logging
-from typing import Any, Dict, List, Optional, Tuple
+from typing import Any
 
 import boto3
-from botocore.exceptions import BotoCoreError, ClientError, NoCredentialsError
+from botocore.exceptions import ClientError, NoCredentialsError
 
 from ..schemas import TextractConfig
 
@@ -17,15 +17,15 @@ class TextractExtractor:
 
     def __init__(
         self,
-        aws_access_key_id: Optional[str] = None,
-        aws_secret_access_key: Optional[str] = None,
+        aws_access_key_id: str | None = None,
+        aws_secret_access_key: str | None = None,
         region_name: str = "us-east-1",
     ) -> None:
         """Initialize Textract client.
-        
+
         Args:
             aws_access_key_id: AWS access key ID
-            aws_secret_access_key: AWS secret access key  
+            aws_secret_access_key: AWS secret access key
             region_name: AWS region name
         """
         try:
@@ -52,18 +52,18 @@ class TextractExtractor:
         self,
         bucket: str,
         key: str,
-        config: Optional[TextractConfig] = None,
-    ) -> Tuple[str, Dict[str, Any]]:
+        config: TextractConfig | None = None,
+    ) -> tuple[str, dict[str, Any]]:
         """Extract text from document stored in S3.
-        
+
         Args:
             bucket: S3 bucket name
             key: S3 object key
             config: Textract configuration
-            
+
         Returns:
             Tuple of (extracted_text, metadata)
-            
+
         Raises:
             ClientError: If AWS service call fails
             ValueError: If document format is not supported
@@ -102,7 +102,7 @@ class TextractExtractor:
             logger.error("Text extraction failed: %s", e)
             raise
 
-    async def _get_s3_metadata(self, bucket: str, key: str) -> Dict[str, Any]:
+    async def _get_s3_metadata(self, bucket: str, key: str) -> dict[str, Any]:
         """Get S3 object metadata."""
         loop = asyncio.get_event_loop()
         response = await loop.run_in_executor(
@@ -117,10 +117,10 @@ class TextractExtractor:
         bucket: str,
         key: str,
         config: TextractConfig,
-    ) -> Tuple[str, Dict[str, Any]]:
+    ) -> tuple[str, dict[str, Any]]:
         """Use Textract DetectDocumentText for simple text extraction."""
         loop = asyncio.get_event_loop()
-        
+
         response = await loop.run_in_executor(
             None,
             self.textract_client.detect_document_text,
@@ -146,7 +146,7 @@ class TextractExtractor:
             if block.get("BlockType") == "LINE":
                 text = block.get("Text", "")
                 confidence = block.get("Confidence", 0)
-                
+
                 if confidence >= (config.confidence_threshold * 100):
                     text_blocks.append(text)
                     metadata["confidence_scores"].append(confidence)
@@ -171,7 +171,7 @@ class TextractExtractor:
         bucket: str,
         key: str,
         config: TextractConfig,
-    ) -> Tuple[str, Dict[str, Any]]:
+    ) -> tuple[str, dict[str, Any]]:
         """Use Textract AnalyzeDocument for advanced extraction."""
         loop = asyncio.get_event_loop()
 
@@ -195,7 +195,7 @@ class TextractExtractor:
         tables = []
         forms = []
         signatures = []
-        
+
         metadata = {
             "extraction_method": "analyze_document",
             "blocks_detected": len(response.get("Blocks", [])),
@@ -207,10 +207,7 @@ class TextractExtractor:
             "textract_job_id": None,
         }
 
-        blocks_by_id = {
-            block["Id"]: block 
-            for block in response.get("Blocks", [])
-        }
+        blocks_by_id = {block["Id"]: block for block in response.get("Blocks", [])}
 
         for block in response.get("Blocks", []):
             block_type = block.get("BlockType")
@@ -240,15 +237,15 @@ class TextractExtractor:
         # Combine all extracted text
         all_text = []
         all_text.extend(text_blocks)
-        
+
         if tables:
             all_text.append("\n=== TABLES ===")
             all_text.extend(tables)
-            
+
         if forms:
             all_text.append("\n=== FORMS ===")
             all_text.extend(forms)
-            
+
         if signatures:
             all_text.append("\n=== SIGNATURES ===")
             all_text.extend(signatures)
@@ -272,8 +269,8 @@ class TextractExtractor:
 
     def _extract_table_text(
         self,
-        table_block: Dict[str, Any],
-        blocks_by_id: Dict[str, Dict[str, Any]],
+        table_block: dict[str, Any],
+        blocks_by_id: dict[str, dict[str, Any]],
     ) -> str:
         """Extract text from table blocks."""
         if not table_block.get("Relationships"):
@@ -295,7 +292,7 @@ class TextractExtractor:
 
         # Sort cells by row and column
         cells.sort(key=lambda x: (x[0], x[1]))
-        
+
         # Group by rows
         rows = {}
         for row_idx, col_idx, text in cells:
@@ -307,7 +304,7 @@ class TextractExtractor:
         table_lines = []
         for row_idx in sorted(rows.keys()):
             row_cells = [
-                rows[row_idx].get(col_idx, "") 
+                rows[row_idx].get(col_idx, "")
                 for col_idx in sorted(rows[row_idx].keys())
             ]
             table_lines.append(" | ".join(row_cells))
@@ -316,8 +313,8 @@ class TextractExtractor:
 
     def _get_cell_text(
         self,
-        cell_block: Dict[str, Any],
-        blocks_by_id: Dict[str, Dict[str, Any]],
+        cell_block: dict[str, Any],
+        blocks_by_id: dict[str, dict[str, Any]],
     ) -> str:
         """Extract text from a cell block."""
         if not cell_block.get("Relationships"):
@@ -335,12 +332,12 @@ class TextractExtractor:
 
     def _extract_form_text(
         self,
-        kvs_block: Dict[str, Any],
-        blocks_by_id: Dict[str, Dict[str, Any]],
+        kvs_block: dict[str, Any],
+        blocks_by_id: dict[str, dict[str, Any]],
     ) -> str:
         """Extract text from key-value set blocks."""
         entity_types = kvs_block.get("EntityTypes", [])
-        
+
         if "KEY" in entity_types:
             key_text = self._get_kvs_text(kvs_block, blocks_by_id)
             value_text = self._get_kvs_value_text(kvs_block, blocks_by_id)
@@ -348,13 +345,13 @@ class TextractExtractor:
                 return f"{key_text}: {value_text}"
             elif key_text:
                 return key_text
-        
+
         return ""
 
     def _get_kvs_text(
         self,
-        kvs_block: Dict[str, Any],
-        blocks_by_id: Dict[str, Dict[str, Any]],
+        kvs_block: dict[str, Any],
+        blocks_by_id: dict[str, dict[str, Any]],
     ) -> str:
         """Get text from key-value set block."""
         if not kvs_block.get("Relationships"):
@@ -372,8 +369,8 @@ class TextractExtractor:
 
     def _get_kvs_value_text(
         self,
-        kvs_block: Dict[str, Any],
-        blocks_by_id: Dict[str, Dict[str, Any]],
+        kvs_block: dict[str, Any],
+        blocks_by_id: dict[str, dict[str, Any]],
     ) -> str:
         """Get value text for a key block."""
         if not kvs_block.get("Relationships"):
@@ -404,15 +401,15 @@ class TextractExtractor:
         self,
         bucket: str,
         key: str,
-        config: Optional[TextractConfig] = None,
+        config: TextractConfig | None = None,
     ) -> str:
         """Start asynchronous document analysis job.
-        
+
         Args:
             bucket: S3 bucket name
             key: S3 object key
             config: Textract configuration
-            
+
         Returns:
             Job ID for tracking
         """
@@ -420,7 +417,7 @@ class TextractExtractor:
             config = TextractConfig()
 
         loop = asyncio.get_event_loop()
-        
+
         job_params = {
             "DocumentLocation": {
                 "S3Object": {
@@ -441,17 +438,17 @@ class TextractExtractor:
         logger.info("Started async Textract job: %s", job_id)
         return job_id
 
-    async def get_async_job_result(self, job_id: str) -> Dict[str, Any]:
+    async def get_async_job_result(self, job_id: str) -> dict[str, Any]:
         """Get result of asynchronous job.
-        
+
         Args:
             job_id: Job ID returned from start_async_job
-            
+
         Returns:
             Job result including status and extracted data
         """
         loop = asyncio.get_event_loop()
-        
+
         response = await loop.run_in_executor(
             None,
             self.textract_client.get_document_analysis,

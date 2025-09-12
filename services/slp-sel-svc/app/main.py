@@ -59,6 +59,7 @@ async def health_check():
 
 # Speech Processing Endpoints
 
+
 @app.post("/speech/analyze-phonemes", response_model=list[PhonemeTimingData])
 async def analyze_phonemes(
     audio_file: UploadFile = File(...),
@@ -138,7 +139,7 @@ async def create_drill_session(
         target_phonemes=target_phonemes,
         articulation_level=ArticulationLevel.BEGINNER,
         scores=[],
-        notes="Session created successfully"
+        notes="Session created successfully",
     )
 
     # Save to database
@@ -147,6 +148,7 @@ async def create_drill_session(
 
 
 # SEL Journaling Endpoints
+
 
 @app.post("/journal/entries", response_model=JournalEntryResponse)
 async def create_journal_entry(
@@ -192,13 +194,12 @@ async def create_journal_entry(
         entry=saved_entry,
         sentiment_analysis=sentiment,
         word_count=word_count,
-        reading_time_minutes=reading_time
+        reading_time_minutes=reading_time,
     )
 
 
 @app.get(
-    "/journal/entries/{student_id}",
-    response_model=JournalHistoryResponse
+    "/journal/entries/{student_id}", response_model=JournalHistoryResponse
 )
 async def get_journal_history(
     student_id: UUID,
@@ -247,7 +248,7 @@ async def get_journal_entry(
         entry=entry,
         sentiment_analysis=sentiment,
         word_count=word_count,
-        reading_time_minutes=reading_time
+        reading_time_minutes=reading_time,
     )
 
 
@@ -276,6 +277,7 @@ async def delete_journal_entry(
 
 # Admin and Analytics Endpoints
 
+
 @app.get("/admin/speech-analytics")
 async def get_speech_analytics():
     """Get speech therapy analytics and progress reports."""
@@ -289,7 +291,7 @@ async def get_speech_analytics():
         "average_improvement": 0.0,  # Would calculate from session scores
         "common_challenges": [],
         "phoneme_accuracy_trends": {},
-        "student_progress_summary": {}
+        "student_progress_summary": {},
     }
 
 
@@ -306,7 +308,7 @@ async def get_journal_analytics():
         "privacy_distribution": journal_stats["privacy_distribution"],
         "engagement_metrics": {},
         "alert_summary": {},
-        "privacy_compliance_status": "compliant"
+        "privacy_compliance_status": "compliant",
     }
 
 
@@ -316,5 +318,5 @@ if __name__ == "__main__":
         host=settings.host,
         port=settings.port,
         reload=settings.debug,
-        log_level="debug" if settings.debug else "info"
+        log_level="debug" if settings.debug else "info",
     )

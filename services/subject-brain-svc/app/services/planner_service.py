@@ -32,10 +32,7 @@ class SubjectBrainPlanner:
         self.cache_ttl = settings.planner_cache_ttl_seconds
         self.max_activities = settings.max_activities_per_plan
 
-    async def create_activity_plan(
-        self,
-        planner_input: PlannerInput
-    ) -> ActivityPlan:
+    async def create_activity_plan(self, planner_input: PlannerInput) -> ActivityPlan:
         """Create a personalized activity plan for a learner."""
         logger.info(
             "Creating plan for learner %s in %s",
@@ -45,8 +42,7 @@ class SubjectBrainPlanner:
 
         # Analyze learner baseline and mastery levels
         analysis = self._analyze_learner_needs(
-            planner_input.baseline,
-            planner_input.available_topics
+            planner_input.baseline, planner_input.available_topics
         )
 
         # Filter topics based on teacher constraints
@@ -67,17 +63,11 @@ class SubjectBrainPlanner:
             learner_id=planner_input.learner_id,
             subject=planner_input.subject,
             activities=activities,
-            total_duration_minutes=sum(
-                a.estimated_duration_minutes for a in activities
-            ),
-            expires_at=datetime.utcnow() + timedelta(
-                seconds=self.cache_ttl
-            ),
+            total_duration_minutes=sum(a.estimated_duration_minutes for a in activities),
+            expires_at=datetime.utcnow() + timedelta(seconds=self.cache_ttl),
         )
 
-        logger.info(
-            "Created plan %s with %d activities", plan.plan_id, len(activities)
-        )
+        logger.info("Created plan %s with %d activities", plan.plan_id, len(activities))
         return plan
 
     def _analyze_learner_needs(
@@ -96,10 +86,7 @@ class SubjectBrainPlanner:
 
         # Identify struggling areas (below proficient)
         for topic, mastery in baseline.mastery_levels.items():
-            if mastery in [
-                MasteryLevel.NOT_STARTED,
-                MasteryLevel.BEGINNING
-            ]:
+            if mastery in [MasteryLevel.NOT_STARTED, MasteryLevel.BEGINNING]:
                 analysis["struggling_topics"].append(topic)
             elif mastery == MasteryLevel.DEVELOPING:
                 analysis["recommended_focus"].append(topic)
@@ -164,10 +151,7 @@ class SubjectBrainPlanner:
                 topic, analysis, constraints, remaining_time
             )
 
-            if (
-                activity
-                and activity.estimated_duration_minutes <= remaining_time
-            ):
+            if activity and activity.estimated_duration_minutes <= remaining_time:
                 activities.append(activity)
                 remaining_time -= activity.estimated_duration_minutes
 
@@ -202,9 +186,7 @@ class SubjectBrainPlanner:
             priority_map[topic.topic_id] = priority
 
         # Sort by priority (descending)
-        return sorted(
-            topics, key=lambda t: priority_map.get(t.topic_id, 0), reverse=True
-        )
+        return sorted(topics, key=lambda t: priority_map.get(t.topic_id, 0), reverse=True)
 
     async def _create_activity_for_topic(
         self,
@@ -215,9 +197,7 @@ class SubjectBrainPlanner:
     ) -> PlannedActivity | None:
         """Create a specific activity for a topic."""
         # Determine activity type based on needs
-        activity_type = self._determine_activity_type(
-            topic, analysis, constraints
-        )
+        activity_type = self._determine_activity_type(topic, analysis, constraints)
 
         if not activity_type:
             return None
@@ -238,13 +218,10 @@ class SubjectBrainPlanner:
 
         # Check prerequisites
         prerequisites_met = all(
-            prereq in analysis.get("mastered_topics", [])
-            for prereq in topic.prerequisites
+            prereq in analysis.get("mastered_topics", []) for prereq in topic.prerequisites
         )
 
-        rationale = self._generate_rationale(
-            topic, activity_type, analysis, difficulty_adjustment
-        )
+        rationale = self._generate_rationale(topic, activity_type, analysis, difficulty_adjustment)
 
         return PlannedActivity(
             type=activity_type,
@@ -266,9 +243,7 @@ class SubjectBrainPlanner:
         # Check teacher preferences first
         if constraints.preferred_activity_types:
             for activity_type in constraints.preferred_activity_types:
-                if self._is_activity_appropriate(
-                    activity_type, topic, analysis
-                ):
+                if self._is_activity_appropriate(activity_type, topic, analysis):
                     return activity_type
 
         # Default logic based on mastery level
@@ -315,17 +290,11 @@ class SubjectBrainPlanner:
 
         # Base reason
         if topic.topic_id in analysis["struggling_topics"]:
-            rationale_parts.append(
-                f"Learner needs foundational support in {topic.name}"
-            )
+            rationale_parts.append(f"Learner needs foundational support in {topic.name}")
         elif topic.topic_id in analysis["recommended_focus"]:
-            rationale_parts.append(
-                f"Good opportunity to strengthen {topic.name} skills"
-            )
+            rationale_parts.append(f"Good opportunity to strengthen {topic.name} skills")
         elif topic.topic_id in analysis["mastered_topics"]:
-            rationale_parts.append(
-                f"Learner ready for advanced work in {topic.name}"
-            )
+            rationale_parts.append(f"Learner ready for advanced work in {topic.name}")
 
         # Activity type reason
         activity_reasons = {
@@ -335,9 +304,7 @@ class SubjectBrainPlanner:
             ActivityType.REMEDIATION: "targeted support",
             ActivityType.ENRICHMENT: "advanced exploration",
         }
-        rationale_parts.append(
-            f"Using {activity_reasons[activity_type]} approach"
-        )
+        rationale_parts.append(f"Using {activity_reasons[activity_type]} approach")
 
         # Difficulty adjustment
         if difficulty_adjustment < 1.0:

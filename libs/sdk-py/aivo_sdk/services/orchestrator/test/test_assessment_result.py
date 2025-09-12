@@ -46,9 +46,9 @@ class TestAssessmentResult(unittest.TestCase):
                 feedback = 'Great job! You demonstrated strong understanding of the concepts.',
                 detailed_results = [
                     aivo_sdk.models.assessment_result_detailed_results_inner.AssessmentResult_detailedResults_inner(
-                        question_id = '', 
-                        correct = True, 
-                        points = 1.337, 
+                        question_id = '',
+                        correct = True,
+                        points = 1.337,
                         feedback = '', )
                     ],
                 submitted_at = '2023-12-01T16:45:00Z'

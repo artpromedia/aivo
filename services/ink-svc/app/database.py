@@ -4,6 +4,7 @@ Database connection and session management for ink capture service.
 This module provides async database connectivity, session management,
 and table initialization utilities.
 """
+
 import logging
 from collections.abc import AsyncGenerator
 

@@ -2,7 +2,6 @@
 Aivo Platform GraphQL API Schema
 Unified API for learner management, IEP documents, analytics, and dashboard services
 """
-
 scalar DateTime
 scalar JSON
 

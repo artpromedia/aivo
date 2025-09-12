@@ -45,9 +45,6 @@ def accessibility_request() -> dict:
         "grade": 2,
         "duration_minutes": 15,
         "accessibility": AccessibilitySettings(
-            reduced_motion=True,
-            high_contrast=True,
-            large_text=True,
-            audio_cues=True
+            reduced_motion=True, high_contrast=True, large_text=True, audio_cues=True
         ),
     }

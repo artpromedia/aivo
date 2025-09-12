@@ -39,7 +39,8 @@ class MathRecognitionService:
         self.max_processing_time = settings.max_recognition_time
 
     async def recognize_from_session(
-        self, request: RecognitionRequest,
+        self,
+        request: RecognitionRequest,
     ) -> RecognitionResponse:
         """Recognize math from ink session ID.
 
@@ -54,7 +55,8 @@ class MathRecognitionService:
         try:
             # Fetch ink data from ink service
             ink_data = await self._fetch_ink_data(
-                request.session_id, request.page_number,
+                request.session_id,
+                request.page_number,
             )
 
             if not ink_data:
@@ -82,7 +84,8 @@ class MathRecognitionService:
             )
 
     async def recognize_from_ink(
-        self, ink_data: InkData,
+        self,
+        ink_data: InkData,
     ) -> RecognitionResponse:
         """Recognize math from direct ink data.
 
@@ -96,7 +99,9 @@ class MathRecognitionService:
         return await self._recognize_ink(ink_data, start_time)
 
     async def _recognize_ink(
-        self, ink_data: InkData, start_time: float,
+        self,
+        ink_data: InkData,
+        start_time: float,
     ) -> RecognitionResponse:
         """Internal method to perform ink recognition.
 
@@ -197,7 +202,9 @@ class MathRecognitionService:
             is_equivalent = False
             if request.check_equivalence:
                 is_equivalent = cas_service.are_equivalent(
-                    student_expr, correct_expr, request.tolerance,
+                    student_expr,
+                    correct_expr,
+                    request.tolerance,
                 )
 
             # Calculate score
@@ -205,7 +212,10 @@ class MathRecognitionService:
 
             # Generate feedback
             feedback = self._generate_feedback(
-                is_exact, is_equivalent, student_expr, correct_expr,
+                is_exact,
+                is_equivalent,
+                student_expr,
+                correct_expr,
             )
 
             # Generate step-by-step solution if requested
@@ -233,7 +243,9 @@ class MathRecognitionService:
             )
 
     async def _fetch_ink_data(
-        self, session_id: str, page_number: int | None,
+        self,
+        session_id: str,
+        page_number: int | None,
     ) -> InkData | None:
         """Fetch ink data from the ink service.
 
@@ -261,7 +273,9 @@ class MathRecognitionService:
             return None
 
     def _filter_by_region(
-        self, ink_data: InkData, region: dict[str, float],
+        self,
+        ink_data: InkData,
+        region: dict[str, float],
     ) -> InkData:
         """Filter strokes by bounding box region.
 
@@ -279,7 +293,8 @@ class MathRecognitionService:
         for stroke in ink_data.strokes:
             # Check if stroke intersects with region
             stroke_points = [
-                point for point in stroke.points
+                point
+                for point in stroke.points
                 if x <= point.x <= x + width and y <= point.y <= y + height
             ]
 
@@ -328,7 +343,8 @@ class MathRecognitionService:
         return Image.fromarray(pixels)
 
     async def _perform_recognition(
-        self, _image: Image.Image,
+        self,
+        _image: Image.Image,
     ) -> tuple[str, float]:
         """Perform OCR/ML recognition on image.
 

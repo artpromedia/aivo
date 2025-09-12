@@ -7,12 +7,9 @@ circuit breakers, and service discovery.
 """
 
 import asyncio
-import json
 import logging
 import sys
-import time
 from pathlib import Path
-from typing import Dict, List, Optional
 
 import grpc
 import requests
@@ -30,10 +27,10 @@ logger = logging.getLogger(__name__)
 class MeshTestSuite:
     """Test suite for gRPC mesh functionality."""
 
-    def __init__(self, config_path: Optional[str] = None) -> None:
+    def __init__(self, config_path: str | None = None) -> None:
         """Initialize test suite."""
         self.config_path = Path(config_path) if config_path else Path("./certs")
-        self.test_results: Dict[str, bool] = {}
+        self.test_results: dict[str, bool] = {}
         self.services_under_test = [
             "event-collector-svc",
             "auth-svc",
@@ -44,7 +41,7 @@ class MeshTestSuite:
     async def run_all_tests(self) -> bool:
         """Run all mesh tests."""
         logger.info("🧪 Starting gRPC mesh test suite...")
-        
+
         tests = [
             self.test_certificate_generation,
             self.test_envoy_admin_interfaces,
@@ -76,7 +73,7 @@ class MeshTestSuite:
     async def test_certificate_generation(self) -> bool:
         """Test certificate generation and validation."""
         ca_cert_path = self.config_path / "ca" / "ca.crt"
-        
+
         if not ca_cert_path.exists():
             logger.error("CA certificate not found at %s", ca_cert_path)
             return False
@@ -85,11 +82,11 @@ class MeshTestSuite:
         for service in self.services_under_test:
             cert_path = self.config_path / "services" / f"{service}.crt"
             key_path = self.config_path / "services" / f"{service}-key.pem"
-            
+
             if not cert_path.exists():
                 logger.error("Certificate not found for service %s", service)
                 return False
-                
+
             if not key_path.exists():
                 logger.error("Private key not found for service %s", service)
                 return False
@@ -100,24 +97,20 @@ class MeshTestSuite:
     async def test_envoy_admin_interfaces(self) -> bool:
         """Test Envoy admin interface accessibility."""
         envoy_ports = [9901, 9902, 9903, 9904]  # Admin ports for different services
-        
+
         for port in envoy_ports:
             try:
-                response = requests.get(
-                    f"http://localhost:{port}/ready", timeout=5
-                )
+                response = requests.get(f"http://localhost:{port}/ready", timeout=5)
                 if response.status_code != 200:
                     logger.warning("Envoy admin interface not ready on port %d", port)
                     continue
-                    
+
                 # Test clusters endpoint
-                clusters_response = requests.get(
-                    f"http://localhost:{port}/clusters", timeout=5
-                )
+                clusters_response = requests.get(f"http://localhost:{port}/clusters", timeout=5)
                 if clusters_response.status_code == 200:
                     logger.info("✅ Envoy admin interface working on port %d", port)
                     return True
-                    
+
             except requests.RequestException as e:
                 logger.debug("Envoy admin interface test failed for port %d: %s", port, e)
                 continue
@@ -128,21 +121,18 @@ class MeshTestSuite:
     async def test_service_discovery(self) -> bool:
         """Test Consul service discovery."""
         try:
-            response = requests.get(
-                "http://localhost:8500/v1/catalog/services", timeout=10
-            )
+            response = requests.get("http://localhost:8500/v1/catalog/services", timeout=10)
             if response.status_code != 200:
                 logger.error("Consul service discovery not accessible")
                 return False
 
             services = response.json()
             logger.info("Discovered services: %s", list(services.keys()))
-            
+
             # Check health of registered services
             for service in self.services_under_test:
                 health_response = requests.get(
-                    f"http://localhost:8500/v1/health/service/{service}",
-                    timeout=5
+                    f"http://localhost:8500/v1/health/service/{service}", timeout=5
                 )
                 if health_response.status_code == 200:
                     health_data = health_response.json()
@@ -165,25 +155,27 @@ class MeshTestSuite:
                 client_cert_path=str(self.config_path / "mesh-client.crt"),
                 client_key_path=str(self.config_path / "mesh-client-key.pem"),
             )
-            
+
             with MeshClient(config) as mesh_client:
                 # Test connection to each service
                 for service in self.services_under_test:
                     try:
                         channel = mesh_client.create_channel(service, timeout=5.0)
-                        
+
                         # Try to create a health stub and make a call
                         stub = health_pb2_grpc.HealthStub(channel)
                         request = health_pb2.HealthCheckRequest()
-                        
+
                         # This will test the full mTLS handshake
-                        response = stub.Check(request, timeout=5.0)
+                        stub.Check(request, timeout=5.0)
                         logger.info("✅ mTLS connection successful to %s", service)
-                        
+
                     except grpc.RpcError as e:
                         if e.code() == grpc.StatusCode.UNIMPLEMENTED:
                             # Service doesn't implement health check, but connection worked
-                            logger.info("✅ mTLS connection successful to %s (no health check)", service)
+                            logger.info(
+                                "✅ mTLS connection successful to %s (no health check)", service
+                            )
                         else:
                             logger.warning("mTLS connection failed to %s: %s", service, e)
                             continue
@@ -201,10 +193,10 @@ class MeshTestSuite:
             client_cert_path=str(self.config_path / "mesh-client.crt"),
             client_key_path=str(self.config_path / "mesh-client-key.pem"),
         )
-        
+
         with MeshClient(config) as mesh_client:
             health_checks_passed = 0
-            
+
             for service in self.services_under_test:
                 try:
                     status = await mesh_client.health_check(service)
@@ -213,7 +205,7 @@ class MeshTestSuite:
                         health_checks_passed += 1
                     else:
                         logger.warning("Health check failed for %s: %s", service, status)
-                        
+
                 except Exception as e:
                     logger.warning("Health check error for %s: %s", service, e)
 
@@ -224,16 +216,14 @@ class MeshTestSuite:
         """Test retry policy configuration."""
         # This test would require a service that can simulate failures
         # For now, we'll check if retry configuration is properly set in Envoy
-        
+
         try:
-            response = requests.get(
-                "http://localhost:9901/config_dump", timeout=10
-            )
+            response = requests.get("http://localhost:9901/config_dump", timeout=10)
             if response.status_code != 200:
                 return False
 
             config_dump = response.json()
-            
+
             # Look for retry policy configuration in the config dump
             dynamic_listeners = config_dump.get("configs", [])
             for config in dynamic_listeners:
@@ -252,14 +242,12 @@ class MeshTestSuite:
     async def test_circuit_breakers(self) -> bool:
         """Test circuit breaker configuration."""
         try:
-            response = requests.get(
-                "http://localhost:9901/clusters", timeout=10
-            )
+            response = requests.get("http://localhost:9901/clusters", timeout=10)
             if response.status_code != 200:
                 return False
 
             clusters_text = response.text
-            
+
             # Look for circuit breaker configuration
             if "circuit_breakers" in clusters_text or "max_connections" in clusters_text:
                 logger.info("✅ Circuit breakers configured in Envoy")
@@ -276,19 +264,18 @@ class MeshTestSuite:
         """Test metrics collection and Prometheus integration."""
         try:
             # Test Prometheus metrics endpoint
-            prometheus_response = requests.get(
-                "http://localhost:9090/api/v1/targets", timeout=10
-            )
+            prometheus_response = requests.get("http://localhost:9090/api/v1/targets", timeout=10)
             if prometheus_response.status_code != 200:
                 logger.error("Prometheus not accessible")
                 return False
 
             targets = prometheus_response.json()
             active_targets = [
-                target for target in targets.get("data", {}).get("activeTargets", [])
+                target
+                for target in targets.get("data", {}).get("activeTargets", [])
                 if target.get("health") == "up"
             ]
-            
+
             if len(active_targets) > 0:
                 logger.info("✅ Prometheus collecting metrics from %d targets", len(active_targets))
                 return True
@@ -304,9 +291,7 @@ class MeshTestSuite:
         """Test Jaeger distributed tracing."""
         try:
             # Test Jaeger health endpoint
-            jaeger_response = requests.get(
-                "http://localhost:16686/api/services", timeout=10
-            )
+            jaeger_response = requests.get("http://localhost:16686/api/services", timeout=10)
             if jaeger_response.status_code != 200:
                 logger.error("Jaeger not accessible")
                 return False
@@ -326,32 +311,32 @@ class MeshTestSuite:
 
     def print_test_summary(self) -> None:
         """Print test results summary."""
-        print("\n" + "="*60)
+        print("\n" + "=" * 60)
         print("🧪 gRPC MESH TEST RESULTS SUMMARY")
-        print("="*60)
-        
+        print("=" * 60)
+
         passed = sum(1 for result in self.test_results.values() if result)
         total = len(self.test_results)
-        
+
         for test_name, result in self.test_results.items():
             status = "✅ PASS" if result else "❌ FAIL"
             print(f"{test_name}: {status}")
-        
-        print("-"*60)
+
+        print("-" * 60)
         print(f"TOTAL: {passed}/{total} tests passed")
-        
+
         if passed == total:
             print("🎉 ALL TESTS PASSED! Mesh is working correctly.")
         else:
             print("⚠️  Some tests failed. Check logs for details.")
-        
-        print("="*60)
+
+        print("=" * 60)
 
 
 async def main() -> None:
     """Main test runner."""
     import argparse
-    
+
     parser = argparse.ArgumentParser(description="gRPC Mesh Test Suite")
     parser.add_argument(
         "--cert-path",
@@ -359,19 +344,20 @@ async def main() -> None:
         help="Path to certificate directory",
     )
     parser.add_argument(
-        "--verbose", "-v",
+        "--verbose",
+        "-v",
         action="store_true",
         help="Enable verbose logging",
     )
-    
+
     args = parser.parse_args()
-    
+
     if args.verbose:
         logging.getLogger().setLevel(logging.DEBUG)
-    
+
     test_suite = MeshTestSuite(args.cert_path)
     success = await test_suite.run_all_tests()
-    
+
     sys.exit(0 if success else 1)
 
 

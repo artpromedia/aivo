@@ -39,10 +39,14 @@ def main() -> None:
     # Start uvicorn with controlled input
     python_executable = sys.executable
     cmd = [
-        python_executable, "-m", "uvicorn",
+        python_executable,
+        "-m",
+        "uvicorn",
         "app.main:app",
-        "--host", host,
-        "--port", str(port),
+        "--host",
+        host,
+        "--port",
+        str(port),
     ]
 
     if debug:

@@ -37,35 +37,35 @@ class TestNamespacesOverview(unittest.TestCase):
                 tenant_id = '456e7890-e89b-12d3-a456-426614174000',
                 total_namespaces = 135,
                 status_counts = aivo_sdk.models.namespaces_overview_status_counts.NamespacesOverview_statusCounts(
-                    active = 112, 
-                    inactive = 18, 
-                    initializing = 3, 
+                    active = 112,
+                    inactive = 18,
+                    initializing = 3,
                     error = 2, ),
                 storage_stats = aivo_sdk.models.namespaces_overview_storage_stats.NamespacesOverview_storageStats(
-                    total_storage_used = 2048, 
-                    average_storage_per_namespace = 15.2, 
+                    total_storage_used = 2048,
+                    average_storage_per_namespace = 15.2,
                     max_storage_used = 125, ),
                 top_namespaces = [
                     aivo_sdk.models.namespaces_overview_top_namespaces_inner.NamespacesOverview_topNamespaces_inner(
-                        namespace_id = 'ns_123e4567-e89b-12d3-a456-426614174000', 
-                        learner_id = '123e4567-e89b-12d3-a456-426614174000', 
-                        learner_name = 'John Doe', 
-                        status = 'active', 
-                        storage_used = 125, 
-                        documents_count = 234, 
-                        last_activity = '2023-12-01T09:15:00Z', 
+                        namespace_id = 'ns_123e4567-e89b-12d3-a456-426614174000',
+                        learner_id = '123e4567-e89b-12d3-a456-426614174000',
+                        learner_name = 'John Doe',
+                        status = 'active',
+                        storage_used = 125,
+                        documents_count = 234,
+                        last_activity = '2023-12-01T09:15:00Z',
                         vector_count = 15420, )
                     ],
                 recent_activity = aivo_sdk.models.namespaces_overview_recent_activity.NamespacesOverview_recentActivity(
-                    namespaces_created_this_week = 5, 
-                    namespaces_created_this_month = 18, 
+                    namespaces_created_this_week = 5,
+                    namespaces_created_this_month = 18,
                     documents_added_this_week = 142, ),
                 health_summary = aivo_sdk.models.namespaces_overview_health_summary.NamespacesOverview_healthSummary(
-                    health_score = 94.2, 
+                    health_score = 94.2,
                     common_issues = [
                         aivo_sdk.models.namespaces_overview_health_summary_common_issues_inner.NamespacesOverview_healthSummary_commonIssues_inner(
-                            issue = 'Storage quota exceeded', 
-                            count = 3, 
+                            issue = 'Storage quota exceeded',
+                            count = 3,
                             severity = 'medium', )
                         ], ),
                 last_updated = '2023-12-01T10:30:00Z'
@@ -75,19 +75,19 @@ class TestNamespacesOverview(unittest.TestCase):
                 tenant_id = '456e7890-e89b-12d3-a456-426614174000',
                 total_namespaces = 135,
                 status_counts = aivo_sdk.models.namespaces_overview_status_counts.NamespacesOverview_statusCounts(
-                    active = 112, 
-                    inactive = 18, 
-                    initializing = 3, 
+                    active = 112,
+                    inactive = 18,
+                    initializing = 3,
                     error = 2, ),
                 top_namespaces = [
                     aivo_sdk.models.namespaces_overview_top_namespaces_inner.NamespacesOverview_topNamespaces_inner(
-                        namespace_id = 'ns_123e4567-e89b-12d3-a456-426614174000', 
-                        learner_id = '123e4567-e89b-12d3-a456-426614174000', 
-                        learner_name = 'John Doe', 
-                        status = 'active', 
-                        storage_used = 125, 
-                        documents_count = 234, 
-                        last_activity = '2023-12-01T09:15:00Z', 
+                        namespace_id = 'ns_123e4567-e89b-12d3-a456-426614174000',
+                        learner_id = '123e4567-e89b-12d3-a456-426614174000',
+                        learner_name = 'John Doe',
+                        status = 'active',
+                        storage_used = 125,
+                        documents_count = 234,
+                        last_activity = '2023-12-01T09:15:00Z',
                         vector_count = 15420, )
                     ],
                 last_updated = '2023-12-01T10:30:00Z',

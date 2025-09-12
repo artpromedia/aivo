@@ -56,9 +56,7 @@ class CacheService:
         ]
         return ":".join(key_parts)
 
-    async def get_policy(
-        self, request: PolicyRequest
-    ) -> PolicyResponse | None:
+    async def get_policy(self, request: PolicyRequest) -> PolicyResponse | None:
         """Get cached policy response."""
         if not self.redis or not settings.cache_enabled:
             self.stats["misses"] += 1
@@ -99,11 +97,7 @@ class CacheService:
             response_data = response.model_dump(mode="json")
             serialized_data = json.dumps(response_data)
 
-            ttl = (
-                ttl_seconds
-                or response.cache_ttl_seconds
-                or settings.cache_ttl_seconds
-            )
+            ttl = ttl_seconds or response.cache_ttl_seconds or settings.cache_ttl_seconds
 
             await self.redis.setex(cache_key, ttl, serialized_data)
 

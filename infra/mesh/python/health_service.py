@@ -7,8 +7,6 @@ Provides standardized health checking functionality for services in the mesh.
 import asyncio
 import logging
 import time
-from concurrent.futures import ThreadPoolExecutor
-from typing import Dict, Optional
 
 import grpc
 from grpc import aio
@@ -26,7 +24,7 @@ class HealthStatus:
         self.last_check = time.time()
         self.check_count = 0
         self.error_count = 0
-        self.dependencies: Dict[str, bool] = {}
+        self.dependencies: dict[str, bool] = {}
 
     def mark_healthy(self) -> None:
         """Mark service as healthy."""
@@ -48,7 +46,7 @@ class HealthStatus:
         """Check if service is healthy including dependencies."""
         if not self.serving:
             return False
-        
+
         # Check if any critical dependencies are unhealthy
         return all(self.dependencies.values())
 
@@ -59,8 +57,8 @@ class AsyncHealthServicer(health_pb2_grpc.HealthServicer):
     def __init__(self) -> None:
         """Initialize health servicer."""
         self._status = HealthStatus()
-        self._service_status: Dict[str, HealthStatus] = {}
-        self._watchers: Dict[str, list] = {}
+        self._service_status: dict[str, HealthStatus] = {}
+        self._watchers: dict[str, list] = {}
 
     async def Check(
         self,
@@ -69,7 +67,7 @@ class AsyncHealthServicer(health_pb2_grpc.HealthServicer):
     ) -> health_pb2.HealthCheckResponse:
         """Handle health check requests."""
         service = request.service or ""
-        
+
         try:
             if service == "":
                 # Overall service health
@@ -93,9 +91,7 @@ class AsyncHealthServicer(health_pb2_grpc.HealthServicer):
 
         except Exception as e:
             logger.error("Health check error for service '%s': %s", service, e)
-            await context.abort(
-                grpc.StatusCode.INTERNAL, f"Health check failed: {e}"
-            )
+            await context.abort(grpc.StatusCode.INTERNAL, f"Health check failed: {e}")
 
     async def Watch(
         self,
@@ -104,15 +100,15 @@ class AsyncHealthServicer(health_pb2_grpc.HealthServicer):
     ) -> None:
         """Handle streaming health check requests."""
         service = request.service or ""
-        
+
         try:
             # Add watcher for this service
             if service not in self._watchers:
                 self._watchers[service] = []
-            
+
             queue = asyncio.Queue()
             self._watchers[service].append(queue)
-            
+
             # Send initial status
             if service == "":
                 status = self._status
@@ -124,18 +120,14 @@ class AsyncHealthServicer(health_pb2_grpc.HealthServicer):
                 if status.is_healthy()
                 else health_pb2.HealthCheckResponse.NOT_SERVING
             )
-            
-            await context.write(
-                health_pb2.HealthCheckResponse(status=initial_status)
-            )
-            
+
+            await context.write(health_pb2.HealthCheckResponse(status=initial_status))
+
             # Listen for status changes
             try:
                 while True:
                     new_status = await queue.get()
-                    await context.write(
-                        health_pb2.HealthCheckResponse(status=new_status)
-                    )
+                    await context.write(health_pb2.HealthCheckResponse(status=new_status))
             except asyncio.CancelledError:
                 # Client disconnected
                 pass
@@ -149,9 +141,7 @@ class AsyncHealthServicer(health_pb2_grpc.HealthServicer):
 
         except Exception as e:
             logger.error("Health watch error for service '%s': %s", service, e)
-            await context.abort(
-                grpc.StatusCode.INTERNAL, f"Health watch failed: {e}"
-            )
+            await context.abort(grpc.StatusCode.INTERNAL, f"Health watch failed: {e}")
 
     def set_serving(self, service: str = "") -> None:
         """Set service as serving."""
@@ -161,7 +151,7 @@ class AsyncHealthServicer(health_pb2_grpc.HealthServicer):
             if service not in self._service_status:
                 self._service_status[service] = HealthStatus()
             self._service_status[service].mark_healthy()
-        
+
         self._notify_watchers(service, health_pb2.HealthCheckResponse.SERVING)
 
     def set_not_serving(self, service: str = "") -> None:
@@ -172,23 +162,17 @@ class AsyncHealthServicer(health_pb2_grpc.HealthServicer):
             if service not in self._service_status:
                 self._service_status[service] = HealthStatus()
             self._service_status[service].mark_unhealthy()
-        
-        self._notify_watchers(
-            service, health_pb2.HealthCheckResponse.NOT_SERVING
-        )
 
-    def set_dependency_status(
-        self, dependency: str, healthy: bool, service: str = ""
-    ) -> None:
+        self._notify_watchers(service, health_pb2.HealthCheckResponse.NOT_SERVING)
+
+    def set_dependency_status(self, dependency: str, healthy: bool, service: str = "") -> None:
         """Set dependency health status."""
         if service == "":
             self._status.set_dependency_status(dependency, healthy)
         else:
             if service not in self._service_status:
                 self._service_status[service] = HealthStatus()
-            self._service_status[service].set_dependency_status(
-                dependency, healthy
-            )
+            self._service_status[service].set_dependency_status(dependency, healthy)
 
     def _notify_watchers(
         self,
@@ -210,7 +194,7 @@ class SyncHealthServicer(health_pb2_grpc.HealthServicer):
     def __init__(self) -> None:
         """Initialize health servicer."""
         self._status = HealthStatus()
-        self._service_status: Dict[str, HealthStatus] = {}
+        self._service_status: dict[str, HealthStatus] = {}
 
     def Check(
         self,
@@ -219,7 +203,7 @@ class SyncHealthServicer(health_pb2_grpc.HealthServicer):
     ) -> health_pb2.HealthCheckResponse:
         """Handle health check requests."""
         service = request.service or ""
-        
+
         try:
             if service == "":
                 status = self._status
@@ -237,9 +221,7 @@ class SyncHealthServicer(health_pb2_grpc.HealthServicer):
             logger.error("Health check error for service '%s': %s", service, e)
             context.set_code(grpc.StatusCode.INTERNAL)
             context.set_details(f"Health check failed: {e}")
-            return health_pb2.HealthCheckResponse(
-                status=health_pb2.HealthCheckResponse.NOT_SERVING
-            )
+            return health_pb2.HealthCheckResponse(status=health_pb2.HealthCheckResponse.NOT_SERVING)
 
     def set_serving(self, service: str = "") -> None:
         """Set service as serving."""
@@ -285,9 +267,9 @@ class DependencyHealthChecker:
         """Initialize dependency health checker."""
         self.health_servicer = health_servicer
         self.check_interval = check_interval
-        self.dependencies: Dict[str, str] = {}  # name -> endpoint
+        self.dependencies: dict[str, str] = {}  # name -> endpoint
         self._running = False
-        self._task: Optional[asyncio.Task] = None
+        self._task: asyncio.Task | None = None
 
     def add_dependency(self, name: str, endpoint: str) -> None:
         """Add a dependency to monitor."""
@@ -304,7 +286,7 @@ class DependencyHealthChecker:
         """Start periodic health checking."""
         if self._running:
             return
-        
+
         self._running = True
         self._task = asyncio.create_task(self._check_loop())
         logger.info("Started dependency health checker")
@@ -339,12 +321,11 @@ class DependencyHealthChecker:
 
         # Check all dependencies concurrently
         tasks = [
-            self._check_dependency(name, endpoint)
-            for name, endpoint in self.dependencies.items()
+            self._check_dependency(name, endpoint) for name, endpoint in self.dependencies.items()
         ]
-        
+
         results = await asyncio.gather(*tasks, return_exceptions=True)
-        
+
         for (name, _), result in zip(self.dependencies.items(), results):
             if isinstance(result, Exception):
                 logger.warning("Health check failed for %s: %s", name, result)
@@ -359,15 +340,15 @@ class DependencyHealthChecker:
             async with aio.insecure_channel(endpoint) as channel:
                 stub = health_pb2_grpc.HealthStub(channel)
                 request = health_pb2.HealthCheckRequest()
-                
+
                 response = await stub.Check(request, timeout=5.0)
                 healthy = response.status == health_pb2.HealthCheckResponse.SERVING
-                
+
                 if healthy:
                     logger.debug("Dependency %s is healthy", name)
                 else:
                     logger.warning("Dependency %s is not serving", name)
-                
+
                 return healthy
 
         except Exception as e:
@@ -380,27 +361,27 @@ async def example_usage() -> None:
     """Example of how to use the health check service."""
     # Create async server
     server = aio.server()
-    
+
     # Add health servicer
     health_servicer = await add_async_health_servicer(server)
-    
+
     # Set up dependency monitoring
     dep_checker = DependencyHealthChecker(health_servicer)
     dep_checker.add_dependency("database", "postgres:5432")
     dep_checker.add_dependency("cache", "redis:6379")
-    
+
     # Start server and dependency checker
     listen_addr = "[::]:50051"
     server.add_insecure_port(listen_addr)
-    
+
     await server.start()
     await dep_checker.start()
-    
+
     # Mark service as serving
     health_servicer.set_serving()
-    
+
     logger.info("Health check service started on %s", listen_addr)
-    
+
     try:
         await server.wait_for_termination()
     finally:

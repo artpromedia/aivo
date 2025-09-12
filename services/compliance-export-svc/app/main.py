@@ -1,17 +1,16 @@
-﻿"""
+"""
 FastAPI application for compliance export service.
 Provides admin download page, job management, and RPO/RTO 5 min export processing.
 """
 
 import uuid
 from datetime import datetime
-from typing import Any, Dict, List, Optional
+from typing import Any
 
 import structlog
-from fastapi import Depends, FastAPI, HTTPException, Request, Response, UploadFile
+from fastapi import Depends, FastAPI, HTTPException, Request
 from fastapi.middleware.cors import CORSMiddleware
-from fastapi.responses import FileResponse, HTMLResponse, StreamingResponse
-from fastapi.staticfiles import StaticFiles
+from fastapi.responses import FileResponse, HTMLResponse
 from fastapi.templating import Jinja2Templates
 from pydantic import BaseModel, Field
 from sqlalchemy import and_, desc, select
@@ -26,7 +25,7 @@ from .jobs import (
     process_compliance_export,
     validate_export_data,
 )
-from .models import AuditAction, ExportFormat, ExportJob, ExportStatus
+from .models import ExportFormat, ExportJob, ExportStatus
 
 # Setup structured logging
 logger = structlog.get_logger()
@@ -74,11 +73,11 @@ class ExportJobRequest(BaseModel):
 
     format: ExportFormat = Field(..., description="Export format")
     name: str = Field(..., description="Job name")
-    description: Optional[str] = Field(None, description="Job description")
+    description: str | None = Field(None, description="Job description")
     school_year: str = Field(..., description="Academic year (e.g., 2023-24)")
     state_code: str = Field(..., description="State code (e.g., CA, TX)")
-    district_id: Optional[str] = Field(None, description="District ID filter")
-    parameters: Dict[str, Any] = Field(default_factory=dict, description="Export parameters")
+    district_id: str | None = Field(None, description="District ID filter")
+    parameters: dict[str, Any] = Field(default_factory=dict, description="Export parameters")
 
 
 class ExportJobResponse(BaseModel):
@@ -88,19 +87,19 @@ class ExportJobResponse(BaseModel):
     format: str
     status: str
     name: str
-    description: Optional[str]
+    description: str | None
     school_year: str
     state_code: str
-    district_id: Optional[str]
+    district_id: str | None
     created_at: datetime
-    started_at: Optional[datetime]
-    completed_at: Optional[datetime]
+    started_at: datetime | None
+    completed_at: datetime | None
     created_by: str
     progress_percentage: int
-    total_records: Optional[int]
-    processed_records: Optional[int]
-    file_size: Optional[int]
-    error_message: Optional[str]
+    total_records: int | None
+    processed_records: int | None
+    file_size: int | None
+    error_message: str | None
 
 
 class AuditLogResponse(BaseModel):
@@ -111,20 +110,21 @@ class AuditLogResponse(BaseModel):
     action: str
     timestamp: datetime
     user_id: str
-    ip_address: Optional[str]
-    details: Dict[str, Any]
+    ip_address: str | None
+    details: dict[str, Any]
 
 
 class ValidationResponse(BaseModel):
     """Response model for data validation."""
 
     is_valid: bool
-    errors: List[str]
-    warnings: List[str]
-    record_counts: Dict[str, int]
+    errors: list[str]
+    warnings: list[str]
+    record_counts: dict[str, int]
 
 
 # API Endpoints
+
 
 @app.get("/", response_class=HTMLResponse)
 async def admin_dashboard(request: Request):
@@ -177,7 +177,9 @@ async def create_export_job(
             user_id,
         )
 
-        logger.info("Export job created", job_id=str(export_job.id), format=job_request.format.value)
+        logger.info(
+            "Export job created", job_id=str(export_job.id), format=job_request.format.value
+        )
 
         return ExportJobResponse(
             id=str(export_job.id),
@@ -204,10 +206,10 @@ async def create_export_job(
         raise HTTPException(status_code=500, detail=f"Failed to create export job: {str(e)}")
 
 
-@app.get("/api/exports", response_model=List[ExportJobResponse])
+@app.get("/api/exports", response_model=list[ExportJobResponse])
 async def list_export_jobs(
-    status: Optional[ExportStatus] = None,
-    format: Optional[ExportFormat] = None,
+    status: ExportStatus | None = None,
+    format: ExportFormat | None = None,
     limit: int = 50,
     offset: int = 0,
     db: AsyncSession = Depends(get_db_session),
@@ -324,9 +326,8 @@ async def download_export_file(
 
         # Get encryption key
         from .models import EncryptionKey
-        key_stmt = select(EncryptionKey).where(
-            EncryptionKey.key_id == job.encryption_key_id
-        )
+
+        key_stmt = select(EncryptionKey).where(EncryptionKey.key_id == job.encryption_key_id)
         key_result = await db.execute(key_stmt)
         encryption_key = key_result.scalar_one_or_none()
 
@@ -334,8 +335,8 @@ async def download_export_file(
             raise HTTPException(status_code=500, detail="Encryption key not found")
 
         # Decrypt file to temporary location
-        from pathlib import Path
         import tempfile
+        from pathlib import Path
 
         encrypted_path = Path(job.encrypted_file_path)
         with tempfile.NamedTemporaryFile(delete=False) as temp_file:
@@ -418,7 +419,7 @@ async def delete_export_job(
         raise HTTPException(status_code=500, detail=f"Failed to delete export job: {str(e)}")
 
 
-@app.get("/api/exports/{job_id}/audit", response_model=List[AuditLogResponse])
+@app.get("/api/exports/{job_id}/audit", response_model=list[AuditLogResponse])
 async def get_export_audit_logs(
     job_id: str,
     db: AsyncSession = Depends(get_db_session),
@@ -428,8 +429,10 @@ async def get_export_audit_logs(
         from .models import AuditLog
 
         job_uuid = uuid.UUID(job_id)
-        stmt = select(AuditLog).where(AuditLog.export_job_id == job_uuid).order_by(
-            desc(AuditLog.timestamp)
+        stmt = (
+            select(AuditLog)
+            .where(AuditLog.export_job_id == job_uuid)
+            .order_by(desc(AuditLog.timestamp))
         )
         result = await db.execute(stmt)
         logs = result.scalars().all()
@@ -459,13 +462,11 @@ async def validate_data(
     format_type: ExportFormat,
     data_type: str,
     school_year: str,
-    district_id: Optional[str] = None,
+    district_id: str | None = None,
 ):
     """Validate export data before processing."""
     try:
-        result = validate_export_data.delay(
-            format_type.value, data_type, school_year, district_id
-        )
+        result = validate_export_data.delay(format_type.value, data_type, school_year, district_id)
         validation_result = result.get(timeout=60)  # 1 minute timeout
 
         return ValidationResponse(**validation_result)
@@ -495,7 +496,7 @@ async def cleanup_exports(retention_days: int = 30):
 async def generate_audit_report(
     start_date: str,
     end_date: str,
-    format_type: Optional[ExportFormat] = None,
+    format_type: ExportFormat | None = None,
 ):
     """Generate compliance audit report."""
     try:

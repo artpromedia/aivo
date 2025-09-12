@@ -51,12 +51,8 @@ class S3ParquetWriter:
             self.s3_client = self._session.client("s3")
             logger.info("S3 client initialized", region=settings.aws_region)
         except NoCredentialsError:
-            logger.warning(
-                "AWS credentials not found, using default provider chain"
-            )
-            self.s3_client = boto3.client(
-                "s3", region_name=settings.aws_region
-            )
+            logger.warning("AWS credentials not found, using default provider chain")
+            self.s3_client = boto3.client("s3", region_name=settings.aws_region)
         except Exception as e:
             logger.error("Failed to initialize S3 client", error=str(e))
             raise
@@ -75,10 +71,7 @@ class S3ParquetWriter:
 
         try:
             # Generate S3 key with partitioning
-            partition_date = (
-                events[0].partition_date
-                or datetime.now().strftime("%Y-%m-%d")
-            )
+            partition_date = events[0].partition_date or datetime.now().strftime("%Y-%m-%d")
             batch_id = str(uuid.uuid4())
             timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
 
@@ -141,17 +134,11 @@ class S3ParquetWriter:
 
         # pylint: disable=broad-exception-caught
         except Exception as e:
-            logger.error(
-                "Failed to write events to S3",
-                error=str(e),
-                event_count=len(events)
-            )
+            logger.error("Failed to write events to S3", error=str(e), event_count=len(events))
             self._metrics["write_errors"] += 1
             return None
 
-    def _upload_to_s3(
-        self, bucket: str, key: str, data: bytes, size: int
-    ) -> None:
+    def _upload_to_s3(self, bucket: str, key: str, data: bytes, size: int) -> None:
         """Upload data to S3 (synchronous)."""
         try:
             self.s3_client.put_object(
@@ -167,13 +154,7 @@ class S3ParquetWriter:
                 },
             )
         except ClientError as e:
-            logger.error(
-                "S3 upload failed",
-                error=str(e),
-                bucket=bucket,
-                key=key,
-                size_bytes=size
-            )
+            logger.error("S3 upload failed", error=str(e), bucket=bucket, key=key, size_bytes=size)
             raise
 
     def _optimize_dataframe(self, df: pd.DataFrame) -> pd.DataFrame:

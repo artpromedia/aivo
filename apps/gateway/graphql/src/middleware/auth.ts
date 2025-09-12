@@ -36,7 +36,7 @@ export class JWTAuthService {
       return payload;
     } catch {
       throw new GraphQLError('Invalid or expired token', {
-        extensions: { code: 'UNAUTHENTICATED' }
+        extensions: { code: 'UNAUTHENTICATED' },
       });
     }
   }
@@ -66,18 +66,21 @@ export class JWTAuthService {
   }
 
   hasStaffAccess(user: User): boolean {
-    return [UserRole.STAFF, UserRole.TEACHER, UserRole.DISTRICT_ADMIN, UserRole.SYSTEM_ADMIN].includes(
-      user.role
-    );
+    return [
+      UserRole.STAFF,
+      UserRole.TEACHER,
+      UserRole.DISTRICT_ADMIN,
+      UserRole.SYSTEM_ADMIN,
+    ].includes(user.role);
   }
 
   canAccessTenant(user: User, tenantId?: string): boolean {
     // System admin can access all tenants
     if (user.role === UserRole.SYSTEM_ADMIN) return true;
-    
+
     // If no tenant specified, allow access
     if (!tenantId) return true;
-    
+
     // User must belong to the same tenant
     return user.tenantId === tenantId;
   }
@@ -114,7 +117,7 @@ export class JWTAuthService {
 
     // Only staff with approval scope can approve IEPs
     return (
-      this.hasStaffAccess(user) && 
+      this.hasStaffAccess(user) &&
       (user.scopes.includes('iep:approve') || this.hasAdminAccess(user))
     );
   }
@@ -155,11 +158,18 @@ export function extractTokenFromRequest(req: _HttpRequest): string | null {
 // Directive for requiring authentication
 export function requireAuth(allowedRoles: UserRole[] = [], requiredScopes: string[] = []) {
   return <TParent = unknown, TArgs = Record<string, unknown>, TResult = unknown>(
-    resolver: (parent: TParent, args: TArgs, context: GraphQLContext, info: GraphQLResolveInfo) => TResult | Promise<TResult>
+    resolver: (
+      parent: TParent,
+      args: TArgs,
+      context: GraphQLContext,
+      info: GraphQLResolveInfo
+    ) => TResult | Promise<TResult>
   ) => {
     return (parent: TParent, args: TArgs, context: GraphQLContext, info: GraphQLResolveInfo) => {
       if (!context.user) {
-        throw new GraphQLError('Authentication required', { extensions: { code: 'UNAUTHENTICATED' } });
+        throw new GraphQLError('Authentication required', {
+          extensions: { code: 'UNAUTHENTICATED' },
+        });
       }
 
       // Validate roles
@@ -171,7 +181,9 @@ export function requireAuth(allowedRoles: UserRole[] = [], requiredScopes: strin
         });
 
         if (!authService.validateRole(context.user.role, allowedRoles)) {
-          throw new GraphQLError('Insufficient role permissions', { extensions: { code: 'UNAUTHENTICATED' } });
+          throw new GraphQLError('Insufficient role permissions', {
+            extensions: { code: 'UNAUTHENTICATED' },
+          });
         }
       }
 
@@ -184,7 +196,9 @@ export function requireAuth(allowedRoles: UserRole[] = [], requiredScopes: strin
         });
 
         if (!authService.validateScopes(context.user.scopes, requiredScopes)) {
-          throw new GraphQLError('Insufficient scope permissions', { extensions: { code: 'UNAUTHENTICATED' } });
+          throw new GraphQLError('Insufficient scope permissions', {
+            extensions: { code: 'UNAUTHENTICATED' },
+          });
         }
       }
 
@@ -209,11 +223,18 @@ export function requireTenantAccess<TArgs = Record<string, unknown>>(
   getTenantId: (args: TArgs, context: GraphQLContext) => string
 ) {
   return <TParent = unknown, TResult = unknown>(
-    resolver: (parent: TParent, args: TArgs, context: GraphQLContext, info: GraphQLResolveInfo) => TResult | Promise<TResult>
+    resolver: (
+      parent: TParent,
+      args: TArgs,
+      context: GraphQLContext,
+      info: GraphQLResolveInfo
+    ) => TResult | Promise<TResult>
   ) => {
     return (parent: TParent, args: TArgs, context: GraphQLContext, info: GraphQLResolveInfo) => {
       if (!context.user) {
-        throw new GraphQLError('Authentication required', { extensions: { code: 'UNAUTHENTICATED' } });
+        throw new GraphQLError('Authentication required', {
+          extensions: { code: 'UNAUTHENTICATED' },
+        });
       }
 
       const tenantId = getTenantId(args, context);
@@ -224,7 +245,9 @@ export function requireTenantAccess<TArgs = Record<string, unknown>>(
       });
 
       if (!authService.canAccessTenant(context.user, tenantId)) {
-        throw new GraphQLError('Insufficient tenant permissions', { extensions: { code: 'UNAUTHENTICATED' } });
+        throw new GraphQLError('Insufficient tenant permissions', {
+          extensions: { code: 'UNAUTHENTICATED' },
+        });
       }
 
       return resolver(parent, args, context, info);

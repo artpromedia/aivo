@@ -1,6 +1,7 @@
-﻿"""Database configuration and session management."""
+"""Database configuration and session management."""
+
 import os
-from typing import AsyncGenerator
+from collections.abc import AsyncGenerator
 
 from sqlalchemy import event
 from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker, create_async_engine
@@ -9,6 +10,7 @@ from sqlalchemy.orm import DeclarativeBase
 
 class Base(DeclarativeBase):
     """Base class for SQLAlchemy models."""
+
     pass
 
 
@@ -51,7 +53,7 @@ def set_sqlite_pragma(dbapi_connection, connection_record):
 
 async def get_db() -> AsyncGenerator[AsyncSession, None]:
     """Get database session.
-    
+
     Yields:
         Database session
     """
@@ -67,14 +69,7 @@ async def get_db() -> AsyncGenerator[AsyncSession, None]:
 
 async def create_tables():
     """Create database tables."""
-    from .models import (
-        EvidenceAuditEntry,
-        EvidenceExtraction,
-        EvidenceUpload,
-        IEPGoal,
-        IEPGoalLinkage,
-    )
-    
+
     async with engine.begin() as conn:
         await conn.run_sync(Base.metadata.create_all)
 

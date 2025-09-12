@@ -23,9 +23,7 @@ test_engine = create_async_engine(
 )
 
 # Create test session factory
-TestSessionLocal = sessionmaker(
-    test_engine, class_=AsyncSession, expire_on_commit=False
-)
+TestSessionLocal = sessionmaker(test_engine, class_=AsyncSession, expire_on_commit=False)
 
 
 @pytest.fixture(scope="session")

@@ -143,3 +143,6 @@ libs/sdk-py/
 
 # Scripts that may have intentional formatting
 scripts/
+
+# MJML templates (complex templating with Jinja2)
+**/*.mjml

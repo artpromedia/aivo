@@ -60,9 +60,7 @@ class ServiceAggregator:
             # Return empty/default data structure
             return self._get_fallback_data(endpoint, tenant_id)
 
-    def _get_fallback_data(
-        self, endpoint: str, tenant_id: str = "unknown"
-    ) -> dict[str, Any]:
+    def _get_fallback_data(self, endpoint: str, tenant_id: str = "unknown") -> dict[str, Any]:
         """Get fallback data when services are unavailable."""
         fallbacks = {
             "summary": {
@@ -106,9 +104,7 @@ class ServiceAggregator:
             "usage": {
                 "tenant_id": tenant_id,
                 "billing_period_start": datetime.utcnow().isoformat(),
-                "billing_period_end": (
-                    datetime.utcnow() + timedelta(days=30)
-                ).isoformat(),
+                "billing_period_end": (datetime.utcnow() + timedelta(days=30)).isoformat(),
                 "metrics": [],
                 "total_api_calls": 0,
                 "total_storage_gb": 0.0,
@@ -148,9 +144,7 @@ class ServiceAggregator:
                 try:
                     results[key] = await task
                 except (httpx.HTTPError, CircuitBreakerError) as e:
-                    logger.warning(
-                        "Failed to fetch %s for summary: %s", key, e
-                    )
+                    logger.warning("Failed to fetch %s for summary: %s", key, e)
                     results[key] = {}
 
             # Aggregate into summary response
@@ -165,24 +159,18 @@ class ServiceAggregator:
                 "tenant_id": tenant_id,
                 "tenant_name": tenant_info.get("name", "Unknown"),
                 "status": tenant_info.get("status", "suspended"),
-                "subscription_tier": tenant_info.get(
-                    "subscription_tier", "free"
-                ),
+                "subscription_tier": tenant_info.get("subscription_tier", "free"),
                 "total_users": user_stats.get("total", 0),
                 "active_users_30d": user_stats.get("active_30d", 0),
                 "total_documents": doc_stats.get("total", 0),
                 "pending_approvals": approval_stats.get("pending", 0),
-                "monthly_spend": billing_info.get(
-                    "current_month_spend", "0.00"
-                ),
+                "monthly_spend": billing_info.get("current_month_spend", "0.00"),
                 "usage_alerts": usage_alerts.get("count", 0),
                 "last_activity": user_stats.get("last_activity"),
                 "health_score": self._calculate_health_score(results),
             }
 
-        data = await self._get_cached_or_fetch(
-            tenant_id, "summary", fetch_summary
-        )
+        data = await self._get_cached_or_fetch(tenant_id, "summary", fetch_summary)
         return SummaryResponse(**data)
 
     async def get_subscription(self, tenant_id: str) -> SubscriptionDetails:
@@ -191,16 +179,14 @@ class ServiceAggregator:
         async def fetch_subscription() -> dict[str, Any]:
             subscription_data = await http_client.get(
                 "tenant_service",
-                f"{self.settings.tenant_service_url}/tenants/"
-                f"{tenant_id}/subscription",
+                f"{self.settings.tenant_service_url}/tenants/" f"{tenant_id}/subscription",
             )
 
             # Enrich with payment service data
             try:
                 payment_data = await http_client.get(
                     "payment_service",
-                    f"{self.settings.payment_service_url}/subscriptions/"
-                    f"{tenant_id}",
+                    f"{self.settings.payment_service_url}/subscriptions/" f"{tenant_id}",
                 )
                 subscription_data.update(payment_data)
             except (httpx.HTTPError, CircuitBreakerError) as e:
@@ -208,21 +194,16 @@ class ServiceAggregator:
 
             return subscription_data
 
-        data = await self._get_cached_or_fetch(
-            tenant_id, "subscription", fetch_subscription
-        )
+        data = await self._get_cached_or_fetch(tenant_id, "subscription", fetch_subscription)
         return SubscriptionDetails(**data)
 
-    async def get_billing_history(
-        self, tenant_id: str
-    ) -> BillingHistoryResponse:
+    async def get_billing_history(self, tenant_id: str) -> BillingHistoryResponse:
         """Get billing history."""
 
         async def fetch_billing() -> dict[str, Any]:
             billing_data = await http_client.get(
                 "payment_service",
-                f"{self.settings.payment_service_url}/billing/"
-                f"{tenant_id}/history",
+                f"{self.settings.payment_service_url}/billing/" f"{tenant_id}/history",
             )
 
             # Transform invoice data
@@ -248,9 +229,7 @@ class ServiceAggregator:
                 "total_spent_ytd": billing_data.get("ytd_total", "0.00"),
             }
 
-        data = await self._get_cached_or_fetch(
-            tenant_id, "billing-history", fetch_billing
-        )
+        data = await self._get_cached_or_fetch(tenant_id, "billing-history", fetch_billing)
         return BillingHistoryResponse(**data)
 
     async def get_team(self, tenant_id: str) -> TeamResponse:
@@ -259,8 +238,7 @@ class ServiceAggregator:
         async def fetch_team() -> dict[str, Any]:
             team_data = await http_client.get(
                 "tenant_service",
-                f"{self.settings.tenant_service_url}/tenants/"
-                f"{tenant_id}/team",
+                f"{self.settings.tenant_service_url}/tenants/" f"{tenant_id}/team",
             )
 
             # Transform member data
@@ -282,12 +260,8 @@ class ServiceAggregator:
             return {
                 "tenant_id": tenant_id,
                 "total_members": len(members),
-                "active_members": len(
-                    [m for m in members if m["status"] == "active"]
-                ),
-                "pending_invites": len(
-                    [m for m in members if m.get("invite_status") == "pending"]
-                ),
+                "active_members": len([m for m in members if m["status"] == "active"]),
+                "pending_invites": len([m for m in members if m.get("invite_status") == "pending"]),
                 "members": members,
                 "role_distribution": team_data.get("role_distribution", {}),
                 "recent_activity": team_data.get("recent_activity", []),
@@ -305,15 +279,13 @@ class ServiceAggregator:
             try:
                 usage_data = await http_client.get(
                     "analytics_service",
-                    f"{self.settings.analytics_service_url}/usage/"
-                    f"{tenant_id}",
+                    f"{self.settings.analytics_service_url}/usage/" f"{tenant_id}",
                 )
             except CircuitBreakerError:
                 # Fallback to tenant service
                 usage_data = await http_client.get(
                     "tenant_service",
-                    f"{self.settings.tenant_service_url}/tenants/"
-                    f"{tenant_id}/usage",
+                    f"{self.settings.tenant_service_url}/tenants/" f"{tenant_id}/usage",
                 )
 
             # Transform metrics
@@ -338,9 +310,7 @@ class ServiceAggregator:
                 "total_storage_gb": usage_data.get("storage_gb", 0.0),
                 "bandwidth_gb": usage_data.get("bandwidth_gb", 0.0),
                 "cost_breakdown": usage_data.get("cost_breakdown", {}),
-                "projected_monthly_cost": usage_data.get(
-                    "projected_cost", "0.00"
-                ),
+                "projected_monthly_cost": usage_data.get("projected_cost", "0.00"),
                 "usage_trends": usage_data.get("trends", {}),
             }
 
@@ -353,8 +323,7 @@ class ServiceAggregator:
         async def fetch_namespaces() -> dict[str, Any]:
             namespaces_data = await http_client.get(
                 "fm_orchestrator",
-                f"{self.settings.fm_orchestrator_url}/tenants/"
-                f"{tenant_id}/namespaces",
+                f"{self.settings.fm_orchestrator_url}/tenants/" f"{tenant_id}/namespaces",
             )
 
             # Transform namespace data
@@ -373,19 +342,13 @@ class ServiceAggregator:
                     }
                 )
 
-            total_storage_gb = (
-                sum(ns["storage_used_mb"] for ns in namespaces) / 1024
-            )
+            total_storage_gb = sum(ns["storage_used_mb"] for ns in namespaces) / 1024
 
             return {
                 "tenant_id": tenant_id,
                 "total_namespaces": len(namespaces),
-                "active_namespaces": len(
-                    [ns for ns in namespaces if ns["status"] == "active"]
-                ),
-                "total_documents": sum(
-                    ns["document_count"] for ns in namespaces
-                ),
+                "active_namespaces": len([ns for ns in namespaces if ns["status"] == "active"]),
+                "total_documents": sum(ns["document_count"] for ns in namespaces),
                 "total_storage_gb": total_storage_gb,
                 "namespaces": namespaces,
                 "storage_distribution": {
@@ -395,9 +358,7 @@ class ServiceAggregator:
                 },
             }
 
-        data = await self._get_cached_or_fetch(
-            tenant_id, "namespaces", fetch_namespaces
-        )
+        data = await self._get_cached_or_fetch(tenant_id, "namespaces", fetch_namespaces)
         return NamespacesResponse(**data)
 
     # Helper methods for fetching specific data
@@ -412,8 +373,7 @@ class ServiceAggregator:
         """Get user statistics."""
         return await http_client.get(
             "tenant_service",
-            f"{self.settings.tenant_service_url}/tenants/"
-            f"{tenant_id}/users/stats",
+            f"{self.settings.tenant_service_url}/tenants/" f"{tenant_id}/users/stats",
         )
 
     async def _get_document_stats(self, tenant_id: str) -> dict[str, Any]:
@@ -421,8 +381,7 @@ class ServiceAggregator:
         try:
             return await http_client.get(
                 "fm_orchestrator",
-                f"{self.settings.fm_orchestrator_url}/tenants/"
-                f"{tenant_id}/documents/stats",
+                f"{self.settings.fm_orchestrator_url}/tenants/" f"{tenant_id}/documents/stats",
             )
         except (httpx.HTTPError, CircuitBreakerError):
             return {"total": 0}
@@ -432,8 +391,7 @@ class ServiceAggregator:
         try:
             return await http_client.get(
                 "approval_service",
-                f"{self.settings.approval_service_url}/approvals/"
-                f"stats?tenant_id={tenant_id}",
+                f"{self.settings.approval_service_url}/approvals/" f"stats?tenant_id={tenant_id}",
             )
         except (httpx.HTTPError, CircuitBreakerError):
             return {"pending": 0}
@@ -443,8 +401,7 @@ class ServiceAggregator:
         try:
             return await http_client.get(
                 "payment_service",
-                f"{self.settings.payment_service_url}/billing/"
-                f"{tenant_id}/summary",
+                f"{self.settings.payment_service_url}/billing/" f"{tenant_id}/summary",
             )
         except (httpx.HTTPError, CircuitBreakerError):
             return {"current_month_spend": "0.00"}
@@ -454,8 +411,7 @@ class ServiceAggregator:
         try:
             return await http_client.get(
                 "tenant_service",
-                f"{self.settings.tenant_service_url}/tenants/"
-                f"{tenant_id}/alerts",
+                f"{self.settings.tenant_service_url}/tenants/" f"{tenant_id}/alerts",
             )
         except (httpx.HTTPError, CircuitBreakerError):
             return {"count": 0}
@@ -465,9 +421,7 @@ class ServiceAggregator:
         score = 100.0
 
         # Deduct for service availability issues
-        failed_services = sum(
-            1 for service_data in data.values() if not service_data
-        )
+        failed_services = sum(1 for service_data in data.values() if not service_data)
         score -= failed_services * 10
 
         # Deduct for usage alerts

@@ -8,23 +8,23 @@ services:
     write_timeout: 60000
     read_timeout: 60000
     retries: 5
-    tags: ["admin", "s1"]
+    tags: ['admin', 's1']
 
 routes:
   - name: admin-portal-root
     service: admin-portal-service
-    paths: ["/"]
+    paths: ['/']
     strip_path: false
-    methods: ["GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"]
+    methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS']
 
   - name: admin-portal-routes
     service: admin-portal-service
-    paths: ["/admin"]
+    paths: ['/admin']
     strip_path: true
-    methods: ["GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"]
+    methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS']
 
   - name: admin-portal-health
-    service: admin-portal-service  
-    paths: ["/health"]
+    service: admin-portal-service
+    paths: ['/health']
     strip_path: false
-    methods: ["GET"]
+    methods: ['GET']

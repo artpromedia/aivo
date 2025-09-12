@@ -1,4 +1,5 @@
 """Tests for ink capture API endpoints."""
+
 import pytest
 from fastapi.testclient import TestClient
 
@@ -14,9 +15,7 @@ def test_health_check(client: TestClient):
 
 
 @pytest.mark.asyncio
-async def test_submit_strokes_success(
-    client: TestClient, sample_stroke_request
-):
+async def test_submit_strokes_success(client: TestClient, sample_stroke_request):
     """Test successful stroke submission."""
     response = client.post("/strokes", json=sample_stroke_request)
     assert response.status_code == 201
@@ -62,12 +61,10 @@ async def test_submit_strokes_too_many_strokes(client: TestClient):
                 "tool_type": "pen",
                 "color": "#000000",
                 "width": 2.0,
-                "points": [
-                    {"x": 100, "y": 150, "pressure": 0.8, "timestamp": 0}
-                ]
+                "points": [{"x": 100, "y": 150, "pressure": 0.8, "timestamp": 0}],
             }
             for i in range(1001)  # Exceeds max limit
-        ]
+        ],
     }
 
     response = client.post("/strokes", json=stroke_request)
@@ -82,9 +79,7 @@ def test_get_session_status_not_found(client: TestClient):
 
 
 @pytest.mark.asyncio
-async def test_get_session_status_success(
-    client: TestClient, sample_stroke_request
-):
+async def test_get_session_status_success(client: TestClient, sample_stroke_request):
     """Test getting session status after creating session."""
     # First create a session by submitting strokes
     client.post("/strokes", json=sample_stroke_request)

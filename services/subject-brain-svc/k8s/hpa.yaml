@@ -11,45 +11,45 @@ spec:
   minReplicas: 0
   maxReplicas: 100
   metrics:
-  - type: Resource
-    resource:
-      name: cpu
-      target:
-        type: Utilization
-        averageUtilization: 70
-  - type: Resource
-    resource:
-      name: memory
-      target:
-        type: Utilization
-        averageUtilization: 80
-  - type: Pods
-    pods:
-      metric:
-        name: gpu_queue_depth
-      target:
-        type: AverageValue
-        averageValue: "10"
+    - type: Resource
+      resource:
+        name: cpu
+        target:
+          type: Utilization
+          averageUtilization: 70
+    - type: Resource
+      resource:
+        name: memory
+        target:
+          type: Utilization
+          averageUtilization: 80
+    - type: Pods
+      pods:
+        metric:
+          name: gpu_queue_depth
+        target:
+          type: AverageValue
+          averageValue: '10'
   behavior:
     scaleUp:
       stabilizationWindowSeconds: 30
       policies:
-      - type: Percent
-        value: 100
-        periodSeconds: 15
-      - type: Pods
-        value: 4
-        periodSeconds: 15
+        - type: Percent
+          value: 100
+          periodSeconds: 15
+        - type: Pods
+          value: 4
+          periodSeconds: 15
       selectPolicy: Max
     scaleDown:
       stabilizationWindowSeconds: 300
       policies:
-      - type: Percent
-        value: 10
-        periodSeconds: 60
-      - type: Pods
-        value: 1
-        periodSeconds: 60
+        - type: Percent
+          value: 10
+          periodSeconds: 60
+        - type: Pods
+          value: 1
+          periodSeconds: 60
       selectPolicy: Min
 ---
 apiVersion: v1

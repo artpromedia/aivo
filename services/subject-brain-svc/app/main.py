@@ -42,10 +42,7 @@ async def lifespan(_app: FastAPI) -> AsyncGenerator[None, None]:
 # Create FastAPI application
 app = FastAPI(
     title="Subject-Brain Service",
-    description=(
-        "AI-powered planner and runtime for "
-        "per-learner-subject GPU pods"
-    ),
+    description=("AI-powered planner and runtime for " "per-learner-subject GPU pods"),
     version=settings.service_version,
     lifespan=lifespan,
 )
@@ -84,10 +81,7 @@ async def get_metrics() -> dict[str, dict[str, int] | dict[str, int]]:
         }
     except Exception as e:  # pylint: disable=broad-exception-caught
         logger.error("Failed to get metrics: %s", e)
-        raise HTTPException(
-            status_code=500,
-            detail="Failed to get metrics"
-        ) from e
+        raise HTTPException(status_code=500, detail="Failed to get metrics") from e
 
 
 @app.post("/plan", response_model=PlannerResponse)
@@ -109,9 +103,7 @@ async def create_activity_plan(request: PlannerRequest) -> PlannerResponse:
         # This would be replaced with actual service calls
         raise HTTPException(
             status_code=501,
-            detail=(
-                "Plan creation requires integration with other services"
-            ),
+            detail=("Plan creation requires integration with other services"),
         )
 
     except HTTPException:
@@ -119,8 +111,7 @@ async def create_activity_plan(request: PlannerRequest) -> PlannerResponse:
     except Exception as e:  # pylint: disable=broad-exception-caught
         logger.error("Failed to create plan: %s", e)
         raise HTTPException(
-            status_code=500,
-            detail="Internal server error while creating plan"
+            status_code=500, detail="Internal server error while creating plan"
         ) from e
 
 
@@ -131,10 +122,7 @@ async def get_runtime_status(runtime_id: str) -> RuntimeStatusResponse:
         runtime_pod = await runtime_manager.get_runtime_status(runtime_id)
 
         if not runtime_pod:
-            raise HTTPException(
-                status_code=404,
-                detail=f"Runtime {runtime_id} not found"
-            )
+            raise HTTPException(status_code=404, detail=f"Runtime {runtime_id} not found")
 
         return RuntimeStatusResponse(
             runtime_id=runtime_pod.runtime_id,
@@ -150,10 +138,7 @@ async def get_runtime_status(runtime_id: str) -> RuntimeStatusResponse:
         raise
     except Exception as e:  # pylint: disable=broad-exception-caught
         logger.error("Failed to get runtime status: %s", e)
-        raise HTTPException(
-            status_code=500,
-            detail="Failed to get runtime status"
-        ) from e
+        raise HTTPException(status_code=500, detail="Failed to get runtime status") from e
 
 
 @app.delete("/runtime/{runtime_id}")
@@ -163,9 +148,7 @@ async def terminate_runtime(runtime_id: str) -> dict[str, str]:
         runtime_pod = await runtime_manager.get_runtime_status(runtime_id)
 
         if not runtime_pod:
-            raise HTTPException(
-                status_code=404, detail=f"Runtime {runtime_id} not found"
-            )
+            raise HTTPException(status_code=404, detail=f"Runtime {runtime_id} not found")
 
         await runtime_manager.terminate_runtime(runtime_id)
 
@@ -178,10 +161,7 @@ async def terminate_runtime(runtime_id: str) -> dict[str, str]:
         raise
     except Exception as e:  # pylint: disable=broad-exception-caught
         logger.error("Failed to terminate runtime: %s", e)
-        raise HTTPException(
-            status_code=500,
-            detail="Failed to terminate runtime"
-        ) from e
+        raise HTTPException(status_code=500, detail="Failed to terminate runtime") from e
 
 
 @app.post("/cleanup")
@@ -198,10 +178,7 @@ async def cleanup_idle_runtimes() -> dict[str, str | list[str] | int]:
 
     except Exception as e:  # pylint: disable=broad-exception-caught
         logger.error("Failed to cleanup runtimes: %s", e)
-        raise HTTPException(
-            status_code=500,
-            detail="Failed to cleanup runtimes"
-        ) from e
+        raise HTTPException(status_code=500, detail="Failed to cleanup runtimes") from e
 
 
 @app.get("/")
@@ -209,9 +186,7 @@ async def root() -> dict[str, str | dict[str, str]]:
     """Root endpoint with service information."""
     return {
         "service": "subject-brain-svc",
-        "description": (
-            "AI-powered planner and runtime for per-learner-subject GPU pods"
-        ),
+        "description": ("AI-powered planner and runtime for per-learner-subject GPU pods"),
         "version": settings.service_version,
         "endpoints": {
             "health": "/health",

@@ -38,8 +38,7 @@ class TestEdgeBundlerAPI:
             "version": "1.0.0",
             "lessons": [],
         }
-        response = client.post("/api/edge-bundler/v1/bundles",
-                             json=bundle_data)
+        response = client.post("/api/edge-bundler/v1/bundles", json=bundle_data)
         assert response.status_code in [200, 201, 422]
 
     def test_create_bundle_precache_validation(
@@ -52,8 +51,7 @@ class TestEdgeBundlerAPI:
             "lessons": [],
             "precache_budget_mb": 30,  # Exceeds 25MB limit
         }
-        response = client.post("/api/edge-bundler/v1/bundles",
-                             json=bundle_data)
+        response = client.post("/api/edge-bundler/v1/bundles", json=bundle_data)
         # Should reject or accept based on validation
         assert response.status_code in [400, 422]
 
@@ -81,7 +79,6 @@ class TestEdgeBundlerAPI:
             "source_device_id": "device-1",
             "target_device_id": "device-2",
         }
-        response = client.post("/api/edge-bundler/v1/crdt/merge",
-                             json=merge_data)
+        response = client.post("/api/edge-bundler/v1/crdt/merge", json=merge_data)
         # May succeed or fail based on implementation
         assert response.status_code in [200, 400, 422, 500]

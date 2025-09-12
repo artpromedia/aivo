@@ -1,9 +1,6 @@
-﻿"""
+"""
 Configuration management for compliance export service.
 """
-
-import os
-from typing import Optional
 
 from pydantic import Field
 from pydantic_settings import BaseSettings
@@ -39,7 +36,7 @@ class Settings(BaseSettings):
     )
 
     # Encryption Configuration
-    compliance_master_key: Optional[str] = Field(
+    compliance_master_key: str | None = Field(
         default=None,
         env="COMPLIANCE_MASTER_KEY",
         description="Master encryption key for AES encryption",
@@ -125,22 +122,22 @@ class Settings(BaseSettings):
     )
 
     # State-specific Configuration
-    edfacts_api_endpoint: Optional[str] = Field(
+    edfacts_api_endpoint: str | None = Field(
         default=None,
         env="EDFACTS_API_ENDPOINT",
         description="EDFacts API endpoint",
     )
-    calpads_sftp_host: Optional[str] = Field(
+    calpads_sftp_host: str | None = Field(
         default=None,
         env="CALPADS_SFTP_HOST",
         description="CALPADS SFTP host",
     )
-    calpads_sftp_username: Optional[str] = Field(
+    calpads_sftp_username: str | None = Field(
         default=None,
         env="CALPADS_SFTP_USERNAME",
         description="CALPADS SFTP username",
     )
-    calpads_sftp_private_key_path: Optional[str] = Field(
+    calpads_sftp_private_key_path: str | None = Field(
         default=None,
         env="CALPADS_SFTP_PRIVATE_KEY_PATH",
         description="CALPADS SFTP private key path",
@@ -166,7 +163,7 @@ class CeleryConfig:
         self.result_serializer = "json"
         self.timezone = "UTC"
         self.enable_utc = True
-        
+
         # Task routing
         self.task_routes = {
             "app.jobs.process_compliance_export": {"queue": "exports"},
@@ -174,17 +171,17 @@ class CeleryConfig:
             "app.jobs.cleanup_old_exports": {"queue": "maintenance"},
             "app.jobs.generate_compliance_report": {"queue": "reports"},
         }
-        
+
         # Task retry configuration
         self.task_acks_late = True
         self.worker_prefetch_multiplier = 1
         self.task_default_max_retries = 3
         self.task_default_retry_delay = 60
-        
+
         # Worker configuration
         self.worker_max_tasks_per_child = 1000
         self.worker_disable_rate_limits = False
-        
+
         # Security
         self.worker_hijack_root_logger = False
         self.worker_log_color = False

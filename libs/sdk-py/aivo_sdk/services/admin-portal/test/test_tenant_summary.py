@@ -36,20 +36,20 @@ class TestTenantSummary(unittest.TestCase):
             return TenantSummary(
                 tenant_id = '456e7890-e89b-12d3-a456-426614174000',
                 learners = aivo_sdk.models.tenant_summary_learners.TenantSummary_learners(
-                    total = 150, 
-                    active = 135, 
-                    inactive = 10, 
+                    total = 150,
+                    active = 135,
+                    inactive = 10,
                     pending = 5, ),
                 seats = aivo_sdk.models.tenant_summary_seats.TenantSummary_seats(
-                    total = 200, 
-                    free = 50, 
-                    reserved = 15, 
+                    total = 200,
+                    free = 50,
+                    reserved = 15,
                     assigned = 135, ),
                 trial_count = 12,
                 open_approvals = 3,
                 enrollment_stats = aivo_sdk.models.tenant_summary_enrollment_stats.TenantSummary_enrollmentStats(
-                    total_enrollments = 425, 
-                    active_enrollments = 350, 
+                    total_enrollments = 425,
+                    active_enrollments = 350,
                     completed_this_month = 45, ),
                 last_updated = '2023-12-01T10:30:00Z'
             )
@@ -57,14 +57,14 @@ class TestTenantSummary(unittest.TestCase):
             return TenantSummary(
                 tenant_id = '456e7890-e89b-12d3-a456-426614174000',
                 learners = aivo_sdk.models.tenant_summary_learners.TenantSummary_learners(
-                    total = 150, 
-                    active = 135, 
-                    inactive = 10, 
+                    total = 150,
+                    active = 135,
+                    inactive = 10,
                     pending = 5, ),
                 seats = aivo_sdk.models.tenant_summary_seats.TenantSummary_seats(
-                    total = 200, 
-                    free = 50, 
-                    reserved = 15, 
+                    total = 200,
+                    free = 50,
+                    reserved = 15,
                     assigned = 135, ),
                 trial_count = 12,
                 open_approvals = 3,

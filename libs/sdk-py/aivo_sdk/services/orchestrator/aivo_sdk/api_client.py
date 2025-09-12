@@ -26,7 +26,7 @@ from pydantic import SecretStr
 import aivo_sdk.models
 from aivo_sdk import rest
 from aivo_sdk.api_response import ApiResponse
-from aivo_sdk.api_response import T as ApiResponseT
+from aivo_sdk.api_response import T as ApiResponseT  # noqa: N811
 from aivo_sdk.configuration import Configuration
 from aivo_sdk.exceptions import (
     ApiException,

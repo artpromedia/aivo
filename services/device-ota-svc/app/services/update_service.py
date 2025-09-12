@@ -136,9 +136,7 @@ class UpdateService:
         # Update rollout metrics
         await self._update_rollout_metrics(update_id)
 
-    async def get_rollout_status(
-        self: "UpdateService", update_id: UUID
-    ) -> UpdateRolloutStatus:
+    async def get_rollout_status(self: "UpdateService", update_id: UUID) -> UpdateRolloutStatus:
         """Get update rollout status."""
         # Get firmware update
         firmware_update = await self.firmware_service.get_update_by_id(update_id)
@@ -165,12 +163,8 @@ class UpdateService:
         completed_devices = status_counts.get(DeviceUpdateStatus.INSTALLED, 0)
         failed_devices = status_counts.get(DeviceUpdateStatus.FAILED, 0)
 
-        success_rate = (
-            (completed_devices / total_devices * 100) if total_devices > 0 else 0.0
-        )
-        failure_rate = (
-            (failed_devices / total_devices * 100) if total_devices > 0 else 0.0
-        )
+        success_rate = (completed_devices / total_devices * 100) if total_devices > 0 else 0.0
+        failure_rate = (failed_devices / total_devices * 100) if total_devices > 0 else 0.0
 
         return UpdateRolloutStatus(
             update_id=update_id,
@@ -188,9 +182,7 @@ class UpdateService:
             average_install_time_minutes=None,
         )
 
-    async def get_update_metrics(
-        self: "UpdateService", update_id: UUID
-    ) -> UpdateMetrics:
+    async def get_update_metrics(self: "UpdateService", update_id: UUID) -> UpdateMetrics:
         """Get update deployment metrics."""
         rollout_status = await self.get_rollout_status(update_id)
 
@@ -233,11 +225,13 @@ class UpdateService:
             .where(
                 and_(
                     DeviceUpdate.update_id == update_id,
-                    DeviceUpdate.status.in_([
-                        DeviceUpdateStatus.PENDING,
-                        DeviceUpdateStatus.DOWNLOADING,
-                        DeviceUpdateStatus.INSTALLING,
-                    ]),
+                    DeviceUpdate.status.in_(
+                        [
+                            DeviceUpdateStatus.PENDING,
+                            DeviceUpdateStatus.DOWNLOADING,
+                            DeviceUpdateStatus.INSTALLING,
+                        ]
+                    ),
                 )
             )
             .values(
@@ -249,17 +243,13 @@ class UpdateService:
 
         await self.db.commit()
 
-    async def _update_rollout_metrics(
-        self: "UpdateService", update_id: UUID
-    ) -> None:
+    async def _update_rollout_metrics(self: "UpdateService", update_id: UUID) -> None:
         """Update rollout metrics for an update."""
         # Get current rollout status
         rollout_status = await self.get_rollout_status(update_id)
 
         # Find or create metrics record
-        stmt = select(UpdateRolloutMetrics).where(
-            UpdateRolloutMetrics.update_id == update_id
-        )
+        stmt = select(UpdateRolloutMetrics).where(UpdateRolloutMetrics.update_id == update_id)
         result = await self.db.execute(stmt)
         metrics = result.scalar_one_or_none()
 

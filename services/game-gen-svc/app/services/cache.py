@@ -19,9 +19,7 @@ class TemplateCache:
         """Initialize template cache."""
         self.redis: Redis | None = None
         self.local_cache: dict[str, dict[str, Any]] = {}
-        self.cache_stats = {
-            "hits": 0, "misses": 0, "size_bytes": 0, "num_entries": 0
-        }
+        self.cache_stats = {"hits": 0, "misses": 0, "size_bytes": 0, "num_entries": 0}
         self._cache_lock = asyncio.Lock()
 
     async def connect(self) -> None:
@@ -29,9 +27,7 @@ class TemplateCache:
         if settings.cache_enabled:
             try:
                 self.redis = redis.from_url(
-                    settings.cache_redis_url,
-                    encoding="utf-8",
-                    decode_responses=True
+                    settings.cache_redis_url, encoding="utf-8", decode_responses=True
                 )
                 await self.redis.ping()
                 print("Redis cache connected successfully")
@@ -54,14 +50,9 @@ class TemplateCache:
         accessibility_hash: str,
     ) -> str:
         """Generate cache key for game manifest."""
-        return (
-            f"manifest:{subject}:{grade}:{game_type}:"
-            f"{duration_minutes}:{accessibility_hash}"
-        )
+        return f"manifest:{subject}:{grade}:{game_type}:" f"{duration_minutes}:{accessibility_hash}"
 
-    def _calculate_accessibility_hash(
-        self, accessibility: dict[str, Any]
-    ) -> str:
+    def _calculate_accessibility_hash(self, accessibility: dict[str, Any]) -> str:
         """Calculate hash for accessibility settings."""
         # Sort keys for consistent hashing
         sorted_settings = sorted(accessibility.items())
@@ -78,9 +69,7 @@ class TemplateCache:
     ) -> GameManifest | None:
         """Get cached game manifest."""
         a11y_hash = self._calculate_accessibility_hash(accessibility)
-        cache_key = self._generate_cache_key(
-            subject, grade, game_type, duration_minutes, a11y_hash
-        )
+        cache_key = self._generate_cache_key(subject, grade, game_type, duration_minutes, a11y_hash)
 
         async with self._cache_lock:
             # Try local cache first (fastest)
@@ -119,9 +108,7 @@ class TemplateCache:
     ) -> None:
         """Store game manifest in cache."""
         a11y_hash = self._calculate_accessibility_hash(accessibility)
-        cache_key = self._generate_cache_key(
-            subject, grade, game_type, duration_minutes, a11y_hash
-        )
+        cache_key = self._generate_cache_key(subject, grade, game_type, duration_minutes, a11y_hash)
 
         manifest_data = {
             "manifest": manifest.model_dump(),
@@ -146,9 +133,7 @@ class TemplateCache:
             if self.redis:
                 try:
                     await self.redis.setex(
-                        cache_key,
-                        settings.cache_default_ttl_seconds,
-                        json.dumps(manifest_data)
+                        cache_key, settings.cache_default_ttl_seconds, json.dumps(manifest_data)
                     )
                 except (redis.ConnectionError, redis.RedisError) as e:
                     print(f"Redis set error: {str(e)}")
@@ -157,9 +142,7 @@ class TemplateCache:
             self.cache_stats["size_bytes"] += data_size
             self.cache_stats["num_entries"] += 1
 
-    async def get_template_variants(
-        self, subject: str, grade: int
-    ) -> list[dict[str, Any]]:
+    async def get_template_variants(self, subject: str, grade: int) -> list[dict[str, Any]]:
         """Get all cached template variants for subject/grade."""
         pattern = f"manifest:{subject}:{grade}:*"
         variants = []
@@ -175,9 +158,7 @@ class TemplateCache:
                             {
                                 "cache_key": key,
                                 "game_type": variant_data.get("game_type"),
-                                "duration_minutes": variant_data.get(
-                                    "duration_minutes"
-                                ),
+                                "duration_minutes": variant_data.get("duration_minutes"),
                                 "created_at": variant_data.get("created_at"),
                             }
                         )
@@ -213,9 +194,7 @@ class TemplateCache:
                     if not manifest:
                         # Would trigger generation in real implementation
                         # For now, create placeholder
-                        tasks.append((
-                            subject, grade, game_type, duration, accessibility
-                        ))
+                        tasks.append((subject, grade, game_type, duration, accessibility))
 
         print(f"Cache warming identified {len(tasks)} variants to generate")
 

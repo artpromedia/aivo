@@ -4,6 +4,7 @@ Configuration settings for the ELA Evaluator service.
 This module handles environment-based configuration for rubric scoring,
 PII moderation, and content safety features.
 """
+
 from typing import Self
 
 from pydantic import Field
@@ -17,7 +18,7 @@ class Settings(BaseSettings):
         env_file=".env",
         env_file_encoding="utf-8",
         case_sensitive=False,
-        extra="ignore"
+        extra="ignore",
     )
 
     # Service configuration
@@ -33,13 +34,12 @@ class Settings(BaseSettings):
     # Database configuration
     database_url: str = Field(
         default="postgresql://user:pass@localhost:5432/ela_eval",
-        alias="DATABASE_URL"
+        alias="DATABASE_URL",
     )
 
     # Redis configuration for caching
     redis_url: str = Field(
-        default="redis://localhost:6379/0",
-        alias="REDIS_URL"
+        default="redis://localhost:6379/0", alias="REDIS_URL"
     )
 
     # AI Model configuration
@@ -73,8 +73,7 @@ class Settings(BaseSettings):
 
     # Grade band configuration
     supported_grade_bands: list[str] = Field(
-        default=["K-2", "3-5", "6-8", "9-12"],
-        alias="SUPPORTED_GRADE_BANDS"
+        default=["K-2", "3-5", "6-8", "9-12"], alias="SUPPORTED_GRADE_BANDS"
     )
 
     @property
@@ -90,7 +89,7 @@ class Settings(BaseSettings):
         return [
             "https://app.aivo.com",
             "https://admin.aivo.com",
-            "https://teacher.aivo.com"
+            "https://teacher.aivo.com",
         ]
 
 

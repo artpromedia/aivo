@@ -1,13 +1,13 @@
-﻿"""
+"""
 Model dispatch service for LLM provider selection.
 
 Handles routing decisions based on subject, grade band, and region.
 """
-from typing import Dict, List, Optional, Tuple
+
 from uuid import UUID
 
 from pydantic import BaseModel
-from sqlalchemy import and_, desc, select
+from sqlalchemy import and_, select
 from sqlalchemy.ext.asyncio import AsyncSession
 from structlog import get_logger
 
@@ -32,8 +32,8 @@ class DispatchRequest(BaseModel):
     grade_band: GradeBand
     region: Region
     teacher_override: bool = False
-    override_provider_id: Optional[UUID] = None
-    override_reason: Optional[str] = None
+    override_provider_id: UUID | None = None
+    override_reason: str | None = None
     request_id: str
 
 
@@ -43,12 +43,12 @@ class DispatchResponse(BaseModel):
     provider_id: UUID
     provider_name: str
     endpoint_url: str
-    template_ids: List[UUID]
+    template_ids: list[UUID]
     moderation_threshold: float
     policy_id: UUID
     allow_teacher_override: bool
-    rate_limits: Dict[str, int]
-    estimated_cost: Dict[str, float]
+    rate_limits: dict[str, int]
+    estimated_cost: dict[str, float]
 
 
 class ModelDispatchService:
@@ -158,7 +158,7 @@ class ModelDispatchService:
 
     async def _find_matching_policy(
         self, subject: Subject, grade_band: GradeBand, region: Region
-    ) -> Optional[DispatchPolicy]:
+    ) -> DispatchPolicy | None:
         """Find the best matching dispatch policy based on priority."""
         # Build query with fallback logic
         conditions = [DispatchPolicy.is_active.is_(True)]
@@ -241,7 +241,7 @@ class ModelDispatchService:
         result = await self.db.execute(default_stmt)
         return result.scalar_one_or_none()
 
-    async def _get_provider(self, provider_id: UUID) -> Optional[ModelProvider]:
+    async def _get_provider(self, provider_id: UUID) -> ModelProvider | None:
         """Get provider by ID."""
         stmt = select(ModelProvider).where(
             and_(ModelProvider.id == provider_id, ModelProvider.is_active.is_(True))
@@ -249,9 +249,7 @@ class ModelDispatchService:
         result = await self.db.execute(stmt)
         return result.scalar_one_or_none()
 
-    async def _get_fallback_provider(
-        self, fallback_ids: List[str]
-    ) -> Optional[ModelProvider]:
+    async def _get_fallback_provider(self, fallback_ids: list[str]) -> ModelProvider | None:
         """Get first available fallback provider."""
         for provider_id_str in fallback_ids:
             try:
@@ -265,8 +263,8 @@ class ModelDispatchService:
         return None
 
     async def _get_template_ids(
-        self, policy_template_ids: List[str], subject: Subject, grade_band: GradeBand
-    ) -> List[UUID]:
+        self, policy_template_ids: list[str], subject: Subject, grade_band: GradeBand
+    ) -> list[UUID]:
         """Get template IDs for the request."""
         template_ids = []
 
@@ -368,7 +366,7 @@ class ModelDispatchService:
         self.db.add(log_entry)
         await self.db.commit()
 
-    async def get_available_providers(self, region: Region) -> List[Dict]:
+    async def get_available_providers(self, region: Region) -> list[dict]:
         """Get list of available providers for a region."""
         # Check regional constraints
         stmt = select(RegionalRouting).where(RegionalRouting.region == region)
@@ -404,9 +402,7 @@ class ModelDispatchService:
             for provider in providers
         ]
 
-    async def get_dispatch_analytics(
-        self, region: Optional[Region] = None, days: int = 7
-    ) -> Dict:
+    async def get_dispatch_analytics(self, region: Region | None = None, days: int = 7) -> dict:
         """Get analytics on dispatch decisions."""
         # This would contain more complex analytics queries
         # For now, return basic stats

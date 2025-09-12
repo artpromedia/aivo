@@ -4,7 +4,7 @@ services:
   evidence-svc:
     build: .
     ports:
-      - "8000:8000"
+      - '8000:8000'
     environment:
       - DATABASE_URL=postgresql+asyncpg://evidence_user:evidence_pass@postgres:5432/evidence_db
       - AWS_REGION=us-east-1
@@ -27,13 +27,13 @@ services:
     volumes:
       - postgres_data:/var/lib/postgresql/data
     ports:
-      - "5432:5432"
+      - '5432:5432'
     restart: unless-stopped
 
   redis:
     image: redis:7-alpine
     ports:
-      - "6379:6379"
+      - '6379:6379'
     volumes:
       - redis_data:/data
     restart: unless-stopped

@@ -1,18 +1,15 @@
-﻿"""
+"""
 CALPADS (California) compliance exporter.
 Generates state-format CSV exports for California reporting requirements.
 """
 
 import csv
-import uuid
-from datetime import datetime
 from pathlib import Path
-from typing import Any, Dict, List, Optional
+from typing import Any
 
-import pandas as pd
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from ..models import ExportFormat, ExportJob, ExportStatus
+from ..models import ExportJob
 
 
 class CALPADSExporter:
@@ -26,7 +23,7 @@ class CALPADSExporter:
         "student_id",
         "local_student_id",
         "student_legal_first_name",
-        "student_legal_middle_name", 
+        "student_legal_middle_name",
         "student_legal_last_name",
         "student_name_suffix",
         "student_birth_date",
@@ -44,7 +41,7 @@ class CALPADSExporter:
         "student_phone_number",
         "grade_level",
         "enrollment_start_date",
-        "enrollment_end_date", 
+        "enrollment_end_date",
         "enrollment_status",
         "school_of_attendance",
         "resident_district",
@@ -55,7 +52,7 @@ class CALPADSExporter:
         "race_code_1",
         "race_code_2",
         "race_code_3",
-        "race_code_4", 
+        "race_code_4",
         "race_code_5",
         "english_language_acquisition_status",
         "english_language_acquisition_status_start_date",
@@ -73,7 +70,7 @@ class CALPADSExporter:
 
     CALPADS_SASS_HEADERS = [
         "academic_year",
-        "district_code", 
+        "district_code",
         "school_code",
         "student_id",
         "test_id",
@@ -84,7 +81,7 @@ class CALPADSExporter:
         "overall_performance_level",
         "claim_1_scale_score",
         "claim_1_performance_level",
-        "claim_2_scale_score", 
+        "claim_2_scale_score",
         "claim_2_performance_level",
         "claim_3_scale_score",
         "claim_3_performance_level",
@@ -103,7 +100,7 @@ class CALPADSExporter:
     CALPADS_SDIS_HEADERS = [
         "academic_year",
         "district_code",
-        "school_code", 
+        "school_code",
         "student_id",
         "incident_id",
         "incident_date",
@@ -131,7 +128,7 @@ class CALPADSExporter:
     def __init__(self, db_session: AsyncSession):
         """
         Initialize CALPADS exporter.
-        
+
         Args:
             db_session: Async database session
         """
@@ -142,26 +139,24 @@ class CALPADSExporter:
         export_job: ExportJob,
         output_path: Path,
         school_year: str,
-        district_code: Optional[str] = None,
-        school_code: Optional[str] = None,
-    ) -> Dict[str, Any]:
+        district_code: str | None = None,
+        school_code: str | None = None,
+    ) -> dict[str, Any]:
         """
         Export Student Enrollment (SENR) data in CALPADS format.
-        
+
         Args:
             export_job: Export job instance
             output_path: Path for output CSV file
             school_year: Academic year (e.g., "2023-24")
             district_code: Optional district filter
             school_code: Optional school filter
-            
+
         Returns:
             Export statistics
         """
         # Query enrollment data
-        senr_data = await self._query_senr_data(
-            school_year, district_code, school_code
-        )
+        senr_data = await self._query_senr_data(school_year, district_code, school_code)
 
         # Ensure output directory exists
         output_path.parent.mkdir(parents=True, exist_ok=True)
@@ -174,12 +169,12 @@ class CALPADSExporter:
                 quoting=csv.QUOTE_MINIMAL,
             )
             writer.writeheader()
-            
+
             processed = 0
             for enrollment in senr_data:
                 writer.writerow(self._transform_senr_record(enrollment))
                 processed += 1
-                
+
                 # Update progress periodically
                 if processed % 1000 == 0:
                     progress = min(100, int((processed / len(senr_data)) * 100))
@@ -197,26 +192,24 @@ class CALPADSExporter:
         export_job: ExportJob,
         output_path: Path,
         school_year: str,
-        test_type: Optional[str] = None,
-        district_code: Optional[str] = None,
-    ) -> Dict[str, Any]:
+        test_type: str | None = None,
+        district_code: str | None = None,
+    ) -> dict[str, Any]:
         """
         Export Student Assessment (SASS) data in CALPADS format.
-        
+
         Args:
             export_job: Export job instance
             output_path: Path for output CSV file
             school_year: Academic year
             test_type: Optional test type filter (SBAC, CAST, etc.)
             district_code: Optional district filter
-            
+
         Returns:
             Export statistics
         """
         # Query assessment data
-        sass_data = await self._query_sass_data(
-            school_year, test_type, district_code
-        )
+        sass_data = await self._query_sass_data(school_year, test_type, district_code)
 
         # Ensure output directory exists
         output_path.parent.mkdir(parents=True, exist_ok=True)
@@ -229,12 +222,12 @@ class CALPADSExporter:
                 quoting=csv.QUOTE_MINIMAL,
             )
             writer.writeheader()
-            
+
             processed = 0
             for assessment in sass_data:
                 writer.writerow(self._transform_sass_record(assessment))
                 processed += 1
-                
+
                 # Update progress periodically
                 if processed % 1000 == 0:
                     progress = min(100, int((processed / len(sass_data)) * 100))
@@ -252,26 +245,24 @@ class CALPADSExporter:
         export_job: ExportJob,
         output_path: Path,
         school_year: str,
-        district_code: Optional[str] = None,
-        school_code: Optional[str] = None,
-    ) -> Dict[str, Any]:
+        district_code: str | None = None,
+        school_code: str | None = None,
+    ) -> dict[str, Any]:
         """
         Export Student Discipline (SDIS) data in CALPADS format.
-        
+
         Args:
             export_job: Export job instance
             output_path: Path for output CSV file
             school_year: Academic year
             district_code: Optional district filter
             school_code: Optional school filter
-            
+
         Returns:
             Export statistics
         """
         # Query discipline data
-        sdis_data = await self._query_sdis_data(
-            school_year, district_code, school_code
-        )
+        sdis_data = await self._query_sdis_data(school_year, district_code, school_code)
 
         # Ensure output directory exists
         output_path.parent.mkdir(parents=True, exist_ok=True)
@@ -284,12 +275,12 @@ class CALPADSExporter:
                 quoting=csv.QUOTE_MINIMAL,
             )
             writer.writeheader()
-            
+
             processed = 0
             for discipline in sdis_data:
                 writer.writerow(self._transform_sdis_record(discipline))
                 processed += 1
-                
+
                 # Update progress periodically
                 if processed % 1000 == 0:
                     progress = min(100, int((processed / len(sdis_data)) * 100))
@@ -305,9 +296,9 @@ class CALPADSExporter:
     async def _query_senr_data(
         self,
         school_year: str,
-        district_code: Optional[str] = None,
-        school_code: Optional[str] = None,
-    ) -> List[Dict[str, Any]]:
+        district_code: str | None = None,
+        school_code: str | None = None,
+    ) -> list[dict[str, Any]]:
         """Query student enrollment data from database."""
         # Placeholder - implement actual database query
         # This would typically join students, enrollments, demographics, etc.
@@ -369,9 +360,9 @@ class CALPADSExporter:
     async def _query_sass_data(
         self,
         school_year: str,
-        test_type: Optional[str] = None,
-        district_code: Optional[str] = None,
-    ) -> List[Dict[str, Any]]:
+        test_type: str | None = None,
+        district_code: str | None = None,
+    ) -> list[dict[str, Any]]:
         """Query student assessment data from database."""
         # Placeholder - implement actual database query
         return [
@@ -409,9 +400,9 @@ class CALPADSExporter:
     async def _query_sdis_data(
         self,
         school_year: str,
-        district_code: Optional[str] = None,
-        school_code: Optional[str] = None,
-    ) -> List[Dict[str, Any]]:
+        district_code: str | None = None,
+        school_code: str | None = None,
+    ) -> list[dict[str, Any]]:
         """Query student discipline data from database."""
         # Placeholder - implement actual database query
         return [
@@ -445,10 +436,10 @@ class CALPADSExporter:
             for i in range(75)  # Simulated data
         ]
 
-    def _transform_senr_record(self, record: Dict[str, Any]) -> Dict[str, Any]:
+    def _transform_senr_record(self, record: dict[str, Any]) -> dict[str, Any]:
         """Transform enrollment record to CALPADS SENR format."""
         transformed = record.copy()
-        
+
         # Apply CALPADS-specific transformations
         if "student_birth_date" in transformed and transformed["student_birth_date"]:
             # Ensure date format is MM/DD/YYYY for CALPADS
@@ -457,21 +448,21 @@ class CALPADSExporter:
                 parts = birth_date[:10].split("-")
                 if len(parts) == 3:
                     transformed["student_birth_date"] = f"{parts[1]}/{parts[2]}/{parts[0]}"
-        
+
         return transformed
 
-    def _transform_sass_record(self, record: Dict[str, Any]) -> Dict[str, Any]:
+    def _transform_sass_record(self, record: dict[str, Any]) -> dict[str, Any]:
         """Transform assessment record to CALPADS SASS format."""
         transformed = record.copy()
-        
+
         # Apply assessment-specific transformations
         # CALPADS has specific scale score ranges and performance levels
         return transformed
 
-    def _transform_sdis_record(self, record: Dict[str, Any]) -> Dict[str, Any]:
+    def _transform_sdis_record(self, record: dict[str, Any]) -> dict[str, Any]:
         """Transform discipline record to CALPADS SDIS format."""
         transformed = record.copy()
-        
+
         # Apply discipline-specific transformations
         if "incident_date" in transformed and transformed["incident_date"]:
             # Ensure date format is MM/DD/YYYY for CALPADS
@@ -480,7 +471,7 @@ class CALPADSExporter:
                 parts = incident_date[:10].split("-")
                 if len(parts) == 3:
                     transformed["incident_date"] = f"{parts[1]}/{parts[2]}/{parts[0]}"
-        
+
         return transformed
 
     async def _update_job_progress(
@@ -492,7 +483,7 @@ class CALPADSExporter:
         """Update export job progress."""
         export_job.progress_percentage = progress_percentage
         export_job.processed_records = processed_records
-        
+
         # Commit progress update
         await self.db_session.commit()
 
@@ -500,16 +491,16 @@ class CALPADSExporter:
         self,
         data_type: str,
         school_year: str,
-        district_code: Optional[str] = None,
-    ) -> Dict[str, Any]:
+        district_code: str | None = None,
+    ) -> dict[str, Any]:
         """
         Validate CALPADS data before export.
-        
+
         Args:
             data_type: Type of data to validate (senr, sass, sdis)
             school_year: Academic year
             district_code: Optional district filter
-            
+
         Returns:
             Validation results
         """
@@ -524,26 +515,22 @@ class CALPADSExporter:
             # Validate SENR enrollment data
             senr_data = await self._query_senr_data(school_year, district_code)
             validation_results["record_counts"]["enrollments"] = len(senr_data)
-            
+
             # Check for required CALPADS fields
             for i, enrollment in enumerate(senr_data[:100]):  # Sample validation
                 if not enrollment.get("student_id"):
-                    validation_results["errors"].append(
-                        f"Row {i+1}: Missing student_id"
-                    )
+                    validation_results["errors"].append(f"Row {i+1}: Missing student_id")
                     validation_results["is_valid"] = False
-                
+
                 if not enrollment.get("district_code"):
-                    validation_results["errors"].append(
-                        f"Row {i+1}: Missing district_code"
-                    )
+                    validation_results["errors"].append(f"Row {i+1}: Missing district_code")
                     validation_results["is_valid"] = False
 
         elif data_type == "sass":
             # Validate SASS assessment data
             sass_data = await self._query_sass_data(school_year, None, district_code)
             validation_results["record_counts"]["assessments"] = len(sass_data)
-            
+
         elif data_type == "sdis":
             # Validate SDIS discipline data
             sdis_data = await self._query_sdis_data(school_year, district_code)

@@ -48,9 +48,9 @@ class TestSubscription(unittest.TestCase):
                 cancel_at_period_end = True,
                 canceled_at = datetime.datetime.strptime('2013-10-20 19:20:30.00', '%Y-%m-%d %H:%M:%S.%f'),
                 discount = aivo_sdk.models.discount.Discount(
-                    coupon_id = 'coup_123e4567-e89b-12d3-a456-426614174000', 
-                    coupon_code = 'WELCOME20', 
-                    discount_type = 'percent', 
+                    coupon_id = 'coup_123e4567-e89b-12d3-a456-426614174000',
+                    coupon_code = 'WELCOME20',
+                    discount_type = 'percent',
                     discount_value = 20.0, ),
                 metadata = { },
                 created_at = '2023-11-01T00:00:00Z',

@@ -35,7 +35,7 @@ def test_root_endpoint() -> None:
     assert "message" in data
 
 
-@pytest.mark.asyncio()
+@pytest.mark.asyncio
 async def test_recognize_from_ink() -> None:
     """Test direct ink recognition endpoint."""
     ink_data = {
@@ -59,7 +59,7 @@ async def test_recognize_from_ink() -> None:
     assert "confidence" in data
 
 
-@pytest.mark.asyncio()
+@pytest.mark.asyncio
 async def test_grade_expression() -> None:
     """Test grading endpoint."""
     grade_request = {

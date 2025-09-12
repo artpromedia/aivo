@@ -1,10 +1,10 @@
-﻿"""
+"""
 FastAPI application for model dispatch service.
 
 Provides REST API for LLM provider selection and policy management.
 """
+
 from contextlib import asynccontextmanager
-from typing import Dict, List, Optional
 from uuid import UUID
 
 from fastapi import Depends, FastAPI, HTTPException, Query
@@ -16,7 +16,6 @@ from structlog import configure, get_logger
 from app.models import Base, GradeBand, Region, Subject
 from app.services.dispatch_service import (
     DispatchRequest,
-    DispatchResponse,
     ModelDispatchService,
 )
 
@@ -91,12 +90,8 @@ class DispatchRequestAPI(BaseModel):
     grade_band: GradeBand = Field(..., description="Grade band")
     region: Region = Field(..., description="Geographic region")
     teacher_override: bool = Field(False, description="Teacher override flag")
-    override_provider_id: Optional[UUID] = Field(
-        None, description="Provider ID for teacher override"
-    )
-    override_reason: Optional[str] = Field(
-        None, max_length=500, description="Reason for override"
-    )
+    override_provider_id: UUID | None = Field(None, description="Provider ID for teacher override")
+    override_reason: str | None = Field(None, max_length=500, description="Reason for override")
 
 
 class DispatchResponseAPI(BaseModel):
@@ -105,12 +100,12 @@ class DispatchResponseAPI(BaseModel):
     provider_id: UUID
     provider_name: str
     endpoint_url: str
-    template_ids: List[UUID]
+    template_ids: list[UUID]
     moderation_threshold: float
     policy_id: UUID
     allow_teacher_override: bool
-    rate_limits: Dict[str, int]
-    estimated_cost: Dict[str, float]
+    rate_limits: dict[str, int]
+    estimated_cost: dict[str, float]
     request_id: str
 
 
@@ -128,7 +123,7 @@ class ProviderInfo(BaseModel):
     id: str
     name: str
     type: str
-    supported_regions: List[str]
+    supported_regions: list[str]
     max_tokens: int
     cost_per_1k_input: float
     cost_per_1k_output: float
@@ -141,17 +136,15 @@ class AnalyticsResponse(BaseModel):
     total_requests: int
     success_rate: float
     teacher_override_rate: float
-    most_used_subjects: Dict[str, int]
-    most_used_grades: Dict[str, int]
+    most_used_subjects: dict[str, int]
+    most_used_grades: dict[str, int]
     average_response_time_ms: float
 
 
 @app.get("/health", response_model=HealthResponse)
 async def health_check() -> HealthResponse:
     """Health check endpoint."""
-    return HealthResponse(
-        status="healthy", service="model-dispatch-svc", version="1.0.0"
-    )
+    return HealthResponse(status="healthy", service="model-dispatch-svc", version="1.0.0")
 
 
 @app.post("/dispatch", response_model=DispatchResponseAPI)
@@ -202,11 +195,11 @@ async def dispatch_model(
         raise HTTPException(status_code=500, detail="Internal server error")
 
 
-@app.get("/providers", response_model=List[ProviderInfo])
+@app.get("/providers", response_model=list[ProviderInfo])
 async def get_providers(
     region: Region = Query(..., description="Region to filter providers"),
     service: ModelDispatchService = Depends(get_dispatch_service),
-) -> List[ProviderInfo]:
+) -> list[ProviderInfo]:
     """Get available providers for a region."""
     try:
         providers_data = await service.get_available_providers(region)
@@ -218,7 +211,7 @@ async def get_providers(
 
 @app.get("/analytics", response_model=AnalyticsResponse)
 async def get_analytics(
-    region: Optional[Region] = Query(None, description="Filter by region"),
+    region: Region | None = Query(None, description="Filter by region"),
     days: int = Query(7, ge=1, le=90, description="Number of days to analyze"),
     service: ModelDispatchService = Depends(get_dispatch_service),
 ) -> AnalyticsResponse:
@@ -231,20 +224,20 @@ async def get_analytics(
         raise HTTPException(status_code=500, detail="Failed to retrieve analytics")
 
 
-@app.get("/subjects", response_model=List[str])
-async def get_subjects() -> List[str]:
+@app.get("/subjects", response_model=list[str])
+async def get_subjects() -> list[str]:
     """Get list of available subjects."""
     return [subject.value for subject in Subject]
 
 
-@app.get("/grade-bands", response_model=List[str])
-async def get_grade_bands() -> List[str]:
+@app.get("/grade-bands", response_model=list[str])
+async def get_grade_bands() -> list[str]:
     """Get list of available grade bands."""
     return [grade.value for grade in GradeBand]
 
 
-@app.get("/regions", response_model=List[str])
-async def get_regions() -> List[str]:
+@app.get("/regions", response_model=list[str])
+async def get_regions() -> list[str]:
     """Get list of available regions."""
     return [region.value for region in Region]
 
@@ -255,7 +248,7 @@ async def validate_policy(
     grade_band: GradeBand = Query(..., description="Grade band to validate"),
     region: Region = Query(..., description="Region to validate"),
     service: ModelDispatchService = Depends(get_dispatch_service),
-) -> Dict[str, any]:
+) -> dict[str, any]:
     """Validate that a policy exists for the given parameters."""
     try:
         # Create a test dispatch request

@@ -68,9 +68,11 @@ class ELAEvaluatorService:
             pii_detected = False
 
             if request.enable_pii_detection and self.analyzer_engine:
-                pii_entities, anonymized_submission, pii_detected = (
-                    await self._detect_and_anonymize_pii(request.submission)
-                )
+                (
+                    pii_entities,
+                    anonymized_submission,
+                    pii_detected,
+                ) = await self._detect_and_anonymize_pii(request.submission)
 
             # Step 2: Content Moderation
             content_flags = []
@@ -83,8 +85,10 @@ class ELAEvaluatorService:
 
             # Step 3: Rubric Scoring (use anonymized text)
             scores = await self._score_submission(
-                request.prompt, anonymized_submission, request.grade_band,
-                request.criteria
+                request.prompt,
+                anonymized_submission,
+                request.grade_band,
+                request.criteria,
             )
 
             # Step 4: Generate Teacher Notes
@@ -153,7 +157,7 @@ class ELAEvaluatorService:
             for result in results:
                 entity = PIIEntity(
                     entity_type=result.entity_type,
-                    text=text[result.start:result.end],
+                    text=text[result.start : result.end],
                     start=result.start,
                     end=result.end,
                     confidence=result.score,
@@ -188,7 +192,10 @@ class ELAEvaluatorService:
 
         # Basic keyword filtering
         inappropriate_keywords = [
-            "hate", "violence", "inappropriate", "harmful"
+            "hate",
+            "violence",
+            "inappropriate",
+            "harmful",
         ]
 
         text_lower = text.lower()
@@ -272,7 +279,10 @@ class ELAEvaluatorService:
         logger.info(
             "Scoring criterion %s for grade band %s "
             "(prompt: %d chars, submission: %d chars)",
-            criterion.value, grade_band.value, len(prompt), len(submission)
+            criterion.value,
+            grade_band.value,
+            len(prompt),
+            len(submission),
         )
         await asyncio.sleep(0.1)  # Simulate processing time
 
@@ -375,11 +385,13 @@ class ELAEvaluatorService:
         # Customize based on lowest scoring areas
         lowest_score = min(score.score.value for score in scores)
         if lowest_score <= 2:
-            suggestions.extend([
-                "Provide additional scaffolding for writing structure",
-                "Use sentence frames and starters",
-                "Practice with shorter writing tasks first",
-            ])
+            suggestions.extend(
+                [
+                    "Provide additional scaffolding for writing structure",
+                    "Use sentence frames and starters",
+                    "Practice with shorter writing tasks first",
+                ]
+            )
 
         return suggestions[:5]  # Return top 5 suggestions
 

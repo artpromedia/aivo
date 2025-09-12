@@ -1,7 +1,7 @@
 // Playwright test files should have their own ESLint config
-import globals from 'globals';
+const globals = require('globals');
 
-export default [
+module.exports = [
   {
     files: ['**/*.spec.ts', '**/*.test.ts'],
     languageOptions: {

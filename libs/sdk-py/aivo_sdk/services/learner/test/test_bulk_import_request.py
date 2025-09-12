@@ -37,15 +37,15 @@ class TestBulkImportRequest(unittest.TestCase):
                 tenant_id = '456e7890-e89b-12d3-a456-426614174000',
                 learners = [
                     aivo_sdk.models.create_learner_request.CreateLearnerRequest(
-                        tenant_id = '456e7890-e89b-12d3-a456-426614174000', 
-                        email = 'learner@example.com', 
-                        first_name = 'Jane', 
-                        last_name = 'Smith', 
-                        timezone = 'America/New_York', 
-                        language = 'en', 
-                        department = 'Engineering', 
-                        job_title = 'Software Engineer', 
-                        manager = '234e5678-e89b-12d3-a456-426614174000', 
+                        tenant_id = '456e7890-e89b-12d3-a456-426614174000',
+                        email = 'learner@example.com',
+                        first_name = 'Jane',
+                        last_name = 'Smith',
+                        timezone = 'America/New_York',
+                        language = 'en',
+                        department = 'Engineering',
+                        job_title = 'Software Engineer',
+                        manager = '234e5678-e89b-12d3-a456-426614174000',
                         metadata = { }, )
                     ]
             )
@@ -54,15 +54,15 @@ class TestBulkImportRequest(unittest.TestCase):
                 tenant_id = '456e7890-e89b-12d3-a456-426614174000',
                 learners = [
                     aivo_sdk.models.create_learner_request.CreateLearnerRequest(
-                        tenant_id = '456e7890-e89b-12d3-a456-426614174000', 
-                        email = 'learner@example.com', 
-                        first_name = 'Jane', 
-                        last_name = 'Smith', 
-                        timezone = 'America/New_York', 
-                        language = 'en', 
-                        department = 'Engineering', 
-                        job_title = 'Software Engineer', 
-                        manager = '234e5678-e89b-12d3-a456-426614174000', 
+                        tenant_id = '456e7890-e89b-12d3-a456-426614174000',
+                        email = 'learner@example.com',
+                        first_name = 'Jane',
+                        last_name = 'Smith',
+                        timezone = 'America/New_York',
+                        language = 'en',
+                        department = 'Engineering',
+                        job_title = 'Software Engineer',
+                        manager = '234e5678-e89b-12d3-a456-426614174000',
                         metadata = { }, )
                     ],
         )

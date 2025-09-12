@@ -16,35 +16,33 @@ class Settings(BaseSettings):
     # Service Configuration
     service_name: str = Field(
         default="problem-session-svc",
-        description="Service name for identification"
+        description="Service name for identification",
     )
     host: str = Field(default="127.0.0.1", description="Host to bind to")
     port: int = Field(default=8000, description="Port to bind to")
     debug: bool = Field(default=False, description="Enable debug mode")
-    log_level: str = Field(
-        default="INFO", description="Logging level"
-    )
+    log_level: str = Field(default="INFO", description="Logging level")
 
     # External Service URLs
     ink_service_url: str = Field(
         default="http://localhost:8001",
-        description="URL for ink capture service"
+        description="URL for ink capture service",
     )
     math_service_url: str = Field(
         default="http://localhost:8002",
-        description="URL for math recognition service"
+        description="URL for math recognition service",
     )
     science_service_url: str = Field(
         default="http://localhost:8003",
-        description="URL for science solver service"
+        description="URL for science solver service",
     )
     subject_brain_url: str = Field(
         default="http://localhost:8004",
-        description="URL for subject brain service"
+        description="URL for subject brain service",
     )
     event_service_url: str = Field(
         default="http://localhost:8080/events",
-        description="URL for event publishing service"
+        description="URL for event publishing service",
     )
 
     # Session Configuration
@@ -77,8 +75,8 @@ class Settings(BaseSettings):
     # Database Configuration
     database_url: str = Field(
         default="postgresql+asyncpg://postgres:postgres@localhost:5432/"
-                "problem_session_db",
-        description="Database connection URL"
+        "problem_session_db",
+        description="Database connection URL",
     )
 
 

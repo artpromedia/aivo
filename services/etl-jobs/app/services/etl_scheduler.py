@@ -90,11 +90,7 @@ class ETLScheduler:
             except asyncio.CancelledError:
                 break
             except Exception as e:  # pylint: disable=broad-exception-caught
-                logger.error(
-                    "Error in scheduler loop",
-                    error=str(e),
-                    error_type=type(e).__name__
-                )
+                logger.error("Error in scheduler loop", error=str(e), error_type=type(e).__name__)
                 # Brief pause before retrying
                 await asyncio.sleep(60)
 
@@ -108,14 +104,10 @@ class ETLScheduler:
             self._metrics["jobs_scheduled"] += 1
 
             # Run transformations
-            results = await self.snowflake_service.run_daily_transformations(
-                target_date
-            )
+            results = await self.snowflake_service.run_daily_transformations(target_date)
 
             # Run data quality validation
-            validation_results = (
-                await self.snowflake_service.validate_data_quality(target_date)
-            )
+            validation_results = await self.snowflake_service.validate_data_quality(target_date)
 
             # Check if all validations passed
             all_passed = all(validation_results.values())
@@ -141,13 +133,9 @@ class ETLScheduler:
 
         except Exception as e:  # pylint: disable=broad-exception-caught
             self._metrics["jobs_failed"] += 1
-            logger.error(
-                "Daily ETL jobs failed", target_date=target_date, error=str(e)
-            )
+            logger.error("Daily ETL jobs failed", target_date=target_date, error=str(e))
 
-    async def run_manual_job(
-        self, target_date: date | None = None
-    ) -> dict[str, Any]:
+    async def run_manual_job(self, target_date: date | None = None) -> dict[str, Any]:
         """Run ETL jobs manually for a specific date."""
         if target_date is None:
             target_date = (datetime.utcnow() - timedelta(days=1)).date()
@@ -160,14 +148,10 @@ class ETLScheduler:
                 await self.snowflake_service.connect()
 
             # Run transformations
-            results = await self.snowflake_service.run_daily_transformations(
-                target_date
-            )
+            results = await self.snowflake_service.run_daily_transformations(target_date)
 
             # Run validation
-            validation_results = (
-                await self.snowflake_service.validate_data_quality(target_date)
-            )
+            validation_results = await self.snowflake_service.validate_data_quality(target_date)
 
             return {
                 "status": "success",
@@ -178,22 +162,12 @@ class ETLScheduler:
             }
 
         except (ConnectionError, RuntimeError, ValueError) as e:
-            logger.error(
-                "Manual ETL job failed", target_date=target_date, error=str(e)
-            )
-            return {
-                "status": "failed",
-                "target_date": target_date.isoformat(),
-                "error": str(e)
-            }
+            logger.error("Manual ETL job failed", target_date=target_date, error=str(e))
+            return {"status": "failed", "target_date": target_date.isoformat(), "error": str(e)}
 
-    async def backfill_data(
-        self, start_date: date, end_date: date
-    ) -> dict[str, Any]:
+    async def backfill_data(self, start_date: date, end_date: date) -> dict[str, Any]:
         """Backfill data for a date range."""
-        logger.info(
-            "Starting data backfill", start_date=start_date, end_date=end_date
-        )
+        logger.info("Starting data backfill", start_date=start_date, end_date=end_date)
 
         if not self.snowflake_service.is_connected():
             await self.snowflake_service.connect()
@@ -206,33 +180,19 @@ class ETLScheduler:
                 logger.info("Processing backfill date", date=current_date)
 
                 # Run transformations for this date
-                day_results = (
-                    await self.snowflake_service.run_daily_transformations(
-                        current_date
-                    )
+                day_results = await self.snowflake_service.run_daily_transformations(current_date)
+
+                results.append(
+                    {"date": current_date.isoformat(), "status": "success", "results": day_results}
                 )
 
-                results.append({
-                    "date": current_date.isoformat(),
-                    "status": "success",
-                    "results": day_results
-                })
-
-                logger.info(
-                    "Backfill date completed",
-                    date=current_date,
-                    results=day_results
-                )
+                logger.info("Backfill date completed", date=current_date, results=day_results)
 
             except Exception as e:  # pylint: disable=broad-exception-caught
-                logger.error(
-                    "Backfill failed for date", date=current_date, error=str(e)
+                logger.error("Backfill failed for date", date=current_date, error=str(e))
+                results.append(
+                    {"date": current_date.isoformat(), "status": "failed", "error": str(e)}
                 )
-                results.append({
-                    "date": current_date.isoformat(),
-                    "status": "failed",
-                    "error": str(e)
-                })
 
             current_date += timedelta(days=1)
 
@@ -241,9 +201,7 @@ class ETLScheduler:
             start_date=start_date,
             end_date=end_date,
             total_days=len(results),
-            successful_days=len(
-                [r for r in results if r["status"] == "success"]
-            ),
+            successful_days=len([r for r in results if r["status"] == "success"]),
         )
 
         return {
@@ -271,8 +229,7 @@ class ETLScheduler:
             health["snowpipe"] = pipe_status
 
             # Overall health depends on Snowflake connectivity
-            if (not sf_health.get("connected") or
-                    not pipe_status.get("healthy")):
+            if not sf_health.get("connected") or not pipe_status.get("healthy"):
                 health["status"] = "unhealthy"
 
         except Exception as e:  # pylint: disable=broad-exception-caught

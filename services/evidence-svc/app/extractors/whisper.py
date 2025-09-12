@@ -1,10 +1,11 @@
-﻿"""OpenAI Whisper integration for audio transcription."""
+"""OpenAI Whisper integration for audio transcription."""
+
 import asyncio
 import io
 import logging
 import tempfile
 from pathlib import Path
-from typing import Any, Dict, Optional, Tuple
+from typing import Any
 
 import boto3
 import httpx
@@ -22,12 +23,12 @@ class WhisperExtractor:
     def __init__(
         self,
         openai_api_key: str,
-        aws_access_key_id: Optional[str] = None,
-        aws_secret_access_key: Optional[str] = None,
+        aws_access_key_id: str | None = None,
+        aws_secret_access_key: str | None = None,
         region_name: str = "us-east-1",
     ) -> None:
         """Initialize Whisper extractor.
-        
+
         Args:
             openai_api_key: OpenAI API key
             aws_access_key_id: AWS access key ID for S3 access
@@ -35,7 +36,7 @@ class WhisperExtractor:
             region_name: AWS region name
         """
         self.openai_client = AsyncOpenAI(api_key=openai_api_key)
-        
+
         try:
             self.s3_client = boto3.client(
                 "s3",
@@ -71,18 +72,18 @@ class WhisperExtractor:
         self,
         bucket: str,
         key: str,
-        config: Optional[WhisperConfig] = None,
-    ) -> Tuple[str, Dict[str, Any]]:
+        config: WhisperConfig | None = None,
+    ) -> tuple[str, dict[str, Any]]:
         """Transcribe audio file from S3.
-        
+
         Args:
             bucket: S3 bucket name
             key: S3 object key
             config: Whisper configuration
-            
+
         Returns:
             Tuple of (transcribed_text, metadata)
-            
+
         Raises:
             ValueError: If file format is not supported
             RuntimeError: If transcription fails
@@ -124,14 +125,14 @@ class WhisperExtractor:
     async def transcribe_from_url(
         self,
         url: str,
-        config: Optional[WhisperConfig] = None,
-    ) -> Tuple[str, Dict[str, Any]]:
+        config: WhisperConfig | None = None,
+    ) -> tuple[str, dict[str, Any]]:
         """Transcribe audio from URL.
-        
+
         Args:
             url: URL to audio file
             config: Whisper configuration
-            
+
         Returns:
             Tuple of (transcribed_text, metadata)
         """
@@ -142,7 +143,7 @@ class WhisperExtractor:
             async with httpx.AsyncClient() as client:
                 response = await client.get(url)
                 response.raise_for_status()
-                
+
                 audio_data = response.content
                 content_type = response.headers.get("content-type", "")
 
@@ -161,7 +162,7 @@ class WhisperExtractor:
             logger.error("URL transcription failed: %s", e)
             raise
 
-    async def _get_s3_metadata(self, bucket: str, key: str) -> Dict[str, Any]:
+    async def _get_s3_metadata(self, bucket: str, key: str) -> dict[str, Any]:
         """Get S3 object metadata."""
         loop = asyncio.get_event_loop()
         response = await loop.run_in_executor(
@@ -186,7 +187,7 @@ class WhisperExtractor:
         bucket: str,
         key: str,
         config: WhisperConfig,
-    ) -> Tuple[str, Dict[str, Any]]:
+    ) -> tuple[str, dict[str, Any]]:
         """Transcribe small audio file directly."""
         audio_data = await self._download_from_s3(bucket, key)
         return await self._transcribe_audio_data(audio_data, config)
@@ -196,7 +197,7 @@ class WhisperExtractor:
         bucket: str,
         key: str,
         config: WhisperConfig,
-    ) -> Tuple[str, Dict[str, Any]]:
+    ) -> tuple[str, dict[str, Any]]:
         """Transcribe large audio file by chunking."""
         audio_data = await self._download_from_s3(bucket, key)
         return await self._transcribe_large_audio_data(audio_data, config)
@@ -205,7 +206,7 @@ class WhisperExtractor:
         self,
         audio_data: bytes,
         config: WhisperConfig,
-    ) -> Tuple[str, Dict[str, Any]]:
+    ) -> tuple[str, dict[str, Any]]:
         """Transcribe audio data using Whisper API."""
         with tempfile.NamedTemporaryFile(suffix=".wav", delete=False) as temp_file:
             temp_file.write(audio_data)
@@ -245,11 +246,11 @@ class WhisperExtractor:
         self,
         audio_data: bytes,
         config: WhisperConfig,
-    ) -> Tuple[str, Dict[str, Any]]:
+    ) -> tuple[str, dict[str, Any]]:
         """Transcribe large audio by splitting into chunks."""
         # Load audio using pydub
         audio = AudioSegment.from_file(io.BytesIO(audio_data))
-        
+
         # Split into 20-minute chunks (Whisper works best with shorter segments)
         chunk_length_ms = 20 * 60 * 1000  # 20 minutes
         chunks = [
@@ -331,14 +332,16 @@ class WhisperExtractor:
 
         # Combine results
         full_transcript = " ".join(all_transcripts)
-        
+
         combined_metadata = {
             "transcription_method": "chunked",
             "total_chunks": len(chunks),
             "total_duration": total_duration,
             "chunks": chunk_metadata,
             "segments": all_segments,
-            "language": chunk_metadata[0]["metadata"].get("language") if chunk_metadata else None,
+            "language": chunk_metadata[0]["metadata"].get("language")
+            if chunk_metadata
+            else None,
             "model": config.model,
         }
 
@@ -354,7 +357,7 @@ class WhisperExtractor:
         self,
         response: Any,
         config: WhisperConfig,
-    ) -> Tuple[str, Dict[str, Any]]:
+    ) -> tuple[str, dict[str, Any]]:
         """Process Whisper API response."""
         if config.response_format == "verbose_json":
             transcript = response.text
@@ -363,7 +366,9 @@ class WhisperExtractor:
                 "language": getattr(response, "language", None),
                 "duration": getattr(response, "duration", None),
                 "segments": getattr(response, "segments", []),
-                "words": getattr(response, "words", []) if hasattr(response, "words") else [],
+                "words": getattr(response, "words", [])
+                if hasattr(response, "words")
+                else [],
                 "model": config.model,
                 "temperature": config.temperature,
             }
@@ -382,9 +387,9 @@ class WhisperExtractor:
         """Check if content type is supported by Whisper."""
         return content_type.lower() in self.supported_formats
 
-    async def get_supported_languages(self) -> Dict[str, str]:
+    async def get_supported_languages(self) -> dict[str, str]:
         """Get list of supported languages for Whisper.
-        
+
         Returns:
             Dictionary mapping language codes to language names
         """
@@ -448,5 +453,5 @@ class WhisperExtractor:
             "vi": "Vietnamese",
             "cy": "Welsh",
         }
-        
+
         return languages

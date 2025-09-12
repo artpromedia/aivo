@@ -210,4 +210,51 @@ export class AuthAPI {
       method: 'POST',
     });
   }
+
+  // Role management methods
+  static async getRoles() {
+    return apiRequest<{
+      roles: Array<{
+        id: string;
+        name: string;
+        description: string;
+        permissions: string[];
+      }>;
+    }>('/admin/roles');
+  }
+
+  static async assignRole(userId: string, role: string) {
+    return apiRequest('/admin/team/role-assign', {
+      method: 'POST',
+      body: JSON.stringify({ userId, role }),
+    });
+  }
+
+  static async revokeRole(userId: string, role: string) {
+    return apiRequest('/admin/team/role-revoke', {
+      method: 'POST',
+      body: JSON.stringify({ userId, role }),
+    });
+  }
+
+  // Invite management methods
+  static async getInvites() {
+    return apiRequest<{
+      invites: Array<{
+        id: string;
+        email: string;
+        role: string;
+        status: 'pending' | 'accepted' | 'expired';
+        sentAt: string;
+        expiresAt: string;
+      }>;
+    }>('/admin/invites');
+  }
+
+  static async resendInvite(inviteId: string) {
+    return apiRequest('/admin/team/invite-resend', {
+      method: 'POST',
+      body: JSON.stringify({ inviteId }),
+    });
+  }
 }

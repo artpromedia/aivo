@@ -303,9 +303,9 @@ class TestAssessmentEngine:
             question_count += 1
             current_question = next_question
 
-        assert 5 <= question_count <= 7, (
-            f"Expected convergence in 5-7 questions, got {question_count}"
-        )
+        assert (
+            5 <= question_count <= 7
+        ), f"Expected convergence in 5-7 questions, got {question_count}"
         assert session.is_complete()
         assert session.current_level_estimate in [
             LevelType.L0,

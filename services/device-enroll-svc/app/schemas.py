@@ -53,12 +53,8 @@ class EnrollmentResponse(BaseModel):
 
     device_id: UUID = Field(..., description="Unique device identifier")
     status: DeviceStatus = Field(..., description="Enrollment status")
-    bootstrap_token: str = Field(
-        ..., description="Bootstrap authentication token"
-    )
-    bootstrap_expires_at: datetime = Field(
-        ..., description="Bootstrap token expiration"
-    )
+    bootstrap_token: str = Field(..., description="Bootstrap authentication token")
+    bootstrap_expires_at: datetime = Field(..., description="Bootstrap token expiration")
     message: str = Field(..., description="Status message")
 
 
@@ -82,9 +78,7 @@ class AttestationSubmissionRequest(BaseModel):
 
     challenge_id: UUID = Field(..., description="Challenge identifier")
     signature: str = Field(..., description="Signed challenge data")
-    public_key_pem: str = Field(
-        ..., description="Device public key in PEM format"
-    )
+    public_key_pem: str = Field(..., description="Device public key in PEM format")
     attestation_data: Optional[Dict[str, Any]] = Field(
         None,
         description="Additional attestation metadata",
@@ -99,9 +93,7 @@ class AttestationSubmissionResponse(BaseModel):
     device_certificate_pem: Optional[str] = Field(
         None, description="Device certificate in PEM format"
     )
-    certificate_serial: Optional[str] = Field(
-        None, description="Certificate serial number"
-    )
+    certificate_serial: Optional[str] = Field(None, description="Certificate serial number")
     certificate_expires_at: Optional[datetime] = Field(
         None, description="Certificate expiration time"
     )
@@ -115,15 +107,9 @@ class DeviceInfoResponse(BaseModel):
     serial_number: str = Field(..., description="Device serial number")
     device_model: str = Field(..., description="Device model")
     status: DeviceStatus = Field(..., description="Device status")
-    firmware_version: Optional[str] = Field(
-        None, description="Firmware version"
-    )
-    certificate_serial: Optional[str] = Field(
-        None, description="Certificate serial number"
-    )
-    certificate_expires_at: Optional[datetime] = Field(
-        None, description="Certificate expiration"
-    )
+    firmware_version: Optional[str] = Field(None, description="Firmware version")
+    certificate_serial: Optional[str] = Field(None, description="Certificate serial number")
+    certificate_expires_at: Optional[datetime] = Field(None, description="Certificate expiration")
     last_seen_at: Optional[datetime] = Field(None, description="Last activity")
     created_at: datetime = Field(..., description="Enrollment date")
 
@@ -131,9 +117,7 @@ class DeviceInfoResponse(BaseModel):
 class DeviceListResponse(BaseModel):
     """Device list response."""
 
-    devices: list[DeviceInfoResponse] = Field(
-        ..., description="List of devices"
-    )
+    devices: list[DeviceInfoResponse] = Field(..., description="List of devices")
     total: int = Field(..., description="Total device count")
     page: int = Field(..., description="Current page")
     size: int = Field(..., description="Page size")

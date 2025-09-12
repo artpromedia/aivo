@@ -236,3 +236,21 @@ async def get_user_tenants(
 async def health_check():
     """Health check endpoint."""
     return MessageResponse(message="Tenant service is healthy")
+
+
+# Add roles listing endpoint
+@router.get("/roles", response_model=list[UserTenantRole])
+async def get_roles(
+    tenantId: int,
+    db: AsyncSession = Depends(get_database),
+    current_user: str = Depends(get_current_user_id),
+):
+    """Get all user roles for a specific tenant."""
+    try:
+        roles = await UserRoleService.get_tenant_roles(db, tenantId)
+        return roles
+    except Exception as e:
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=f"Failed to get roles: {str(e)}",
+        )

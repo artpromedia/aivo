@@ -85,6 +85,7 @@ def _test_fastapi_import() -> bool:
     """Test FastAPI app import."""
     try:
         from app.main import app
+
         assert app is not None  # noqa: S101
     except ImportError as e:
         print(f"❌ FastAPI app import failed: {e}")
@@ -117,6 +118,7 @@ def _test_schemas_import() -> bool:
             DiagramParseRequest,
             UnitValidationRequest,
         )
+
         test_schemas = [
             ChemicalEquationRequest,
             DiagramParseRequest,
@@ -145,7 +147,7 @@ def _test_scientific_computing() -> bool:
 
         # Basic sympy test
         x = sp.Symbol("x")
-        expr = x**2 + 2*x + 1
+        expr = x**2 + 2 * x + 1
         sp.simplify(expr)  # Test simplification works
 
     except Exception as e:

@@ -10,6 +10,7 @@ from pydantic import BaseModel, Field, validator
 
 class ArticulationLevel(str, Enum):
     """Articulation difficulty levels."""
+
     BEGINNER = "beginner"
     INTERMEDIATE = "intermediate"
     ADVANCED = "advanced"
@@ -17,6 +18,7 @@ class ArticulationLevel(str, Enum):
 
 class DrillType(str, Enum):
     """Types of speech drills."""
+
     PHONEME = "phoneme"
     WORD = "word"
     SENTENCE = "sentence"
@@ -25,6 +27,7 @@ class DrillType(str, Enum):
 
 class SentimentType(str, Enum):
     """Sentiment analysis results."""
+
     POSITIVE = "positive"
     NEGATIVE = "negative"
     NEUTRAL = "neutral"
@@ -33,6 +36,7 @@ class SentimentType(str, Enum):
 
 class PrivacyLevel(str, Enum):
     """Journal entry privacy levels."""
+
     PRIVATE = "private"
     THERAPIST_ONLY = "therapist_only"
     TEAM_SHARED = "team_shared"
@@ -40,8 +44,10 @@ class PrivacyLevel(str, Enum):
 
 # Speech Recognition and Articulation Models
 
+
 class PhonemeTimingData(BaseModel):
     """Phoneme timing data from ASR."""
+
     phoneme: str = Field(..., description="IPA phoneme symbol")
     start_time: float = Field(..., description="Start time in seconds", ge=0.0)
     end_time: float = Field(..., description="End time in seconds", ge=0.0)
@@ -63,6 +69,7 @@ class PhonemeTimingData(BaseModel):
 
 class AudioProcessingRequest(BaseModel):
     """Request for audio processing and articulation analysis."""
+
     audio_data: bytes = Field(..., description="Audio file data")
     target_phonemes: list[str] = Field(
         ..., description="Target phonemes to analyze"
@@ -88,6 +95,7 @@ class AudioProcessingRequest(BaseModel):
 
 class ArticulationScore(BaseModel):
     """Articulation scoring results."""
+
     phoneme: str = Field(..., description="Evaluated phoneme")
     accuracy_score: float = Field(
         ..., description="Accuracy score", ge=0.0, le=1.0
@@ -111,6 +119,7 @@ class ArticulationScore(BaseModel):
 
 class DrillSession(BaseModel):
     """Speech drill session."""
+
     session_id: UUID = Field(default_factory=uuid4)
     student_id: UUID = Field(..., description="Student identifier")
     drill_type: DrillType = Field(..., description="Type of drill")
@@ -134,6 +143,7 @@ class DrillSession(BaseModel):
 
 class DrillSessionResponse(BaseModel):
     """Response for drill session creation/analysis."""
+
     session: DrillSession = Field(..., description="Drill session data")
     overall_performance: float = Field(
         ..., description="Overall session performance", ge=0.0, le=1.0
@@ -148,23 +158,21 @@ class DrillSessionResponse(BaseModel):
 
 # SEL Journaling Models
 
+
 class JournalEntry(BaseModel):
     """SEL journal entry."""
+
     entry_id: UUID = Field(default_factory=uuid4)
     student_id: UUID = Field(..., description="Student identifier")
     title: str = Field(..., description="Entry title", max_length=200)
-    content: str = Field(
-        ..., description="Entry content", max_length=5000
-    )
+    content: str = Field(..., description="Entry content", max_length=5000)
     privacy_level: PrivacyLevel = Field(
         default=PrivacyLevel.PRIVATE, description="Privacy level"
     )
     mood_rating: int | None = Field(
         default=None, description="Mood rating 1-10", ge=1, le=10
     )
-    tags: list[str] = Field(
-        default_factory=list, description="Entry tags"
-    )
+    tags: list[str] = Field(default_factory=list, description="Entry tags")
     created_at: datetime = Field(
         default_factory=datetime.utcnow, description="Creation timestamp"
     )
@@ -183,23 +191,21 @@ class JournalEntry(BaseModel):
 
 class JournalEntryRequest(BaseModel):
     """Request to create/update journal entry."""
+
     title: str = Field(..., description="Entry title", max_length=200)
-    content: str = Field(
-        ..., description="Entry content", max_length=5000
-    )
+    content: str = Field(..., description="Entry content", max_length=5000)
     privacy_level: PrivacyLevel = Field(
         default=PrivacyLevel.PRIVATE, description="Privacy level"
     )
     mood_rating: int | None = Field(
         default=None, description="Mood rating 1-10", ge=1, le=10
     )
-    tags: list[str] = Field(
-        default_factory=list, description="Entry tags"
-    )
+    tags: list[str] = Field(default_factory=list, description="Entry tags")
 
 
 class SentimentAnalysis(BaseModel):
     """Sentiment analysis results."""
+
     sentiment: SentimentType = Field(..., description="Overall sentiment")
     confidence: float = Field(
         ..., description="Confidence score", ge=0.0, le=1.0
@@ -220,6 +226,7 @@ class SentimentAnalysis(BaseModel):
 
 class JournalEntryResponse(BaseModel):
     """Response for journal entry operations."""
+
     entry: JournalEntry = Field(..., description="Journal entry")
     sentiment_analysis: SentimentAnalysis | None = Field(
         default=None, description="Sentiment analysis results"
@@ -232,6 +239,7 @@ class JournalEntryResponse(BaseModel):
 
 class JournalHistoryRequest(BaseModel):
     """Request for journal history."""
+
     student_id: UUID = Field(..., description="Student identifier")
     start_date: datetime | None = Field(
         default=None, description="Start date filter"
@@ -243,9 +251,7 @@ class JournalHistoryRequest(BaseModel):
         default_factory=lambda: list(PrivacyLevel),
         description="Privacy levels to include",
     )
-    tags: list[str] = Field(
-        default_factory=list, description="Filter by tags"
-    )
+    tags: list[str] = Field(default_factory=list, description="Filter by tags")
     limit: int = Field(
         default=50, description="Maximum results", ge=1, le=1000
     )
@@ -254,6 +260,7 @@ class JournalHistoryRequest(BaseModel):
 
 class JournalHistoryResponse(BaseModel):
     """Response for journal history."""
+
     entries: list[JournalEntryResponse] = Field(
         default_factory=list, description="Journal entries"
     )
@@ -268,8 +275,10 @@ class JournalHistoryResponse(BaseModel):
 
 # Health and Status Models
 
+
 class HealthResponse(BaseModel):
     """Health check response."""
+
     status: str = Field(default="healthy", description="Service status")
     service_name: str = Field(..., description="Service name")
     version: str = Field(..., description="Service version")

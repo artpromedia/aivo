@@ -1,6 +1,7 @@
-﻿"""Database configuration for Media Service."""
+"""Database configuration for Media Service."""
+
 import os
-from typing import AsyncGenerator
+from collections.abc import AsyncGenerator
 
 from sqlalchemy import MetaData
 from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker, create_async_engine
@@ -43,7 +44,7 @@ metadata = MetaData(naming_convention=convention)
 
 class Base(DeclarativeBase):
     """Base class for SQLAlchemy models."""
-    
+
     metadata = metadata
 
 

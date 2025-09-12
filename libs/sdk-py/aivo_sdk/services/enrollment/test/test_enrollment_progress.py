@@ -42,8 +42,8 @@ class TestEnrollmentProgress(unittest.TestCase):
                 current_module = 'mod3-uuid',
                 assessment_scores = [
                     aivo_sdk.models.enrollment_progress_assessment_scores_inner.EnrollmentProgress_assessmentScores_inner(
-                        assessment_id = '', 
-                        score = 0, 
+                        assessment_id = '',
+                        score = 0,
                         completed_at = datetime.datetime.strptime('2013-10-20 19:20:30.00', '%Y-%m-%d %H:%M:%S.%f'), )
                     ]
             )

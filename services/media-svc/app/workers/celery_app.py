@@ -1,5 +1,7 @@
-﻿"""Celery application for background video processing tasks."""
+"""Celery application for background video processing tasks."""
+
 import os
+
 from celery import Celery
 
 # Redis configuration for Celery

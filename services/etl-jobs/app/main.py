@@ -129,9 +129,7 @@ class ETLProcessor:
                 )
                 return True
 
-            logger.error(
-                "Failed to write events to S3", event_count=len(events)
-            )
+            logger.error("Failed to write events to S3", event_count=len(events))
             self._metrics["processing_errors"] += 1
             return False
 

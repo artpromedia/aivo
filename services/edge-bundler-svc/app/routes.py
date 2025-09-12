@@ -63,21 +63,19 @@ async def create_bundle(
         if bundle_request.max_bundle_size > 52428800:  # 50MB
             raise HTTPException(
                 status_code=status.HTTP_400_BAD_REQUEST,
-                detail="Bundle size cannot exceed 50MB limit"
+                detail="Bundle size cannot exceed 50MB limit",
             )
 
         if bundle_request.max_precache_size > 26214400:  # 25MB
             raise HTTPException(
                 status_code=status.HTTP_400_BAD_REQUEST,
-                detail="Precache size cannot exceed 25MB limit"
+                detail="Precache size cannot exceed 25MB limit",
             )
 
         # Get user from request headers (in production, use proper auth)
         created_by = request.headers.get("X-User-ID")
 
-        bundle = await bundle_service.create_bundle(
-            bundle_request, db, _created_by=created_by
-        )
+        bundle = await bundle_service.create_bundle(bundle_request, db, _created_by=created_by)
 
         logger.info(
             "Bundle creation initiated",
@@ -91,15 +89,11 @@ async def create_bundle(
 
     except ValueError as e:
         logger.warning("Invalid bundle request", error=str(e))
-        raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST,
-            detail=str(e)
-        ) from e
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=str(e)) from e
     except Exception as e:
         logger.error("Failed to create bundle", error=str(e))
         raise HTTPException(
-            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail="Failed to create bundle"
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail="Failed to create bundle"
         ) from e
 
 
@@ -111,10 +105,7 @@ async def get_bundle(
     """Get bundle details by ID."""
     bundle = await bundle_service.get_bundle(bundle_id, db)
     if not bundle:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail="Bundle not found"
-        )
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Bundle not found")
     return BundleResponse.from_orm(bundle)
 
 
@@ -155,10 +146,7 @@ async def delete_bundle(
     """Delete a bundle and its files."""
     bundle = await bundle_service.get_bundle(bundle_id, db)
     if not bundle:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail="Bundle not found"
-        )
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Bundle not found")
 
     # TODO: Implement bundle deletion with file cleanup  # pylint: disable=fixme
     logger.info("Bundle deletion requested", bundle_id=bundle_id)
@@ -175,15 +163,12 @@ async def initiate_download(
     """Initiate bundle download."""
     bundle = await bundle_service.get_bundle(bundle_id, db)
     if not bundle:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail="Bundle not found"
-        )
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Bundle not found")
 
     if bundle.status != BundleStatus.COMPLETED:
         raise HTTPException(
             status_code=status.HTTP_409_CONFLICT,
-            detail=f"Bundle is not ready for download (status: {bundle.status})"
+            detail=f"Bundle is not ready for download (status: {bundle.status})",
         )
 
     # Create download record
@@ -201,7 +186,8 @@ async def initiate_download(
     download_url = f"{base_url}/api/v1/bundles/{bundle_id}/files/bundle"
     manifest_url = (
         f"{base_url}/api/v1/bundles/{bundle_id}/files/manifest"
-        if download_request.include_manifest else None
+        if download_request.include_manifest
+        else None
     )
 
     return DownloadResponse(
@@ -223,15 +209,11 @@ async def download_bundle_file(
     """Download the actual bundle file."""
     bundle = await bundle_service.get_bundle(bundle_id, db)
     if not bundle or not bundle.bundle_path:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail="Bundle file not found"
-        )
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Bundle file not found")
 
     if not os.path.exists(bundle.bundle_path):
         raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail="Bundle file not found on disk"
+            status_code=status.HTTP_404_NOT_FOUND, detail="Bundle file not found on disk"
         )
 
     return FileResponse(
@@ -249,15 +231,11 @@ async def download_manifest_file(
     """Download the bundle manifest file."""
     bundle = await bundle_service.get_bundle(bundle_id, db)
     if not bundle or not bundle.manifest_path:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail="Manifest file not found"
-        )
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Manifest file not found")
 
     if not os.path.exists(bundle.manifest_path):
         raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail="Manifest file not found on disk"
+            status_code=status.HTTP_404_NOT_FOUND, detail="Manifest file not found on disk"
         )
 
     return FileResponse(
@@ -279,10 +257,7 @@ async def merge_crdt_operations(
         # Validate bundle exists
         bundle = await bundle_service.get_bundle(bundle_id, db)
         if not bundle:
-            raise HTTPException(
-                status_code=status.HTTP_404_NOT_FOUND,
-                detail="Bundle not found"
-            )
+            raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Bundle not found")
 
         # Ensure bundle ID matches request
         merge_request.bundle_id = bundle_id
@@ -303,7 +278,7 @@ async def merge_crdt_operations(
         logger.error("CRDT merge failed", bundle_id=bundle_id, error=str(e))
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail="Failed to merge CRDT operations"
+            detail="Failed to merge CRDT operations",
         ) from e
 
 
@@ -331,9 +306,7 @@ async def health_check() -> HealthResponse:
     try:
         # Check storage path availability
         storage_path = os.getenv("BUNDLE_STORAGE_PATH", "/tmp/bundles")
-        storage_available = (
-            os.path.exists(storage_path) and os.access(storage_path, os.W_OK)
-        )
+        storage_available = os.path.exists(storage_path) and os.access(storage_path, os.W_OK)
 
         dependencies = {
             "database": "healthy",  # TODO: Add actual DB health check  # pylint: disable=fixme
@@ -342,9 +315,7 @@ async def health_check() -> HealthResponse:
 
         return HealthResponse(
             status=(
-                "healthy"
-                if all(dep == "healthy" for dep in dependencies.values())
-                else "degraded"
+                "healthy" if all(dep == "healthy" for dep in dependencies.values()) else "degraded"
             ),
             timestamp=datetime.utcnow(),
             version="1.0.0",
@@ -357,6 +328,5 @@ async def health_check() -> HealthResponse:
     except Exception as e:
         logger.error("Health check failed", error=str(e))
         raise HTTPException(
-            status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
-            detail="Service unhealthy"
+            status_code=status.HTTP_503_SERVICE_UNAVAILABLE, detail="Service unhealthy"
         ) from e

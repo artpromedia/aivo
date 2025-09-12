@@ -1,19 +1,18 @@
-﻿"""
+"""
 FastAPI application setup with consent ledger API routes.
 
 Main application with CORS, middleware, and route registration.
 """
-from contextlib import asynccontextmanager
-from typing import Dict, Any
 
-from fastapi import FastAPI, Request, Response
+from contextlib import asynccontextmanager
+
+import uvicorn
+from app.api import consent_router, deletion_router, export_router, health_router, parental_router
+from config import cleanup_database, get_settings, init_database, is_database_healthy
+from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.middleware.trustedhost import TrustedHostMiddleware
 from fastapi.responses import JSONResponse
-import uvicorn
-
-from app.api import consent_router, parental_router, export_router, deletion_router, health_router
-from config import get_settings, init_database, cleanup_database, is_database_healthy
 
 
 @asynccontextmanager
@@ -29,7 +28,7 @@ async def lifespan(app: FastAPI):
 def create_app() -> FastAPI:
     """Create and configure FastAPI application."""
     settings = get_settings()
-    
+
     app = FastAPI(
         title=settings.APP_NAME,
         version=settings.APP_VERSION,
@@ -38,7 +37,7 @@ def create_app() -> FastAPI:
         redoc_url="/redoc" if settings.DEBUG else None,
         lifespan=lifespan,
     )
-    
+
     # CORS middleware
     app.add_middleware(
         CORSMiddleware,
@@ -47,21 +46,20 @@ def create_app() -> FastAPI:
         allow_methods=settings.CORS_ALLOW_METHODS,
         allow_headers=settings.CORS_ALLOW_HEADERS,
     )
-    
+
     # Trusted host middleware for production
     if not settings.DEBUG:
         app.add_middleware(
-            TrustedHostMiddleware,
-            allowed_hosts=["localhost", "127.0.0.1", "*.district.edu"]
+            TrustedHostMiddleware, allowed_hosts=["localhost", "127.0.0.1", "*.district.edu"]
         )
-    
+
     # Register API routers
     app.include_router(health_router, prefix="/health", tags=["Health"])
     app.include_router(consent_router, prefix="/api/v1/consent", tags=["Consent"])
     app.include_router(parental_router, prefix="/api/v1/parental", tags=["Parental Rights"])
     app.include_router(export_router, prefix="/api/v1/export", tags=["Data Export"])
     app.include_router(deletion_router, prefix="/api/v1/deletion", tags=["Data Deletion"])
-    
+
     # Global exception handler
     @app.exception_handler(Exception)
     async def global_exception_handler(request: Request, exc: Exception):
@@ -71,23 +69,23 @@ def create_app() -> FastAPI:
             content={
                 "error": "Internal server error",
                 "message": str(exc) if settings.DEBUG else "An unexpected error occurred",
-                "detail": "Please contact support if this issue persists"
-            }
+                "detail": "Please contact support if this issue persists",
+            },
         )
-    
+
     # Health check middleware
     @app.middleware("http")
     async def health_check_middleware(request: Request, call_next):
         """Add health status headers to responses."""
         response = await call_next(request)
-        
+
         # Add health status header
         db_healthy = await is_database_healthy()
         response.headers["X-Health-Database"] = "healthy" if db_healthy else "unhealthy"
         response.headers["X-Service-Version"] = settings.APP_VERSION
-        
+
         return response
-    
+
     return app
 
 

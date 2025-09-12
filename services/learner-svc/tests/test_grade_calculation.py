@@ -115,6 +115,6 @@ class TestGradeCalculatorService:
 
         for dob, expected_grade in test_cases:
             actual_grade = calculator.calculate_grade_from_dob(dob, reference_date)
-            assert actual_grade == expected_grade, (
-                f"DOB {dob} should be grade {expected_grade}, got {actual_grade}"
-            )
+            assert (
+                actual_grade == expected_grade
+            ), f"DOB {dob} should be grade {expected_grade}, got {actual_grade}"

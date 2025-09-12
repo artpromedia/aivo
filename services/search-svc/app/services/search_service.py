@@ -83,9 +83,7 @@ class SearchService:
             return HealthStatus(status="unhealthy", details={"error": str(e)})
 
     async def search(
-        self: Self,
-        request: SearchRequest,
-        user_context: UserContext
+        self: Self, request: SearchRequest, user_context: UserContext
     ) -> SearchResponse:
         """Perform search with RBAC filtering and PII masking."""
         try:
@@ -100,16 +98,11 @@ class SearchService:
 
             # Apply RBAC filtering
             # pylint: disable=no-member
-            filtered_request = await self.rbac_service.filter_search_request(
-                request,
-                user_context
-            )
+            filtered_request = await self.rbac_service.filter_search_request(request, user_context)
 
             # Perform search
             # pylint: disable=no-member
-            search_response = await self.opensearch_service.search(
-                filtered_request
-            )
+            search_response = await self.opensearch_service.search(filtered_request)
 
             # Apply PII masking
             # pylint: disable=no-member
@@ -137,26 +130,19 @@ class SearchService:
             raise
 
     async def suggest(
-        self: Self,
-        request: SuggestionRequest,
-        user_context: UserContext
+        self: Self, request: SuggestionRequest, user_context: UserContext
     ) -> SuggestionResponse:
         """Get search suggestions with RBAC filtering."""
         try:
             # Apply RBAC filtering to suggestion request
             # pylint: disable=no-member
-            filtered_request = (
-                await self.rbac_service.filter_suggestion_request(
-                    request,
-                    user_context
-                )
+            filtered_request = await self.rbac_service.filter_suggestion_request(
+                request, user_context
             )
 
             # Get suggestions from OpenSearch
             # pylint: disable=no-member
-            suggestions = await self.opensearch_service.suggest(
-                filtered_request
-            )
+            suggestions = await self.opensearch_service.suggest(filtered_request)
 
             logger.debug(
                 "Suggestions generated for user %s: %d suggestions",
@@ -174,18 +160,14 @@ class SearchService:
             raise
 
     async def index_document(
-        self: Self,
-        request: IndexRequest,
-        user_context: UserContext
+        self: Self, request: IndexRequest, user_context: UserContext
     ) -> dict[str, Any]:
         """Index a single document with authorization checks."""
         try:
             # Check user permissions for indexing
             # pylint: disable=no-member
             if not await self.rbac_service.can_index(user_context):
-                raise PermissionError(
-                    "User does not have permission to index documents"
-                )
+                raise PermissionError("User does not have permission to index documents")
 
             # Apply PII masking before indexing
             # pylint: disable=no-member
@@ -202,9 +184,7 @@ class SearchService:
 
             # Index the document
             # pylint: disable=no-member
-            result = await self.opensearch_service.index_document(
-                masked_request
-            )
+            result = await self.opensearch_service.index_document(masked_request)
 
             # Invalidate relevant caches
             if self.redis_client:
@@ -226,32 +206,24 @@ class SearchService:
             raise
 
     async def bulk_index(
-        self: Self,
-        request: BulkIndexRequest,
-        user_context: UserContext
+        self: Self, request: BulkIndexRequest, user_context: UserContext
     ) -> dict[str, Any]:
         """Bulk index documents with authorization checks."""
         try:
             # Check user permissions for bulk indexing
             # pylint: disable=no-member
             if not await self.rbac_service.can_bulk_index(user_context):
-                raise PermissionError(
-                    "User does not have permission to bulk index documents"
-                )
+                raise PermissionError("User does not have permission to bulk index documents")
 
             # Apply PII masking to all documents
             masked_documents = []
             for doc in request.documents:
                 # pylint: disable=no-member
-                masked_doc = await self.pii_masking_service.mask_document(
-                    doc, user_context
-                )
+                masked_doc = await self.pii_masking_service.mask_document(doc, user_context)
                 masked_documents.append(masked_doc)
 
             # Create masked request
-            masked_request = BulkIndexRequest(
-                index=request.index, documents=masked_documents
-            )
+            masked_request = BulkIndexRequest(index=request.index, documents=masked_documents)
 
             # Bulk index the documents
             # pylint: disable=no-member
@@ -276,9 +248,7 @@ class SearchService:
             )
             raise
 
-    def _generate_cache_key(
-        self: Self, request: SearchRequest, user_context: UserContext
-    ) -> str:
+    def _generate_cache_key(self: Self, request: SearchRequest, user_context: UserContext) -> str:
         """Generate a cache key for the search request."""
         key_data = {
             "query": request.query,
@@ -302,9 +272,7 @@ class SearchService:
             logger.warning("Failed to get cached result: %s", str(e))
             return None
 
-    async def _cache_result(
-        self: Self, cache_key: str, result: SearchResponse
-    ) -> None:
+    async def _cache_result(self: Self, cache_key: str, result: SearchResponse) -> None:
         """Cache search result."""
         try:
             if not self.redis_client:

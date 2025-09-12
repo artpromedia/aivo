@@ -2,9 +2,9 @@
 
 on:
   push:
-    branches: [ main, develop ]
+    branches: [main, develop]
   pull_request:
-    branches: [ main, develop ]
+    branches: [main, develop]
   schedule:
     # Run accessibility audits weekly
     - cron: '0 2 * * 1'
@@ -20,35 +20,35 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      
+
       - name: Setup Python
         uses: actions/setup-python@v4
         with:
           python-version: ${{ env.PYTHON_VERSION }}
-      
+
       - name: Install Poetry
         uses: snok/install-poetry@v1
         with:
           version: latest
           virtualenvs-create: true
           virtualenvs-in-project: true
-      
+
       - name: Load cached venv
         id: cached-deps
         uses: actions/cache@v3
         with:
           path: .venv
           key: venv-${{ runner.os }}-${{ hashFiles('**/poetry.lock') }}
-      
+
       - name: Install dependencies
         if: steps.cached-deps.outputs.cache-hit != 'true'
         run: poetry install --no-interaction --no-root
-      
+
       - name: Extract translatable strings
         run: |
           cd services/i18n-svc
           poetry run python -m app.cli.i18n_cli extract --source ../../ --output locales/messages.pot
-      
+
       - name: Validate African language support
         run: |
           cd services/i18n-svc
@@ -59,13 +59,13 @@ jobs:
             poetry run python -m app.cli.i18n_cli update-locale --pot locales/messages.pot --locale $locale
             poetry run python -m app.cli.i18n_cli validate-locale --locale $locale
           done
-      
+
       - name: Generate translation stats
         run: |
           cd services/i18n-svc
           poetry run python -m app.cli.i18n_cli stats > translation-stats.txt
           cat translation-stats.txt
-      
+
       - name: Upload extraction artifacts
         uses: actions/upload-artifact@v3
         with:
@@ -83,29 +83,29 @@ jobs:
         tool: [axe-core, pa11y, lighthouse]
     steps:
       - uses: actions/checkout@v4
-      
+
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
           node-version: ${{ env.NODE_VERSION }}
           cache: 'npm'
-      
+
       - name: Install accessibility tools
         run: |
           npm install -g @axe-core/cli pa11y lighthouse
           npm install -g serve
-      
+
       - name: Setup Python for i18n service
         uses: actions/setup-python@v4
         with:
           python-version: ${{ env.PYTHON_VERSION }}
-      
+
       - name: Install Poetry and dependencies
         run: |
           pip install poetry
           cd services/i18n-svc
           poetry install
-      
+
       - name: Start i18n service
         run: |
           cd services/i18n-svc
@@ -113,7 +113,7 @@ jobs:
           sleep 10
         env:
           DATABASE_URL: sqlite+aiosqlite:///./test.db
-      
+
       - name: Run Axe Core audit
         if: matrix.tool == 'axe-core'
         run: |
@@ -121,7 +121,7 @@ jobs:
             --tags wcag2a,wcag2aa,wcag21aa,wcag22aa \
             --reporter json \
             --output axe-results.json
-          
+
           # Check compliance percentage
           VIOLATIONS=$(jq '.violations | length' axe-results.json)
           if [ "$VIOLATIONS" -gt 0 ]; then
@@ -131,7 +131,7 @@ jobs:
           else
             echo " No Axe violations found"
           fi
-      
+
       - name: Run Pa11y audit
         if: matrix.tool == 'pa11y'
         run: |
@@ -139,7 +139,7 @@ jobs:
             --standard WCAG2AA \
             --reporter json \
             --output pa11y-results.json
-          
+
           # Check for issues
           ISSUES=$(jq '. | length' pa11y-results.json)
           if [ "$ISSUES" -gt 0 ]; then
@@ -149,7 +149,7 @@ jobs:
           else
             echo " No Pa11y issues found"
           fi
-      
+
       - name: Run Lighthouse accessibility audit
         if: matrix.tool == 'lighthouse'
         run: |
@@ -158,11 +158,11 @@ jobs:
             --output=json \
             --output-path=lighthouse-results.json \
             --chrome-flags="--headless --no-sandbox"
-          
+
           # Extract accessibility score
           SCORE=$(jq '.categories.accessibility.score * 100' lighthouse-results.json)
           echo "Lighthouse Accessibility Score: $SCORE%"
-          
+
           if (( $(echo "$SCORE < $WCAG_TARGET" | bc -l) )); then
             echo " Accessibility score $SCORE% below target $WCAG_TARGET%"
             jq '.categories.accessibility.auditRefs[] | select(.result.score < 1) | .result' lighthouse-results.json
@@ -170,7 +170,7 @@ jobs:
           else
             echo " Accessibility score $SCORE% meets target $WCAG_TARGET%"
           fi
-      
+
       - name: Upload audit results
         if: always()
         uses: actions/upload-artifact@v3
@@ -185,74 +185,74 @@ jobs:
     needs: i18n-extraction
     steps:
       - uses: actions/checkout@v4
-      
+
       - name: Setup Python
         uses: actions/setup-python@v4
         with:
           python-version: ${{ env.PYTHON_VERSION }}
-      
+
       - name: Install dependencies
         run: |
           pip install poetry
           cd services/i18n-svc
           poetry install
-      
+
       - name: Download extraction artifacts
         uses: actions/download-artifact@v3
         with:
           name: i18n-extractions
           path: services/i18n-svc/
-      
+
       - name: Run translation accessibility audit
         run: |
           cd services/i18n-svc
-          
+
           # Start service with test database
           export DATABASE_URL="sqlite+aiosqlite:///./test.db"
           poetry run python -c "
           import asyncio
           from app.models import Base
           from sqlalchemy.ext.asyncio import create_async_engine
-          
+
           async def create_tables():
               engine = create_async_engine('sqlite+aiosqlite:///./test.db')
               async with engine.begin() as conn:
                   await conn.run_sync(Base.metadata.create_all)
               await engine.dispose()
-          
+
           asyncio.run(create_tables())
           "
-          
+
           # Test African language fallback logic
           poetry run python -c "
           from app.services.translation_service import get_fallback_locale
-          
+
           african_locales = ['ig-NG', 'yo-NG', 'ha-NG', 'efi-NG', 'sw-KE', 'sw-TZ', 'xh-ZA']
           for locale in african_locales:
               fallback = get_fallback_locale(locale)
               print(f' {locale} -> {fallback}')
           "
-          
+
           # Test accessibility validation
           poetry run python -c "
           from app.services.accessibility_service import validate_wcag_compliance
-          
+
           test_translations = [
               {'value': 'Welcome to our application', 'locale': 'en-US'},
               {'value': 'Nnọọ na aplikeshọn anyị', 'locale': 'ig-NG'},
               {'value': 'Kaabo si aplikeshọn wa', 'locale': 'yo-NG'},
           ]
-          
+
           total_score = 0
           for trans in test_translations:
               result = validate_wcag_compliance(trans)
               score = result['score']
               total_score += score
               print(f' {trans[\"locale\"]}: {score}% - {result[\"wcag_level\"]}')
-          
+
           avg_score = total_score / len(test_translations)
           print(f' Average compliance: {avg_score:.1f}%')
-          
+
           if avg_score < $WCAG_TARGET:
               print(f' Average score {avg_score:.1f}% below target $WCAG_TARGET%')
               exit(1)
@@ -268,14 +268,14 @@ jobs:
     steps:
       - name: Download all artifacts
         uses: actions/download-artifact@v3
-      
+
       - name: Accessibility Gates Summary
         run: |
           echo "#  Accessibility Gates Summary" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
           echo "## WCAG 2.2 AA Compliance Target: $WCAG_TARGET%" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
-          
+
           # Check if all jobs passed
           if [ "${{ needs.accessibility-audit.result }}" == "success" ] && [ "${{ needs.translation-compliance.result }}" == "success" ]; then
             echo " **All accessibility gates PASSED**" >> $GITHUB_STEP_SUMMARY
@@ -287,7 +287,7 @@ jobs:
             echo " **Accessibility gates FAILED**" >> $GITHUB_STEP_SUMMARY
             echo "Please review the audit results and fix accessibility issues." >> $GITHUB_STEP_SUMMARY
           fi
-          
+
           echo "" >> $GITHUB_STEP_SUMMARY
           echo "## Supported African Languages" >> $GITHUB_STEP_SUMMARY
           echo "-  Igbo (ig-NG)" >> $GITHUB_STEP_SUMMARY
@@ -296,7 +296,7 @@ jobs:
           echo "-  Efik (efi-NG)" >> $GITHUB_STEP_SUMMARY
           echo "-  Swahili (sw-KE, sw-TZ)" >> $GITHUB_STEP_SUMMARY
           echo "-  Xhosa (xh-ZA)" >> $GITHUB_STEP_SUMMARY
-      
+
       - name: Fail if accessibility gates failed
         if: needs.accessibility-audit.result != 'success' || needs.translation-compliance.result != 'success'
         run: |

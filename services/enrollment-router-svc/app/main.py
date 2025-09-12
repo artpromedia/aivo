@@ -42,9 +42,7 @@ async def lifespan(_app: FastAPI):
 # Create FastAPI app
 app = FastAPI(
     title="Enrollment Router Service",
-    description=(
-        "Routes learner enrollments between district and parent provisioning"
-    ),
+    description=("Routes learner enrollments between district and parent provisioning"),
     version="1.0.0",
     lifespan=lifespan,
 )
@@ -69,12 +67,8 @@ async def health_check():
     return {"status": "healthy", "service": "enrollment-router"}
 
 
-@app.post(
-    "/enroll", response_model=DistrictEnrollmentResult | ParentEnrollmentResult
-)
-async def enroll_learner(
-    request: EnrollmentRequest, db: AsyncSession = Depends(get_db)
-):
+@app.post("/enroll", response_model=DistrictEnrollmentResult | ParentEnrollmentResult)
+async def enroll_learner(request: EnrollmentRequest, db: AsyncSession = Depends(get_db)):
     """
     Route learner enrollment based on context and availability.
 
@@ -98,12 +92,8 @@ async def enroll_learner(
         ) from e
 
 
-@app.get(
-    "/enrollments/{decision_id}", response_model=EnrollmentDecisionResponse
-)
-async def get_enrollment_decision(
-    decision_id: int, db: AsyncSession = Depends(get_db)
-):
+@app.get("/enrollments/{decision_id}", response_model=EnrollmentDecisionResponse)
+async def get_enrollment_decision(decision_id: int, db: AsyncSession = Depends(get_db)):
     """Get enrollment decision by ID."""
     result = await db.execute(
         select(EnrollmentDecision).where(EnrollmentDecision.id == decision_id)
@@ -149,11 +139,7 @@ async def list_enrollment_decisions(
     if guardian_id:
         query = query.where(EnrollmentDecision.guardian_id == guardian_id)
 
-    query = (
-        query.offset(offset)
-        .limit(limit)
-        .order_by(EnrollmentDecision.created_at.desc())
-    )
+    query = query.offset(offset).limit(limit).order_by(EnrollmentDecision.created_at.desc())
 
     result = await db.execute(query)
     decisions = result.scalars().all()
@@ -202,9 +188,7 @@ async def create_district_allocation(
     "/districts/{tenant_id}/seats",
     response_model=DistrictSeatAllocationResponse,
 )
-async def get_district_allocation(
-    tenant_id: int, db: AsyncSession = Depends(get_db)
-):
+async def get_district_allocation(tenant_id: int, db: AsyncSession = Depends(get_db)):
     """Get district seat allocation."""
     allocation = await district_service.get_allocation(db, tenant_id)
     if not allocation:
@@ -243,9 +227,7 @@ async def update_district_allocation(
 
 
 @app.get("/districts", response_model=list[DistrictSeatAllocationResponse])
-async def list_district_allocations(
-    active_only: bool = True, db: AsyncSession = Depends(get_db)
-):
+async def list_district_allocations(active_only: bool = True, db: AsyncSession = Depends(get_db)):
     """List all district seat allocations."""
     query = select(DistrictSeatAllocation)
     if active_only:

@@ -1,15 +1,17 @@
-﻿"""
+"""
 Core consent management service.
 
 Handles consent lifecycle, parental rights, and GDPR/COPPA compliance.
 """
+
 import hashlib
+import logging
 import secrets
 from datetime import datetime, timedelta
-from typing import Any, Dict, List, Optional
-from uuid import UUID, uuid4
+from typing import Any
+from uuid import UUID
 
-from sqlalchemy import select, update
+from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import selectinload
 
@@ -26,8 +28,6 @@ from app.models.models import (
     requires_parental_consent,
 )
 
-import logging
-
 logger = logging.getLogger(__name__)
 
 
@@ -36,13 +36,13 @@ def generate_verification_token() -> str:
     return secrets.token_urlsafe(32)
 
 
-def hash_audit_data(data: Dict[str, Any]) -> str:
+def hash_audit_data(data: dict[str, Any]) -> str:
     """Helper function to create tamper-evident hash for audit logs."""
     data_str = str(sorted(data.items()))
     return hashlib.sha256(data_str.encode()).hexdigest()
 
 
-def is_consent_expired(expires_at: Optional[datetime]) -> bool:
+def is_consent_expired(expires_at: datetime | None) -> bool:
     """Helper function to check if consent has expired."""
     if expires_at is None:
         return False
@@ -52,36 +52,36 @@ def is_consent_expired(expires_at: Optional[datetime]) -> bool:
 class ConsentService:
     """
     Core service for managing user consent and preferences.
-    
+
     Handles GDPR Article 6 legal basis and COPPA parental consent.
     """
-    
+
     def __init__(self, db_session: AsyncSession):
         self.db_session = db_session
-    
+
     async def grant_consent(
         self,
         user_id: str,
         consent_type: ConsentType,
         legal_basis: str,
         purpose: str,
-        data_categories: List[str],
-        user_age: Optional[int] = None,
-        user_agent: Optional[str] = None,
-        ip_address: Optional[str] = None,
-        location: Optional[str] = None,
-        created_by: Optional[str] = None,
+        data_categories: list[str],
+        user_age: int | None = None,
+        user_agent: str | None = None,
+        ip_address: str | None = None,
+        location: str | None = None,
+        created_by: str | None = None,
     ) -> ConsentRecord:
         """
         Grant consent for a specific purpose and data categories.
-        
+
         Handles parental consent requirements for minors.
         """
         logger.info(f"Granting consent for user {user_id}, type: {consent_type.value}")
-        
+
         # Check if parental consent is required
         needs_parental_consent = requires_parental_consent(user_age)
-        
+
         # Create consent record
         consent_record = ConsentRecord(
             user_id=user_id,
@@ -96,16 +96,16 @@ class ConsentService:
             requires_parental_consent=needs_parental_consent,
             created_by=created_by,
         )
-        
+
         if not needs_parental_consent:
             consent_record.granted_at = datetime.utcnow()
         else:
             # Generate parental verification token
             consent_record.parent_verification_token = generate_verification_token()
-        
+
         self.db_session.add(consent_record)
         await self.db_session.flush()
-        
+
         # Create audit log
         await self._create_audit_log(
             action=AuditAction.CONSENT_GRANTED,
@@ -122,43 +122,45 @@ class ConsentService:
             ip_address=ip_address,
             user_agent=user_agent,
         )
-        
+
         await self.db_session.commit()
-        
-        logger.info(f"Consent granted for user {user_id} (requires_parental: {needs_parental_consent})")
+
+        logger.info(
+            f"Consent granted for user {user_id} (requires_parental: {needs_parental_consent})"
+        )
         return consent_record
-    
+
     async def revoke_consent(
         self,
         consent_id: UUID,
         revoked_by: str,
-        reason: Optional[str] = None,
-        ip_address: Optional[str] = None,
-        user_agent: Optional[str] = None,
+        reason: str | None = None,
+        ip_address: str | None = None,
+        user_agent: str | None = None,
     ) -> ConsentRecord:
         """
         Revoke previously granted consent.
-        
+
         Triggers cascaded deletion if applicable.
         """
         # Get consent record
         stmt = select(ConsentRecord).where(ConsentRecord.id == consent_id)
         result = await self.db_session.execute(stmt)
         consent_record = result.scalar_one_or_none()
-        
+
         if not consent_record:
             raise ValueError(f"Consent record {consent_id} not found")
-        
+
         if consent_record.status == ConsentStatus.REVOKED:
             raise ValueError("Consent already revoked")
-        
+
         logger.info(f"Revoking consent {consent_id} for user {consent_record.user_id}")
-        
+
         # Update consent record
         old_status = consent_record.status
         consent_record.status = ConsentStatus.REVOKED
         consent_record.revoked_at = datetime.utcnow()
-        
+
         # Create audit log
         await self._create_audit_log(
             action=AuditAction.CONSENT_REVOKED,
@@ -176,21 +178,21 @@ class ConsentService:
             ip_address=ip_address,
             user_agent=user_agent,
         )
-        
+
         await self.db_session.commit()
-        
+
         logger.info(f"Consent {consent_id} revoked successfully")
         return consent_record
-    
+
     async def verify_parental_consent(
         self,
         verification_token: str,
         parent_email: str,
-        ip_address: Optional[str] = None,
+        ip_address: str | None = None,
     ) -> ConsentRecord:
         """
         Verify parental consent using verification token.
-        
+
         Completes COPPA compliance process.
         """
         # Find consent record by verification token
@@ -199,25 +201,25 @@ class ConsentService:
         )
         result = await self.db_session.execute(stmt)
         consent_record = result.scalar_one_or_none()
-        
+
         if not consent_record:
             raise ValueError("Invalid verification token")
-        
+
         if not is_valid_email(parent_email):
             raise ValueError("Invalid parent email address")
-        
+
         logger.info(f"Verifying parental consent for user {consent_record.user_id}")
-        
+
         # Update consent record
         consent_record.status = ConsentStatus.GRANTED
         consent_record.granted_at = datetime.utcnow()
         consent_record.parent_email = parent_email
         consent_record.parent_verified_at = datetime.utcnow()
         consent_record.parental_consent_given = True
-        
+
         # Clear verification token
         consent_record.parent_verification_token = None
-        
+
         # Create audit log
         await self._create_audit_log(
             action=AuditAction.CONSENT_GRANTED,
@@ -232,33 +234,33 @@ class ConsentService:
             },
             ip_address=ip_address,
         )
-        
+
         await self.db_session.commit()
-        
+
         logger.info(f"Parental consent verified for user {consent_record.user_id}")
         return consent_record
-    
+
     async def get_user_consents(
         self,
         user_id: str,
         include_revoked: bool = False,
-    ) -> List[ConsentRecord]:
+    ) -> list[ConsentRecord]:
         """Get all consent records for a user."""
         stmt = select(ConsentRecord).where(ConsentRecord.user_id == user_id)
-        
+
         if not include_revoked:
             stmt = stmt.where(ConsentRecord.status != ConsentStatus.REVOKED)
-        
+
         stmt = stmt.options(selectinload(ConsentRecord.preferences))
-        
+
         result = await self.db_session.execute(stmt)
         return result.scalars().all()
-    
+
     async def check_consent_status(
         self,
         user_id: str,
         consent_type: ConsentType,
-    ) -> Optional[ConsentRecord]:
+    ) -> ConsentRecord | None:
         """Check if user has valid consent for specific type."""
         stmt = (
             select(ConsentRecord)
@@ -266,35 +268,37 @@ class ConsentService:
             .where(ConsentRecord.consent_type == consent_type)
             .where(ConsentRecord.status == ConsentStatus.GRANTED)
         )
-        
+
         result = await self.db_session.execute(stmt)
         consent_record = result.scalar_one_or_none()
-        
+
         # Check if consent has expired
         if consent_record and is_consent_expired(consent_record.expires_at):
             consent_record.status = ConsentStatus.EXPIRED
             await self.db_session.commit()
             return None
-        
+
         return consent_record
-    
+
     async def update_preferences(
         self,
         consent_id: UUID,
-        preferences: Dict[str, Any],
+        preferences: dict[str, Any],
         updated_by: str,
     ) -> PreferenceSettings:
         """Update user preference settings."""
         # Get consent record
-        stmt = select(ConsentRecord).options(
-            selectinload(ConsentRecord.preferences)
-        ).where(ConsentRecord.id == consent_id)
+        stmt = (
+            select(ConsentRecord)
+            .options(selectinload(ConsentRecord.preferences))
+            .where(ConsentRecord.id == consent_id)
+        )
         result = await self.db_session.execute(stmt)
         consent_record = result.scalar_one_or_none()
-        
+
         if not consent_record:
             raise ValueError(f"Consent record {consent_id} not found")
-        
+
         # Get or create preferences
         if consent_record.preferences:
             preference_settings = consent_record.preferences[0]
@@ -307,12 +311,12 @@ class ConsentService:
             preference_settings = PreferenceSettings(consent_record_id=consent_id)
             self.db_session.add(preference_settings)
             old_values = {}
-        
+
         # Update preferences
         for key, value in preferences.items():
             if hasattr(preference_settings, key):
                 setattr(preference_settings, key, value)
-        
+
         # Create audit log
         await self._create_audit_log(
             action=AuditAction.CONSENT_UPDATED,
@@ -326,26 +330,26 @@ class ConsentService:
             old_values=old_values,
             new_values=preferences,
         )
-        
+
         await self.db_session.commit()
         return preference_settings
-    
+
     async def _create_audit_log(
         self,
         action: AuditAction,
         user_id: str,
         actor_id: str,
         actor_type: str,
-        details: Optional[Dict[str, Any]] = None,
-        consent_record_id: Optional[UUID] = None,
-        export_request_id: Optional[UUID] = None,
-        deletion_request_id: Optional[UUID] = None,
-        old_values: Optional[Dict[str, Any]] = None,
-        new_values: Optional[Dict[str, Any]] = None,
-        ip_address: Optional[str] = None,
-        user_agent: Optional[str] = None,
-        session_id: Optional[str] = None,
-        legal_basis: Optional[str] = None,
+        details: dict[str, Any] | None = None,
+        consent_record_id: UUID | None = None,
+        export_request_id: UUID | None = None,
+        deletion_request_id: UUID | None = None,
+        old_values: dict[str, Any] | None = None,
+        new_values: dict[str, Any] | None = None,
+        ip_address: str | None = None,
+        user_agent: str | None = None,
+        session_id: str | None = None,
+        legal_basis: str | None = None,
     ) -> AuditLog:
         """Create audit log entry with integrity protection."""
         audit_data = {
@@ -358,10 +362,10 @@ class ConsentService:
             "old_values": old_values,
             "new_values": new_values,
         }
-        
+
         # Generate integrity checksum
         checksum = hash_audit_data(audit_data)
-        
+
         audit_log = AuditLog(
             action=action,
             user_id=user_id,
@@ -379,7 +383,7 @@ class ConsentService:
             legal_basis=legal_basis,
             checksum=checksum,
         )
-        
+
         self.db_session.add(audit_log)
         return audit_log
 
@@ -387,13 +391,13 @@ class ConsentService:
 class ParentalRightsService:
     """
     Service for managing parental rights and controls under COPPA.
-    
+
     Handles parent-child relationships and rights verification.
     """
-    
+
     def __init__(self, db_session: AsyncSession):
         self.db_session = db_session
-    
+
     async def establish_parental_right(
         self,
         parent_email: str,
@@ -404,12 +408,12 @@ class ParentalRightsService:
         """Establish parental right over child's data."""
         if not is_valid_email(parent_email):
             raise ValueError("Invalid parent email address")
-        
+
         logger.info(f"Establishing parental right for {parent_email} over child {child_user_id}")
-        
+
         # Generate verification token
         verification_token = generate_verification_token()
-        
+
         parental_right = ParentalRight(
             parent_email=parent_email,
             child_user_id=child_user_id,
@@ -418,48 +422,46 @@ class ParentalRightsService:
             verification_method=verification_method,
             expires_at=datetime.utcnow() + timedelta(days=365),  # 1 year expiration
         )
-        
+
         self.db_session.add(parental_right)
         await self.db_session.commit()
-        
+
         return parental_right
-    
+
     async def verify_parental_right(
         self,
         verification_token: str,
-        ip_address: Optional[str] = None,
+        ip_address: str | None = None,
     ) -> ParentalRight:
         """Verify parental right using verification token."""
-        stmt = select(ParentalRight).where(
-            ParentalRight.verification_token == verification_token
-        )
+        stmt = select(ParentalRight).where(ParentalRight.verification_token == verification_token)
         result = await self.db_session.execute(stmt)
         parental_right = result.scalar_one_or_none()
-        
+
         if not parental_right:
             raise ValueError("Invalid verification token")
-        
+
         # Update verification status
         parental_right.verified_at = datetime.utcnow()
         parental_right.verification_token = None  # Clear token after use
-        
+
         await self.db_session.commit()
         return parental_right
-    
+
     async def get_parental_rights(
         self,
         parent_email: str,
         active_only: bool = True,
-    ) -> List[ParentalRight]:
+    ) -> list[ParentalRight]:
         """Get all parental rights for a parent."""
         stmt = select(ParentalRight).where(ParentalRight.parent_email == parent_email)
-        
+
         if active_only:
-            stmt = stmt.where(ParentalRight.is_active == True)
-        
+            stmt = stmt.where(ParentalRight.is_active is True)
+
         result = await self.db_session.execute(stmt)
         return result.scalars().all()
-    
+
     async def revoke_parental_right(
         self,
         right_id: UUID,
@@ -469,11 +471,11 @@ class ParentalRightsService:
         stmt = select(ParentalRight).where(ParentalRight.id == right_id)
         result = await self.db_session.execute(stmt)
         parental_right = result.scalar_one_or_none()
-        
+
         if not parental_right:
             raise ValueError(f"Parental right {right_id} not found")
-        
+
         parental_right.is_active = False
         await self.db_session.commit()
-        
+
         return parental_right

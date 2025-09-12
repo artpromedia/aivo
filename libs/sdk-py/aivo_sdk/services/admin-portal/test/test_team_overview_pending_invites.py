@@ -36,8 +36,8 @@ class TestTeamOverviewPendingInvites(unittest.TestCase):
             return TeamOverviewPendingInvites(
                 total = 5,
                 by_role = aivo_sdk.models.team_overview_pending_invites_by_role.TeamOverview_pendingInvites_byRole(
-                    tenant_admin = 0, 
-                    instructor = 2, 
+                    tenant_admin = 0,
+                    instructor = 2,
                     learner = 3, ),
                 oldest_invite = '2023-11-15T09:00:00Z'
             )
@@ -45,8 +45,8 @@ class TestTeamOverviewPendingInvites(unittest.TestCase):
             return TeamOverviewPendingInvites(
                 total = 5,
                 by_role = aivo_sdk.models.team_overview_pending_invites_by_role.TeamOverview_pendingInvites_byRole(
-                    tenant_admin = 0, 
-                    instructor = 2, 
+                    tenant_admin = 0,
+                    instructor = 2,
                     learner = 3, ),
         )
         """

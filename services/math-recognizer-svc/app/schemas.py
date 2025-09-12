@@ -20,12 +20,14 @@ class Stroke(BaseModel):
 
     stroke_id: UUID = Field(..., description="Unique stroke identifier")
     tool_type: str = Field(
-        default="pen", description="Tool type (pen, pencil)",
+        default="pen",
+        description="Tool type (pen, pencil)",
     )
     color: str = Field(default="#000000", description="Stroke color")
     width: float = Field(default=2.0, description="Stroke width")
     points: list[Point] = Field(
-        ..., description="List of points in the stroke",
+        ...,
+        description="List of points in the stroke",
     )
 
 
@@ -34,10 +36,12 @@ class RecognitionRequest(BaseModel):
 
     session_id: UUID = Field(..., description="Ink session identifier")
     page_number: int | None = Field(
-        1, description="Page number to recognize",
+        1,
+        description="Page number to recognize",
     )
     region: dict[str, float] | None = Field(
-        None, description="Bounding box region {x, y, width, height}",
+        None,
+        description="Bounding box region {x, y, width, height}",
     )
 
 
@@ -55,14 +59,17 @@ class RecognitionResponse(BaseModel):
     success: bool = Field(..., description="Recognition success status")
     latex: str | None = Field(None, description="LaTeX representation")
     ast: dict[str, Any] | None = Field(
-        None, description="Abstract syntax tree",
+        None,
+        description="Abstract syntax tree",
     )
     confidence: float = Field(..., description="Confidence score (0-1)")
     processing_time: float = Field(
-        ..., description="Processing time in seconds",
+        ...,
+        description="Processing time in seconds",
     )
     error_message: str | None = Field(
-        None, description="Error message if failed",
+        None,
+        description="Error message if failed",
     )
 
 
@@ -70,19 +77,24 @@ class GradeRequest(BaseModel):
     """Request for grading mathematical expressions."""
 
     student_expression: str = Field(
-        ..., description="Student's mathematical expression (LaTeX or raw)",
+        ...,
+        description="Student's mathematical expression (LaTeX or raw)",
     )
     correct_expression: str = Field(
-        ..., description="Correct mathematical expression (LaTeX or raw)",
+        ...,
+        description="Correct mathematical expression (LaTeX or raw)",
     )
     tolerance: float | None = Field(
-        1e-6, description="Numerical tolerance for comparison",
+        1e-6,
+        description="Numerical tolerance for comparison",
     )
     check_equivalence: bool = Field(
-        True, description="Check mathematical equivalence",
+        True,
+        description="Check mathematical equivalence",
     )
     return_steps: bool = Field(
-        False, description="Return step-by-step solution",
+        False,
+        description="Return step-by-step solution",
     )
 
 
@@ -93,7 +105,8 @@ class GradingStep(BaseModel):
     expression: str = Field(..., description="Expression at this step")
     explanation: str = Field(..., description="Explanation of the step")
     rule_applied: str | None = Field(
-        None, description="Mathematical rule applied",
+        None,
+        description="Mathematical rule applied",
     )
 
 
@@ -102,15 +115,18 @@ class GradeResponse(BaseModel):
 
     is_correct: bool = Field(..., description="Whether the answer is correct")
     is_equivalent: bool = Field(
-        ..., description="Whether expressions are mathematically equivalent",
+        ...,
+        description="Whether expressions are mathematically equivalent",
     )
     score: float = Field(..., description="Grading score (0-1)")
     feedback: str = Field(..., description="Feedback message")
     steps: list[GradingStep] | None = Field(
-        None, description="Step-by-step solution",
+        None,
+        description="Step-by-step solution",
     )
     error_message: str | None = Field(
-        None, description="Error message if grading failed",
+        None,
+        description="Error message if grading failed",
     )
 
 
@@ -122,5 +138,6 @@ class HealthResponse(BaseModel):
     version: str = Field(..., description="Service version")
     timestamp: str = Field(..., description="Current timestamp")
     dependencies: dict[str, str] = Field(
-        default_factory=dict, description="Status of dependencies",
+        default_factory=dict,
+        description="Status of dependencies",
     )

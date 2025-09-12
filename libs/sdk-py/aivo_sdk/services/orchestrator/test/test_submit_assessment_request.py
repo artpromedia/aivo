@@ -36,7 +36,7 @@ class TestSubmitAssessmentRequest(unittest.TestCase):
             return SubmitAssessmentRequest(
                 answers = [
                     aivo_sdk.models.submit_assessment_request_answers_inner.SubmitAssessmentRequest_answers_inner(
-                        question_id = '', 
+                        question_id = '',
                         answer = null, )
                     ],
                 time_spent = 45
@@ -45,7 +45,7 @@ class TestSubmitAssessmentRequest(unittest.TestCase):
             return SubmitAssessmentRequest(
                 answers = [
                     aivo_sdk.models.submit_assessment_request_answers_inner.SubmitAssessmentRequest_answers_inner(
-                        question_id = '', 
+                        question_id = '',
                         answer = null, )
                     ],
         )

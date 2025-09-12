@@ -70,9 +70,7 @@ class PolicyEngine:
                     "safety_mode": "strict",
                     "content_filter": "high",
                 },
-                description=(
-                    "STEM subjects for K-2 use local models with high safety"
-                ),
+                description=("STEM subjects for K-2 use local models with high safety"),
             )
         )
 
@@ -87,9 +85,7 @@ class PolicyEngine:
                 template_ids=["azure_general", "azure_educational"],
                 moderation_threshold=0.8,
                 provider_config={"region": "eu", "data_residency": True},
-                description=(
-                    "EU regions use Azure OpenAI for data residency compliance"
-                ),
+                description=("EU regions use Azure OpenAI for data residency compliance"),
             )
         )
 
@@ -111,9 +107,7 @@ class PolicyEngine:
                     "model": "claude-3-sonnet",
                     "max_tokens": 4000,
                 },
-                description=(
-                    "High school humanities use Claude for advanced reasoning"
-                ),
+                description=("High school humanities use Claude for advanced reasoning"),
             )
         )
 
@@ -128,10 +122,7 @@ class PolicyEngine:
                 template_ids=["openai_creative", "openai_artistic"],
                 moderation_threshold=0.5,
                 provider_config={"model": "gpt-4", "temperature": 0.8},
-                description=(
-                    "Creative subjects use OpenAI with "
-                    "higher creativity settings"
-                ),
+                description=("Creative subjects use OpenAI with " "higher creativity settings"),
             )
         )
 
@@ -149,9 +140,7 @@ class PolicyEngine:
                     "region": "asia",
                     "language_support": "enhanced",
                 },
-                description=(
-                    "Asia Pacific uses Google for regional optimization"
-                ),
+                description=("Asia Pacific uses Google for regional optimization"),
             )
         )
 
@@ -199,9 +188,7 @@ class PolicyEngine:
             moderation_threshold=matching_rule.moderation_threshold,
             provider_config=matching_rule.provider_config.copy(),
             routing_reason=matching_rule.description,
-            cache_ttl_seconds=(
-                self.config.cache_ttl_seconds if self.config else 3600
-            ),
+            cache_ttl_seconds=(self.config.cache_ttl_seconds if self.config else 3600),
             request_id=request.request_id,
         )
 
@@ -218,9 +205,7 @@ class PolicyEngine:
             response_time = (time.time() - start_time) * 1000
             self.stats["response_times"].append(response_time)
             if len(self.stats["response_times"]) > 1000:
-                self.stats["response_times"] = self.stats["response_times"][
-                    -1000:
-                ]
+                self.stats["response_times"] = self.stats["response_times"][-1000:]
 
         return response
 
@@ -239,9 +224,7 @@ class PolicyEngine:
             )
 
         # Sort rules by priority (highest first)
-        sorted_rules = sorted(
-            self.config.rules, key=lambda r: r.priority, reverse=True
-        )
+        sorted_rules = sorted(self.config.rules, key=lambda r: r.priority, reverse=True)
 
         for rule in sorted_rules:
             if not rule.enabled:
@@ -253,9 +236,7 @@ class PolicyEngine:
         # If no rules match, return the lowest priority rule as fallback
         return sorted_rules[-1] if sorted_rules else self._get_default_rule()
 
-    async def _rule_matches(
-        self, rule: RouteRule, request: PolicyRequest
-    ) -> bool:
+    async def _rule_matches(self, rule: RouteRule, request: PolicyRequest) -> bool:
         """Check if a rule matches the request."""
         conditions = rule.conditions
 
@@ -302,20 +283,14 @@ class PolicyEngine:
                     if settings.fallback_to_local:
                         response.provider = LLMProvider.LOCAL
                         response.template_ids = ["local_eu_compliant"]
-                        response.routing_reason += (
-                            " (adjusted for EU data residency)"
-                        )
+                        response.routing_reason += " (adjusted for EU data residency)"
                     else:
                         response.provider = LLMProvider.AZURE_OPENAI
-                        response.routing_reason += (
-                            " (adjusted for EU data residency)"
-                        )
+                        response.routing_reason += " (adjusted for EU data residency)"
 
         return response
 
-    async def _check_teacher_override(
-        self, _request: PolicyRequest
-    ) -> PolicyResponse | None:
+    async def _check_teacher_override(self, _request: PolicyRequest) -> PolicyResponse | None:
         """Check for active teacher override."""
         # For demo purposes, this would check a database or cache
         # Here we'll just return None indicating no override
@@ -357,8 +332,7 @@ class PolicyEngine:
         """Get current policy statistics."""
         async with self._lock:
             avg_response_time = (
-                sum(self.stats["response_times"])
-                / len(self.stats["response_times"])
+                sum(self.stats["response_times"]) / len(self.stats["response_times"])
                 if self.stats["response_times"]
                 else 0.0
             )
@@ -367,12 +341,8 @@ class PolicyEngine:
                 "total_requests": self.stats["total_requests"],
                 "cache_hits": self.stats["cache_hits"],
                 "cache_misses": self.stats["cache_misses"],
-                "provider_distribution": self.stats[
-                    "provider_distribution"
-                ].copy(),
-                "region_distribution": self.stats[
-                    "region_distribution"
-                ].copy(),
+                "provider_distribution": self.stats["provider_distribution"].copy(),
+                "region_distribution": self.stats["region_distribution"].copy(),
                 "average_response_time_ms": avg_response_time,
                 "rules_count": len(self.config.rules) if self.config else 0,
                 "last_updated": self.stats["last_updated"],

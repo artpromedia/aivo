@@ -56,8 +56,8 @@ class BundleService:
         """Create a new offline bundle."""
         # Generate bundle name if not provided
         bundle_name = (
-            request.bundle_name or
-            f"bundle_{request.learner_id}_{datetime.utcnow().strftime('%Y%m%d_%H%M%S')}"
+            request.bundle_name
+            or f"bundle_{request.learner_id}_{datetime.utcnow().strftime('%Y%m%d_%H%M%S')}"
         )
 
         # Calculate expiration time
@@ -229,16 +229,22 @@ class BundleService:
                 with open(lesson_path, "w", encoding="utf-8") as f:
                     json.dump(lesson_content, f, indent=2)
 
-                assets.append(type('Asset', (), {
-                    'asset_type': 'lesson',
-                    'asset_name': lesson_name,
-                    'file_path': str(lesson_path.relative_to(bundle_dir)),
-                    'file_size': lesson_path.stat().st_size,
-                    'content_id': lesson_content["id"],
-                    'subject': subject,
-                    'is_precache': i == 0,  # First lesson is precached
-                    'priority': 10 if i == 0 else 100,
-                })())
+                assets.append(
+                    type(
+                        "Asset",
+                        (),
+                        {
+                            "asset_type": "lesson",
+                            "asset_name": lesson_name,
+                            "file_path": str(lesson_path.relative_to(bundle_dir)),
+                            "file_size": lesson_path.stat().st_size,
+                            "content_id": lesson_content["id"],
+                            "subject": subject,
+                            "is_precache": i == 0,  # First lesson is precached
+                            "priority": 10 if i == 0 else 100,
+                        },
+                    )()
+                )
 
             # Add subject adapter if requested
             if request.include_adapters:
@@ -270,16 +276,22 @@ export default {subject.title()}Adapter;
                 with open(adapter_path, "w", encoding="utf-8") as f:
                     f.write(adapter_content)
 
-                assets.append(type('Asset', (), {
-                    'asset_type': 'adapter',
-                    'asset_name': adapter_name,
-                    'file_path': str(adapter_path.relative_to(bundle_dir)),
-                    'file_size': adapter_path.stat().st_size,
-                    'content_id': f"{subject}_adapter",
-                    'subject': subject,
-                    'is_precache': True,  # Adapters are always precached
-                    'priority': 1,
-                })())
+                assets.append(
+                    type(
+                        "Asset",
+                        (),
+                        {
+                            "asset_type": "adapter",
+                            "asset_name": adapter_name,
+                            "file_path": str(adapter_path.relative_to(bundle_dir)),
+                            "file_size": adapter_path.stat().st_size,
+                            "content_id": f"{subject}_adapter",
+                            "subject": subject,
+                            "is_precache": True,  # Adapters are always precached
+                            "priority": 1,
+                        },
+                    )()
+                )
 
         return assets
 
@@ -290,7 +302,7 @@ export default {subject.title()}Adapter;
         compression_map = {
             CompressionType.GZIP: "gz",
             CompressionType.BROTLI: "bz2",  # Using bz2 as fallback for brotli
-            CompressionType.ZSTD: "gz",     # Using gz as fallback for zstd
+            CompressionType.ZSTD: "gz",  # Using gz as fallback for zstd
         }
 
         mode = f"w:{compression_map[compression]}"
@@ -336,11 +348,7 @@ export default {subject.title()}Adapter;
         if error_message:
             update_data["error_message"] = error_message
 
-        await db.execute(
-            update(Bundle)
-            .where(Bundle.bundle_id == bundle_id)
-            .values(**update_data)
-        )
+        await db.execute(update(Bundle).where(Bundle.bundle_id == bundle_id).values(**update_data))
         await db.commit()
 
     async def _update_bundle_completion(
@@ -400,9 +408,7 @@ export default {subject.title()}Adapter;
 
     async def get_bundle(self, bundle_id: UUID, db: AsyncSession) -> Bundle | None:
         """Get bundle by ID."""
-        result = await db.execute(
-            select(Bundle).where(Bundle.bundle_id == bundle_id)
-        )
+        result = await db.execute(select(Bundle).where(Bundle.bundle_id == bundle_id))
         return result.scalar_one_or_none()
 
     async def list_bundles(
@@ -469,8 +475,11 @@ class CRDTService:
                     )
 
             except Exception as e:  # pylint: disable=broad-exception-caught,W0718
-                logger.error("Failed to process CRDT operation",
-                           operation_id=operation.operation_id, error=str(e))
+                logger.error(
+                    "Failed to process CRDT operation",
+                    operation_id=operation.operation_id,
+                    error=str(e),
+                )
                 conflicted_operations.append(operation.operation_id)
 
         # Update vector clock
@@ -483,17 +492,16 @@ class CRDTService:
             conflicted_operations=conflicted_operations,
             server_operations=server_operations,
             updated_vector_clock=updated_vector_clock,
-            conflicts_resolved=len([
-                op for op in server_operations if op.operation_type == "merge"
-            ]),
+            conflicts_resolved=len(
+                [op for op in server_operations if op.operation_type == "merge"]
+            ),
         )
 
     async def _detect_conflict(self, operation: CRDTOperation, db: AsyncSession) -> dict | None:
         """Detect if operation conflicts with existing state."""
         # Check for concurrent modifications using vector clocks
         result = await db.execute(
-            select(CRDTMergeLog)
-            .where(
+            select(CRDTMergeLog).where(
                 and_(
                     CRDTMergeLog.content_id == operation.content_id,  # pylint: disable=no-member
                     CRDTMergeLog.operation_type.in_(["create", "update"]),  # pylint: disable=no-member
@@ -517,12 +525,8 @@ class CRDTService:
     def _is_concurrent(self, clock1: dict[str, int], clock2: dict[str, int]) -> bool:
         """Check if two vector clocks represent concurrent operations."""
         # Two clocks are concurrent if neither dominates the other
-        clock1_dominates = all(
-            clock1.get(node, 0) >= clock2.get(node, 0) for node in clock2
-        )
-        clock2_dominates = all(
-            clock2.get(node, 0) >= clock1.get(node, 0) for node in clock1
-        )
+        clock1_dominates = all(clock1.get(node, 0) >= clock2.get(node, 0) for node in clock2)
+        clock2_dominates = all(clock2.get(node, 0) >= clock1.get(node, 0) for node in clock1)
 
         return not (clock1_dominates or clock2_dominates)
 
@@ -563,10 +567,7 @@ class CRDTService:
     ) -> dict[str, int]:
         """Merge two vector clocks by taking the maximum of each component."""
         all_nodes = set(clock1.keys()) | set(clock2.keys())
-        return {
-            node: max(clock1.get(node, 0), clock2.get(node, 0))
-            for node in all_nodes
-        }
+        return {node: max(clock1.get(node, 0), clock2.get(node, 0)) for node in all_nodes}
 
     async def _apply_operation(
         self,

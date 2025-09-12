@@ -92,7 +92,7 @@ def test_start_session_success(
         "subject": "mathematics",
         "session_duration_minutes": 30,
         "canvas_width": 800,
-        "canvas_height": 600
+        "canvas_height": 600,
     }
 
     response = client.post("/start", json=request_data)
@@ -110,7 +110,7 @@ def test_start_session_invalid_subject(client, sample_learner_id):
     request_data = {
         "learner_id": str(sample_learner_id),
         "subject": "invalid_subject",
-        "session_duration_minutes": 30
+        "session_duration_minutes": 30,
     }
 
     response = client.post("/start", json=request_data)
@@ -122,7 +122,7 @@ def test_start_session_invalid_duration(client, sample_learner_id):
     request_data = {
         "learner_id": str(sample_learner_id),
         "subject": "mathematics",
-        "session_duration_minutes": 200  # Too long
+        "session_duration_minutes": 200,  # Too long
     }
 
     response = client.post("/start", json=request_data)
@@ -145,7 +145,7 @@ def test_submit_ink_success(
         page_id=uuid4(),
         recognition_job_id=uuid4(),
         status="submitted",
-        message="Ink submitted successfully"
+        message="Ink submitted successfully",
     )
     mock_submit_ink.return_value = mock_response
 
@@ -161,11 +161,11 @@ def test_submit_ink_success(
                 "width": 2.0,
                 "points": [
                     {"x": 100, "y": 150, "pressure": 0.8, "timestamp": 0},
-                    {"x": 110, "y": 155, "pressure": 0.9, "timestamp": 50}
-                ]
+                    {"x": 110, "y": 155, "pressure": 0.9, "timestamp": 50},
+                ],
             }
         ],
-        "metadata": {"device": "tablet"}
+        "metadata": {"device": "tablet"},
     }
 
     response = client.post("/ink", json=request_data)
@@ -182,7 +182,7 @@ def test_submit_ink_missing_strokes(client, sample_session_id):
     request_data = {
         "session_id": str(sample_session_id),
         "page_number": 1,
-        "metadata": {"device": "tablet"}
+        "metadata": {"device": "tablet"},
         # Missing strokes
     }
 

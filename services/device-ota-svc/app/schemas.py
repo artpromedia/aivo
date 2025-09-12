@@ -26,9 +26,7 @@ class FirmwareUpdateRequest(BaseModel):
     changelog: list[dict] | None = Field(None, description="Structured changelog")
 
     # Deployment configuration
-    target_device_types: list[str] = Field(
-        ..., min_items=1, description="Target device types"
-    )
+    target_device_types: list[str] = Field(..., min_items=1, description="Target device types")
     minimum_battery_level: int = Field(
         50, ge=10, le=100, description="Minimum battery level required"
     )
@@ -40,12 +38,8 @@ class FirmwareUpdateRequest(BaseModel):
     signature: str | None = Field(None, description="Digital signature")
 
     # Rollout configuration
-    canary_percentage: float = Field(
-        5.0, ge=0.1, le=50.0, description="Canary rollout percentage"
-    )
-    early_percentage: float = Field(
-        25.0, ge=5.0, le=75.0, description="Early adopter percentage"
-    )
+    canary_percentage: float = Field(5.0, ge=0.1, le=50.0, description="Canary rollout percentage")
+    early_percentage: float = Field(25.0, ge=5.0, le=75.0, description="Early adopter percentage")
     broad_percentage: float = Field(
         75.0, ge=25.0, le=95.0, description="Broad deployment percentage"
     )
@@ -56,9 +50,7 @@ class FirmwareUpdateRequest(BaseModel):
 
     # Scheduling
     scheduled_deployment: datetime | None = Field(None, description="Scheduled deployment time")
-    deployment_window_hours: int = Field(
-        6, ge=1, le=24, description="Deployment window duration"
-    )
+    deployment_window_hours: int = Field(6, ge=1, le=24, description="Deployment window duration")
     force_update: bool = Field(False, description="Force update on all devices")
 
     @validator("early_percentage")
@@ -196,12 +188,8 @@ class HeartbeatRequest(BaseModel):
     uptime_seconds: int | None = Field(None, ge=0, description="Device uptime")
     battery_level: int | None = Field(None, ge=0, le=100, description="Battery level")
     charging_status: bool | None = Field(None, description="Charging status")
-    cpu_usage_percent: float | None = Field(
-        None, ge=0.0, le=100.0, description="CPU usage"
-    )
-    memory_usage_percent: float | None = Field(
-        None, ge=0.0, le=100.0, description="Memory usage"
-    )
+    cpu_usage_percent: float | None = Field(None, ge=0.0, le=100.0, description="CPU usage")
+    memory_usage_percent: float | None = Field(None, ge=0.0, le=100.0, description="Memory usage")
     storage_used_mb: int | None = Field(None, ge=0, description="Used storage MB")
     storage_total_mb: int | None = Field(None, ge=0, description="Total storage MB")
 

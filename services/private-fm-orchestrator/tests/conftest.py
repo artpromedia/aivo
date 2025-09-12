@@ -26,11 +26,7 @@ test_engine = create_async_engine(
 )
 
 # Test session factory
-TestSessionLocal = async_sessionmaker(
-    test_engine,
-    class_=AsyncSession,
-    expire_on_commit=False
-)
+TestSessionLocal = async_sessionmaker(test_engine, class_=AsyncSession, expire_on_commit=False)
 
 
 async def get_test_db() -> AsyncGenerator[AsyncSession, None]:
@@ -71,9 +67,7 @@ async def app(db_session):  # pylint: disable=redefined-outer-name
 @pytest_asyncio.fixture
 async def client(app):  # pylint: disable=redefined-outer-name
     """Create test client"""
-    async with AsyncClient(
-        transport=ASGITransport(app=app), base_url="http://test"
-    ) as ac:
+    async with AsyncClient(transport=ASGITransport(app=app), base_url="http://test") as ac:
         yield ac
 
 

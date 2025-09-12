@@ -11,7 +11,7 @@ export class DataLoader<K, V> {
 
   async load(key: K): Promise<V> {
     const cacheKey = String(key);
-    
+
     // Return cached result if available
     if (this.cache.has(cacheKey)) {
       return this.cache.get(cacheKey)!;
@@ -20,12 +20,12 @@ export class DataLoader<K, V> {
     // Create promise for this key
     const promise = new Promise<V>((resolve, reject) => {
       this.batch.push(key);
-      
+
       // Schedule batch execution
       if (!this.batchPromise) {
         this.batchPromise = Promise.resolve().then(() => this.processBatch());
       }
-      
+
       this.batchPromise.then(() => {
         const result = this.cache.get(cacheKey);
         if (result) {
@@ -63,11 +63,11 @@ export class DataLoader<K, V> {
 
     try {
       const results = await this.batchLoadFn(batch);
-      
+
       batch.forEach((key, index) => {
         const result = results[index];
         const cacheKey = String(key);
-        
+
         if (result instanceof Error) {
           this.cache.set(cacheKey, Promise.reject(result));
         } else {
@@ -96,10 +96,13 @@ import {
 } from '@/types';
 
 // DataLoader factory functions
-function createLearnerLoader(learnerService: LearnerService, cache: CacheService): DataLoader<string, Learner> {
-  return new DataLoader<string, Learner>(async (ids) => {
+function createLearnerLoader(
+  learnerService: LearnerService,
+  cache: CacheService
+): DataLoader<string, Learner> {
+  return new DataLoader<string, Learner>(async ids => {
     const results = await Promise.allSettled(
-      ids.map(async (id) => {
+      ids.map(async id => {
         const cached = await cache.get<string>(`learner:${id}`);
         if (cached) {
           return JSON.parse(cached) as Learner;
@@ -114,16 +117,19 @@ function createLearnerLoader(learnerService: LearnerService, cache: CacheService
       })
     );
 
-    return results.map(result => 
+    return results.map(result =>
       result.status === 'fulfilled' ? result.value : new Error(`Failed to load learner`)
     );
   });
 }
 
-function createGuardianLoader(learnerService: LearnerService, cache: CacheService): DataLoader<string, Guardian[]> {
-  return new DataLoader<string, Guardian[]>(async (learnerIds) => {
+function createGuardianLoader(
+  learnerService: LearnerService,
+  cache: CacheService
+): DataLoader<string, Guardian[]> {
+  return new DataLoader<string, Guardian[]>(async learnerIds => {
     const results = await Promise.allSettled(
-      learnerIds.map(async (learnerId) => {
+      learnerIds.map(async learnerId => {
         const cached = await cache.get<string>(`guardians:${learnerId}`);
         if (cached) {
           return JSON.parse(cached) as Guardian[];
@@ -139,16 +145,14 @@ function createGuardianLoader(learnerService: LearnerService, cache: CacheServic
       })
     );
 
-    return results.map(result => 
-      result.status === 'fulfilled' ? result.value : []
-    );
+    return results.map(result => (result.status === 'fulfilled' ? result.value : []));
   });
 }
 
 function createIepLoader(iepService: IepService, cache: CacheService): DataLoader<string, IepDoc> {
-  return new DataLoader<string, IepDoc>(async (ids) => {
+  return new DataLoader<string, IepDoc>(async ids => {
     const results = await Promise.allSettled(
-      ids.map(async (id) => {
+      ids.map(async id => {
         const cached = await cache.get<string>(`iep:${id}`);
         if (cached) {
           return JSON.parse(cached) as IepDoc;
@@ -163,16 +167,19 @@ function createIepLoader(iepService: IepService, cache: CacheService): DataLoade
       })
     );
 
-    return results.map(result => 
+    return results.map(result =>
       result.status === 'fulfilled' ? result.value : new Error(`Failed to load IEP`)
     );
   });
 }
 
-function createAnalyticsLoader(analyticsService: AnalyticsService, cache: CacheService): DataLoader<string, LearnerAnalytics> {
-  return new DataLoader<string, LearnerAnalytics>(async (learnerIds) => {
+function createAnalyticsLoader(
+  analyticsService: AnalyticsService,
+  cache: CacheService
+): DataLoader<string, LearnerAnalytics> {
+  return new DataLoader<string, LearnerAnalytics>(async learnerIds => {
     const results = await Promise.allSettled(
-      learnerIds.map(async (learnerId) => {
+      learnerIds.map(async learnerId => {
         const cached = await cache.get<string>(`learner_analytics:${learnerId}`);
         if (cached) {
           return JSON.parse(cached) as LearnerAnalytics;
@@ -187,16 +194,19 @@ function createAnalyticsLoader(analyticsService: AnalyticsService, cache: CacheS
       })
     );
 
-    return results.map(result => 
+    return results.map(result =>
       result.status === 'fulfilled' ? result.value : new Error(`Failed to load analytics`)
     );
   });
 }
 
-function createStudentIepsLoader(iepService: IepService, cache: CacheService): DataLoader<string, IepDoc[]> {
-  return new DataLoader<string, IepDoc[]>(async (studentIds) => {
+function createStudentIepsLoader(
+  iepService: IepService,
+  cache: CacheService
+): DataLoader<string, IepDoc[]> {
+  return new DataLoader<string, IepDoc[]>(async studentIds => {
     const results = await Promise.allSettled(
-      studentIds.map(async (studentId) => {
+      studentIds.map(async studentId => {
         const cached = await cache.get<string>(`student_ieps:${studentId}`);
         if (cached) {
           return JSON.parse(cached) as IepDoc[];
@@ -212,9 +222,7 @@ function createStudentIepsLoader(iepService: IepService, cache: CacheService): D
       })
     );
 
-    return results.map(result => 
-      result.status === 'fulfilled' ? result.value : []
-    );
+    return results.map(result => (result.status === 'fulfilled' ? result.value : []));
   });
 }
 
@@ -234,7 +242,10 @@ export const createDataLoaders = (
 };
 
 // Cache clearing utility functions
-export const clearCacheForLearner = async (cache: CacheService, learnerId: string): Promise<void> => {
+export const clearCacheForLearner = async (
+  cache: CacheService,
+  learnerId: string
+): Promise<void> => {
   await Promise.all([
     cache.del(`learner:${learnerId}`),
     cache.del(`guardians:${learnerId}`),
@@ -243,7 +254,11 @@ export const clearCacheForLearner = async (cache: CacheService, learnerId: strin
   ]);
 };
 
-export const clearCacheForIep = async (cache: CacheService, iepId: string, learnerId?: string): Promise<void> => {
+export const clearCacheForIep = async (
+  cache: CacheService,
+  iepId: string,
+  learnerId?: string
+): Promise<void> => {
   const keysToDelete = [`iep:${iepId}`];
   if (learnerId) {
     keysToDelete.push(`student_ieps:${learnerId}`);

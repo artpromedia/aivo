@@ -1,4 +1,4 @@
-﻿"""
+"""
 SQLAlchemy models for compliance export service.
 Includes export jobs, audit logs, and encrypted file storage.
 """
@@ -6,7 +6,6 @@ Includes export jobs, audit logs, and encrypted file storage.
 import uuid
 from datetime import datetime
 from enum import Enum
-from typing import Dict, List, Optional
 
 from sqlalchemy import (
     JSON,
@@ -66,46 +65,42 @@ class ExportJob(Base):
 
     __tablename__ = "export_jobs"
 
-    id: Mapped[uuid.UUID] = mapped_column(
-        UUID(as_uuid=True), primary_key=True, default=uuid.uuid4
-    )
+    id: Mapped[uuid.UUID] = mapped_column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
     format: Mapped[ExportFormat] = mapped_column(String(50), nullable=False)
     status: Mapped[ExportStatus] = mapped_column(
         String(20), default=ExportStatus.PENDING, nullable=False
     )
-    
+
     # Job metadata
     name: Mapped[str] = mapped_column(String(255), nullable=False)
-    description: Mapped[Optional[str]] = mapped_column(Text)
-    parameters: Mapped[Dict] = mapped_column(JSON, default=dict)
-    
+    description: Mapped[str | None] = mapped_column(Text)
+    parameters: Mapped[dict] = mapped_column(JSON, default=dict)
+
     # Timing and user info
-    created_at: Mapped[datetime] = mapped_column(
-        DateTime, default=datetime.utcnow, nullable=False
-    )
-    started_at: Mapped[Optional[datetime]] = mapped_column(DateTime)
-    completed_at: Mapped[Optional[datetime]] = mapped_column(DateTime)
+    created_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow, nullable=False)
+    started_at: Mapped[datetime | None] = mapped_column(DateTime)
+    completed_at: Mapped[datetime | None] = mapped_column(DateTime)
     created_by: Mapped[str] = mapped_column(String(255), nullable=False)
-    
+
     # File and encryption info
-    file_path: Mapped[Optional[str]] = mapped_column(String(500))
-    encrypted_file_path: Mapped[Optional[str]] = mapped_column(String(500))
-    file_size: Mapped[Optional[int]] = mapped_column(Integer)
-    encryption_key_id: Mapped[Optional[str]] = mapped_column(String(255))
-    
+    file_path: Mapped[str | None] = mapped_column(String(500))
+    encrypted_file_path: Mapped[str | None] = mapped_column(String(500))
+    file_size: Mapped[int | None] = mapped_column(Integer)
+    encryption_key_id: Mapped[str | None] = mapped_column(String(255))
+
     # Progress and results
     progress_percentage: Mapped[int] = mapped_column(Integer, default=0)
-    total_records: Mapped[Optional[int]] = mapped_column(Integer)
-    processed_records: Mapped[Optional[int]] = mapped_column(Integer)
-    error_message: Mapped[Optional[str]] = mapped_column(Text)
-    
+    total_records: Mapped[int | None] = mapped_column(Integer)
+    processed_records: Mapped[int | None] = mapped_column(Integer)
+    error_message: Mapped[str | None] = mapped_column(Text)
+
     # Compliance metadata
     school_year: Mapped[str] = mapped_column(String(10), nullable=False)
-    district_id: Mapped[Optional[str]] = mapped_column(String(50))
+    district_id: Mapped[str | None] = mapped_column(String(50))
     state_code: Mapped[str] = mapped_column(String(2), nullable=False)
-    
+
     # Relationships
-    audit_logs: Mapped[List["AuditLog"]] = relationship(
+    audit_logs: Mapped[list["AuditLog"]] = relationship(
         "AuditLog", back_populates="export_job", cascade="all, delete-orphan"
     )
 
@@ -118,35 +113,29 @@ class AuditLog(Base):
         UniqueConstraint("id"),  # Ensure immutability
     )
 
-    id: Mapped[uuid.UUID] = mapped_column(
-        UUID(as_uuid=True), primary_key=True, default=uuid.uuid4
-    )
+    id: Mapped[uuid.UUID] = mapped_column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
     export_job_id: Mapped[uuid.UUID] = mapped_column(
         UUID(as_uuid=True), ForeignKey("export_jobs.id"), nullable=False
     )
-    
+
     # Audit details
     action: Mapped[AuditAction] = mapped_column(String(50), nullable=False)
-    timestamp: Mapped[datetime] = mapped_column(
-        DateTime, default=datetime.utcnow, nullable=False
-    )
+    timestamp: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow, nullable=False)
     user_id: Mapped[str] = mapped_column(String(255), nullable=False)
-    ip_address: Mapped[Optional[str]] = mapped_column(String(45))
-    user_agent: Mapped[Optional[str]] = mapped_column(String(500))
-    
+    ip_address: Mapped[str | None] = mapped_column(String(45))
+    user_agent: Mapped[str | None] = mapped_column(String(500))
+
     # Action details
-    details: Mapped[Dict] = mapped_column(JSON, default=dict)
-    previous_values: Mapped[Optional[Dict]] = mapped_column(JSON)
-    new_values: Mapped[Optional[Dict]] = mapped_column(JSON)
-    
+    details: Mapped[dict] = mapped_column(JSON, default=dict)
+    previous_values: Mapped[dict | None] = mapped_column(JSON)
+    new_values: Mapped[dict | None] = mapped_column(JSON)
+
     # Compliance tracking
-    compliance_officer: Mapped[Optional[str]] = mapped_column(String(255))
-    regulatory_requirement: Mapped[Optional[str]] = mapped_column(String(255))
-    
+    compliance_officer: Mapped[str | None] = mapped_column(String(255))
+    regulatory_requirement: Mapped[str | None] = mapped_column(String(255))
+
     # Relationships
-    export_job: Mapped["ExportJob"] = relationship(
-        "ExportJob", back_populates="audit_logs"
-    )
+    export_job: Mapped["ExportJob"] = relationship("ExportJob", back_populates="audit_logs")
 
 
 class EncryptionKey(Base):
@@ -154,25 +143,21 @@ class EncryptionKey(Base):
 
     __tablename__ = "encryption_keys"
 
-    id: Mapped[uuid.UUID] = mapped_column(
-        UUID(as_uuid=True), primary_key=True, default=uuid.uuid4
-    )
+    id: Mapped[uuid.UUID] = mapped_column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
     key_id: Mapped[str] = mapped_column(String(255), unique=True, nullable=False)
-    
+
     # Encrypted key storage (key is encrypted with master key)
     encrypted_key: Mapped[bytes] = mapped_column(LargeBinary, nullable=False)
     salt: Mapped[bytes] = mapped_column(LargeBinary, nullable=False)
-    
+
     # Key metadata
-    created_at: Mapped[datetime] = mapped_column(
-        DateTime, default=datetime.utcnow, nullable=False
-    )
+    created_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow, nullable=False)
     created_by: Mapped[str] = mapped_column(String(255), nullable=False)
     is_active: Mapped[bool] = mapped_column(Boolean, default=True, nullable=False)
-    
+
     # Key rotation
-    rotated_at: Mapped[Optional[datetime]] = mapped_column(DateTime)
-    predecessor_key_id: Mapped[Optional[str]] = mapped_column(String(255))
+    rotated_at: Mapped[datetime | None] = mapped_column(DateTime)
+    predecessor_key_id: Mapped[str | None] = mapped_column(String(255))
 
 
 class ComplianceTemplate(Base):
@@ -180,26 +165,22 @@ class ComplianceTemplate(Base):
 
     __tablename__ = "compliance_templates"
 
-    id: Mapped[uuid.UUID] = mapped_column(
-        UUID(as_uuid=True), primary_key=True, default=uuid.uuid4
-    )
+    id: Mapped[uuid.UUID] = mapped_column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
     format: Mapped[ExportFormat] = mapped_column(String(50), nullable=False)
     version: Mapped[str] = mapped_column(String(20), nullable=False)
-    
+
     # Template metadata
     name: Mapped[str] = mapped_column(String(255), nullable=False)
-    description: Mapped[Optional[str]] = mapped_column(Text)
+    description: Mapped[str | None] = mapped_column(Text)
     state_code: Mapped[str] = mapped_column(String(2), nullable=False)
-    
+
     # Template configuration
-    field_definitions: Mapped[Dict] = mapped_column(JSON, nullable=False)
-    validation_rules: Mapped[Dict] = mapped_column(JSON, default=dict)
-    transformation_rules: Mapped[Dict] = mapped_column(JSON, default=dict)
-    
+    field_definitions: Mapped[dict] = mapped_column(JSON, nullable=False)
+    validation_rules: Mapped[dict] = mapped_column(JSON, default=dict)
+    transformation_rules: Mapped[dict] = mapped_column(JSON, default=dict)
+
     # Timing
-    created_at: Mapped[datetime] = mapped_column(
-        DateTime, default=datetime.utcnow, nullable=False
-    )
+    created_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow, nullable=False)
     updated_at: Mapped[datetime] = mapped_column(
         DateTime, default=datetime.utcnow, onupdate=datetime.utcnow, nullable=False
     )
@@ -211,24 +192,20 @@ class ExportSchedule(Base):
 
     __tablename__ = "export_schedules"
 
-    id: Mapped[uuid.UUID] = mapped_column(
-        UUID(as_uuid=True), primary_key=True, default=uuid.uuid4
-    )
+    id: Mapped[uuid.UUID] = mapped_column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
     name: Mapped[str] = mapped_column(String(255), nullable=False)
     format: Mapped[ExportFormat] = mapped_column(String(50), nullable=False)
-    
+
     # Schedule configuration
     cron_expression: Mapped[str] = mapped_column(String(100), nullable=False)
-    parameters: Mapped[Dict] = mapped_column(JSON, default=dict)
-    
+    parameters: Mapped[dict] = mapped_column(JSON, default=dict)
+
     # Schedule metadata
-    created_at: Mapped[datetime] = mapped_column(
-        DateTime, default=datetime.utcnow, nullable=False
-    )
+    created_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow, nullable=False)
     created_by: Mapped[str] = mapped_column(String(255), nullable=False)
     is_active: Mapped[bool] = mapped_column(Boolean, default=True, nullable=False)
-    
+
     # Last execution
-    last_run_at: Mapped[Optional[datetime]] = mapped_column(DateTime)
-    next_run_at: Mapped[Optional[datetime]] = mapped_column(DateTime)
-    last_job_id: Mapped[Optional[uuid.UUID]] = mapped_column(UUID(as_uuid=True))
+    last_run_at: Mapped[datetime | None] = mapped_column(DateTime)
+    next_run_at: Mapped[datetime | None] = mapped_column(DateTime)
+    last_job_id: Mapped[uuid.UUID | None] = mapped_column(UUID(as_uuid=True))

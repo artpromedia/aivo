@@ -39,9 +39,7 @@ async def lifespan(_app: FastAPI) -> AsyncGenerator[None, None]:
 # Create FastAPI application
 app = FastAPI(
     title="Game Generation Service",
-    description=(
-        "Generate accessible educational games with declarative manifests"
-    ),
+    description=("Generate accessible educational games with declarative manifests"),
     version=settings.service_version,
     lifespan=lifespan,
 )
@@ -103,18 +101,14 @@ async def generate_game_manifest(
             raise HTTPException(
                 status_code=400,
                 detail=(
-                    f"Duration must be at least "
-                    f"{settings.min_game_duration_minutes} minutes"
+                    f"Duration must be at least " f"{settings.min_game_duration_minutes} minutes"
                 ),
             )
 
         if request.duration_minutes > settings.max_game_duration_minutes:
             raise HTTPException(
                 status_code=400,
-                detail=(
-                    f"Duration cannot exceed "
-                    f"{settings.max_game_duration_minutes} minutes"
-                ),
+                detail=(f"Duration cannot exceed " f"{settings.max_game_duration_minutes} minutes"),
             )
 
         # Check cache first for sub-second response
@@ -155,9 +149,7 @@ async def generate_game_manifest(
         )
 
         # Schedule cache warming for related variants
-        background_tasks.add_task(
-            template_cache.warm_cache, request.subject.value, grade
-        )
+        background_tasks.add_task(template_cache.warm_cache, request.subject.value, grade)
 
         generation_time_ms = int((time.time() - start_time) * 1000)
 
@@ -177,14 +169,11 @@ async def generate_game_manifest(
         )
 
     except ValidationError as e:
-        raise HTTPException(
-            status_code=422, detail=f"Validation error: {str(e)}"
-        ) from e
+        raise HTTPException(status_code=422, detail=f"Validation error: {str(e)}") from e
     except Exception as e:
         print("Manifest generation error: %s", str(e))
         raise HTTPException(
-            status_code=500,
-            detail="Internal server error during manifest generation"
+            status_code=500, detail="Internal server error during manifest generation"
         ) from e
 
 
@@ -195,9 +184,7 @@ async def get_cache_statistics() -> CacheStats:
 
 
 @app.post("/cache/warm")
-async def warm_cache(
-    subject: str, grade: int, background_tasks: BackgroundTasks
-) -> dict[str, str]:
+async def warm_cache(subject: str, grade: int, background_tasks: BackgroundTasks) -> dict[str, str]:
     """Warm cache for specific subject and grade combinations.
 
     Pre-generates common game variants for faster response times.
@@ -208,9 +195,7 @@ async def warm_cache(
         message = f"Cache warming started for {subject} grade {grade}"
         return {"message": message}
     except Exception as e:
-        raise HTTPException(
-            status_code=500, detail=f"Cache warming failed: {str(e)}"
-        ) from e
+        raise HTTPException(status_code=500, detail=f"Cache warming failed: {str(e)}") from e
 
 
 @app.delete("/cache/clear")
@@ -220,9 +205,7 @@ async def clear_cache() -> dict[str, str]:
         expired_count = await template_cache.clear_expired()
         return {"message": f"Cleared {expired_count} expired cache entries"}
     except Exception as e:
-        raise HTTPException(
-            status_code=500, detail=f"Cache clearing failed: {str(e)}"
-        ) from e
+        raise HTTPException(status_code=500, detail=f"Cache clearing failed: {str(e)}") from e
 
 
 @app.get("/performance", response_model=PerformanceStats)
@@ -233,9 +216,7 @@ async def get_performance_stats() -> PerformanceStats:
 
     return PerformanceStats(
         total_generations=generator_stats["total_generations"],
-        average_generation_time_ms=(
-            generator_stats["average_generation_time_ms"]
-        ),
+        average_generation_time_ms=(generator_stats["average_generation_time_ms"]),
         target_time_ms=settings.target_generation_time_ms,
         cache_hit_rate=cache_stats.hit_rate,
         cache_size_bytes=cache_stats.size_bytes,
@@ -275,13 +256,9 @@ async def get_available_games(subject: str, grade: int = 1) -> dict[str, Any]:
 
 # Error handlers
 @app.exception_handler(ValidationError)
-async def validation_exception_handler(
-    _request: Request, exc: ValidationError
-) -> HTTPException:
+async def validation_exception_handler(_request: Request, exc: ValidationError) -> HTTPException:
     """Handle Pydantic validation errors."""
-    return HTTPException(
-        status_code=422, detail=f"Validation error: {str(exc)}"
-    )
+    return HTTPException(status_code=422, detail=f"Validation error: {str(exc)}")
 
 
 if __name__ == "__main__":

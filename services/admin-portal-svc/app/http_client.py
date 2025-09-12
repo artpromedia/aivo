@@ -33,18 +33,14 @@ class CircuitBreakerError(Exception):
 class CircuitBreaker:
     """Circuit breaker implementation."""
 
-    def __init__(
-        self: Self, failure_threshold: int = 5, recovery_timeout: int = 60
-    ) -> None:
+    def __init__(self: Self, failure_threshold: int = 5, recovery_timeout: int = 60) -> None:
         self.failure_threshold = failure_threshold
         self.recovery_timeout = recovery_timeout
         self.failure_count = 0
         self.last_failure_time = None
         self.state = "closed"  # closed, open, half-open
 
-    async def call(
-        self: Self, func: Callable, *args: Any, **kwargs: Any
-    ) -> Any:
+    async def call(self: Self, func: Callable, *args: Any, **kwargs: Any) -> Any:
         """Execute function with circuit breaker protection."""
         if self.state == "open":
             if self._should_attempt_reset():
@@ -79,9 +75,7 @@ class CircuitBreaker:
 
         if self.failure_count >= self.failure_threshold:
             self.state = "open"
-            logger.warning(
-                "Circuit breaker opened after %s failures", self.failure_count
-            )
+            logger.warning("Circuit breaker opened after %s failures", self.failure_count)
 
 
 class HTTPClientService:
@@ -100,9 +94,7 @@ class HTTPClientService:
         """Initialize HTTP client."""
         self.client = httpx.AsyncClient(
             timeout=httpx.Timeout(self.settings.http_timeout),
-            limits=httpx.Limits(
-                max_connections=100, max_keepalive_connections=20
-            ),
+            limits=httpx.Limits(max_connections=100, max_keepalive_connections=20),
         )
         logger.info("HTTP client service initialized")
 
@@ -123,13 +115,9 @@ class HTTPClientService:
     @retry(
         stop=stop_after_attempt(3),
         wait=wait_exponential(multiplier=1, min=4, max=10),
-        retry=retry_if_exception_type(
-            (httpx.RequestError, httpx.TimeoutException)
-        ),
+        retry=retry_if_exception_type((httpx.RequestError, httpx.TimeoutException)),
     )
-    async def _make_request(
-        self: Self, method: str, url: str, **kwargs: Any
-    ) -> httpx.Response:
+    async def _make_request(self: Self, method: str, url: str, **kwargs: Any) -> httpx.Response:
         """Make HTTP request with retries."""
         if not self.client:
             raise RuntimeError("HTTP client not initialized")
@@ -153,18 +141,13 @@ class HTTPClientService:
             },
         ) as span:
             try:
-                response = await circuit_breaker.call(
-                    self._make_request, method, url, **kwargs
-                )
+                response = await circuit_breaker.call(self._make_request, method, url, **kwargs)
 
                 data = response.json()
                 span.set_attribute("http.status_code", response.status_code)
                 span.set_attribute("http.response_size", len(response.content))
 
-                logger.debug(
-                    "Successful request to %s: %s %s",
-                    service_name, method, url
-                )
+                logger.debug("Successful request to %s: %s %s", service_name, method, url)
                 return data
 
             except CircuitBreakerError as e:
@@ -176,10 +159,7 @@ class HTTPClientService:
             except httpx.HTTPStatusError as e:
                 span.set_attribute("http.status_code", e.response.status_code)
                 span.record_exception(e)
-                logger.error(
-                    "HTTP error from %s: %s",
-                    service_name, e.response.status_code
-                )
+                logger.error("HTTP error from %s: %s", service_name, e.response.status_code)
                 raise
 
             except Exception as e:
@@ -187,27 +167,19 @@ class HTTPClientService:
                 logger.error("Request failed to %s: %s", service_name, e)
                 raise
 
-    async def get(
-        self: Self, service_name: str, url: str, **kwargs: Any
-    ) -> dict[str, Any]:
+    async def get(self: Self, service_name: str, url: str, **kwargs: Any) -> dict[str, Any]:
         """Make GET request."""
         return await self.request(service_name, "GET", url, **kwargs)
 
-    async def post(
-        self: Self, service_name: str, url: str, **kwargs: Any
-    ) -> dict[str, Any]:
+    async def post(self: Self, service_name: str, url: str, **kwargs: Any) -> dict[str, Any]:
         """Make POST request."""
         return await self.request(service_name, "POST", url, **kwargs)
 
-    async def put(
-        self: Self, service_name: str, url: str, **kwargs: Any
-    ) -> dict[str, Any]:
+    async def put(self: Self, service_name: str, url: str, **kwargs: Any) -> dict[str, Any]:
         """Make PUT request."""
         return await self.request(service_name, "PUT", url, **kwargs)
 
-    async def delete(
-        self: Self, service_name: str, url: str, **kwargs: Any
-    ) -> dict[str, Any]:
+    async def delete(self: Self, service_name: str, url: str, **kwargs: Any) -> dict[str, Any]:
         """Make DELETE request."""
         return await self.request(service_name, "DELETE", url, **kwargs)
 

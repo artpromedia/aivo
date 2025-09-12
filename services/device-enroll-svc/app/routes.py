@@ -176,29 +176,23 @@ async def submit_attestation(
 ) -> AttestationSubmissionResponse:
     """Submit attestation and receive device certificate."""
     try:
-        challenge, certificate_pem = (
-            await attestation_service.verify_attestation(
-                challenge_id=request.challenge_id,
-                signature=request.signature,
-                public_key_pem=request.public_key_pem,
-                db=db,
-                attestation_data=request.attestation_data,
-            )
+        challenge, certificate_pem = await attestation_service.verify_attestation(
+            challenge_id=request.challenge_id,
+            signature=request.signature,
+            public_key_pem=request.public_key_pem,
+            db=db,
+            attestation_data=request.attestation_data,
         )
 
         # Get updated device info for certificate details
-        device = await enrollment_service.get_device_by_id(
-            challenge.device_id, db
-        )
+        device = await enrollment_service.get_device_by_id(challenge.device_id, db)
 
         return AttestationSubmissionResponse(
             challenge_id=challenge.challenge_id,
             status=challenge.status,
             device_certificate_pem=certificate_pem,
             certificate_serial=device.certificate_serial if device else None,
-            certificate_expires_at=(
-                device.certificate_expires_at if device else None
-            ),
+            certificate_expires_at=(device.certificate_expires_at if device else None),
             message=(
                 "Attestation verified and certificate issued"
                 if certificate_pem
@@ -304,17 +298,12 @@ async def list_devices(
         offset = (page - 1) * size
 
         # Get total count
-        count_result = await db.execute(
-            text("SELECT COUNT(*) FROM devices")
-        )
+        count_result = await db.execute(text("SELECT COUNT(*) FROM devices"))
         total = count_result.scalar()
 
         # Get devices
         result = await db.execute(
-            select(Device)
-            .order_by(Device.created_at.desc())
-            .offset(offset)
-            .limit(size)
+            select(Device).order_by(Device.created_at.desc()).offset(offset).limit(size)
         )
         devices = result.scalars().all()
 

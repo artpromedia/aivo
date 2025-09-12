@@ -39,8 +39,8 @@ abstract class BaseService {
 
     // Add response interceptor for consistent error handling
     this.client.interceptors.response.use(
-      (response) => response,
-      (error) => {
+      response => response,
+      error => {
         console.error(`Service error: ${error.message}`, {
           url: error.config?.url,
           status: error.response?.status,
@@ -51,7 +51,9 @@ abstract class BaseService {
     );
   }
 
-  protected async handleRequest<T>(request: Promise<AxiosResponse<T>>): Promise<ServiceResponse<T>> {
+  protected async handleRequest<T>(
+    request: Promise<AxiosResponse<T>>
+  ): Promise<ServiceResponse<T>> {
     try {
       const response = await request;
       return {
@@ -81,9 +83,7 @@ export class HTTPLearnerService extends BaseService implements LearnerService {
   }
 
   async getLearners(params: GetLearnersParams): Promise<ServiceResponse<Learner[]>> {
-    return this.handleRequest(
-      this.client.get<Learner[]>('/learners', { params })
-    );
+    return this.handleRequest(this.client.get<Learner[]>('/learners', { params }));
   }
 
   async createLearner(input: LearnerInput): Promise<ServiceResponse<Learner>> {
@@ -94,16 +94,17 @@ export class HTTPLearnerService extends BaseService implements LearnerService {
     return this.handleRequest(this.client.put<Learner>(`/learners/${id}`, input));
   }
 
-  async addGuardian(learnerId: string, guardian: GuardianInput): Promise<ServiceResponse<Guardian>> {
+  async addGuardian(
+    learnerId: string,
+    guardian: GuardianInput
+  ): Promise<ServiceResponse<Guardian>> {
     return this.handleRequest(
       this.client.post<Guardian>(`/learners/${learnerId}/guardians`, guardian)
     );
   }
 
   async getGuardians(learnerId: string): Promise<ServiceResponse<Guardian[]>> {
-    return this.handleRequest(
-      this.client.get<Guardian[]>(`/learners/${learnerId}/guardians`)
-    );
+    return this.handleRequest(this.client.get<Guardian[]>(`/learners/${learnerId}/guardians`));
   }
 }
 
@@ -128,21 +129,15 @@ export class HTTPIepService extends BaseService implements IepService {
     iepId: string,
     operations: CrdtOperationInput[]
   ): Promise<ServiceResponse<IepDoc>> {
-    return this.handleRequest(
-      this.client.post<IepDoc>(`/ieps/${iepId}/draft`, { operations })
-    );
+    return this.handleRequest(this.client.post<IepDoc>(`/ieps/${iepId}/draft`, { operations }));
   }
 
   async submitForApproval(iepId: string): Promise<ServiceResponse<IepDoc>> {
-    return this.handleRequest(
-      this.client.post<IepDoc>(`/ieps/${iepId}/submit-approval`)
-    );
+    return this.handleRequest(this.client.post<IepDoc>(`/ieps/${iepId}/submit-approval`));
   }
 
   async addGoal(iepId: string, goal: GoalInput): Promise<ServiceResponse<Goal>> {
-    return this.handleRequest(
-      this.client.post<Goal>(`/ieps/${iepId}/goals`, goal)
-    );
+    return this.handleRequest(this.client.post<Goal>(`/ieps/${iepId}/goals`, goal));
   }
 
   async addAccommodation(
@@ -155,23 +150,17 @@ export class HTTPIepService extends BaseService implements IepService {
   }
 
   async getStudentIeps(studentId: string): Promise<ServiceResponse<IepDoc[]>> {
-    return this.handleRequest(
-      this.client.get<IepDoc[]>(`/students/${studentId}/ieps`)
-    );
+    return this.handleRequest(this.client.get<IepDoc[]>(`/students/${studentId}/ieps`));
   }
 
   async getActiveIeps(tenantId?: string): Promise<ServiceResponse<IepDoc[]>> {
     const params = tenantId ? { tenantId } : {};
-    return this.handleRequest(
-      this.client.get<IepDoc[]>('/ieps/active', { params })
-    );
+    return this.handleRequest(this.client.get<IepDoc[]>('/ieps/active', { params }));
   }
 
   async getPendingApprovals(tenantId?: string): Promise<ServiceResponse<IepDoc[]>> {
     const params = tenantId ? { tenantId } : {};
-    return this.handleRequest(
-      this.client.get<IepDoc[]>('/ieps/pending-approvals', { params })
-    );
+    return this.handleRequest(this.client.get<IepDoc[]>('/ieps/pending-approvals', { params }));
   }
 }
 
@@ -221,15 +210,13 @@ export class HTTPAdminPortalService extends BaseService implements AdminPortalSe
 
   async getDashboardData(tenantId?: string): Promise<ServiceResponse<DashboardMetrics>> {
     const params = tenantId ? { tenantId } : {};
-    return this.handleRequest(
-      this.client.get<DashboardMetrics>('/dashboard', { params })
-    );
+    return this.handleRequest(this.client.get<DashboardMetrics>('/dashboard', { params }));
   }
 
-  async getSystemHealth(): Promise<ServiceResponse<{ status: string; services: Record<string, string> }>> {
-    return this.handleRequest(
-      this.client.get('/health')
-    );
+  async getSystemHealth(): Promise<
+    ServiceResponse<{ status: string; services: Record<string, string> }>
+  > {
+    return this.handleRequest(this.client.get('/health'));
   }
 }
 

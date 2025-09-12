@@ -1,15 +1,16 @@
-﻿"""IEP Goal linkage system for connecting evidence to learning objectives."""
+"""IEP Goal linkage system for connecting evidence to learning objectives."""
+
 import logging
 import uuid
-from typing import Any, Dict, List, Optional, Tuple
+from typing import Any
 
 from sklearn.feature_extraction.text import TfidfVectorizer
 from sklearn.metrics.pairwise import cosine_similarity
-from sqlalchemy import and_, desc, func, select
+from sqlalchemy import and_, func, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from ..models import EvidenceExtraction, IEPGoal, IEPGoalLinkage
-from ..schemas import BulkLinkageRequest, IEPGoalLinkageCreate
+from ..schemas import BulkLinkageRequest
 
 logger = logging.getLogger(__name__)
 
@@ -40,15 +41,15 @@ class IEPGoalLinker:
         extraction_id: uuid.UUID,
         learner_id: uuid.UUID,
         min_strength: float = 0.5,
-    ) -> List[IEPGoalLinkage]:
+    ) -> list[IEPGoalLinkage]:
         """Create automatic linkages for an evidence extraction.
-        
+
         Args:
             db: Database session
             extraction_id: ID of evidence extraction
             learner_id: ID of learner
             min_strength: Minimum linkage strength threshold
-            
+
         Returns:
             List of created linkages
         """
@@ -59,7 +60,7 @@ class IEPGoalLinker:
             ),
         )
         extraction = extraction_result.scalar_one_or_none()
-        
+
         if not extraction:
             logger.warning("Extraction %s not found", extraction_id)
             return []
@@ -114,13 +115,13 @@ class IEPGoalLinker:
         self,
         db: AsyncSession,
         request: BulkLinkageRequest,
-    ) -> Dict[str, Any]:
+    ) -> dict[str, Any]:
         """Process bulk linkage creation for a learner.
-        
+
         Args:
             db: Database session
             request: Bulk linkage request
-            
+
         Returns:
             Summary of linkage creation results
         """
@@ -135,7 +136,7 @@ class IEPGoalLinker:
                 ),
             )
         )
-        
+
         if request.subject_areas:
             query = query.where(
                 EvidenceExtraction.subject_tags.op("&&")(request.subject_areas),
@@ -151,7 +152,7 @@ class IEPGoalLinker:
                 IEPGoal.is_active == True,  # noqa: E712
             ),
         )
-        
+
         if request.subject_areas:
             goals_query = goals_query.where(
                 IEPGoal.subject_area.in_(request.subject_areas),
@@ -175,7 +176,7 @@ class IEPGoalLinker:
             for goal_id, strength, matching_keywords, reason in linkage_data:
                 if strength >= request.min_linkage_strength:
                     validated = strength >= request.auto_validate_threshold
-                    
+
                     linkage = IEPGoalLinkage(
                         extraction_id=extraction.id,
                         iep_goal_id=goal_id,
@@ -185,10 +186,10 @@ class IEPGoalLinker:
                         validated_by_teacher=validated if validated else None,
                     )
                     db.add(linkage)
-                    
+
                     extraction_linkages += 1
                     total_linkages += 1
-                    
+
                     if validated:
                         auto_validated += 1
 
@@ -214,14 +215,14 @@ class IEPGoalLinker:
     async def _calculate_linkage_strengths(
         self,
         extraction: EvidenceExtraction,
-        iep_goals: List[IEPGoal],
-    ) -> List[Tuple[uuid.UUID, float, List[str], str]]:
+        iep_goals: list[IEPGoal],
+    ) -> list[tuple[uuid.UUID, float, list[str], str]]:
         """Calculate linkage strengths between extraction and IEP goals.
-        
+
         Args:
             extraction: Evidence extraction
             iep_goals: List of IEP goals
-            
+
         Returns:
             List of tuples (goal_id, strength, matching_keywords, reason)
         """
@@ -258,16 +259,18 @@ class IEPGoalLinker:
             )
 
             if total_strength >= self.min_linkage_strength:
-                linkage_results.append((
-                    goal.id,
-                    total_strength,
-                    matching_keywords,
-                    reason,
-                ))
+                linkage_results.append(
+                    (
+                        goal.id,
+                        total_strength,
+                        matching_keywords,
+                        reason,
+                    )
+                )
 
         # Sort by strength (descending)
         linkage_results.sort(key=lambda x: x[1], reverse=True)
-        
+
         return linkage_results
 
     def _calculate_keyword_overlap(
@@ -276,8 +279,8 @@ class IEPGoalLinker:
         goal: IEPGoal,
     ) -> float:
         """Calculate keyword overlap score."""
-        extraction_keywords = set(kw.lower() for kw in extraction.keywords)
-        goal_keywords = set(kw.lower() for kw in goal.keywords)
+        extraction_keywords = {kw.lower() for kw in extraction.keywords}
+        goal_keywords = {kw.lower() for kw in goal.keywords}
 
         if not extraction_keywords or not goal_keywords:
             return 0.0
@@ -300,10 +303,12 @@ class IEPGoalLinker:
                     partial_matches += 1
                     break
 
-        partial_score = partial_matches / max(len(extraction_keywords), len(goal_keywords))
+        partial_score = partial_matches / max(
+            len(extraction_keywords), len(goal_keywords)
+        )
 
         # Combine scores
-        return (jaccard_score * 0.7 + partial_score * 0.3)
+        return jaccard_score * 0.7 + partial_score * 0.3
 
     async def _calculate_text_similarity(
         self,
@@ -324,7 +329,7 @@ class IEPGoalLinker:
 
             # Calculate cosine similarity
             similarity = cosine_similarity(tfidf_matrix[0:1], tfidf_matrix[1:2])[0][0]
-            
+
             return float(similarity)
 
         except Exception as e:
@@ -337,7 +342,7 @@ class IEPGoalLinker:
         goal: IEPGoal,
     ) -> float:
         """Calculate subject area match score."""
-        extraction_subjects = set(tag.lower() for tag in extraction.subject_tags)
+        extraction_subjects = {tag.lower() for tag in extraction.subject_tags}
         goal_subject = goal.subject_area.lower()
 
         if not extraction_subjects:
@@ -395,22 +400,19 @@ class IEPGoalLinker:
         self,
         extraction: EvidenceExtraction,
         goal: IEPGoal,
-    ) -> List[str]:
+    ) -> list[str]:
         """Get list of matching keywords between extraction and goal."""
-        extraction_keywords = set(kw.lower() for kw in extraction.keywords)
-        goal_keywords = set(kw.lower() for kw in goal.keywords)
+        extraction_keywords = {kw.lower() for kw in extraction.keywords}
+        goal_keywords = {kw.lower() for kw in goal.keywords}
 
         # Direct matches
         direct_matches = extraction_keywords.intersection(goal_keywords)
-        
+
         # Partial matches
         partial_matches = set()
         for ext_kw in extraction_keywords:
             for goal_kw in goal_keywords:
-                if (
-                    ext_kw != goal_kw
-                    and (ext_kw in goal_kw or goal_kw in ext_kw)
-                ):
+                if ext_kw != goal_kw and (ext_kw in goal_kw or goal_kw in ext_kw):
                     partial_matches.add(f"{ext_kw}~{goal_kw}")
 
         all_matches = list(direct_matches) + list(partial_matches)
@@ -422,7 +424,7 @@ class IEPGoalLinker:
         text_score: float,
         subject_score: float,
         context_score: float,
-        matching_keywords: List[str],
+        matching_keywords: list[str],
     ) -> str:
         """Generate human-readable linkage reason."""
         reasons = []
@@ -473,7 +475,9 @@ class IEPGoalLinker:
         ]
 
         for pattern1, pattern2 in educational_patterns:
-            if (pattern1 in kw1 and pattern2 in kw2) or (pattern2 in kw1 and pattern1 in kw2):
+            if (pattern1 in kw1 and pattern2 in kw2) or (
+                pattern2 in kw1 and pattern1 in kw2
+            ):
                 return True
 
         return False
@@ -508,17 +512,17 @@ class IEPGoalLinker:
         linkage_id: uuid.UUID,
         teacher_id: uuid.UUID,
         is_valid: bool,
-        notes: Optional[str] = None,
-    ) -> Optional[IEPGoalLinkage]:
+        notes: str | None = None,
+    ) -> IEPGoalLinkage | None:
         """Validate or reject a linkage by a teacher.
-        
+
         Args:
             db: Database session
             linkage_id: ID of linkage to validate
             teacher_id: ID of validating teacher
             is_valid: Whether the linkage is valid
             notes: Optional teacher notes
-            
+
         Returns:
             Updated linkage or None if not found
         """
@@ -547,27 +551,27 @@ class IEPGoalLinker:
     async def get_linkage_analytics(
         self,
         db: AsyncSession,
-        learner_id: Optional[uuid.UUID] = None,
-        subject_area: Optional[str] = None,
-    ) -> Dict[str, Any]:
+        learner_id: uuid.UUID | None = None,
+        subject_area: str | None = None,
+    ) -> dict[str, Any]:
         """Get analytics about linkages.
-        
+
         Args:
             db: Database session
             learner_id: Optional learner filter
             subject_area: Optional subject area filter
-            
+
         Returns:
             Analytics dictionary
         """
         # Base query
         query = select(IEPGoalLinkage)
-        
+
         if learner_id:
             query = query.join(IEPGoalLinkage.iep_goal).where(
                 IEPGoal.learner_id == learner_id,
             )
-        
+
         if subject_area:
             query = query.join(IEPGoalLinkage.iep_goal).where(
                 IEPGoal.subject_area == subject_area,
@@ -588,10 +592,14 @@ class IEPGoalLinker:
                 "strength_distribution": {},
             }
 
-        validated_count = sum(1 for l in linkages if l.validated_by_teacher is True)
-        pending_count = sum(1 for l in linkages if l.validated_by_teacher is None)
-        
-        strengths = [l.linkage_strength for l in linkages]
+        validated_count = sum(
+            1 for linkage in linkages if linkage.validated_by_teacher is True
+        )
+        pending_count = sum(
+            1 for linkage in linkages if linkage.validated_by_teacher is None
+        )
+
+        strengths = [linkage.linkage_strength for linkage in linkages]
         avg_strength = sum(strengths) / len(strengths)
 
         # Subject distribution
@@ -600,7 +608,7 @@ class IEPGoalLinker:
             .join(IEPGoalLinkage)
             .group_by(IEPGoal.subject_area)
         )
-        
+
         if learner_id:
             subject_query = subject_query.where(IEPGoal.learner_id == learner_id)
 

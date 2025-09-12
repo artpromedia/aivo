@@ -1,1 +1,1 @@
-﻿"""Proxy package for HLS content access control."""
+"""Proxy package for HLS content access control."""

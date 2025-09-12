@@ -1,4 +1,5 @@
 """Tests for ink service business logic."""
+
 import sys
 from pathlib import Path
 from uuid import uuid4
@@ -22,9 +23,7 @@ async def test_consent_validation():
     subject = "mathematics"
     metadata = {"device": "tablet"}
 
-    is_valid, error = await service.validate_consent(
-        learner_id, subject, metadata
-    )
+    is_valid, error = await service.validate_consent(learner_id, subject, metadata)
 
     assert is_valid is True
     assert error is None
@@ -48,9 +47,9 @@ async def test_media_policy_validation():
                 points=[
                     Point(x=100, y=150, timestamp=0),
                     Point(x=105, y=152, timestamp=16),
-                ]
+                ],
             )
-        ]
+        ],
     )
 
     is_valid, error = await service.validate_media_policy(stroke_request)
@@ -66,10 +65,7 @@ async def test_media_policy_too_many_strokes():
 
     # Create stroke request with too many strokes
     strokes = [
-        Stroke(
-            stroke_id=uuid4(),
-            points=[Point(x=100, y=150, timestamp=0)]
-        )
+        Stroke(stroke_id=uuid4(), points=[Point(x=100, y=150, timestamp=0)])
         for _ in range(1001)  # Exceeds limit
     ]
 
@@ -79,7 +75,7 @@ async def test_media_policy_too_many_strokes():
         subject="mathematics",
         canvas_width=800,
         canvas_height=600,
-        strokes=strokes
+        strokes=strokes,
     )
 
     is_valid, error = await service.validate_media_policy(stroke_request)

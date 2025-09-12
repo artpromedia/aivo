@@ -22,6 +22,7 @@ from .schemas import (
 
 class RegionParams(NamedTuple):
     """Parameters for recognition region."""
+
     x: float | None = None
     y: float | None = None
     width: float | None = None
@@ -139,7 +140,8 @@ async def recognize_math(
     except Exception as e:
         logger.exception("Error in math recognition endpoint")
         raise HTTPException(
-            status_code=500, detail=f"Internal server error: {e!s}",
+            status_code=500,
+            detail=f"Internal server error: {e!s}",
         ) from e
 
 
@@ -168,7 +170,8 @@ async def recognize_math_from_ink(ink_data: InkData) -> RecognitionResponse:
     except Exception as e:
         logger.exception("Error in direct ink recognition endpoint")
         raise HTTPException(
-            status_code=500, detail=f"Internal server error: {e!s}",
+            status_code=500,
+            detail=f"Internal server error: {e!s}",
         ) from e
 
 
@@ -188,7 +191,8 @@ async def grade_expression(request: GradeRequest) -> GradeResponse:
     except Exception as e:
         logger.exception("Error in grading endpoint")
         raise HTTPException(
-            status_code=500, detail=f"Internal server error: {e!s}",
+            status_code=500,
+            detail=f"Internal server error: {e!s}",
         ) from e
 
 

@@ -38,7 +38,7 @@ class TestValidationError(unittest.TestCase):
                 message = 'Request validation failed',
                 validation_errors = [
                     aivo_sdk.models.validation_error_validation_errors_inner.ValidationError_validationErrors_inner(
-                        field = 'email', 
+                        field = 'email',
                         message = 'Invalid email format', )
                     ]
             )
@@ -48,7 +48,7 @@ class TestValidationError(unittest.TestCase):
                 message = 'Request validation failed',
                 validation_errors = [
                     aivo_sdk.models.validation_error_validation_errors_inner.ValidationError_validationErrors_inner(
-                        field = 'email', 
+                        field = 'email',
                         message = 'Invalid email format', )
                     ],
         )

@@ -10,10 +10,7 @@ class Settings(BaseSettings):
     """Application settings."""
 
     # Database
-    database_url: str = (
-        "postgresql+asyncpg://postgres:postgres@localhost:5432/"
-        "device_policy_db"
-    )
+    database_url: str = "postgresql+asyncpg://postgres:postgres@localhost:5432/" "device_policy_db"
     sql_debug: bool = False
 
     # API

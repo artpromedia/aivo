@@ -197,9 +197,7 @@ class MeshClient:
             logger.error("Failed to load certificates: %s", e)
             raise
 
-    def _get_circuit_breaker(
-        self: "MeshClient", service_name: str
-    ) -> CircuitBreakerState:
+    def _get_circuit_breaker(self: "MeshClient", service_name: str) -> CircuitBreakerState:
         """Get or create a circuit breaker for a service."""
         if service_name not in self.circuit_breakers:
             self.circuit_breakers[service_name] = CircuitBreakerState()
@@ -249,19 +247,15 @@ class MeshClient:
 
         try:
             # Test connection with timeout
-            await asyncio.wait_for(
-                channel.channel_ready(), timeout=self.config.connection_timeout
-            )
+            await asyncio.wait_for(channel.channel_ready(), timeout=self.config.connection_timeout)
             circuit_breaker.record_success()
             logger.debug("Connected to service: %s", service_name)
 
             yield channel
 
-        except (grpc.RpcError, asyncio.TimeoutError, OSError) as e:
+        except (TimeoutError, grpc.RpcError, OSError) as e:
             circuit_breaker.record_failure()
-            logger.error(
-                "Failed to connect to service %s: %s", service_name, e
-            )
+            logger.error("Failed to connect to service %s: %s", service_name, e)
             raise
         finally:
             await channel.close()
@@ -325,9 +319,7 @@ class MeshClient:
                     )
 
                 circuit_breaker.record_success()
-                logger.debug(
-                    "Successful call to %s.%s", service_name, method_name
-                )
+                logger.debug("Successful call to %s.%s", service_name, method_name)
                 return response
 
             except (grpc.RpcError, TimeoutError) as e:
@@ -387,16 +379,10 @@ def create_mesh_config_from_env() -> MeshConfig:
     return MeshConfig(
         service_name=os.getenv("SERVICE_NAME", "unknown"),
         ca_cert_path=os.getenv("CA_CERT_PATH", "/etc/ssl/certs/ca.crt"),
-        client_cert_path=os.getenv(
-            "CLIENT_CERT_PATH", "/etc/ssl/certs/service.crt"
-        ),
-        client_key_path=os.getenv(
-            "CLIENT_KEY_PATH", "/etc/ssl/private/service.key"
-        ),
+        client_cert_path=os.getenv("CLIENT_CERT_PATH", "/etc/ssl/certs/service.crt"),
+        client_key_path=os.getenv("CLIENT_KEY_PATH", "/etc/ssl/private/service.key"),
         envoy_outbound_port=int(os.getenv("ENVOY_OUTBOUND_PORT", "15001")),
-        jaeger_endpoint=os.getenv(
-            "JAEGER_ENDPOINT", "http://jaeger:14268/api/traces"
-        ),
+        jaeger_endpoint=os.getenv("JAEGER_ENDPOINT", "http://jaeger:14268/api/traces"),
         enable_tracing=os.getenv("ENABLE_TRACING", "true").lower() == "true",
         enable_metrics=os.getenv("ENABLE_METRICS", "true").lower() == "true",
         connection_timeout=float(os.getenv("CONNECTION_TIMEOUT", "5.0")),

@@ -44,9 +44,7 @@ async def get_device_heartbeats(
     heartbeat_service = HeartbeatService(db)
 
     # Get heartbeats
-    heartbeats = await heartbeat_service.get_device_heartbeats(
-        device_id, limit
-    )
+    heartbeats = await heartbeat_service.get_device_heartbeats(device_id, limit)
 
     return {
         "device_id": device_id,

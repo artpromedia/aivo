@@ -1,23 +1,26 @@
-﻿"""
+"""
 Pydantic schemas for chat service.
 """
 
 from datetime import datetime
-from typing import Optional, List, Dict, Any
+from typing import Any, Dict, List, Optional
 from uuid import UUID
 
-from pydantic import BaseModel, Field, ConfigDict
-from .models import UserRole, ChatType, MessageStatus, ModerationAction
+from pydantic import BaseModel, ConfigDict, Field
+
+from .models import ChatType, MessageStatus, ModerationAction, UserRole
 
 
 class BaseSchema(BaseModel):
     """Base schema with common configuration."""
+
     model_config = ConfigDict(from_attributes=True)
 
 
 # Request/Response Models
 class ChatSessionCreate(BaseSchema):
     """Create chat session request."""
+
     chat_type: ChatType
     participants: List[UUID]
     learner_id: Optional[UUID] = None
@@ -30,6 +33,7 @@ class ChatSessionCreate(BaseSchema):
 
 class ChatSessionResponse(BaseSchema):
     """Chat session response."""
+
     id: UUID
     chat_type: ChatType
     participants: List[UUID]
@@ -48,6 +52,7 @@ class ChatSessionResponse(BaseSchema):
 
 class MessageCreate(BaseSchema):
     """Create message request."""
+
     session_id: UUID
     sender_id: UUID
     sender_role: UserRole
@@ -57,6 +62,7 @@ class MessageCreate(BaseSchema):
 
 class MessageResponse(BaseSchema):
     """Message response."""
+
     id: UUID
     session_id: UUID
     sender_id: UUID
@@ -76,6 +82,7 @@ class MessageResponse(BaseSchema):
 
 class ModerationResult(BaseSchema):
     """Moderation result."""
+
     action: ModerationAction
     confidence: float
     reason: Optional[str]
@@ -88,6 +95,7 @@ class ModerationResult(BaseSchema):
 
 class ParentalControlCreate(BaseSchema):
     """Create parental control request."""
+
     parent_id: UUID
     learner_id: UUID
     ai_tutor_enabled: bool = True
@@ -104,6 +112,7 @@ class ParentalControlCreate(BaseSchema):
 
 class ParentalControlResponse(BaseSchema):
     """Parental control response."""
+
     id: UUID
     parent_id: UUID
     learner_id: UUID
@@ -123,6 +132,7 @@ class ParentalControlResponse(BaseSchema):
 
 class ParentalControlUpdate(BaseSchema):
     """Update parental control request."""
+
     ai_tutor_enabled: Optional[bool] = None
     ai_tutor_time_limits: Optional[Dict[str, Any]] = None
     content_filter_level: Optional[str] = None
@@ -137,6 +147,7 @@ class ParentalControlUpdate(BaseSchema):
 
 class AuditEntryResponse(BaseSchema):
     """Audit entry response."""
+
     id: UUID
     message_id: UUID
     block_hash: str
@@ -152,6 +163,7 @@ class AuditEntryResponse(BaseSchema):
 
 class ChatExportRequest(BaseSchema):
     """Chat export request."""
+
     session_ids: Optional[List[UUID]] = None
     start_date: Optional[datetime] = None
     end_date: Optional[datetime] = None
@@ -163,6 +175,7 @@ class ChatExportRequest(BaseSchema):
 
 class ChatDeleteRequest(BaseSchema):
     """Chat deletion request."""
+
     session_ids: Optional[List[UUID]] = None
     message_ids: Optional[List[UUID]] = None
     hard_delete: bool = False
@@ -173,6 +186,7 @@ class ChatDeleteRequest(BaseSchema):
 
 class ErrorResponse(BaseSchema):
     """Error response schema."""
+
     error: str
     message: str
     details: Optional[Dict[str, Any]] = None
@@ -180,6 +194,7 @@ class ErrorResponse(BaseSchema):
 
 class HealthResponse(BaseSchema):
     """Health check response."""
+
     status: str
     service: str
     version: str
@@ -191,6 +206,7 @@ class HealthResponse(BaseSchema):
 
 class WebSocketMessage(BaseSchema):
     """WebSocket message schema."""
+
     type: str  # "message", "typing", "user_joined", "user_left", "error"
     session_id: UUID
     data: Dict[str, Any]
@@ -199,6 +215,7 @@ class WebSocketMessage(BaseSchema):
 
 class ModerationStats(BaseSchema):
     """Moderation statistics."""
+
     total_messages: int
     approved_messages: int
     blocked_messages: int
@@ -210,6 +227,7 @@ class ModerationStats(BaseSchema):
 
 class ChatSessionStats(BaseSchema):
     """Chat session statistics."""
+
     total_sessions: int
     active_sessions: int
     sessions_by_type: Dict[str, int]
@@ -219,6 +237,7 @@ class ChatSessionStats(BaseSchema):
 
 class PIIDetectionResult(BaseSchema):
     """PII detection result."""
+
     contains_pii: bool
     pii_types: List[str]
     confidence: float

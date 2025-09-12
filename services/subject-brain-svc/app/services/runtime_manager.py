@@ -41,8 +41,7 @@ class KubernetesRuntimeManager:
         """Initialize the Kubernetes runtime manager."""
         if not KUBERNETES_AVAILABLE:
             logger.warning(
-                "Kubernetes client not available. "
-                "Service will run in mock mode for development."
+                "Kubernetes client not available. " "Service will run in mock mode for development."
             )
 
         self.namespace = settings.k8s_namespace
@@ -84,9 +83,7 @@ class KubernetesRuntimeManager:
         self.active_runtimes: dict[str, RuntimePod] = {}
         self.metrics_history: dict[str, list[RuntimeMetrics]] = {}
 
-    async def create_runtime(
-        self, runtime_request: RuntimeRequest
-    ) -> RuntimePod:
+    async def create_runtime(self, runtime_request: RuntimeRequest) -> RuntimePod:
         """Create a new per-learner-subject runtime pod."""
         logger.info(
             "Creating runtime %s for learner %s",
@@ -118,12 +115,8 @@ class KubernetesRuntimeManager:
                 },
                 annotations={
                     "subject-brain/created-at": datetime.utcnow().isoformat(),
-                    "subject-brain/ttl-seconds": str(
-                        settings.default_ttl_seconds
-                    ),
-                    "subject-brain/max-runtime-minutes": str(
-                        runtime_request.max_runtime_minutes
-                    ),
+                    "subject-brain/ttl-seconds": str(settings.default_ttl_seconds),
+                    "subject-brain/max-runtime-minutes": str(runtime_request.max_runtime_minutes),
                 },
             ),
             spec=pod_spec,
@@ -152,9 +145,7 @@ class KubernetesRuntimeManager:
 
         return runtime_pod
 
-    def _generate_pod_name(
-        self, learner_id: str, subject: str, runtime_id: str
-    ) -> str:
+    def _generate_pod_name(self, learner_id: str, subject: str, runtime_id: str) -> str:
         """Generate a unique pod name."""
         # Clean the IDs for Kubernetes naming
         clean_learner = learner_id.replace("_", "-").lower()[:10]
@@ -237,26 +228,20 @@ class KubernetesRuntimeManager:
 
         try:
             # Get pod status from Kubernetes
-            pod = self.v1.read_namespaced_pod(
-                name=runtime_pod.pod_name, namespace=self.namespace
-            )
+            pod = self.v1.read_namespaced_pod(name=runtime_pod.pod_name, namespace=self.namespace)
 
             # Update runtime status
             runtime_pod.status = self._map_pod_status(pod.status.phase)
             runtime_pod.node_name = pod.spec.node_name
 
             if pod.status.start_time and not runtime_pod.started_at:
-                runtime_pod.started_at = pod.status.start_time.replace(
-                    tzinfo=None
-                )
+                runtime_pod.started_at = pod.status.start_time.replace(tzinfo=None)
 
             # Update metrics
             await self._update_runtime_metrics(runtime_pod)
 
         except Exception as e:  # pylint: disable=broad-exception-caught
-            logger.error(
-                "Failed to get status for runtime %s: %s", runtime_id, e
-            )
+            logger.error("Failed to get status for runtime %s: %s", runtime_id, e)
             runtime_pod.status = RuntimeStatus.TERMINATED
 
         return runtime_pod
@@ -287,9 +272,7 @@ class KubernetesRuntimeManager:
             if runtime_pod.runtime_id not in self.metrics_history:
                 self.metrics_history[runtime_pod.runtime_id] = []
 
-            self.metrics_history[runtime_pod.runtime_id].append(
-                runtime_pod.metrics
-            )
+            self.metrics_history[runtime_pod.runtime_id].append(runtime_pod.metrics)
 
             # Keep only recent metrics (last hour)
             cutoff = datetime.utcnow() - timedelta(hours=1)
@@ -326,9 +309,7 @@ class KubernetesRuntimeManager:
 
         try:
             # Delete the pod
-            self.v1.delete_namespaced_pod(
-                name=runtime_pod.pod_name, namespace=self.namespace
-            )
+            self.v1.delete_namespaced_pod(name=runtime_pod.pod_name, namespace=self.namespace)
 
             # Update status
             runtime_pod.status = RuntimeStatus.TERMINATING
@@ -363,9 +344,7 @@ class KubernetesRuntimeManager:
                             "name": "cpu",
                             "target": {
                                 "type": "Utilization",
-                                "averageUtilization": (
-                                    settings.hpa_target_cpu_utilization
-                                ),
+                                "averageUtilization": (settings.hpa_target_cpu_utilization),
                             },
                         },
                     },
@@ -375,9 +354,7 @@ class KubernetesRuntimeManager:
                             "name": "memory",
                             "target": {
                                 "type": "Utilization",
-                                "averageUtilization": (
-                                    settings.hpa_target_memory_utilization
-                                ),
+                                "averageUtilization": (settings.hpa_target_memory_utilization),
                             },
                         },
                     },
@@ -387,23 +364,17 @@ class KubernetesRuntimeManager:
                             "metric": {"name": "gpu_queue_depth"},
                             "target": {
                                 "type": "AverageValue",
-                                "averageValue": str(
-                                    settings.hpa_target_gpu_queue_depth
-                                ),
+                                "averageValue": str(settings.hpa_target_gpu_queue_depth),
                             },
                         },
                     },
                 ],
                 "behavior": {
                     "scaleUp": {
-                        "stabilizationWindowSeconds": (
-                            settings.hpa_scale_up_delay_seconds
-                        )
+                        "stabilizationWindowSeconds": (settings.hpa_scale_up_delay_seconds)
                     },
                     "scaleDown": {
-                        "stabilizationWindowSeconds": (
-                            settings.hpa_scale_down_delay_seconds
-                        )
+                        "stabilizationWindowSeconds": (settings.hpa_scale_down_delay_seconds)
                     },
                 },
             },
@@ -420,18 +391,15 @@ class KubernetesRuntimeManager:
     async def get_scaling_metrics(self) -> dict[str, Any]:
         """Get current scaling metrics for decision making."""
         total_gpu_queue = sum(
-            runtime.metrics.gpu_queue_depth
-            for runtime in self.active_runtimes.values()
+            runtime.metrics.gpu_queue_depth for runtime in self.active_runtimes.values()
         )
 
         avg_cpu = sum(
-            runtime.metrics.cpu_utilization_percent
-            for runtime in self.active_runtimes.values()
+            runtime.metrics.cpu_utilization_percent for runtime in self.active_runtimes.values()
         ) / max(len(self.active_runtimes), 1)
 
         avg_memory = sum(
-            runtime.metrics.memory_usage_mb
-            for runtime in self.active_runtimes.values()
+            runtime.metrics.memory_usage_mb for runtime in self.active_runtimes.values()
         ) / max(len(self.active_runtimes), 1)
 
         return {
@@ -440,8 +408,7 @@ class KubernetesRuntimeManager:
             "average_cpu_utilization": avg_cpu,
             "average_memory_usage_mb": avg_memory,
             "pending_requests": sum(
-                runtime.metrics.pending_requests
-                for runtime in self.active_runtimes.values()
+                runtime.metrics.pending_requests for runtime in self.active_runtimes.values()
             ),
         }
 

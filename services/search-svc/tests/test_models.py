@@ -15,12 +15,7 @@ from app.models import (
 
 def test_search_request_creation():
     """Test creating a search request."""
-    request = SearchRequest(
-        q="test query",
-        scope=SearchScope.ALL,
-        size=10,
-        from_=0
-    )
+    request = SearchRequest(q="test query", scope=SearchScope.ALL, size=10, from_=0)
 
     assert request.q == "test query"
     assert request.scope == SearchScope.ALL

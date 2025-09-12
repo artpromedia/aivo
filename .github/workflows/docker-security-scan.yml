@@ -2,9 +2,9 @@ name: Docker Security Scan
 
 on:
   push:
-    branches: [ main, develop ]
+    branches: [main, develop]
   pull_request:
-    branches: [ main ]
+    branches: [main]
   schedule:
     - cron: '0 0 * * 1' # Weekly on Monday
 
@@ -13,27 +13,37 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        service: [analytics-svc, etl-jobs, event-collector-svc, game-gen-svc, model-dispatch-svc, notification-svc, search-svc, subject-brain-svc]
-    
+        service:
+          [
+            analytics-svc,
+            etl-jobs,
+            event-collector-svc,
+            game-gen-svc,
+            model-dispatch-svc,
+            notification-svc,
+            search-svc,
+            subject-brain-svc,
+          ]
+
     steps:
-    - uses: actions/checkout@v4
-    
-    - name: Set up Docker Buildx
-      uses: docker/setup-buildx-action@v3
-    
-    - name: Build Docker image
-      run: |
-        docker build -t aivo-ai/${{ matrix.service }}:scan ./services/${{ matrix.service }}
-    
-    - name: Run Trivy vulnerability scanner
-      uses: aquasecurity/trivy-action@master
-      with:
-        image-ref: aivo-ai/${{ matrix.service }}:scan
-        format: 'sarif'
-        output: 'trivy-results.sarif'
-        severity: 'CRITICAL,HIGH'
-    
-    - name: Upload Trivy results to GitHub Security
-      uses: github/codeql-action/upload-sarif@v3
-      with:
-        sarif_file: 'trivy-results.sarif'
+      - uses: actions/checkout@v4
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Build Docker image
+        run: |
+          docker build -t aivo-ai/${{ matrix.service }}:scan ./services/${{ matrix.service }}
+
+      - name: Run Trivy vulnerability scanner
+        uses: aquasecurity/trivy-action@master
+        with:
+          image-ref: aivo-ai/${{ matrix.service }}:scan
+          format: 'sarif'
+          output: 'trivy-results.sarif'
+          severity: 'CRITICAL,HIGH'
+
+      - name: Upload Trivy results to GitHub Security
+        uses: github/codeql-action/upload-sarif@v3
+        with:
+          sarif_file: 'trivy-results.sarif'

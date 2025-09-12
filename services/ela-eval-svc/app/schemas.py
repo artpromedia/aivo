@@ -4,6 +4,7 @@ Pydantic models for ELA evaluator service API schemas.
 This module defines the request/response models for rubric scoring,
 PII moderation, and content safety evaluation.
 """
+
 from datetime import datetime
 from enum import Enum
 from typing import Self
@@ -14,6 +15,7 @@ from pydantic import BaseModel, Field, validator
 
 class GradeBand(str, Enum):
     """Supported grade bands for rubric evaluation."""
+
     K_2 = "K-2"
     GRADES_3_5 = "3-5"
     GRADES_6_8 = "6-8"
@@ -22,6 +24,7 @@ class GradeBand(str, Enum):
 
 class RubricCriterion(str, Enum):
     """Standard ELA rubric criteria."""
+
     IDEAS_AND_CONTENT = "ideas_and_content"
     ORGANIZATION = "organization"
     VOICE = "voice"
@@ -32,6 +35,7 @@ class RubricCriterion(str, Enum):
 
 class ScoreLevel(int, Enum):
     """Rubric scoring levels (1-4 scale)."""
+
     BEGINNING = 1
     DEVELOPING = 2
     PROFICIENT = 3
@@ -40,6 +44,7 @@ class ScoreLevel(int, Enum):
 
 class PIIEntity(BaseModel):
     """Detected PII entity information."""
+
     entity_type: str = Field(..., description="Type of PII detected")
     text: str = Field(..., description="Original text containing PII")
     start: int = Field(..., description="Start position in text")
@@ -54,6 +59,7 @@ class PIIEntity(BaseModel):
 
 class ContentModerationFlag(BaseModel):
     """Content moderation flag information."""
+
     category: str = Field(..., description="Moderation category")
     severity: str = Field(..., description="Severity level")
     confidence: float = Field(
@@ -64,6 +70,7 @@ class ContentModerationFlag(BaseModel):
 
 class RubricScore(BaseModel):
     """Individual rubric criterion score."""
+
     criterion: RubricCriterion = Field(..., description="Rubric criterion")
     score: ScoreLevel = Field(..., description="Score level (1-4)")
     reasoning: str = Field(..., description="Detailed scoring rationale")
@@ -77,18 +84,19 @@ class RubricScore(BaseModel):
 
 class EvaluationRequest(BaseModel):
     """Request model for ELA rubric evaluation."""
+
     prompt: str = Field(
-        ..., description="Writing prompt or assignment instructions",
-        max_length=5000
+        ...,
+        description="Writing prompt or assignment instructions",
+        max_length=5000,
     )
     submission: str = Field(
-        ..., description="Student writing submission",
-        max_length=10000
+        ..., description="Student writing submission", max_length=10000
     )
     grade_band: GradeBand = Field(..., description="Grade band for evaluation")
     criteria: list[RubricCriterion] = Field(
         default_factory=lambda: list(RubricCriterion),
-        description="Specific criteria to evaluate"
+        description="Specific criteria to evaluate",
     )
     student_id: UUID | None = Field(
         default=None, description="Optional student identifier"
@@ -124,6 +132,7 @@ class EvaluationRequest(BaseModel):
 
 class EvaluationResponse(BaseModel):
     """Response model for ELA rubric evaluation."""
+
     evaluation_id: UUID = Field(
         ..., description="Unique evaluation identifier"
     )
@@ -167,6 +176,7 @@ class EvaluationResponse(BaseModel):
 
 class HealthResponse(BaseModel):
     """Health check response model."""
+
     status: str = Field(..., description="Service health status")
     service_name: str = Field(..., description="Service name")
     version: str = Field(..., description="Service version")
@@ -178,6 +188,7 @@ class HealthResponse(BaseModel):
 
 class EvaluationHistoryRequest(BaseModel):
     """Request model for evaluation history."""
+
     student_id: UUID | None = Field(
         default=None, description="Filter by student ID"
     )
@@ -201,6 +212,7 @@ class EvaluationHistoryRequest(BaseModel):
 
 class EvaluationSummary(BaseModel):
     """Summary model for evaluation history."""
+
     evaluation_id: UUID = Field(..., description="Evaluation identifier")
     student_id: UUID | None = Field(
         default=None, description="Student identifier"
@@ -218,6 +230,7 @@ class EvaluationSummary(BaseModel):
 
 class EvaluationHistoryResponse(BaseModel):
     """Response model for evaluation history."""
+
     evaluations: list[EvaluationSummary] = Field(
         default_factory=list, description="Evaluation summaries"
     )

@@ -1,11 +1,11 @@
-﻿"""
+"""
 Database models for model dispatch policy.
 
 Handles LLM provider selection based on subject, grade band, and region.
 """
+
 from datetime import datetime
 from enum import Enum
-from typing import Dict, List, Optional
 from uuid import UUID, uuid4
 
 from sqlalchemy import JSON, Boolean, DateTime, Float, Integer, String, Text, func
@@ -87,9 +87,9 @@ class ModelProvider(Base):
     name: Mapped[str] = mapped_column(String(100), unique=True, nullable=False)
     provider_type: Mapped[ProviderType] = mapped_column(nullable=False)
     endpoint_url: Mapped[str] = mapped_column(String(500), nullable=False)
-    api_key_env: Mapped[Optional[str]] = mapped_column(String(100))
-    supported_regions: Mapped[List[str]] = mapped_column(JSON, default=list)
-    model_configs: Mapped[Dict] = mapped_column(JSON, default=dict)
+    api_key_env: Mapped[str | None] = mapped_column(String(100))
+    supported_regions: Mapped[list[str]] = mapped_column(JSON, default=list)
+    model_configs: Mapped[dict] = mapped_column(JSON, default=dict)
     max_tokens: Mapped[int] = mapped_column(Integer, default=4096)
     rate_limit_rpm: Mapped[int] = mapped_column(Integer, default=60)
     rate_limit_tpm: Mapped[int] = mapped_column(Integer, default=100000)
@@ -114,12 +114,12 @@ class PromptTemplate(Base):
     subject: Mapped[Subject] = mapped_column(nullable=False)
     grade_band: Mapped[GradeBand] = mapped_column(nullable=False)
     template_content: Mapped[str] = mapped_column(Text, nullable=False)
-    system_prompt: Mapped[Optional[str]] = mapped_column(Text)
-    variables: Mapped[List[str]] = mapped_column(JSON, default=list)
+    system_prompt: Mapped[str | None] = mapped_column(Text)
+    variables: Mapped[list[str]] = mapped_column(JSON, default=list)
     temperature: Mapped[float] = mapped_column(Float, default=0.7)
     max_tokens: Mapped[int] = mapped_column(Integer, default=1000)
-    stop_sequences: Mapped[List[str]] = mapped_column(JSON, default=list)
-    tags: Mapped[List[str]] = mapped_column(JSON, default=list)
+    stop_sequences: Mapped[list[str]] = mapped_column(JSON, default=list)
+    tags: Mapped[list[str]] = mapped_column(JSON, default=list)
     is_active: Mapped[bool] = mapped_column(Boolean, default=True)
     created_at: Mapped[datetime] = mapped_column(DateTime, server_default=func.now())
     updated_at: Mapped[datetime] = mapped_column(
@@ -134,16 +134,16 @@ class DispatchPolicy(Base):
 
     id: Mapped[UUID] = mapped_column(PGUUID(as_uuid=True), primary_key=True, default=uuid4)
     name: Mapped[str] = mapped_column(String(200), nullable=False)
-    subject: Mapped[Optional[Subject]] = mapped_column()  # None = applies to all
-    grade_band: Mapped[Optional[GradeBand]] = mapped_column()  # None = applies to all
-    region: Mapped[Optional[Region]] = mapped_column()  # None = applies to all
+    subject: Mapped[Subject | None] = mapped_column()  # None = applies to all
+    grade_band: Mapped[GradeBand | None] = mapped_column()  # None = applies to all
+    region: Mapped[Region | None] = mapped_column()  # None = applies to all
     primary_provider_id: Mapped[UUID] = mapped_column(PGUUID(as_uuid=True), nullable=False)
-    fallback_provider_ids: Mapped[List[str]] = mapped_column(JSON, default=list)
-    template_ids: Mapped[List[str]] = mapped_column(JSON, default=list)
+    fallback_provider_ids: Mapped[list[str]] = mapped_column(JSON, default=list)
+    template_ids: Mapped[list[str]] = mapped_column(JSON, default=list)
     moderation_threshold: Mapped[float] = mapped_column(Float, default=0.8)
     allow_teacher_override: Mapped[bool] = mapped_column(Boolean, default=True)
     priority: Mapped[int] = mapped_column(Integer, default=100)  # Lower = higher priority
-    conditions: Mapped[Dict] = mapped_column(JSON, default=dict)  # Additional conditions
+    conditions: Mapped[dict] = mapped_column(JSON, default=dict)  # Additional conditions
     is_active: Mapped[bool] = mapped_column(Boolean, default=True)
     created_at: Mapped[datetime] = mapped_column(DateTime, server_default=func.now())
     updated_at: Mapped[datetime] = mapped_column(
@@ -158,15 +158,15 @@ class RegionalRouting(Base):
 
     id: Mapped[UUID] = mapped_column(PGUUID(as_uuid=True), primary_key=True, default=uuid4)
     region: Mapped[Region] = mapped_column(nullable=False, unique=True)
-    allowed_providers: Mapped[List[str]] = mapped_column(JSON, default=list)
-    blocked_providers: Mapped[List[str]] = mapped_column(JSON, default=list)
+    allowed_providers: Mapped[list[str]] = mapped_column(JSON, default=list)
+    blocked_providers: Mapped[list[str]] = mapped_column(JSON, default=list)
     data_residency_required: Mapped[bool] = mapped_column(Boolean, default=True)
     encryption_required: Mapped[bool] = mapped_column(Boolean, default=True)
     audit_logging_required: Mapped[bool] = mapped_column(Boolean, default=True)
     retention_days: Mapped[int] = mapped_column(Integer, default=90)
-    compliance_frameworks: Mapped[List[str]] = mapped_column(JSON, default=list)
-    backup_region: Mapped[Optional[Region]] = mapped_column()
-    routing_preferences: Mapped[Dict] = mapped_column(JSON, default=dict)
+    compliance_frameworks: Mapped[list[str]] = mapped_column(JSON, default=list)
+    backup_region: Mapped[Region | None] = mapped_column()
+    routing_preferences: Mapped[dict] = mapped_column(JSON, default=dict)
     is_active: Mapped[bool] = mapped_column(Boolean, default=True)
     created_at: Mapped[datetime] = mapped_column(DateTime, server_default=func.now())
     updated_at: Mapped[datetime] = mapped_column(
@@ -185,16 +185,16 @@ class DispatchLog(Base):
     grade_band: Mapped[GradeBand] = mapped_column(nullable=False)
     region: Mapped[Region] = mapped_column(nullable=False)
     selected_provider_id: Mapped[UUID] = mapped_column(PGUUID(as_uuid=True), nullable=False)
-    template_ids: Mapped[List[str]] = mapped_column(JSON, default=list)
+    template_ids: Mapped[list[str]] = mapped_column(JSON, default=list)
     moderation_threshold: Mapped[float] = mapped_column(Float)
     policy_id: Mapped[UUID] = mapped_column(PGUUID(as_uuid=True), nullable=False)
     teacher_override: Mapped[bool] = mapped_column(Boolean, default=False)
-    override_reason: Mapped[Optional[str]] = mapped_column(String(500))
-    response_time_ms: Mapped[Optional[int]] = mapped_column(Integer)
-    tokens_used: Mapped[Optional[int]] = mapped_column(Integer)
-    cost_usd: Mapped[Optional[float]] = mapped_column(Float)
+    override_reason: Mapped[str | None] = mapped_column(String(500))
+    response_time_ms: Mapped[int | None] = mapped_column(Integer)
+    tokens_used: Mapped[int | None] = mapped_column(Integer)
+    cost_usd: Mapped[float | None] = mapped_column(Float)
     success: Mapped[bool] = mapped_column(Boolean, default=True)
-    error_message: Mapped[Optional[str]] = mapped_column(Text)
+    error_message: Mapped[str | None] = mapped_column(Text)
     created_at: Mapped[datetime] = mapped_column(DateTime, server_default=func.now())
 
 

@@ -36,14 +36,14 @@ class TestUsageAnalyticsTrends(unittest.TestCase):
             return UsageAnalyticsTrends(
                 daily_activity = [
                     aivo_sdk.models.usage_analytics_trends_daily_activity_inner.UsageAnalytics_trends_dailyActivity_inner(
-                        date = '2023-12-01', 
-                        minutes_learned = 245, 
-                        active_learners = 23, 
+                        date = '2023-12-01',
+                        minutes_learned = 245,
+                        active_learners = 23,
                         sessions_started = 45, )
                     ],
                 peak_hours = [
                     aivo_sdk.models.usage_analytics_trends_peak_hours_inner.UsageAnalytics_trends_peakHours_inner(
-                        hour = 14, 
+                        hour = 14,
                         sessions = 156, )
                     ]
             )

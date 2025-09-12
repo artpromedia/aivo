@@ -1,4 +1,5 @@
 """Test configuration and fixtures for ink service tests."""
+
 import sys
 from collections.abc import AsyncGenerator, Generator
 from pathlib import Path
@@ -32,9 +33,7 @@ async def test_db() -> AsyncGenerator[AsyncSession, None]:
         await conn.run_sync(Base.metadata.create_all)
 
     # Create session
-    test_session_local = sessionmaker(
-        engine, class_=AsyncSession, expire_on_commit=False
-    )
+    test_session_local = sessionmaker(engine, class_=AsyncSession, expire_on_commit=False)
 
     async with test_session_local() as session:
         yield session
@@ -49,6 +48,7 @@ async def test_db() -> AsyncGenerator[AsyncSession, None]:
 @pytest.fixture
 def client(_test_db: AsyncSession) -> Generator[TestClient, None, None]:
     """Create test client with database dependency override."""
+
     async def override_get_db() -> AsyncGenerator[AsyncSession, None]:
         yield _test_db
 
@@ -77,20 +77,10 @@ def sample_stroke_request() -> dict[str, Any]:
                 "color": "#000000",
                 "width": 2.0,
                 "points": [
-                    {
-                        "x": 100,
-                        "y": 150,
-                        "pressure": 0.8,
-                        "timestamp": 0
-                    },
-                    {
-                        "x": 105,
-                        "y": 152,
-                        "pressure": 0.9,
-                        "timestamp": 16
-                    }
-                ]
+                    {"x": 100, "y": 150, "pressure": 0.8, "timestamp": 0},
+                    {"x": 105, "y": 152, "pressure": 0.9, "timestamp": 16},
+                ],
             }
         ],
-        "metadata": {"device": "tablet", "app_version": "1.0.0"}
+        "metadata": {"device": "tablet", "app_version": "1.0.0"},
     }

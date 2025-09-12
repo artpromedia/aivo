@@ -61,54 +61,36 @@ class RBACService:
             # No specific filters, deny all
             return {"bool": {"must_not": {"match_all": {}}}}
 
-    def _build_district_filter(
-        self,
-        user_context: UserContext
-    ) -> dict[str, Any]:
+    def _build_district_filter(self, user_context: UserContext) -> dict[str, Any]:
         """Build filter for district admin access."""
         if not user_context.district_id:
             return {"bool": {"must_not": {"match_all": {}}}}
 
         return {"term": {"district_id": user_context.district_id}}
 
-    def _build_teacher_filter(
-        self,
-        user_context: UserContext
-    ) -> dict[str, Any]:
+    def _build_teacher_filter(self, user_context: UserContext) -> dict[str, Any]:
         """Build filter for teacher access."""
         should_clauses = []
 
         # Teacher can access their own content
-        should_clauses.append(
-            {"term": {"teacher_id": user_context.user_id}}
-        )
+        should_clauses.append({"term": {"teacher_id": user_context.user_id}})
 
         # Teacher can access content in their classes
         if user_context.class_ids:
-            should_clauses.append(
-                {"terms": {"class_id": user_context.class_ids}}
-            )
-            should_clauses.append(
-                {"terms": {"class_ids": user_context.class_ids}}
-            )
+            should_clauses.append({"terms": {"class_id": user_context.class_ids}})
+            should_clauses.append({"terms": {"class_ids": user_context.class_ids}})
 
         # Teacher can access content in their school
         if user_context.school_id:
-            should_clauses.append(
-                {"term": {"school_id": user_context.school_id}}
-            )
+            should_clauses.append({"term": {"school_id": user_context.school_id}})
 
         # District level access if specified
         if user_context.district_id:
-            should_clauses.append(
-                {"term": {"district_id": user_context.district_id}}
-            )
+            should_clauses.append({"term": {"district_id": user_context.district_id}})
 
         return {"bool": {"should": should_clauses, "minimum_should_match": 1}}
 
-    def _build_guardian_filter(
-        self, user_context: UserContext
-    ) -> dict[str, Any]:
+    def _build_guardian_filter(self, user_context: UserContext) -> dict[str, Any]:
         """Build filter for guardian access."""
         should_clauses = []
 
@@ -118,9 +100,7 @@ class RBACService:
             should_clauses.append({"terms": {"id": user_context.learner_ids}})
 
             # Access to content where guardian is listed
-            should_clauses.append(
-                {"terms": {"guardian_ids": [user_context.user_id]}}
-            )
+            should_clauses.append({"terms": {"guardian_ids": [user_context.user_id]}})
 
             # Access to coursework/lessons for learner's classes
             # This would require additional context about learner's classes
@@ -132,9 +112,7 @@ class RBACService:
 
         return {"bool": {"should": should_clauses, "minimum_should_match": 1}}
 
-    def _build_learner_filter(
-        self, user_context: UserContext
-    ) -> dict[str, Any]:
+    def _build_learner_filter(self, user_context: UserContext) -> dict[str, Any]:
         """Build filter for learner access."""
         should_clauses = []
 
@@ -143,9 +121,7 @@ class RBACService:
 
         # Learner can access content in their classes
         if user_context.class_ids:
-            should_clauses.append(
-                {"terms": {"class_id": user_context.class_ids}}
-            )
+            should_clauses.append({"terms": {"class_id": user_context.class_ids}})
 
         # Learner can access general lessons in their district/school
         if user_context.district_id:
@@ -154,11 +130,7 @@ class RBACService:
                     "bool": {
                         "must": [
                             {"term": {"type": "lesson"}},
-                            {
-                                "term": {
-                                    "district_id": user_context.district_id
-                                }
-                            },
+                            {"term": {"district_id": user_context.district_id}},
                         ]
                     }
                 }
@@ -204,15 +176,11 @@ class RBACService:
                 must_clauses = bool_query["must"]
                 if isinstance(must_clauses, list):
                     for clause in must_clauses:
-                        matches_clause = self._document_matches_filter(
-                            document, clause
-                        )
+                        matches_clause = self._document_matches_filter(document, clause)
                         if not matches_clause:
                             return False
                 else:
-                    matches_clause = self._document_matches_filter(
-                        document, must_clauses
-                    )
+                    matches_clause = self._document_matches_filter(document, must_clauses)
                     if not matches_clause:
                         return False
 
@@ -255,9 +223,7 @@ class RBACService:
 
         return filtered_results
 
-    async def get_user_accessible_indices(
-        self, user_context: UserContext
-    ) -> list[str]:
+    async def get_user_accessible_indices(self, user_context: UserContext) -> list[str]:
         """Get list of indices the user can access."""
         accessible_indices = []
 
@@ -309,9 +275,7 @@ class RBACService:
         """Get numeric level for role hierarchy."""
         return self.role_hierarchy.get(role, 0)
 
-    def can_role_access_role(
-        self, accessor_role: UserRole, target_role: UserRole
-    ) -> bool:
+    def can_role_access_role(self, accessor_role: UserRole, target_role: UserRole) -> bool:
         """Check if one role can access data from another role."""
         accessor_level = self.get_role_level(accessor_role)
         target_level = self.get_role_level(target_role)

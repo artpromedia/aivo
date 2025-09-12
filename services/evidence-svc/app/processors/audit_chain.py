@@ -1,18 +1,18 @@
-﻿"""SHA-256 audit chain implementation for evidence tracking."""
+"""SHA-256 audit chain implementation for evidence tracking."""
+
 import hashlib
 import json
 import logging
 import uuid
 from datetime import datetime
-from typing import Any, Dict, List, Optional
+from typing import Any
 
 from cryptography.hazmat.primitives import hashes, serialization
-from cryptography.hazmat.primitives.asymmetric import padding, rsa
+from cryptography.hazmat.primitives.asymmetric import padding
 from sqlalchemy import desc, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from ..models import EvidenceAuditEntry, EvidenceUpload
-from ..schemas import EvidenceAuditEntryCreate
 
 logger = logging.getLogger(__name__)
 
@@ -22,18 +22,18 @@ class AuditChain:
 
     def __init__(
         self,
-        private_key_path: Optional[str] = None,
-        public_key_path: Optional[str] = None,
+        private_key_path: str | None = None,
+        public_key_path: str | None = None,
     ) -> None:
         """Initialize audit chain.
-        
+
         Args:
             private_key_path: Path to RSA private key for signing
             public_key_path: Path to RSA public key for verification
         """
         self.private_key = None
         self.public_key = None
-        
+
         if private_key_path:
             self._load_private_key(private_key_path)
         if public_key_path:
@@ -64,14 +64,14 @@ class AuditChain:
 
     def generate_content_hash(self, data: Any) -> str:
         """Generate SHA-256 hash of content.
-        
+
         Args:
             data: Data to hash (will be JSON serialized)
-            
+
         Returns:
             Hex string of SHA-256 hash
         """
-        if isinstance(data, (str, bytes)):
+        if isinstance(data, str | bytes):
             content = data if isinstance(data, bytes) else data.encode("utf-8")
         else:
             # Serialize complex data structures deterministically
@@ -89,18 +89,18 @@ class AuditChain:
     def generate_chain_hash(
         self,
         content_hash: str,
-        previous_hash: Optional[str],
+        previous_hash: str | None,
         timestamp: datetime,
-        action_details: Dict[str, Any],
+        action_details: dict[str, Any],
     ) -> str:
         """Generate chain hash linking to previous entry.
-        
+
         Args:
             content_hash: Hash of the content
             previous_hash: Hash of previous chain entry
             timestamp: Timestamp of the action
             action_details: Details of the action
-            
+
         Returns:
             Hex string of chain hash
         """
@@ -122,12 +122,12 @@ class AuditChain:
         hash_obj.update(chain_content)
         return hash_obj.hexdigest()
 
-    def sign_entry(self, chain_hash: str) -> Optional[str]:
+    def sign_entry(self, chain_hash: str) -> str | None:
         """Sign audit entry with RSA private key.
-        
+
         Args:
             chain_hash: Chain hash to sign
-            
+
         Returns:
             Base64 encoded signature or None if no private key
         """
@@ -143,21 +143,22 @@ class AuditChain:
                 ),
                 hashes.SHA256(),
             )
-            
+
             import base64
+
             return base64.b64encode(signature).decode("utf-8")
-            
+
         except Exception as e:
             logger.error("Failed to sign audit entry: %s", e)
             return None
 
     def verify_signature(self, chain_hash: str, signature: str) -> bool:
         """Verify audit entry signature.
-        
+
         Args:
             chain_hash: Chain hash that was signed
             signature: Base64 encoded signature
-            
+
         Returns:
             True if signature is valid
         """
@@ -166,8 +167,9 @@ class AuditChain:
 
         try:
             import base64
+
             signature_bytes = base64.b64decode(signature.encode("utf-8"))
-            
+
             self.public_key.verify(
                 signature_bytes,
                 chain_hash.encode("utf-8"),
@@ -178,7 +180,7 @@ class AuditChain:
                 hashes.SHA256(),
             )
             return True
-            
+
         except Exception as e:
             logger.error("Signature verification failed: %s", e)
             return False
@@ -189,12 +191,12 @@ class AuditChain:
         upload_id: uuid.UUID,
         learner_id: uuid.UUID,
         action_type: str,
-        action_details: Dict[str, Any],
+        action_details: dict[str, Any],
         performed_by: uuid.UUID,
-        content: Optional[Any] = None,
+        content: Any | None = None,
     ) -> EvidenceAuditEntry:
         """Create new audit chain entry.
-        
+
         Args:
             db: Database session
             upload_id: ID of evidence upload
@@ -203,7 +205,7 @@ class AuditChain:
             action_details: Details of the action
             performed_by: ID of user performing action
             content: Optional content to hash
-            
+
         Returns:
             Created audit entry
         """
@@ -259,13 +261,13 @@ class AuditChain:
         self,
         db: AsyncSession,
         learner_id: uuid.UUID,
-    ) -> Optional[str]:
+    ) -> str | None:
         """Get the latest chain hash for a learner.
-        
+
         Args:
             db: Database session
             learner_id: ID of learner
-            
+
         Returns:
             Latest chain hash or None if no entries
         """
@@ -275,7 +277,7 @@ class AuditChain:
             .order_by(desc(EvidenceAuditEntry.timestamp))
             .limit(1),
         )
-        
+
         latest_hash = result.scalar_one_or_none()
         return latest_hash
 
@@ -284,14 +286,14 @@ class AuditChain:
         db: AsyncSession,
         learner_id: uuid.UUID,
         verify_signatures: bool = True,
-    ) -> Dict[str, Any]:
+    ) -> dict[str, Any]:
         """Verify integrity of audit chain for a learner.
-        
+
         Args:
             db: Database session
             learner_id: ID of learner
             verify_signatures: Whether to verify RSA signatures
-            
+
         Returns:
             Verification results
         """
@@ -323,7 +325,7 @@ class AuditChain:
         }
 
         previous_hash = None
-        
+
         for i, entry in enumerate(entries):
             try:
                 # Verify chain linkage
@@ -336,33 +338,39 @@ class AuditChain:
 
                 if entry.chain_hash != expected_chain_hash:
                     verification_results["valid"] = False
-                    verification_results["broken_links"].append({
-                        "entry_id": str(entry.id),
-                        "position": i,
-                        "expected_hash": expected_chain_hash,
-                        "actual_hash": entry.chain_hash,
-                    })
+                    verification_results["broken_links"].append(
+                        {
+                            "entry_id": str(entry.id),
+                            "position": i,
+                            "expected_hash": expected_chain_hash,
+                            "actual_hash": entry.chain_hash,
+                        }
+                    )
                     continue
 
                 # Verify signature if available
                 if verify_signatures and entry.signature:
                     if not self.verify_signature(entry.chain_hash, entry.signature):
                         verification_results["valid"] = False
-                        verification_results["invalid_signatures"].append({
-                            "entry_id": str(entry.id),
-                            "position": i,
-                        })
+                        verification_results["invalid_signatures"].append(
+                            {
+                                "entry_id": str(entry.id),
+                                "position": i,
+                            }
+                        )
                         continue
 
                 # Check previous hash linkage
                 if entry.previous_hash != previous_hash:
                     verification_results["valid"] = False
-                    verification_results["broken_links"].append({
-                        "entry_id": str(entry.id),
-                        "position": i,
-                        "expected_previous": previous_hash,
-                        "actual_previous": entry.previous_hash,
-                    })
+                    verification_results["broken_links"].append(
+                        {
+                            "entry_id": str(entry.id),
+                            "position": i,
+                            "expected_previous": previous_hash,
+                            "actual_previous": entry.previous_hash,
+                        }
+                    )
                     continue
 
                 verification_results["verified_entries"] += 1
@@ -370,11 +378,13 @@ class AuditChain:
 
             except Exception as e:
                 verification_results["valid"] = False
-                verification_results["errors"].append({
-                    "entry_id": str(entry.id),
-                    "position": i,
-                    "error": str(e),
-                })
+                verification_results["errors"].append(
+                    {
+                        "entry_id": str(entry.id),
+                        "position": i,
+                        "error": str(e),
+                    }
+                )
 
         logger.info(
             "Chain verification for learner %s: %s (%d/%d entries verified)",
@@ -389,20 +399,20 @@ class AuditChain:
     async def get_audit_trail(
         self,
         db: AsyncSession,
-        upload_id: Optional[uuid.UUID] = None,
-        learner_id: Optional[uuid.UUID] = None,
-        action_type: Optional[str] = None,
+        upload_id: uuid.UUID | None = None,
+        learner_id: uuid.UUID | None = None,
+        action_type: str | None = None,
         limit: int = 100,
-    ) -> List[EvidenceAuditEntry]:
+    ) -> list[EvidenceAuditEntry]:
         """Get audit trail entries with optional filters.
-        
+
         Args:
             db: Database session
             upload_id: Optional upload ID filter
             learner_id: Optional learner ID filter
             action_type: Optional action type filter
             limit: Maximum number of entries to return
-            
+
         Returns:
             List of audit entries
         """
@@ -412,10 +422,10 @@ class AuditChain:
 
         if upload_id:
             query = query.where(EvidenceAuditEntry.upload_id == upload_id)
-        
+
         if learner_id:
             query = query.where(EvidenceAuditEntry.learner_id == learner_id)
-            
+
         if action_type:
             query = query.where(EvidenceAuditEntry.action_type == action_type)
 
@@ -429,14 +439,14 @@ class AuditChain:
         db: AsyncSession,
         learner_id: uuid.UUID,
         include_content: bool = False,
-    ) -> Dict[str, Any]:
+    ) -> dict[str, Any]:
         """Export complete audit chain for a learner.
-        
+
         Args:
             db: Database session
             learner_id: ID of learner
             include_content: Whether to include full content hashes
-            
+
         Returns:
             Exportable audit chain data
         """
@@ -495,17 +505,17 @@ class AuditChain:
         upload: EvidenceUpload,
         action_type: str,
         performed_by: uuid.UUID,
-        additional_details: Optional[Dict[str, Any]] = None,
+        additional_details: dict[str, Any] | None = None,
     ) -> EvidenceAuditEntry:
         """Create audit entry for upload-related action.
-        
+
         Args:
             db: Database session
             upload: Evidence upload
             action_type: Type of action
             performed_by: ID of user performing action
             additional_details: Additional action details
-            
+
         Returns:
             Created audit entry
         """
@@ -533,19 +543,19 @@ class AuditChain:
     async def get_audit_statistics(
         self,
         db: AsyncSession,
-        learner_id: Optional[uuid.UUID] = None,
-    ) -> Dict[str, Any]:
+        learner_id: uuid.UUID | None = None,
+    ) -> dict[str, Any]:
         """Get audit chain statistics.
-        
+
         Args:
             db: Database session
             learner_id: Optional learner filter
-            
+
         Returns:
             Statistics dictionary
         """
         query = select(EvidenceAuditEntry)
-        
+
         if learner_id:
             query = query.where(EvidenceAuditEntry.learner_id == learner_id)
 
@@ -562,7 +572,7 @@ class AuditChain:
             }
 
         # Calculate statistics
-        unique_learners = len(set(entry.learner_id for entry in entries))
+        unique_learners = len({entry.learner_id for entry in entries})
         action_types = {}
         signed_entries = 0
 
@@ -574,9 +584,9 @@ class AuditChain:
         # Check chain integrity for sample of learners (if not filtered)
         integrity_rate = 1.0  # Default to valid if single learner
         if not learner_id and unique_learners > 0:
-            sample_learners = list(set(entry.learner_id for entry in entries))[:10]
+            sample_learners = list({entry.learner_id for entry in entries})[:10]
             valid_chains = 0
-            
+
             for sample_learner in sample_learners:
                 verification = await self.verify_chain_integrity(
                     db,
@@ -585,7 +595,7 @@ class AuditChain:
                 )
                 if verification["valid"]:
                     valid_chains += 1
-            
+
             integrity_rate = valid_chains / len(sample_learners)
 
         return {

@@ -1,1 +1,1 @@
-﻿"""Workers package for background tasks."""
+"""Workers package for background tasks."""

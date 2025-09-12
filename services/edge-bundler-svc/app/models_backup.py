@@ -1,4 +1,4 @@
-﻿"""Edge Bundler Service for offline lesson packaging with CRDT support."""
+"""Edge Bundler Service for offline lesson packaging with CRDT support."""
 # flake8: noqa: E501
 
 from datetime import datetime
@@ -65,9 +65,7 @@ class Bundle(Base):
     compression_type: Mapped[CompressionType] = mapped_column(
         String(10), default=CompressionType.GZIP
     )
-    bundle_version: Mapped[str] = mapped_column(
-        String(50), nullable=False, default="1.0.0"
-    )
+    bundle_version: Mapped[str] = mapped_column(String(50), nullable=False, default="1.0.0")
 
     # File paths and checksums
     bundle_path: Mapped[str] = mapped_column(String(500), nullable=True)
@@ -89,9 +87,7 @@ class Bundle(Base):
         DateTime, server_default=text("CURRENT_TIMESTAMP"), index=True
     )
     updated_at: Mapped[datetime] = mapped_column(
-        DateTime,
-        server_default=text("CURRENT_TIMESTAMP"),
-        onupdate=text("CURRENT_TIMESTAMP")
+        DateTime, server_default=text("CURRENT_TIMESTAMP"), onupdate=text("CURRENT_TIMESTAMP")
     )
     expires_at: Mapped[datetime] = mapped_column(DateTime, nullable=True, index=True)
 
@@ -112,12 +108,8 @@ class BundleAsset(Base):
 
     __tablename__ = "bundle_assets"
 
-    asset_id: Mapped[UUID] = mapped_column(
-        PGUUID(as_uuid=True), primary_key=True, default=uuid4
-    )
-    bundle_id: Mapped[UUID] = mapped_column(
-        PGUUID(as_uuid=True), nullable=False, index=True
-    )
+    asset_id: Mapped[UUID] = mapped_column(PGUUID(as_uuid=True), primary_key=True, default=uuid4)
+    bundle_id: Mapped[UUID] = mapped_column(PGUUID(as_uuid=True), nullable=False, index=True)
 
     # Asset metadata
     asset_type: Mapped[str] = mapped_column(
@@ -141,9 +133,7 @@ class BundleAsset(Base):
     is_precache: Mapped[bool] = mapped_column(Boolean, default=False, index=True)
     priority: Mapped[int] = mapped_column(Integer, default=100)  # Lower = higher priority
 
-    created_at: Mapped[datetime] = mapped_column(
-        DateTime, server_default=text("CURRENT_TIMESTAMP")
-    )
+    created_at: Mapped[datetime] = mapped_column(DateTime, server_default=text("CURRENT_TIMESTAMP"))
 
 
 class BundleDownload(Base):
@@ -151,15 +141,9 @@ class BundleDownload(Base):
 
     __tablename__ = "bundle_downloads"
 
-    download_id: Mapped[UUID] = mapped_column(
-        PGUUID(as_uuid=True), primary_key=True, default=uuid4
-    )
-    bundle_id: Mapped[UUID] = mapped_column(
-        PGUUID(as_uuid=True), nullable=False, index=True
-    )
-    learner_id: Mapped[UUID] = mapped_column(
-        PGUUID(as_uuid=True), nullable=False, index=True
-    )
+    download_id: Mapped[UUID] = mapped_column(PGUUID(as_uuid=True), primary_key=True, default=uuid4)
+    bundle_id: Mapped[UUID] = mapped_column(PGUUID(as_uuid=True), nullable=False, index=True)
+    learner_id: Mapped[UUID] = mapped_column(PGUUID(as_uuid=True), nullable=False, index=True)
 
     # Download metadata
     download_started_at: Mapped[datetime] = mapped_column(
@@ -183,12 +167,8 @@ class CRDTMergeLog(Base):
 
     __tablename__ = "crdt_merge_logs"
 
-    merge_id: Mapped[UUID] = mapped_column(
-        PGUUID(as_uuid=True), primary_key=True, default=uuid4
-    )
-    bundle_id: Mapped[UUID] = mapped_column(
-        PGUUID(as_uuid=True), nullable=False, index=True
-    )
+    merge_id: Mapped[UUID] = mapped_column(PGUUID(as_uuid=True), primary_key=True, default=uuid4)
+    bundle_id: Mapped[UUID] = mapped_column(PGUUID(as_uuid=True), nullable=False, index=True)
 
     # Merge operation details
     merge_timestamp: Mapped[datetime] = mapped_column(
@@ -208,7 +188,5 @@ class CRDTMergeLog(Base):
     affected_assets_count: Mapped[int] = mapped_column(Integer, default=0)
 
     # Audit information
-    initiated_by: Mapped[UUID] = mapped_column(
-        PGUUID(as_uuid=True), nullable=False, index=True
-    )
+    initiated_by: Mapped[UUID] = mapped_column(PGUUID(as_uuid=True), nullable=False, index=True)
     merge_context: Mapped[dict] = mapped_column(JSON, nullable=True)

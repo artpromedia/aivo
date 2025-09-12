@@ -19,9 +19,7 @@ logger = structlog.get_logger(__name__)
 class KafkaEventConsumer:
     """Kafka consumer for processing events from Redpanda."""
 
-    def __init__(
-        self, event_handler: Callable[[list[RawEvent]], Awaitable[bool]]
-    ) -> None:
+    def __init__(self, event_handler: Callable[[list[RawEvent]], Awaitable[bool]]) -> None:
         """Initialize the Kafka consumer.
 
         Args:
@@ -42,9 +40,7 @@ class KafkaEventConsumer:
 
     async def start(self) -> None:
         """Start the Kafka consumer."""
-        logger.info(
-            "Starting Kafka consumer", topic=settings.kafka_topic_events_raw
-        )
+        logger.info("Starting Kafka consumer", topic=settings.kafka_topic_events_raw)
 
         try:
             self.consumer = AIOKafkaConsumer(
@@ -109,11 +105,7 @@ class KafkaEventConsumer:
                         await self._process_messages(topic_partition, messages)
 
             except Exception as e:  # pylint: disable=broad-exception-caught
-                logger.error(
-                    "Error in consume loop",
-                    error=str(e),
-                    error_type=type(e).__name__
-                )
+                logger.error("Error in consume loop", error=str(e), error_type=type(e).__name__)
                 self._metrics["processing_errors"] += 1
 
                 # Brief pause before retrying
@@ -167,9 +159,7 @@ class KafkaEventConsumer:
                     # Commit offsets for successfully processed messages
                     if valid_messages:
                         last_message = valid_messages[-1]
-                        await self.consumer.commit(
-                            {topic_partition: last_message.offset + 1}
-                        )
+                        await self.consumer.commit({topic_partition: last_message.offset + 1})
 
                     # Update metrics
                     self._metrics["messages_consumed"] += len(valid_messages)
@@ -180,10 +170,7 @@ class KafkaEventConsumer:
                         "Processed message batch successfully",
                         events_count=len(events),
                         partition=topic_partition.partition,
-                        last_offset=(
-                            valid_messages[-1].offset
-                            if valid_messages else None
-                        ),
+                        last_offset=(valid_messages[-1].offset if valid_messages else None),
                     )
                 else:
                     logger.error(

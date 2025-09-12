@@ -39,9 +39,9 @@ class TestBulkImportResponse(unittest.TestCase):
                 total = 100,
                 errors = [
                     aivo_sdk.models.bulk_import_response_errors_inner.BulkImportResponse_errors_inner(
-                        index = 56, 
-                        email = '', 
-                        error = '', 
+                        index = 56,
+                        email = '',
+                        error = '',
                         message = '', )
                     ]
             )

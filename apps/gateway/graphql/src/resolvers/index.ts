@@ -10,13 +10,13 @@ const healthResolvers = {
   Query: {
     ping: (): string => 'pong',
     version: (): string => '1.0.0',
-    status: (): any => ({ 
-      healthy: true, 
+    status: (): any => ({
+      healthy: true,
       timestamp: new Date().toISOString(),
       services: {
         redis: 'connected',
-        database: 'connected'
-      }
+        database: 'connected',
+      },
     }),
   },
 };

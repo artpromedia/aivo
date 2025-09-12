@@ -11,9 +11,7 @@ class Settings(BaseSettings):
     """Application settings."""
 
     # Environment
-    environment: str = Field(
-        default="development", description="Runtime environment"
-    )
+    environment: str = Field(default="development", description="Runtime environment")
     debug: bool = Field(default=False, description="Debug mode")
     log_level: str = Field(default="INFO", description="Logging level")
 
@@ -22,12 +20,8 @@ class Settings(BaseSettings):
         default="postgresql://postgres:postgres@localhost:5432/device_ota",
         description="Database connection URL",
     )
-    database_pool_size: int = Field(
-        default=10, description="Database pool size"
-    )
-    database_pool_overflow: int = Field(
-        default=20, description="Database pool overflow"
-    )
+    database_pool_size: int = Field(default=10, description="Database pool size")
+    database_pool_overflow: int = Field(default=20, description="Database pool overflow")
 
     # Security
     secret_key: str = Field(
@@ -44,76 +38,46 @@ class Settings(BaseSettings):
     )
 
     # File Storage
-    storage_type: str = Field(
-        default="local", description="Storage backend type"
-    )
+    storage_type: str = Field(default="local", description="Storage backend type")
     storage_base_path: str = Field(
         default="./storage/firmware",
         description="Base path for firmware storage",
     )
     storage_s3_bucket: str | None = Field(None, description="S3 bucket name")
     storage_s3_region: str | None = Field(None, description="S3 region")
-    storage_s3_access_key: str | None = Field(
-        None, description="S3 access key"
-    )
-    storage_s3_secret_key: str | None = Field(
-        None, description="S3 secret key"
-    )
+    storage_s3_access_key: str | None = Field(None, description="S3 access key")
+    storage_s3_secret_key: str | None = Field(None, description="S3 secret key")
 
     # Update Configuration
     max_concurrent_downloads: int = Field(
         default=100, description="Maximum concurrent downloads per update"
     )
-    max_file_size_mb: int = Field(
-        default=1024, description="Maximum firmware file size in MB"
-    )
-    update_timeout_hours: int = Field(
-        default=24, description="Update timeout in hours"
-    )
-    heartbeat_timeout_minutes: int = Field(
-        default=30, description="Heartbeat timeout in minutes"
-    )
+    max_file_size_mb: int = Field(default=1024, description="Maximum firmware file size in MB")
+    update_timeout_hours: int = Field(default=24, description="Update timeout in hours")
+    heartbeat_timeout_minutes: int = Field(default=30, description="Heartbeat timeout in minutes")
 
     # Deployment Rings
-    canary_max_devices: int = Field(
-        default=50, description="Maximum devices in canary ring"
-    )
-    early_max_devices: int = Field(
-        default=500, description="Maximum devices in early ring"
-    )
+    canary_max_devices: int = Field(default=50, description="Maximum devices in canary ring")
+    early_max_devices: int = Field(default=500, description="Maximum devices in early ring")
 
     # Rollback Configuration
     auto_rollback_failure_threshold: float = Field(
         default=10.0, description="Auto rollback failure rate threshold"
     )
-    rollback_timeout_hours: int = Field(
-        default=6, description="Rollback timeout in hours"
-    )
+    rollback_timeout_hours: int = Field(default=6, description="Rollback timeout in hours")
 
     # Monitoring
-    metrics_enabled: bool = Field(
-        default=True, description="Enable metrics collection"
-    )
+    metrics_enabled: bool = Field(default=True, description="Enable metrics collection")
     metrics_port: int = Field(default=9090, description="Metrics server port")
-    health_check_timeout: int = Field(
-        default=30, description="Health check timeout"
-    )
+    health_check_timeout: int = Field(default=30, description="Health check timeout")
 
     # External Services
-    notification_service_url: str | None = Field(
-        None, description="Notification service URL"
-    )
-    analytics_service_url: str | None = Field(
-        None, description="Analytics service URL"
-    )
+    notification_service_url: str | None = Field(None, description="Notification service URL")
+    analytics_service_url: str | None = Field(None, description="Analytics service URL")
 
     # Rate Limiting
-    rate_limit_heartbeat: str = Field(
-        default="100/minute", description="Heartbeat rate limit"
-    )
-    rate_limit_update_check: str = Field(
-        default="10/minute", description="Update check rate limit"
-    )
+    rate_limit_heartbeat: str = Field(default="100/minute", description="Heartbeat rate limit")
+    rate_limit_update_check: str = Field(default="10/minute", description="Update check rate limit")
 
     @validator("log_level")
     @classmethod
@@ -180,11 +144,13 @@ def get_storage_config() -> dict[str, Any]:
     }
 
     if settings.storage_type == "s3":
-        config.update({
-            "bucket": settings.storage_s3_bucket,
-            "region": settings.storage_s3_region,
-            "access_key": settings.storage_s3_access_key,
-            "secret_key": settings.storage_s3_secret_key,
-        })
+        config.update(
+            {
+                "bucket": settings.storage_s3_bucket,
+                "region": settings.storage_s3_region,
+                "access_key": settings.storage_s3_access_key,
+                "secret_key": settings.storage_s3_secret_key,
+            }
+        )
 
     return config

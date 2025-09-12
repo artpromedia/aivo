@@ -89,14 +89,23 @@ export interface IepService {
   saveDraft(iepId: string, operations: CrdtOperationInput[]): Promise<ServiceResponse<IepDoc>>;
   submitForApproval(iepId: string): Promise<ServiceResponse<IepDoc>>;
   addGoal(iepId: string, goal: GoalInput): Promise<ServiceResponse<Goal>>;
-  addAccommodation(iepId: string, accommodation: AccommodationInput): Promise<ServiceResponse<Accommodation>>;
+  addAccommodation(
+    iepId: string,
+    accommodation: AccommodationInput
+  ): Promise<ServiceResponse<Accommodation>>;
 }
 
 export interface AnalyticsService {
   getLearnerAnalytics(learnerId: string): Promise<ServiceResponse<LearnerAnalytics>>;
   getDashboardMetrics(tenantId?: string): Promise<ServiceResponse<DashboardMetrics>>;
-  getAcademicTrends(tenantId?: string, timeframe?: string): Promise<ServiceResponse<SubjectGrade[]>>;
-  getGoalProgressSummary(tenantId?: string, timeframe?: string): Promise<ServiceResponse<GoalProgress[]>>;
+  getAcademicTrends(
+    tenantId?: string,
+    timeframe?: string
+  ): Promise<ServiceResponse<SubjectGrade[]>>;
+  getGoalProgressSummary(
+    tenantId?: string,
+    timeframe?: string
+  ): Promise<ServiceResponse<GoalProgress[]>>;
 }
 
 export interface AdminPortalService {

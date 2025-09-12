@@ -1,11 +1,11 @@
-﻿"""
+"""
 Database models for internationalization service.
 
 SQLAlchemy models for managing translations and accessibility metadata.
 """
+
 from datetime import datetime
 from enum import Enum
-from typing import Dict, List, Optional
 from uuid import UUID, uuid4
 
 from sqlalchemy import JSON, Boolean, DateTime, String, Text, func
@@ -15,31 +15,32 @@ from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column, relationship
 
 class Base(DeclarativeBase):
     """Base class for all database models."""
+
     pass
 
 
 class SupportedLocale(str, Enum):
     """Supported locale codes including African languages."""
-    
+
     # Primary languages
     EN_US = "en-US"  # English (United States)
     EN_GB = "en-GB"  # English (United Kingdom)
-    
+
     # African languages
-    IG_NG = "ig-NG"  # Igbo (Nigeria) 
+    IG_NG = "ig-NG"  # Igbo (Nigeria)
     YO_NG = "yo-NG"  # Yoruba (Nigeria)
     HA_NG = "ha-NG"  # Hausa (Nigeria)
     EFI_NG = "efi-NG"  # Efik (Nigeria)
     SW_KE = "sw-KE"  # Swahili (Kenya)
     SW_TZ = "sw-TZ"  # Swahili (Tanzania)
     XH_ZA = "xh-ZA"  # Xhosa (South Africa)
-    
+
     # European languages
     ES_ES = "es-ES"  # Spanish (Spain)
     FR_FR = "fr-FR"  # French (France)
     DE_DE = "de-DE"  # German (Germany)
     PT_BR = "pt-BR"  # Portuguese (Brazil)
-    
+
     # Asian languages
     ZH_CN = "zh-CN"  # Chinese (Simplified)
     JA_JP = "ja-JP"  # Japanese
@@ -50,7 +51,7 @@ class SupportedLocale(str, Enum):
 
 class AccessibilityLevel(str, Enum):
     """WCAG accessibility compliance levels."""
-    
+
     A = "A"
     AA = "AA"
     AAA = "AAA"
@@ -73,7 +74,7 @@ def get_locale_display_name(locale: str) -> str:
         "en-US": "English (United States)",
         "en-GB": "English (United Kingdom)",
         "ig-NG": "Igbo (Nigeria)",
-        "yo-NG": "Yoruba (Nigeria)", 
+        "yo-NG": "Yoruba (Nigeria)",
         "ha-NG": "Hausa (Nigeria)",
         "efi-NG": "Efik (Nigeria)",
         "sw-KE": "Swahili (Kenya)",
@@ -94,93 +95,73 @@ def get_locale_display_name(locale: str) -> str:
 
 class TranslationKey(Base):
     """Translation key and metadata model."""
-    
+
     __tablename__ = "translation_keys"
-    
+
     id: Mapped[UUID] = mapped_column(
-        PostgresUUID(as_uuid=True),
-        primary_key=True,
-        default=generate_uuid
+        PostgresUUID(as_uuid=True), primary_key=True, default=generate_uuid
     )
     key: Mapped[str] = mapped_column(String(255), unique=True, index=True)
-    context: Mapped[Optional[str]] = mapped_column(String(500))
-    description: Mapped[Optional[str]] = mapped_column(Text)
-    source_file: Mapped[Optional[str]] = mapped_column(String(500))
-    source_line: Mapped[Optional[int]]
+    context: Mapped[str | None] = mapped_column(String(500))
+    description: Mapped[str | None] = mapped_column(Text)
+    source_file: Mapped[str | None] = mapped_column(String(500))
+    source_line: Mapped[int | None]
     is_active: Mapped[bool] = mapped_column(Boolean, default=True)
     requires_review: Mapped[bool] = mapped_column(Boolean, default=False)
-    accessibility_notes: Mapped[Optional[str]] = mapped_column(Text)
+    accessibility_notes: Mapped[str | None] = mapped_column(Text)
     created_at: Mapped[datetime] = mapped_column(
-        DateTime(timezone=True),
-        server_default=func.now()
+        DateTime(timezone=True), server_default=func.now()
     )
     updated_at: Mapped[datetime] = mapped_column(
-        DateTime(timezone=True),
-        server_default=func.now(),
-        onupdate=func.now()
+        DateTime(timezone=True), server_default=func.now(), onupdate=func.now()
     )
-    
+
     # Relationships
-    translations: Mapped[List["Translation"]] = relationship(
-        "Translation",
-        back_populates="translation_key",
-        cascade="all, delete-orphan"
+    translations: Mapped[list["Translation"]] = relationship(
+        "Translation", back_populates="translation_key", cascade="all, delete-orphan"
     )
 
 
 class Translation(Base):
     """Translation model for specific locales."""
-    
+
     __tablename__ = "translations"
-    
+
     id: Mapped[UUID] = mapped_column(
-        PostgresUUID(as_uuid=True),
-        primary_key=True,
-        default=generate_uuid
+        PostgresUUID(as_uuid=True), primary_key=True, default=generate_uuid
     )
     key_id: Mapped[UUID] = mapped_column(
-        PostgresUUID(as_uuid=True),
-        nullable=False,
-        index=True
+        PostgresUUID(as_uuid=True), nullable=False, index=True
     )
     locale: Mapped[str] = mapped_column(String(10), index=True)
     value: Mapped[str] = mapped_column(Text)
     is_approved: Mapped[bool] = mapped_column(Boolean, default=False)
-    translator_id: Mapped[Optional[str]] = mapped_column(String(255))
-    reviewer_id: Mapped[Optional[str]] = mapped_column(String(255))
-    quality_score: Mapped[Optional[float]]
+    translator_id: Mapped[str | None] = mapped_column(String(255))
+    reviewer_id: Mapped[str | None] = mapped_column(String(255))
+    quality_score: Mapped[float | None]
     accessibility_compliant: Mapped[bool] = mapped_column(Boolean, default=True)
-    wcag_level: Mapped[str] = mapped_column(
-        String(3),
-        default=AccessibilityLevel.AA
-    )
+    wcag_level: Mapped[str] = mapped_column(String(3), default=AccessibilityLevel.AA)
     created_at: Mapped[datetime] = mapped_column(
-        DateTime(timezone=True),
-        server_default=func.now()
+        DateTime(timezone=True), server_default=func.now()
     )
     updated_at: Mapped[datetime] = mapped_column(
-        DateTime(timezone=True),
-        server_default=func.now(),
-        onupdate=func.now()
+        DateTime(timezone=True), server_default=func.now(), onupdate=func.now()
     )
-    approved_at: Mapped[Optional[datetime]] = mapped_column(DateTime(timezone=True))
-    
+    approved_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
+
     # Relationships
     translation_key: Mapped["TranslationKey"] = relationship(
-        "TranslationKey",
-        back_populates="translations"
+        "TranslationKey", back_populates="translations"
     )
 
 
 class LocaleConfiguration(Base):
     """Locale configuration and metadata."""
-    
+
     __tablename__ = "locale_configurations"
-    
+
     id: Mapped[UUID] = mapped_column(
-        PostgresUUID(as_uuid=True),
-        primary_key=True,
-        default=generate_uuid
+        PostgresUUID(as_uuid=True), primary_key=True, default=generate_uuid
     )
     locale: Mapped[str] = mapped_column(String(10), unique=True, index=True)
     display_name: Mapped[str] = mapped_column(String(100))
@@ -188,85 +169,66 @@ class LocaleConfiguration(Base):
     is_enabled: Mapped[bool] = mapped_column(Boolean, default=True)
     is_rtl: Mapped[bool] = mapped_column(Boolean, default=False)
     completion_percentage: Mapped[float] = mapped_column(default=0.0)
-    fallback_locale: Mapped[Optional[str]] = mapped_column(String(10))
+    fallback_locale: Mapped[str | None] = mapped_column(String(10))
     date_format: Mapped[str] = mapped_column(String(50), default="%Y-%m-%d")
     time_format: Mapped[str] = mapped_column(String(50), default="%H:%M:%S")
-    number_format: Mapped[Dict] = mapped_column(JSON, default=dict)
-    currency_format: Mapped[Dict] = mapped_column(JSON, default=dict)
-    accessibility_config: Mapped[Dict] = mapped_column(JSON, default=dict)
+    number_format: Mapped[dict] = mapped_column(JSON, default=dict)
+    currency_format: Mapped[dict] = mapped_column(JSON, default=dict)
+    accessibility_config: Mapped[dict] = mapped_column(JSON, default=dict)
     created_at: Mapped[datetime] = mapped_column(
-        DateTime(timezone=True),
-        server_default=func.now()
+        DateTime(timezone=True), server_default=func.now()
     )
     updated_at: Mapped[datetime] = mapped_column(
-        DateTime(timezone=True),
-        server_default=func.now(),
-        onupdate=func.now()
+        DateTime(timezone=True), server_default=func.now(), onupdate=func.now()
     )
 
 
 class AccessibilityAudit(Base):
     """Accessibility audit results for translations."""
-    
+
     __tablename__ = "accessibility_audits"
-    
+
     id: Mapped[UUID] = mapped_column(
-        PostgresUUID(as_uuid=True),
-        primary_key=True,
-        default=generate_uuid
+        PostgresUUID(as_uuid=True), primary_key=True, default=generate_uuid
     )
     translation_id: Mapped[UUID] = mapped_column(
-        PostgresUUID(as_uuid=True),
-        nullable=False,
-        index=True
+        PostgresUUID(as_uuid=True), nullable=False, index=True
     )
     audit_type: Mapped[str] = mapped_column(String(50))  # "automated", "manual"
     wcag_level: Mapped[str] = mapped_column(String(3))
     score: Mapped[float]  # 0-100 percentage
-    issues_found: Mapped[List[Dict]] = mapped_column(JSON, default=list)
-    recommendations: Mapped[List[str]] = mapped_column(JSON, default=list)
-    auditor_id: Mapped[Optional[str]] = mapped_column(String(255))
-    audit_tool: Mapped[Optional[str]] = mapped_column(String(100))
+    issues_found: Mapped[list[dict]] = mapped_column(JSON, default=list)
+    recommendations: Mapped[list[str]] = mapped_column(JSON, default=list)
+    auditor_id: Mapped[str | None] = mapped_column(String(255))
+    audit_tool: Mapped[str | None] = mapped_column(String(100))
     audit_date: Mapped[datetime] = mapped_column(
-        DateTime(timezone=True),
-        server_default=func.now()
+        DateTime(timezone=True), server_default=func.now()
     )
-    next_audit_date: Mapped[Optional[datetime]] = mapped_column(
-        DateTime(timezone=True)
-    )
+    next_audit_date: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
 
 
 class TranslationRequest(Base):
     """Translation request workflow model."""
-    
+
     __tablename__ = "translation_requests"
-    
+
     id: Mapped[UUID] = mapped_column(
-        PostgresUUID(as_uuid=True),
-        primary_key=True,
-        default=generate_uuid
+        PostgresUUID(as_uuid=True), primary_key=True, default=generate_uuid
     )
     key_id: Mapped[UUID] = mapped_column(
-        PostgresUUID(as_uuid=True),
-        nullable=False,
-        index=True
+        PostgresUUID(as_uuid=True), nullable=False, index=True
     )
     target_locale: Mapped[str] = mapped_column(String(10))
     priority: Mapped[str] = mapped_column(String(20), default="medium")
     status: Mapped[str] = mapped_column(String(20), default="pending")
     requester_id: Mapped[str] = mapped_column(String(255))
-    assigned_translator_id: Mapped[Optional[str]] = mapped_column(String(255))
-    due_date: Mapped[Optional[datetime]] = mapped_column(DateTime(timezone=True))
-    notes: Mapped[Optional[str]] = mapped_column(Text)
+    assigned_translator_id: Mapped[str | None] = mapped_column(String(255))
+    due_date: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
+    notes: Mapped[str | None] = mapped_column(Text)
     created_at: Mapped[datetime] = mapped_column(
-        DateTime(timezone=True),
-        server_default=func.now()
+        DateTime(timezone=True), server_default=func.now()
     )
     updated_at: Mapped[datetime] = mapped_column(
-        DateTime(timezone=True),
-        server_default=func.now(),
-        onupdate=func.now()
+        DateTime(timezone=True), server_default=func.now(), onupdate=func.now()
     )
-    completed_at: Mapped[Optional[datetime]] = mapped_column(
-        DateTime(timezone=True)
-    )
+    completed_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))

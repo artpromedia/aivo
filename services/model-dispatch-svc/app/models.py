@@ -61,9 +61,7 @@ class PolicyRequest(BaseModel):
 
     subject: SubjectType = Field(..., description="Subject being taught")
     grade_band: GradeBand = Field(..., description="Grade band classification")
-    region: Region = Field(
-        ..., description="Geographic region for data residency"
-    )
+    region: Region = Field(..., description="Geographic region for data residency")
     teacher_override: bool = Field(
         default=False, description="Flag indicating teacher manual override"
     )
@@ -94,15 +92,9 @@ class PolicyResponse(BaseModel):
     provider_config: dict[str, Any] = Field(
         default_factory=dict, description="Provider-specific configuration"
     )
-    routing_reason: str = Field(
-        ..., description="Explanation for the routing decision"
-    )
-    cache_ttl_seconds: int = Field(
-        default=3600, description="Cache time-to-live in seconds"
-    )
-    request_id: str | None = Field(
-        default=None, description="Request identifier for tracking"
-    )
+    routing_reason: str = Field(..., description="Explanation for the routing decision")
+    cache_ttl_seconds: int = Field(default=3600, description="Cache time-to-live in seconds")
+    request_id: str | None = Field(default=None, description="Request identifier for tracking")
 
 
 class RouteRule(BaseModel):
@@ -113,30 +105,18 @@ class RouteRule(BaseModel):
         validate_assignment=True,
     )
 
-    priority: int = Field(
-        ..., description="Rule priority (higher number = higher priority)"
-    )
-    conditions: dict[str, Any] = Field(
-        ..., description="Conditions for rule matching"
-    )
-    provider: LLMProvider = Field(
-        ..., description="Target provider for this rule"
-    )
-    template_ids: list[str] = Field(
-        ..., description="Template IDs for this rule"
-    )
+    priority: int = Field(..., description="Rule priority (higher number = higher priority)")
+    conditions: dict[str, Any] = Field(..., description="Conditions for rule matching")
+    provider: LLMProvider = Field(..., description="Target provider for this rule")
+    template_ids: list[str] = Field(..., description="Template IDs for this rule")
     moderation_threshold: float = Field(
         ..., ge=0.0, le=1.0, description="Moderation threshold for this rule"
     )
     provider_config: dict[str, Any] = Field(
         default_factory=dict, description="Provider-specific configuration"
     )
-    enabled: bool = Field(
-        default=True, description="Whether this rule is active"
-    )
-    description: str = Field(
-        ..., description="Human-readable rule description"
-    )
+    enabled: bool = Field(default=True, description="Whether this rule is active")
+    description: str = Field(..., description="Human-readable rule description")
 
 
 class PolicyConfig(BaseModel):
@@ -154,12 +134,8 @@ class PolicyConfig(BaseModel):
     default_moderation_threshold: float = Field(
         default=0.7, ge=0.0, le=1.0, description="Default moderation threshold"
     )
-    cache_enabled: bool = Field(
-        default=True, description="Whether to cache responses"
-    )
-    cache_ttl_seconds: int = Field(
-        default=3600, description="Default cache TTL"
-    )
+    cache_enabled: bool = Field(default=True, description="Whether to cache responses")
+    cache_ttl_seconds: int = Field(default=3600, description="Default cache TTL")
 
 
 class HealthResponse(BaseModel):
@@ -174,9 +150,7 @@ class HealthResponse(BaseModel):
     service: str = Field(..., description="Service name")
     version: str = Field(..., description="Service version")
     timestamp: float = Field(..., description="Response timestamp")
-    rules_loaded: int = Field(
-        ..., description="Number of routing rules loaded"
-    )
+    rules_loaded: int = Field(..., description="Number of routing rules loaded")
 
 
 class PolicyStats(BaseModel):
@@ -187,24 +161,16 @@ class PolicyStats(BaseModel):
         validate_assignment=True,
     )
 
-    total_requests: int = Field(
-        ..., description="Total policy requests processed"
-    )
+    total_requests: int = Field(..., description="Total policy requests processed")
     cache_hits: int = Field(..., description="Number of cache hits")
     cache_misses: int = Field(..., description="Number of cache misses")
-    provider_distribution: dict[str, int] = Field(
-        ..., description="Request count by provider"
-    )
-    region_distribution: dict[str, int] = Field(
-        ..., description="Request count by region"
-    )
+    provider_distribution: dict[str, int] = Field(..., description="Request count by provider")
+    region_distribution: dict[str, int] = Field(..., description="Request count by region")
     average_response_time_ms: float = Field(
         ..., description="Average response time in milliseconds"
     )
     rules_count: int = Field(..., description="Number of active routing rules")
-    last_updated: datetime = Field(
-        ..., description="Last statistics update time"
-    )
+    last_updated: datetime = Field(..., description="Last statistics update time")
 
 
 class TeacherOverride(BaseModel):
@@ -218,9 +184,7 @@ class TeacherOverride(BaseModel):
     teacher_id: str = Field(..., description="Teacher identifier")
     subject: SubjectType = Field(..., description="Subject being overridden")
     grade_band: GradeBand = Field(..., description="Grade band for override")
-    preferred_provider: LLMProvider = Field(
-        ..., description="Teacher's preferred provider"
-    )
+    preferred_provider: LLMProvider = Field(..., description="Teacher's preferred provider")
     reason: str = Field(..., description="Reason for override")
     duration_hours: int = Field(
         default=24,
@@ -228,9 +192,7 @@ class TeacherOverride(BaseModel):
         le=168,
         description="Override duration in hours (max 1 week)",
     )
-    request_id: str | None = Field(
-        default=None, description="Optional request identifier"
-    )
+    request_id: str | None = Field(default=None, description="Optional request identifier")
 
 
 class OverrideResponse(BaseModel):
@@ -243,7 +205,5 @@ class OverrideResponse(BaseModel):
 
     override_id: str = Field(..., description="Unique override identifier")
     expires_at: datetime = Field(..., description="Override expiration time")
-    applied: bool = Field(
-        ..., description="Whether override was successfully applied"
-    )
+    applied: bool = Field(..., description="Whether override was successfully applied")
     message: str = Field(..., description="Response message")

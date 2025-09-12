@@ -49,9 +49,9 @@ class TestInvoice(unittest.TestCase):
                 download_url = 'https://api.aivo.com/invoices/inv_123/download',
                 line_items = [
                     aivo_sdk.models.invoice_line_item.InvoiceLineItem(
-                        description = 'Professional Plan (Dec 2023)', 
-                        quantity = 50, 
-                        unit_amount = 99, 
+                        description = 'Professional Plan (Dec 2023)',
+                        quantity = 50,
+                        unit_amount = 99,
                         amount = 4950, )
                     ],
                 created_at = '2023-12-01T00:00:00Z'

@@ -105,9 +105,7 @@ class ApprovalCreateInput(BaseSchema):
     ttl_hours: int | None = Field(None, ge=1, le=720)  # 1 hour to 30 days
 
     # Participants
-    participants: list[ParticipantInput] = Field(
-        ..., min_length=1, max_length=10
-    )
+    participants: list[ParticipantInput] = Field(..., min_length=1, max_length=10)
     required_participants: int | None = None
     require_all_participants: bool = True
 
@@ -141,9 +139,7 @@ class ApprovalCreateInput(BaseSchema):
         has_staff = any(role in staff_roles for role in roles)
 
         if not has_guardian or not has_staff:
-            raise ValueError(
-                "Must have at least one guardian and one staff member"
-            )
+            raise ValueError("Must have at least one guardian and one staff member")
 
         return v
 
@@ -153,9 +149,7 @@ class ApprovalCreateInput(BaseSchema):
         if self.required_participants is not None and self.participants:
             participants_count = len(self.participants)
             if self.required_participants > participants_count:
-                raise ValueError(
-                    "Required participants cannot exceed total participants"
-                )
+                raise ValueError("Required participants cannot exceed total participants")
             if self.required_participants < 1:
                 raise ValueError("Required participants must be at least 1")
         return self

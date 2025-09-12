@@ -1,4 +1,4 @@
-﻿"""Media service for video uploads, HLS transcoding, and Zoom LTI integration."""
+"""Media service for video uploads, HLS transcoding, and Zoom LTI integration."""
 
 __version__ = "1.0.0"
 __author__ = "Media Service Team"

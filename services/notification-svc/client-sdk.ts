@@ -9,18 +9,37 @@ interface NotificationConfig {
   replayId?: string;
 }
 
+interface NotificationRequest {
+  to: string | string[];
+  subject?: string;
+  body: string;
+  type?: 'email' | 'sms' | 'push';
+  priority?: 'low' | 'normal' | 'high';
+  template?: string;
+  data?: Record<string, unknown>;
+}
+
+interface NotificationResponse {
+  id: string;
+  status: 'sent' | 'pending' | 'failed';
+  message?: string;
+}
+
 interface NotificationMessage {
   id: string;
   type: string;
   timestamp: string;
-  data: any;
-  metadata?: any;
+  data: Record<string, unknown>;
+  metadata?: Record<string, unknown>;
 }
 
 export class NotificationClient {
   private ws?: WebSocket;
   private config: NotificationConfig;
-  private messageHandlers: Map<string, Function[]> = new Map();
+  private messageHandlers: Map<
+    string,
+    ((message: NotificationMessage) => void)[]
+  > = new Map();
   private reconnectAttempts = 0;
   private maxReconnectAttempts = 5;
   private reconnectDelay = 1000;
@@ -98,7 +117,7 @@ export class NotificationClient {
   /**
    * Register message handler
    */
-  on(type: string, handler: Function): void {
+  on(type: string, handler: (message: NotificationMessage) => void): void {
     if (!this.messageHandlers.has(type)) {
       this.messageHandlers.set(type, []);
     }
@@ -126,7 +145,9 @@ export class NotificationClient {
   /**
    * Send notification
    */
-  async sendNotification(request: any): Promise<any> {
+  async sendNotification(
+    request: NotificationRequest
+  ): Promise<NotificationResponse> {
     const response = await fetch(`${this.config.apiUrl}/notify`, {
       method: 'POST',
       headers: {

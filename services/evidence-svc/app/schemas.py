@@ -1,9 +1,10 @@
-﻿"""Pydantic schemas for Evidence Service."""
+"""Pydantic schemas for Evidence Service."""
+
 import uuid
 from datetime import datetime
-from typing import Any, Dict, List, Optional
+from typing import Any
 
-from pydantic import BaseModel, Field, ConfigDict
+from pydantic import BaseModel, ConfigDict, Field
 
 
 class EvidenceUploadBase(BaseModel):
@@ -22,16 +23,16 @@ class EvidenceUploadCreate(EvidenceUploadBase):
     s3_key: str = Field(..., max_length=500)
     s3_bucket: str = Field(..., max_length=100)
     content_hash: str = Field(..., min_length=64, max_length=64)
-    metadata: Optional[Dict[str, Any]] = None
+    metadata: dict[str, Any] | None = None
 
 
 class EvidenceUploadUpdate(BaseModel):
     """Schema for updating evidence uploads."""
 
-    processing_status: Optional[str] = Field(None, max_length=50)
-    processing_started_at: Optional[datetime] = None
-    processing_completed_at: Optional[datetime] = None
-    metadata: Optional[Dict[str, Any]] = None
+    processing_status: str | None = Field(None, max_length=50)
+    processing_started_at: datetime | None = None
+    processing_completed_at: datetime | None = None
+    metadata: dict[str, Any] | None = None
 
 
 class EvidenceUploadResponse(EvidenceUploadBase):
@@ -46,9 +47,9 @@ class EvidenceUploadResponse(EvidenceUploadBase):
     upload_timestamp: datetime
     content_hash: str
     processing_status: str
-    processing_started_at: Optional[datetime] = None
-    processing_completed_at: Optional[datetime] = None
-    metadata: Optional[Dict[str, Any]] = None
+    processing_started_at: datetime | None = None
+    processing_completed_at: datetime | None = None
+    metadata: dict[str, Any] | None = None
 
 
 class EvidenceExtractionBase(BaseModel):
@@ -62,11 +63,11 @@ class EvidenceExtractionBase(BaseModel):
 class EvidenceExtractionCreate(EvidenceExtractionBase):
     """Schema for creating evidence extractions."""
 
-    extracted_text: Optional[str] = None
-    keywords: List[str] = Field(default_factory=list)
-    subject_tags: List[str] = Field(default_factory=list)
-    confidence_score: Optional[float] = Field(None, ge=0.0, le=1.0)
-    extraction_metadata: Optional[Dict[str, Any]] = None
+    extracted_text: str | None = None
+    keywords: list[str] = Field(default_factory=list)
+    subject_tags: list[str] = Field(default_factory=list)
+    confidence_score: float | None = Field(None, ge=0.0, le=1.0)
+    extraction_metadata: dict[str, Any] | None = None
 
 
 class EvidenceExtractionResponse(EvidenceExtractionBase):
@@ -75,11 +76,11 @@ class EvidenceExtractionResponse(EvidenceExtractionBase):
     model_config = ConfigDict(from_attributes=True)
 
     id: uuid.UUID
-    extracted_text: Optional[str] = None
-    keywords: List[str]
-    subject_tags: List[str]
-    confidence_score: Optional[float] = None
-    extraction_metadata: Optional[Dict[str, Any]] = None
+    extracted_text: str | None = None
+    keywords: list[str]
+    subject_tags: list[str]
+    confidence_score: float | None = None
+    extraction_metadata: dict[str, Any] | None = None
     extracted_at: datetime
 
 
@@ -95,19 +96,19 @@ class IEPGoalBase(BaseModel):
 class IEPGoalCreate(IEPGoalBase):
     """Schema for creating IEP goals."""
 
-    target_date: Optional[datetime] = None
-    keywords: List[str] = Field(default_factory=list)
+    target_date: datetime | None = None
+    keywords: list[str] = Field(default_factory=list)
 
 
 class IEPGoalUpdate(BaseModel):
     """Schema for updating IEP goals."""
 
-    goal_text: Optional[str] = None
-    subject_area: Optional[str] = Field(None, max_length=100)
-    category: Optional[str] = Field(None, max_length=100)
-    target_date: Optional[datetime] = None
-    keywords: Optional[List[str]] = None
-    is_active: Optional[bool] = None
+    goal_text: str | None = None
+    subject_area: str | None = Field(None, max_length=100)
+    category: str | None = Field(None, max_length=100)
+    target_date: datetime | None = None
+    keywords: list[str] | None = None
+    is_active: bool | None = None
 
 
 class IEPGoalResponse(IEPGoalBase):
@@ -116,8 +117,8 @@ class IEPGoalResponse(IEPGoalBase):
     model_config = ConfigDict(from_attributes=True)
 
     id: uuid.UUID
-    target_date: Optional[datetime] = None
-    keywords: List[str]
+    target_date: datetime | None = None
+    keywords: list[str]
     created_at: datetime
     updated_at: datetime
     is_active: bool
@@ -135,14 +136,14 @@ class IEPGoalLinkageBase(BaseModel):
 class IEPGoalLinkageCreate(IEPGoalLinkageBase):
     """Schema for creating IEP goal linkages."""
 
-    matching_keywords: List[str] = Field(default_factory=list)
+    matching_keywords: list[str] = Field(default_factory=list)
 
 
 class IEPGoalLinkageUpdate(BaseModel):
     """Schema for updating IEP goal linkages."""
 
-    validated_by_teacher: Optional[bool] = None
-    teacher_notes: Optional[str] = None
+    validated_by_teacher: bool | None = None
+    teacher_notes: str | None = None
 
 
 class IEPGoalLinkageResponse(IEPGoalLinkageBase):
@@ -151,10 +152,10 @@ class IEPGoalLinkageResponse(IEPGoalLinkageBase):
     model_config = ConfigDict(from_attributes=True)
 
     id: uuid.UUID
-    matching_keywords: List[str]
+    matching_keywords: list[str]
     created_at: datetime
-    validated_by_teacher: Optional[bool] = None
-    teacher_notes: Optional[str] = None
+    validated_by_teacher: bool | None = None
+    teacher_notes: str | None = None
 
 
 class EvidenceAuditEntryBase(BaseModel):
@@ -163,7 +164,7 @@ class EvidenceAuditEntryBase(BaseModel):
     upload_id: uuid.UUID
     learner_id: uuid.UUID
     action_type: str = Field(..., max_length=50)
-    action_details: Dict[str, Any]
+    action_details: dict[str, Any]
     performed_by: uuid.UUID
 
 
@@ -171,8 +172,8 @@ class EvidenceAuditEntryCreate(EvidenceAuditEntryBase):
     """Schema for creating evidence audit entries."""
 
     content_hash: str = Field(..., min_length=64, max_length=64)
-    previous_hash: Optional[str] = Field(None, min_length=64, max_length=64)
-    signature: Optional[str] = None
+    previous_hash: str | None = Field(None, min_length=64, max_length=64)
+    signature: str | None = None
 
 
 class EvidenceAuditEntryResponse(EvidenceAuditEntryBase):
@@ -183,9 +184,9 @@ class EvidenceAuditEntryResponse(EvidenceAuditEntryBase):
     id: uuid.UUID
     timestamp: datetime
     content_hash: str
-    previous_hash: Optional[str] = None
+    previous_hash: str | None = None
     chain_hash: str
-    signature: Optional[str] = None
+    signature: str | None = None
 
 
 class SubjectKeywordMapBase(BaseModel):
@@ -204,8 +205,8 @@ class SubjectKeywordMapCreate(SubjectKeywordMapBase):
 class SubjectKeywordMapUpdate(BaseModel):
     """Schema for updating subject keyword mappings."""
 
-    weight: Optional[float] = Field(None, ge=0.1, le=10.0)
-    is_active: Optional[bool] = None
+    weight: float | None = Field(None, ge=0.1, le=10.0)
+    is_active: bool | None = None
 
 
 class SubjectKeywordMapResponse(SubjectKeywordMapBase):
@@ -224,13 +225,13 @@ class TextractConfig(BaseModel):
     """Configuration for AWS Textract processing."""
 
     model_config = ConfigDict(
-        extra='forbid',
+        extra="forbid",
         validate_assignment=True,
     )
 
     detect_text: bool = True
     analyze_document: bool = True
-    feature_types: List[str] = Field(
+    feature_types: list[str] = Field(
         default_factory=lambda: [
             "TABLES",
             "FORMS",
@@ -245,15 +246,15 @@ class WhisperConfig(BaseModel):
     """Configuration for OpenAI Whisper processing."""
 
     model_config = ConfigDict(
-        extra='forbid',
+        extra="forbid",
         validate_assignment=True,
     )
 
     model: str = Field(default="whisper-1")
-    language: Optional[str] = None
+    language: str | None = None
     temperature: float = Field(default=0.0, ge=0.0, le=1.0)
     response_format: str = Field(default="verbose_json")
-    timestamp_granularities: List[str] = Field(
+    timestamp_granularities: list[str] = Field(
         default_factory=lambda: [
             "word",
             "segment",
@@ -265,7 +266,7 @@ class KeywordExtractionConfig(BaseModel):
     """Configuration for keyword extraction."""
 
     model_config = ConfigDict(
-        extra='forbid',
+        extra="forbid",
         validate_assignment=True,
     )
 
@@ -282,9 +283,9 @@ class ProcessingJobRequest(BaseModel):
 
     upload_id: uuid.UUID
     priority: int = Field(default=1, ge=1, le=10)
-    textract_config: Optional[TextractConfig] = None
-    whisper_config: Optional[WhisperConfig] = None
-    keyword_config: Optional[KeywordExtractionConfig] = None
+    textract_config: TextractConfig | None = None
+    whisper_config: WhisperConfig | None = None
+    keyword_config: KeywordExtractionConfig | None = None
 
 
 class ProcessingJobResponse(BaseModel):
@@ -294,24 +295,24 @@ class ProcessingJobResponse(BaseModel):
     upload_id: uuid.UUID
     status: str
     created_at: datetime
-    estimated_completion: Optional[datetime] = None
-    progress_percentage: Optional[float] = Field(None, ge=0.0, le=100.0)
+    estimated_completion: datetime | None = None
+    progress_percentage: float | None = Field(None, ge=0.0, le=100.0)
 
 
 class EvidenceSummary(BaseModel):
     """Schema for evidence summary responses."""
 
     upload: EvidenceUploadResponse
-    extractions: List[EvidenceExtractionResponse]
-    linkages: List[IEPGoalLinkageResponse]
-    audit_entries: List[EvidenceAuditEntryResponse]
+    extractions: list[EvidenceExtractionResponse]
+    linkages: list[IEPGoalLinkageResponse]
+    audit_entries: list[EvidenceAuditEntryResponse]
 
 
 class BulkLinkageRequest(BaseModel):
     """Schema for bulk linkage requests."""
 
     learner_id: uuid.UUID
-    subject_areas: Optional[List[str]] = None
+    subject_areas: list[str] | None = None
     min_linkage_strength: float = Field(default=0.7, ge=0.0, le=1.0)
     auto_validate_threshold: float = Field(default=0.9, ge=0.0, le=1.0)
 
@@ -324,8 +325,8 @@ class LinkageAnalytics(BaseModel):
     average_linkage_strength: float
     validated_linkages: int
     pending_validation: int
-    subject_distribution: Dict[str, int]
-    confidence_distribution: Dict[str, int]
+    subject_distribution: dict[str, int]
+    confidence_distribution: dict[str, int]
 
 
 class ExtractionStats(BaseModel):
@@ -336,6 +337,6 @@ class ExtractionStats(BaseModel):
     pending_uploads: int
     failed_uploads: int
     total_extractions: int
-    average_processing_time: Optional[float] = None
-    extraction_types: Dict[str, int]
-    file_types: Dict[str, int]
+    average_processing_time: float | None = None
+    extraction_types: dict[str, int]
+    file_types: dict[str, int]

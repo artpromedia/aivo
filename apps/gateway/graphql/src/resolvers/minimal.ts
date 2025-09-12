@@ -21,21 +21,17 @@ export const resolvers = {
     // Health & System
     ping: (): string => 'pong',
     version: (): string => '1.0.0',
-    status: (): Record<string, unknown> => ({ 
-      healthy: true, 
+    status: (): Record<string, unknown> => ({
+      healthy: true,
       timestamp: new Date().toISOString(),
       services: {
         redis: 'connected',
-        database: 'connected'
-      }
+        database: 'connected',
+      },
     }),
 
     // Basic learner queries
-    learner: async (
-      _parent: unknown,
-      { id }: { id: string },
-      _context: GraphQLContext
-    ) => {
+    learner: async (_parent: unknown, { id }: { id: string }, _context: GraphQLContext) => {
       // TODO: Implement learner lookup
       return {
         id,
@@ -46,13 +42,17 @@ export const resolvers = {
         guardians: [],
         ieps: [],
         createdAt: new Date().toISOString(),
-        updatedAt: new Date().toISOString()
+        updatedAt: new Date().toISOString(),
       };
     },
 
     learners: async (
       _parent: unknown,
-      { _tenantId, _limit = 20, _offset = 0 }: { _tenantId?: string; _limit?: number; _offset?: number },
+      {
+        _tenantId,
+        _limit = 20,
+        _offset = 0,
+      }: { _tenantId?: string; _limit?: number; _offset?: number },
       _context: GraphQLContext
     ) => {
       // TODO: Implement learners lookup
@@ -60,20 +60,12 @@ export const resolvers = {
     },
 
     // Basic IEP queries
-    iep: async (
-      _parent: unknown,
-      { _id }: { _id: string },
-      _context: GraphQLContext
-    ) => {
+    iep: async (_parent: unknown, { _id }: { _id: string }, _context: GraphQLContext) => {
       // TODO: Implement IEP lookup
       return null;
     },
 
-    ieps: async (
-      _parent: unknown,
-      _args: unknown,
-      _context: GraphQLContext
-    ) => {
+    ieps: async (_parent: unknown, _args: unknown, _context: GraphQLContext) => {
       // TODO: Implement IEPs lookup
       return [];
     },
@@ -109,7 +101,7 @@ export const resolvers = {
         pendingApprovals: 0,
         completedGoals: 0,
         averageProgress: 0,
-        alertsCount: 0
+        alertsCount: 0,
       };
     },
 
@@ -122,11 +114,7 @@ export const resolvers = {
       return null;
     },
 
-    academicTrends: async (
-      _parent: unknown,
-      _args: unknown,
-      _context: GraphQLContext
-    ) => {
+    academicTrends: async (_parent: unknown, _args: unknown, _context: GraphQLContext) => {
       // TODO: Implement academic trends
       return [];
     },
@@ -146,7 +134,7 @@ export const resolvers = {
         guardians: [],
         ieps: [],
         createdAt: new Date().toISOString(),
-        updatedAt: new Date().toISOString()
+        updatedAt: new Date().toISOString(),
       };
     },
 
@@ -166,7 +154,7 @@ export const resolvers = {
         guardians: [],
         ieps: [],
         createdAt: new Date().toISOString(),
-        updatedAt: new Date().toISOString()
+        updatedAt: new Date().toISOString(),
       };
     },
 
@@ -180,7 +168,7 @@ export const resolvers = {
         id: 'new-guardian-id',
         ...input,
         createdAt: new Date().toISOString(),
-        updatedAt: new Date().toISOString()
+        updatedAt: new Date().toISOString(),
       };
     },
   },

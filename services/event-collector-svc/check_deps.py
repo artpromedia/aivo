@@ -66,6 +66,7 @@ def test_app_modules():
 
         # Test models
         import importlib.util
+
         if importlib.util.find_spec("app.models"):
             print("✅ Models module available")
 

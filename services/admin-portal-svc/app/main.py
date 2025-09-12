@@ -105,9 +105,7 @@ async def health_check():
         # Check HTTP client circuit breakers
         try:
             cb_status = http_client.get_circuit_breaker_status()
-            all_closed = all(
-                cb["state"] == "closed" for cb in cb_status.values()
-            )
+            all_closed = all(cb["state"] == "closed" for cb in cb_status.values())
             dependencies["http_client"] = "ok" if all_closed else "degraded"
         except Exception as e:  # pylint: disable=broad-exception-caught
             dependencies["http_client"] = f"error: {str(e)}"
@@ -140,9 +138,7 @@ async def get_summary(tenant_id: str = Depends(get_tenant_id)):
             return summary
         except Exception as e:
             span.record_exception(e)
-            logger.error(
-                "Failed to get summary for tenant %s: %s", tenant_id, e
-            )
+            logger.error("Failed to get summary for tenant %s: %s", tenant_id, e)
             raise HTTPException(
                 status_code=500,
                 detail=f"Failed to retrieve summary data: {str(e)}",
@@ -161,9 +157,7 @@ async def get_subscription(tenant_id: str = Depends(get_tenant_id)):
             return subscription
         except Exception as e:
             span.record_exception(e)
-            logger.error(
-                "Failed to get subscription for tenant %s: %s", tenant_id, e
-            )
+            logger.error("Failed to get subscription for tenant %s: %s", tenant_id, e)
             raise HTTPException(
                 status_code=500,
                 detail=f"Failed to retrieve subscription data: {str(e)}",
@@ -182,9 +176,7 @@ async def get_billing_history(tenant_id: str = Depends(get_tenant_id)):
             return billing
         except Exception as e:
             span.record_exception(e)
-            logger.error(
-                "Failed to get billing history for tenant %s: %s", tenant_id, e
-            )
+            logger.error("Failed to get billing history for tenant %s: %s", tenant_id, e)
             raise HTTPException(
                 status_code=500,
                 detail=f"Failed to retrieve billing history: {str(e)}",
@@ -239,15 +231,11 @@ async def get_namespaces(tenant_id: str = Depends(get_tenant_id)):
         try:
             namespaces = await service_aggregator.get_namespaces(tenant_id)
             span.set_attribute("namespaces.total", namespaces.total_namespaces)
-            span.set_attribute(
-                "namespaces.storage_gb", namespaces.total_storage_gb
-            )
+            span.set_attribute("namespaces.storage_gb", namespaces.total_storage_gb)
             return namespaces
         except Exception as e:
             span.record_exception(e)
-            logger.error(
-                "Failed to get namespaces for tenant %s: %s", tenant_id, e
-            )
+            logger.error("Failed to get namespaces for tenant %s: %s", tenant_id, e)
             raise HTTPException(
                 status_code=500,
                 detail=f"Failed to retrieve namespaces data: {str(e)}",
@@ -264,9 +252,7 @@ async def clear_tenant_cache(tenant_id: str):
             cleared_count = await cache_service.clear_tenant(tenant_id)
             span.set_attribute("cache.cleared_count", cleared_count)
 
-            message = (
-                f"Cleared {cleared_count} cache entries for tenant {tenant_id}"
-            )
+            message = f"Cleared {cleared_count} cache entries for tenant {tenant_id}"
             return {
                 "message": message,
                 "tenant_id": tenant_id,
@@ -274,12 +260,8 @@ async def clear_tenant_cache(tenant_id: str):
             }
         except Exception as e:
             span.record_exception(e)
-            logger.error(
-                "Failed to clear cache for tenant %s: %s", tenant_id, e
-            )
-            raise HTTPException(
-                status_code=500, detail=f"Failed to clear cache: {str(e)}"
-            ) from e
+            logger.error("Failed to clear cache for tenant %s: %s", tenant_id, e)
+            raise HTTPException(status_code=500, detail=f"Failed to clear cache: {str(e)}") from e
 
 
 @app.get("/circuit-breakers")
@@ -337,3 +319,117 @@ if __name__ == "__main__":
         port=settings.port,
         reload=settings.debug,
     )
+
+
+# Team Management Endpoints
+
+
+@app.post("/team/role-assign")
+async def assign_team_role(
+    request: dict,
+    tenant_id: str = Depends(get_tenant_id),
+) -> dict:
+    """Assign role to team member via auth service."""
+    with tracer.start_as_current_span("assign_team_role") as span:
+        span.set_attribute("tenant.id", tenant_id)
+        span.set_attribute("user.id", request.get("user_id"))
+        span.set_attribute("role", request.get("role"))
+
+        try:
+            # Validate request
+            if not all(k in request for k in ["user_id", "tenant_id", "role"]):
+                raise HTTPException(
+                    status_code=400, detail="Missing required fields: user_id, tenant_id, role"
+                )
+
+            # Proxy to auth service
+            response = await http_client.post(
+                f"auth-svc/users/{request['user_id']}/roles",
+                json={"tenant_id": request["tenant_id"], "role": request["role"]},
+            )
+
+            if response.status_code == 200:
+                span.set_attribute("operation.success", True)
+                return response.json()
+            else:
+                error_detail = response.json().get("detail", "Role assignment failed")
+                raise HTTPException(status_code=response.status_code, detail=error_detail)
+
+        except HTTPException:
+            raise
+        except Exception as e:
+            span.record_exception(e)
+            logger.error("Failed to assign role for tenant %s: %s", tenant_id, e)
+            raise HTTPException(status_code=500, detail=f"Failed to assign role: {str(e)}") from e
+
+
+@app.post("/team/role-revoke")
+async def revoke_team_role(
+    request: dict,
+    tenant_id: str = Depends(get_tenant_id),
+) -> dict:
+    """Revoke role from team member via auth service."""
+    with tracer.start_as_current_span("revoke_team_role") as span:
+        span.set_attribute("tenant.id", tenant_id)
+        span.set_attribute("user.id", request.get("user_id"))
+        span.set_attribute("role", request.get("role"))
+
+        try:
+            # Validate request
+            if not all(k in request for k in ["user_id", "tenant_id", "role"]):
+                raise HTTPException(
+                    status_code=400, detail="Missing required fields: user_id, tenant_id, role"
+                )
+
+            # Proxy to auth service
+            response = await http_client.delete(
+                f"auth-svc/users/{request['user_id']}/roles",
+                json={"tenant_id": request["tenant_id"], "role": request["role"]},
+            )
+
+            if response.status_code == 200:
+                span.set_attribute("operation.success", True)
+                return response.json()
+            else:
+                error_detail = response.json().get("detail", "Role revocation failed")
+                raise HTTPException(status_code=response.status_code, detail=error_detail)
+
+        except HTTPException:
+            raise
+        except Exception as e:
+            span.record_exception(e)
+            logger.error("Failed to revoke role for tenant %s: %s", tenant_id, e)
+            raise HTTPException(status_code=500, detail=f"Failed to revoke role: {str(e)}") from e
+
+
+@app.post("/team/invite-resend")
+async def resend_team_invite(
+    request: dict,
+    tenant_id: str = Depends(get_tenant_id),
+) -> dict:
+    """Resend invitation via auth service."""
+    with tracer.start_as_current_span("resend_team_invite") as span:
+        span.set_attribute("tenant.id", tenant_id)
+        span.set_attribute("invite.id", request.get("invite_id"))
+
+        try:
+            # Validate request
+            if "invite_id" not in request:
+                raise HTTPException(status_code=400, detail="Missing required field: invite_id")
+
+            # Proxy to auth service
+            response = await http_client.post(f"auth-svc/invites/{request['invite_id']}/resend")
+
+            if response.status_code == 200:
+                span.set_attribute("operation.success", True)
+                return response.json()
+            else:
+                error_detail = response.json().get("detail", "Invite resend failed")
+                raise HTTPException(status_code=response.status_code, detail=error_detail)
+
+        except HTTPException:
+            raise
+        except Exception as e:
+            span.record_exception(e)
+            logger.error("Failed to resend invite for tenant %s: %s", tenant_id, e)
+            raise HTTPException(status_code=500, detail=f"Failed to resend invite: {str(e)}") from e

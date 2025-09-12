@@ -53,9 +53,7 @@ async def lifespan(_app: FastAPI) -> AsyncGenerator[None, None]:
 # FastAPI app configuration
 app = FastAPI(
     title="Device Enrollment & Attestation Service",
-    description=(
-        "Aivo Pad device enrollment and certificate attestation service"
-    ),
+    description=("Aivo Pad device enrollment and certificate attestation service"),
     version="1.0.0",
     docs_url="/docs",
     redoc_url="/redoc",
@@ -83,9 +81,7 @@ app.include_router(router, prefix="/api/v1")
 
 
 @app.exception_handler(SQLAlchemyError)
-async def sqlalchemy_exception_handler(
-    request: Request, exc: SQLAlchemyError
-) -> JSONResponse:
+async def sqlalchemy_exception_handler(request: Request, exc: SQLAlchemyError) -> JSONResponse:
     """Handle SQLAlchemy database errors."""
     logger.error(
         "Database error",
@@ -103,9 +99,7 @@ async def sqlalchemy_exception_handler(
 
 
 @app.exception_handler(HTTPException)
-async def http_exception_handler(
-    request: Request, exc: HTTPException
-) -> JSONResponse:
+async def http_exception_handler(request: Request, exc: HTTPException) -> JSONResponse:
     """Handle HTTP exceptions."""
     logger.warning(
         "HTTP error",
@@ -124,9 +118,7 @@ async def http_exception_handler(
 
 
 @app.exception_handler(Exception)
-async def general_exception_handler(
-    request: Request, exc: Exception
-) -> JSONResponse:
+async def general_exception_handler(request: Request, exc: Exception) -> JSONResponse:
     """Handle general exceptions."""
     logger.error(
         "Unhandled error",

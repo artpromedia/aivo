@@ -134,9 +134,7 @@ class LearnerBase(BaseModel):
         max_date = date(today.year - 2, today.month, today.day)
 
         if v < min_date or v > max_date:
-            raise ValueError(
-                "Date of birth must be between 2 and 25 years ago"
-            )
+            raise ValueError("Date of birth must be between 2 and 25 years ago")
         return v
 
 
@@ -183,20 +181,14 @@ class TeacherAssignment(BaseModel):
     """Schema for teacher assignment to learner."""
 
     teacher_id: int = Field(..., description="ID of the teacher to assign")
-    assigned_by: str | None = Field(
-        None, description="Who assigned the teacher"
-    )
+    assigned_by: str | None = Field(None, description="Who assigned the teacher")
 
 
 class BulkTeacherAssignment(BaseModel):
     """Schema for bulk teacher assignment."""
 
-    teacher_ids: list[int] = Field(
-        ..., description="List of teacher IDs to assign"
-    )
-    assigned_by: str | None = Field(
-        None, description="Who assigned the teachers"
-    )
+    teacher_ids: list[int] = Field(..., description="List of teacher IDs to assign")
+    assigned_by: str | None = Field(None, description="Who assigned the teachers")
 
 
 # Legacy schema names for compatibility

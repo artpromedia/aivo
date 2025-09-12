@@ -1,9 +1,9 @@
-﻿"""Keyword extraction and subject tagging processors."""
-import asyncio
+"""Keyword extraction and subject tagging processors."""
+
 import logging
 import re
 from collections import Counter
-from typing import Any, Dict, List, Optional, Set, Tuple
+from typing import Any
 
 import nltk
 import spacy
@@ -571,14 +571,14 @@ class KeywordExtractor:
     async def extract_keywords(
         self,
         text: str,
-        config: Optional[KeywordExtractionConfig] = None,
-    ) -> Tuple[List[str], List[str], Dict[str, Any]]:
+        config: KeywordExtractionConfig | None = None,
+    ) -> tuple[list[str], list[str], dict[str, Any]]:
         """Extract keywords and subject tags from text.
-        
+
         Args:
             text: Input text to process
             config: Extraction configuration
-            
+
         Returns:
             Tuple of (keywords, subject_tags, metadata)
         """
@@ -590,22 +590,22 @@ class KeywordExtractor:
 
         # Preprocess text
         cleaned_text = self._preprocess_text(text)
-        
+
         # Extract keywords using multiple methods
         keywords_methods = {}
-        
+
         if config.use_tfidf:
             keywords_methods["tfidf"] = await self._extract_tfidf_keywords(
                 cleaned_text,
                 config,
             )
-            
+
         if config.use_yake:
             keywords_methods["yake"] = await self._extract_yake_keywords(
                 cleaned_text,
                 config,
             )
-            
+
         if config.use_spacy and self.nlp:
             keywords_methods["spacy"] = await self._extract_spacy_keywords(
                 cleaned_text,
@@ -630,8 +630,7 @@ class KeywordExtractor:
             "total_text_length": len(text),
             "cleaned_text_length": len(cleaned_text),
             "keyword_counts": {
-                method: len(keywords)
-                for method, keywords in keywords_methods.items()
+                method: len(keywords) for method, keywords in keywords_methods.items()
             },
             "subject_confidence_threshold": config.subject_confidence_threshold,
         }
@@ -649,44 +648,44 @@ class KeywordExtractor:
         """Preprocess text for keyword extraction."""
         # Remove extra whitespace and normalize
         text = re.sub(r"\s+", " ", text.strip())
-        
+
         # Remove special characters but keep word boundaries
         text = re.sub(r"[^\w\s\-']", " ", text)
-        
+
         # Remove very short words (less than 3 characters)
         words = text.split()
         words = [word for word in words if len(word) >= 3]
-        
+
         return " ".join(words)
 
     async def _extract_tfidf_keywords(
         self,
         text: str,
         config: KeywordExtractionConfig,
-    ) -> List[str]:
+    ) -> list[str]:
         """Extract keywords using TF-IDF."""
         try:
             # Fit TF-IDF on the text
             tfidf_matrix = self.tfidf_vectorizer.fit_transform([text])
-            
+
             # Get feature names and scores
             feature_names = self.tfidf_vectorizer.get_feature_names_out()
             tfidf_scores = tfidf_matrix.toarray()[0]
-            
+
             # Create keyword-score pairs
-            keyword_scores = list(zip(feature_names, tfidf_scores))
-            
+            keyword_scores = list(zip(feature_names, tfidf_scores, strict=False))
+
             # Sort by score and filter
             keyword_scores.sort(key=lambda x: x[1], reverse=True)
-            
+
             keywords = [
                 keyword
                 for keyword, score in keyword_scores
                 if score > 0 and len(keyword) >= config.min_keyword_length
             ]
-            
+
             return keywords[: config.max_keywords * 2]  # Get more for combining
-            
+
         except Exception as e:
             logger.error("TF-IDF keyword extraction failed: %s", e)
             return []
@@ -695,29 +694,29 @@ class KeywordExtractor:
         self,
         text: str,
         config: KeywordExtractionConfig,
-    ) -> List[str]:
+    ) -> list[str]:
         """Extract keywords using YAKE algorithm."""
         try:
             import yake
-            
+
             kw_extractor = yake.KeywordExtractor(
                 lan="en",
                 n=3,  # n-gram size
                 dedupLim=0.7,
                 top=config.max_keywords * 2,
             )
-            
+
             keywords_scores = kw_extractor.extract_keywords(text)
-            
+
             # YAKE returns (keyword, score) tuples with lower scores being better
             keywords = [
                 keyword
                 for keyword, score in keywords_scores
                 if len(keyword) >= config.min_keyword_length
             ]
-            
+
             return keywords
-            
+
         except ImportError:
             logger.warning("YAKE not available, skipping YAKE extraction")
             return []
@@ -729,29 +728,29 @@ class KeywordExtractor:
         self,
         text: str,
         config: KeywordExtractionConfig,
-    ) -> List[str]:
+    ) -> list[str]:
         """Extract keywords using spaCy NLP."""
         if not self.nlp:
             return []
 
         try:
             doc = self.nlp(text)
-            
+
             # Extract noun phrases and named entities
             keywords = set()
-            
+
             # Add noun phrases
             for chunk in doc.noun_chunks:
                 phrase = chunk.text.strip().lower()
                 if len(phrase) >= config.min_keyword_length:
                     keywords.add(phrase)
-            
+
             # Add named entities
             for ent in doc.ents:
                 entity = ent.text.strip().lower()
                 if len(entity) >= config.min_keyword_length:
                     keywords.add(entity)
-            
+
             # Add important single words (nouns, adjectives)
             for token in doc:
                 if (
@@ -761,52 +760,52 @@ class KeywordExtractor:
                     and len(token.text) >= config.min_keyword_length
                 ):
                     keywords.add(token.text.lower())
-            
+
             return list(keywords)[: config.max_keywords * 2]
-            
+
         except Exception as e:
             logger.error("spaCy keyword extraction failed: %s", e)
             return []
 
     def _combine_keywords(
         self,
-        keywords_methods: Dict[str, List[str]],
+        keywords_methods: dict[str, list[str]],
         max_keywords: int,
-    ) -> List[str]:
+    ) -> list[str]:
         """Combine keywords from different methods."""
         # Count frequency across methods
         keyword_counts = Counter()
-        
+
         for method_keywords in keywords_methods.values():
             for keyword in method_keywords:
                 keyword_counts[keyword] += 1
-        
+
         # Sort by frequency and then alphabetically
         sorted_keywords = sorted(
             keyword_counts.items(),
             key=lambda x: (-x[1], x[0]),
         )
-        
+
         # Return top keywords
         return [keyword for keyword, count in sorted_keywords[:max_keywords]]
 
     def _extract_subject_tags(
         self,
-        keywords: List[str],
+        keywords: list[str],
         original_text: str,
         confidence_threshold: float,
-    ) -> List[str]:
+    ) -> list[str]:
         """Extract subject area tags based on keywords."""
         subject_scores = {}
-        
+
         # Convert text to lowercase for matching
         text_lower = original_text.lower()
         keywords_lower = [kw.lower() for kw in keywords]
-        
+
         for subject, subject_keywords in SUBJECT_KEYWORD_MAPPINGS.items():
             score = 0.0
             matches = 0
-            
+
             # Check keyword matches
             for keyword in keywords_lower:
                 for subject_keyword in subject_keywords:
@@ -818,111 +817,111 @@ class KeywordExtractor:
                         score += 1.0
                         matches += 1
                         break
-            
+
             # Check direct text matches
             for subject_keyword in subject_keywords:
                 if subject_keyword in text_lower:
                     score += 0.5
                     matches += 1
-            
+
             # Normalize score
             if matches > 0:
                 total_possible = len(subject_keywords)
                 normalized_score = min(score / total_possible, 1.0)
                 subject_scores[subject] = normalized_score
-        
+
         # Filter by confidence threshold
         confident_subjects = [
             subject
             for subject, score in subject_scores.items()
             if score >= confidence_threshold
         ]
-        
+
         # Sort by score
         confident_subjects.sort(
             key=lambda s: subject_scores[s],
             reverse=True,
         )
-        
+
         return confident_subjects
 
     async def update_subject_mappings(
         self,
-        new_mappings: Dict[str, Set[str]],
+        new_mappings: dict[str, set[str]],
     ) -> None:
         """Update subject keyword mappings.
-        
+
         Args:
             new_mappings: New mappings to add or update
         """
         global SUBJECT_KEYWORD_MAPPINGS
-        
+
         for subject, keywords in new_mappings.items():
             if subject in SUBJECT_KEYWORD_MAPPINGS:
                 SUBJECT_KEYWORD_MAPPINGS[subject].update(keywords)
             else:
                 SUBJECT_KEYWORD_MAPPINGS[subject] = keywords
-        
+
         logger.info("Updated subject mappings for %d subjects", len(new_mappings))
 
     async def get_subject_similarities(
         self,
         text: str,
-        subjects: Optional[List[str]] = None,
-    ) -> Dict[str, float]:
+        subjects: list[str] | None = None,
+    ) -> dict[str, float]:
         """Get similarity scores for subjects using text analysis.
-        
+
         Args:
             text: Input text
             subjects: List of subjects to check (default: all)
-            
+
         Returns:
             Dictionary mapping subjects to similarity scores
         """
         if subjects is None:
             subjects = list(SUBJECT_KEYWORD_MAPPINGS.keys())
-        
+
         if not text.strip():
             return {subject: 0.0 for subject in subjects}
-        
+
         try:
             # Create documents for each subject
             subject_docs = []
             subject_names = []
-            
+
             for subject in subjects:
                 if subject in SUBJECT_KEYWORD_MAPPINGS:
                     subject_text = " ".join(SUBJECT_KEYWORD_MAPPINGS[subject])
                     subject_docs.append(subject_text)
                     subject_names.append(subject)
-            
+
             if not subject_docs:
                 return {subject: 0.0 for subject in subjects}
-            
+
             # Add input text
             all_docs = subject_docs + [text]
-            
+
             # Calculate TF-IDF similarities
             tfidf_matrix = self.tfidf_vectorizer.fit_transform(all_docs)
-            
+
             # Calculate cosine similarities
             input_vector = tfidf_matrix[-1]  # Last document is input text
             subject_vectors = tfidf_matrix[:-1]  # All except last
-            
+
             similarities = cosine_similarity(input_vector, subject_vectors)[0]
-            
+
             # Create result dictionary
             result = {}
             for i, subject in enumerate(subject_names):
                 result[subject] = float(similarities[i])
-            
+
             # Add zeros for subjects not in mappings
             for subject in subjects:
                 if subject not in result:
                     result[subject] = 0.0
-            
+
             return result
-            
+
         except Exception as e:
             logger.error("Subject similarity calculation failed: %s", e)
             return {subject: 0.0 for subject in subjects}

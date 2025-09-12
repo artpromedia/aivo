@@ -20,9 +20,8 @@ class OpenApiError(Exception):
 
 class ApiTypeError(OpenApiError, TypeError):
     """Exception raised for type-related API errors."""
-    def __init__(
-        self: Self, msg, path_to_item=None, valid_classes=None, key_type=None
-    ) -> None:
+
+    def __init__(self: Self, msg, path_to_item=None, valid_classes=None, key_type=None) -> None:
         """Raises an exception for TypeErrors
 
         Args:
@@ -51,6 +50,7 @@ class ApiTypeError(OpenApiError, TypeError):
 
 class ApiValueError(OpenApiError, ValueError):
     """Exception raised for value-related API errors."""
+
     def __init__(self: Self, msg, path_to_item=None) -> None:
         """
         Args:
@@ -70,6 +70,7 @@ class ApiValueError(OpenApiError, ValueError):
 
 class ApiAttributeError(OpenApiError, AttributeError):
     """Exception raised for attribute-related API errors."""
+
     def __init__(self: Self, msg, path_to_item=None) -> None:
         """
         Raised when an attribute reference or assignment fails.
@@ -90,6 +91,7 @@ class ApiAttributeError(OpenApiError, AttributeError):
 
 class ApiKeyError(OpenApiError, KeyError):
     """Exception raised for key-related API errors."""
+
     def __init__(self: Self, msg, path_to_item=None) -> None:
         """
         Args:
@@ -108,6 +110,7 @@ class ApiKeyError(OpenApiError, KeyError):
 
 class ApiError(OpenApiError):
     """General API error exception."""
+
     def __init__(
         self: Self,
         status=None,
@@ -146,14 +149,10 @@ class ApiError(OpenApiError):
     ) -> Self:
         """Create appropriate exception based on HTTP response status code."""
         if http_resp.status == 400:
-            raise BadRequestException(
-                http_resp=http_resp, body=body, data=data
-            )
+            raise BadRequestException(http_resp=http_resp, body=body, data=data)
 
         if http_resp.status == 401:
-            raise UnauthorizedException(
-                http_resp=http_resp, body=body, data=data
-            )
+            raise UnauthorizedException(http_resp=http_resp, body=body, data=data)
 
         if http_resp.status == 403:
             raise ForbiddenException(http_resp=http_resp, body=body, data=data)
@@ -166,9 +165,7 @@ class ApiError(OpenApiError):
             raise ConflictException(http_resp=http_resp, body=body, data=data)
 
         if http_resp.status == 422:
-            raise UnprocessableEntityException(
-                http_resp=http_resp, body=body, data=data
-            )
+            raise UnprocessableEntityException(http_resp=http_resp, body=body, data=data)
 
         if 500 <= http_resp.status <= 599:
             raise ServiceException(http_resp=http_resp, body=body, data=data)

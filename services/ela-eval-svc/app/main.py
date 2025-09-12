@@ -172,9 +172,7 @@ async def get_evaluation_by_id(evaluation_id: str) -> EvaluationResponse:
         )
 
         if result is None:
-            _raise_not_found_error(
-                f"Evaluation {evaluation_id} not found"
-            )
+            _raise_not_found_error(f"Evaluation {evaluation_id} not found")
         else:
             return result
 

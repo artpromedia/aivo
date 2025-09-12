@@ -49,9 +49,7 @@ def sample_device():
 class TestDeviceEnrollmentService:
     """Test DeviceEnrollmentService."""
 
-    async def test_enroll_device_success(
-        self, enrollment_service, mock_db, _sample_device
-    ):
+    async def test_enroll_device_success(self, enrollment_service, mock_db, _sample_device):
         """Test successful device enrollment."""
         # Mock database operations
         mock_db.execute.return_value.scalar_one_or_none.return_value = None
@@ -71,14 +69,10 @@ class TestDeviceEnrollmentService:
         assert mock_db.add.called
         assert mock_db.commit.called
 
-    async def test_enroll_duplicate_device(
-        self, enrollment_service, mock_db, sample_device
-    ):
+    async def test_enroll_duplicate_device(self, enrollment_service, mock_db, sample_device):
         """Test enrollment of duplicate device."""
         # Mock existing device
-        mock_db.execute.return_value.scalar_one_or_none.return_value = (
-            sample_device
-        )
+        mock_db.execute.return_value.scalar_one_or_none.return_value = sample_device
 
         # Test enrollment should raise error
         with pytest.raises(ValueError, match="already enrolled"):
@@ -92,14 +86,10 @@ class TestDeviceEnrollmentService:
 class TestAttestationService:
     """Test AttestationService."""
 
-    async def test_create_challenge_success(
-        self, attestation_service, mock_db, sample_device
-    ):
+    async def test_create_challenge_success(self, attestation_service, mock_db, sample_device):
         """Test successful challenge creation."""
         # Mock device lookup
-        mock_db.execute.return_value.scalar_one_or_none.return_value = (
-            sample_device
-        )
+        mock_db.execute.return_value.scalar_one_or_none.return_value = sample_device
         mock_db.add.return_value = None
         mock_db.commit.return_value = None
         mock_db.refresh.return_value = None
@@ -115,9 +105,7 @@ class TestAttestationService:
         assert mock_db.add.called
         assert mock_db.commit.called
 
-    async def test_create_challenge_device_not_found(
-        self, attestation_service, mock_db
-    ):
+    async def test_create_challenge_device_not_found(self, attestation_service, mock_db):
         """Test challenge creation for non-existent device."""
         # Mock no device found
         mock_db.execute.return_value.scalar_one_or_none.return_value = None

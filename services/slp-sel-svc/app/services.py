@@ -34,9 +34,7 @@ class SpeechProcessor:
         self.sample_rate = settings.sample_rate
 
     def extract_phoneme_timing(
-        self,
-        audio_path: str,
-        target_phonemes: list[str]
+        self, audio_path: str, target_phonemes: list[str]
     ) -> list[PhonemeTimingData]:
         """
         Extract phoneme timing from audio file.
@@ -58,17 +56,11 @@ class SpeechProcessor:
 
             # Extract MFCC features for phoneme detection
             # (unused in this simplified implementation)
-            _ = librosa.feature.mfcc(
-                y=audio,
-                sr=sr,
-                n_mfcc=13
-            )
+            _ = librosa.feature.mfcc(y=audio, sr=sr, n_mfcc=13)
 
             # Simple onset detection for timing
             onset_frames = librosa.onset.onset_detect(
-                y=audio,
-                sr=sr,
-                units="time"
+                y=audio, sr=sr, units="time"
             )
 
             # Advanced phoneme detection using onset detection and spectral
@@ -80,7 +72,8 @@ class SpeechProcessor:
                 phoneme = target_phonemes[i]
                 start_time = onset_frames[i]
                 end_time = (
-                    onset_frames[i + 1] if i + 1 < len(onset_frames)
+                    onset_frames[i + 1]
+                    if i + 1 < len(onset_frames)
                     else len(audio) / sr
                 )
 
@@ -97,13 +90,15 @@ class SpeechProcessor:
                 # Detect actual phoneme using spectral features
                 detected_phoneme = self._detect_phoneme(segment, sr)
 
-                phoneme_data.append(PhonemeTimingData(
-                    phoneme=detected_phoneme or phoneme,
-                    start_time=start_time,
-                    end_time=end_time,
-                    confidence=confidence,
-                    expected_phoneme=phoneme
-                ))
+                phoneme_data.append(
+                    PhonemeTimingData(
+                        phoneme=detected_phoneme or phoneme,
+                        start_time=start_time,
+                        end_time=end_time,
+                        confidence=confidence,
+                        expected_phoneme=phoneme,
+                    )
+                )
 
             return phoneme_data
 
@@ -148,14 +143,18 @@ class SpeechProcessor:
             if is_vowel:
                 # Vowels: emphasize spectral stability and formant clarity
                 confidence = (
-                    rms_energy * 0.4 + (1 - zcr) * 0.3 +
-                    (spectral_centroid / 4000) * 0.2 + abs(mfcc_mean) * 0.1
+                    rms_energy * 0.4
+                    + (1 - zcr) * 0.3
+                    + (spectral_centroid / 4000) * 0.2
+                    + abs(mfcc_mean) * 0.1
                 )
             else:
                 # Consonants: emphasize onset clarity and spectral dynamics
                 confidence = (
-                    rms_energy * 0.3 + zcr * 0.3 +
-                    (spectral_centroid / 4000) * 0.3 + abs(mfcc_mean) * 0.1
+                    rms_energy * 0.3
+                    + zcr * 0.3
+                    + (spectral_centroid / 4000) * 0.3
+                    + abs(mfcc_mean) * 0.1
                 )
 
             return min(max(confidence, 0.0), 1.0)
@@ -203,8 +202,7 @@ class SpeechProcessor:
             return None
 
     def score_articulation(
-        self,
-        phoneme_data: list[PhonemeTimingData]
+        self, phoneme_data: list[PhonemeTimingData]
     ) -> list[ArticulationScore]:
         """
         Score articulation quality based on phoneme timing.
@@ -223,9 +221,7 @@ class SpeechProcessor:
 
             # Timing score based on phoneme duration
             duration = phoneme.end_time - phoneme.start_time
-            optimal_duration = self._get_optimal_duration(
-                phoneme.phoneme
-            )
+            optimal_duration = self._get_optimal_duration(phoneme.phoneme)
             timing_score = (
                 1.0 - abs(duration - optimal_duration) / optimal_duration
             )
@@ -239,10 +235,10 @@ class SpeechProcessor:
 
             # Overall weighted score
             overall_score = (
-                accuracy * settings.scoring_weights["accuracy"] +
-                timing_score * settings.scoring_weights["timing"] +
-                consistency_score * settings.scoring_weights["consistency"] +
-                fluency_score * settings.scoring_weights["fluency"]
+                accuracy * settings.scoring_weights["accuracy"]
+                + timing_score * settings.scoring_weights["timing"]
+                + consistency_score * settings.scoring_weights["consistency"]
+                + fluency_score * settings.scoring_weights["fluency"]
             )
 
             # Generate feedback
@@ -250,15 +246,17 @@ class SpeechProcessor:
                 phoneme.phoneme, accuracy, timing_score
             )
 
-            scores.append(ArticulationScore(
-                phoneme=phoneme.phoneme,
-                accuracy_score=accuracy,
-                timing_score=timing_score,
-                consistency_score=consistency_score,
-                fluency_score=fluency_score,
-                overall_score=overall_score,
-                feedback=feedback
-            ))
+            scores.append(
+                ArticulationScore(
+                    phoneme=phoneme.phoneme,
+                    accuracy_score=accuracy,
+                    timing_score=timing_score,
+                    consistency_score=consistency_score,
+                    fluency_score=fluency_score,
+                    overall_score=overall_score,
+                    feedback=feedback,
+                )
+            )
 
         return scores
 
@@ -274,10 +272,7 @@ class SpeechProcessor:
         )
 
     def _generate_feedback(
-        self,
-        phoneme: str,
-        accuracy: float,
-        timing: float
+        self, phoneme: str, accuracy: float, timing: float
     ) -> list[str]:
         """Generate feedback messages for articulation."""
         feedback = []
@@ -336,20 +331,55 @@ class JournalService:
         # In production, use a proper NLP model
 
         positive_words = {
-            "happy", "joy", "excited", "good", "great", "awesome",
-            "wonderful", "amazing", "love", "like", "enjoy", "fun",
-            "success", "proud", "confident", "grateful", "thankful"
+            "happy",
+            "joy",
+            "excited",
+            "good",
+            "great",
+            "awesome",
+            "wonderful",
+            "amazing",
+            "love",
+            "like",
+            "enjoy",
+            "fun",
+            "success",
+            "proud",
+            "confident",
+            "grateful",
+            "thankful",
         }
 
         negative_words = {
-            "sad", "angry", "upset", "bad", "terrible", "awful",
-            "hate", "dislike", "frustrated", "worried", "anxious",
-            "scared", "afraid", "disappointed", "lonely", "stressed"
+            "sad",
+            "angry",
+            "upset",
+            "bad",
+            "terrible",
+            "awful",
+            "hate",
+            "dislike",
+            "frustrated",
+            "worried",
+            "anxious",
+            "scared",
+            "afraid",
+            "disappointed",
+            "lonely",
+            "stressed",
         }
 
         neutral_words = {
-            "okay", "fine", "normal", "usual", "regular", "average",
-            "nothing", "same", "typical", "ordinary"
+            "okay",
+            "fine",
+            "normal",
+            "usual",
+            "regular",
+            "average",
+            "nothing",
+            "same",
+            "typical",
+            "ordinary",
         }
 
         # Tokenize and analyze
@@ -404,7 +434,7 @@ class JournalService:
             positive_score=positive_score,
             negative_score=negative_score,
             neutral_score=neutral_score,
-            key_emotions=key_emotions
+            key_emotions=key_emotions,
         )
 
     def should_trigger_alert(self, sentiment: SentimentAnalysis) -> bool:
@@ -419,15 +449,13 @@ class JournalService:
         """
         # Trigger alert for strong negative sentiment
         return (
-            sentiment.sentiment == SentimentType.NEGATIVE and
-            sentiment.confidence > 0.8 and
-            sentiment.negative_score > 0.7
+            sentiment.sentiment == SentimentType.NEGATIVE
+            and sentiment.confidence > 0.8
+            and sentiment.negative_score > 0.7
         )
 
     def get_privacy_level_access(
-        self,
-        privacy_level: PrivacyLevel,
-        requester_role: str
+        self, privacy_level: PrivacyLevel, requester_role: str
     ) -> bool:
         """
         Check if requester has access to content with given privacy level.
@@ -443,8 +471,11 @@ class JournalService:
             PrivacyLevel.PRIVATE: ["student"],
             PrivacyLevel.THERAPIST_ONLY: ["student", "therapist"],
             PrivacyLevel.TEAM_SHARED: [
-                "student", "teacher", "counselor", "therapist"
-            ]
+                "student",
+                "teacher",
+                "counselor",
+                "therapist",
+            ],
         }
 
         return requester_role in access_matrix.get(privacy_level, [])

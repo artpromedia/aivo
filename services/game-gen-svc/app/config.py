@@ -60,9 +60,7 @@ class Settings(BaseSettings):
 
     # Subject-specific settings
     math_game_types: list[str] = ["number_line", "puzzle", "sorting", "quiz"]
-    english_game_types: list[str] = [
-        "word_builder", "matching", "quiz", "drag_drop"
-    ]
+    english_game_types: list[str] = ["word_builder", "matching", "quiz", "drag_drop"]
     science_game_types: list[str] = ["quiz", "matching", "sorting", "puzzle"]
     art_game_types: list[str] = ["drawing", "matching", "memory", "puzzle"]
     music_game_types: list[str] = ["rhythm", "memory", "matching", "quiz"]

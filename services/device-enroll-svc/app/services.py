@@ -50,16 +50,12 @@ class DeviceEnrollmentService:
     ) -> Device:
         """Enroll a new device."""
         # Check if device already exists
-        result = await db.execute(
-            select(Device).where(Device.serial_number == serial_number)
-        )
+        result = await db.execute(select(Device).where(Device.serial_number == serial_number))
         existing_device = result.scalar_one_or_none()
 
         if existing_device:
             if existing_device.status == DeviceStatus.REVOKED:
-                raise ValueError(
-                    "Device has been revoked and cannot be re-enrolled"
-                )
+                raise ValueError("Device has been revoked and cannot be re-enrolled")
             if existing_device.status in [
                 DeviceStatus.ENROLLED,
                 DeviceStatus.ATTESTED,
@@ -74,9 +70,7 @@ class DeviceEnrollmentService:
 
         # Generate bootstrap token
         bootstrap_token = self._generate_bootstrap_token()
-        bootstrap_expires_at = (
-            datetime.utcnow() + self.bootstrap_token_lifetime
-        )
+        bootstrap_expires_at = datetime.utcnow() + self.bootstrap_token_lifetime
 
         if existing_device:
             # Update existing device
@@ -133,22 +127,14 @@ class DeviceEnrollmentService:
         """Generate a secure bootstrap token."""
         return secrets.token_urlsafe(32)
 
-    async def get_device_by_id(
-        self, device_id: UUID, db: AsyncSession
-    ) -> Optional[Device]:
+    async def get_device_by_id(self, device_id: UUID, db: AsyncSession) -> Optional[Device]:
         """Get device by ID."""
-        result = await db.execute(
-            select(Device).where(Device.device_id == device_id)
-        )
+        result = await db.execute(select(Device).where(Device.device_id == device_id))
         return result.scalar_one_or_none()
 
-    async def get_device_by_serial(
-        self, serial_number: str, db: AsyncSession
-    ) -> Optional[Device]:
+    async def get_device_by_serial(self, serial_number: str, db: AsyncSession) -> Optional[Device]:
         """Get device by serial number."""
-        result = await db.execute(
-            select(Device).where(Device.serial_number == serial_number)
-        )
+        result = await db.execute(select(Device).where(Device.serial_number == serial_number))
         return result.scalar_one_or_none()
 
 
@@ -168,25 +154,19 @@ class AttestationService:
     ) -> AttestationChallenge:
         """Create an attestation challenge for a device."""
         # Verify device exists and is enrolled
-        result = await db.execute(
-            select(Device).where(Device.device_id == device_id)
-        )
+        result = await db.execute(select(Device).where(Device.device_id == device_id))
         device = result.scalar_one_or_none()
 
         if not device:
             raise ValueError("Device not found")
 
         if device.status not in [DeviceStatus.ENROLLED, DeviceStatus.ATTESTED]:
-            raise ValueError(
-                f"Device not eligible for attestation: {device.status}"
-            )
+            raise ValueError(f"Device not eligible for attestation: {device.status}")
 
         # Generate challenge data
         nonce = secrets.token_hex(32)
         timestamp = int(datetime.utcnow().timestamp())
-        challenge_data = (
-            f"aivo-pad-attestation:{device_id}:{nonce}:{timestamp}"
-        )
+        challenge_data = f"aivo-pad-attestation:{device_id}:{nonce}:{timestamp}"
 
         # Create challenge record
         challenge = AttestationChallenge(
@@ -221,9 +201,7 @@ class AttestationService:
         """Verify attestation submission and issue certificate if valid."""
         # Get challenge
         result = await db.execute(
-            select(AttestationChallenge).where(
-                AttestationChallenge.challenge_id == challenge_id
-            )
+            select(AttestationChallenge).where(AttestationChallenge.challenge_id == challenge_id)
         )
         challenge = result.scalar_one_or_none()
 
@@ -231,9 +209,7 @@ class AttestationService:
             raise ValueError("Challenge not found")
 
         if challenge.status != AttestationStatus.PENDING:
-            raise ValueError(
-                f"Challenge already processed: {challenge.status}"
-            )
+            raise ValueError(f"Challenge already processed: {challenge.status}")
 
         if datetime.utcnow() > challenge.expires_at:
             await db.execute(
@@ -286,9 +262,7 @@ class AttestationService:
                 signature=signature,
                 attestation_data=attestation_data,
                 verification_result={
-                    "verified": (
-                        verification_status == AttestationStatus.VERIFIED
-                    ),
+                    "verified": (verification_status == AttestationStatus.VERIFIED),
                     "timestamp": datetime.utcnow().isoformat(),
                 },
                 completed_at=datetime.utcnow(),
@@ -316,20 +290,16 @@ class AttestationService:
 
         # Generate CA private key
         # (in production, this should be stored securely)
-        ca_private_key = rsa.generate_private_key(
-            public_exponent=65537, key_size=2048
-        )
+        ca_private_key = rsa.generate_private_key(public_exponent=65537, key_size=2048)
 
         # Create certificate
         subject = Name(
             [
                 NameAttribute(NameOID.COMMON_NAME, f"aivo-pad-{device_id}"),
                 NameAttribute(NameOID.ORGANIZATION_NAME, "Aivo Technologies"),
-                NameAttribute(
-                    NameOID.ORGANIZATIONAL_UNIT_NAME, "Device Certificates"
-                ),
+                NameAttribute(NameOID.ORGANIZATIONAL_UNIT_NAME, "Device Certificates"),
             ]
-        )        # In production, this should be the CA certificate subject
+        )  # In production, this should be the CA certificate subject
         issuer = Name(
             [
                 NameAttribute(NameOID.COMMON_NAME, "Aivo Device CA"),
@@ -350,9 +320,7 @@ class AttestationService:
             .sign(ca_private_key, hashes.SHA256())
         )
 
-        certificate_pem = cert.public_bytes(
-            serialization.Encoding.PEM
-        ).decode()
+        certificate_pem = cert.public_bytes(serialization.Encoding.PEM).decode()
 
         # Update device with certificate info
         await db.execute(
@@ -373,13 +341,9 @@ class AttestationService:
 
         return certificate_pem
 
-    async def revoke_device(
-        self, device_id: UUID, reason: str, db: AsyncSession
-    ) -> Device:
+    async def revoke_device(self, device_id: UUID, reason: str, db: AsyncSession) -> Device:
         """Revoke a device certificate."""
-        result = await db.execute(
-            select(Device).where(Device.device_id == device_id)
-        )
+        result = await db.execute(select(Device).where(Device.device_id == device_id))
         device = result.scalar_one_or_none()
 
         if not device:

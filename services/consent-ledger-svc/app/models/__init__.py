@@ -1,10 +1,10 @@
-﻿"""
+"""
 Database models for consent and preferences management.
 """
 
 __all__ = [
     "ConsentRecord",
-    "ParentalRight", 
+    "ParentalRight",
     "PreferenceSettings",
     "AuditLog",
     "DataExportRequest",

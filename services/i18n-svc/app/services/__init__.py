@@ -1,6 +1,6 @@
-﻿"""Services package for i18n functionality."""
+"""Services package for i18n functionality."""
 
-from .translation_service import TranslationService, LocaleService
 from .accessibility_service import AccessibilityService
+from .translation_service import LocaleService, TranslationService
 
 __all__ = ["TranslationService", "LocaleService", "AccessibilityService"]

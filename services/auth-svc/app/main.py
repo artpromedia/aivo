@@ -45,9 +45,7 @@ if not DATABASE_URL.startswith("sqlite"):
 engine = create_async_engine(DATABASE_URL, **engine_kwargs)
 
 # Create session factory
-async_session_factory = async_sessionmaker(
-    engine, class_=AsyncSession, expire_on_commit=False
-)
+async_session_factory = async_sessionmaker(engine, class_=AsyncSession, expire_on_commit=False)
 
 
 @asynccontextmanager
@@ -70,16 +68,8 @@ app = FastAPI(
     description="Authentication and authorization service with JWT and RBAC",
     version="1.0.0",
     lifespan=lifespan,
-    docs_url=(
-        "/docs"
-        if os.getenv("ENVIRONMENT", "development") == "development"
-        else None
-    ),
-    redoc_url=(
-        "/redoc"
-        if os.getenv("ENVIRONMENT", "development") == "development"
-        else None
-    ),
+    docs_url=("/docs" if os.getenv("ENVIRONMENT", "development") == "development" else None),
+    redoc_url=("/redoc" if os.getenv("ENVIRONMENT", "development") == "development" else None),
 )
 
 # Add CORS middleware
@@ -122,7 +112,8 @@ app.dependency_overrides[get_db_dependency] = get_db
 # Exception handlers
 @app.exception_handler(HTTPException)
 async def http_exception_handler(
-    request: Request, exc: HTTPException  # pylint: disable=unused-argument
+    request: Request,
+    exc: HTTPException,  # pylint: disable=unused-argument
 ) -> JSONResponse:
     """Handle HTTP exceptions."""
     return JSONResponse(
@@ -180,9 +171,7 @@ async def root() -> dict:
         "message": "Auth Service API",
         "version": "1.0.0",
         "docs": (
-            "/docs"
-            if os.getenv("ENVIRONMENT", "development") == "development"
-            else "disabled"
+            "/docs" if os.getenv("ENVIRONMENT", "development") == "development" else "disabled"
         ),
     }
 

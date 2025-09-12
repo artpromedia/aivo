@@ -167,3 +167,39 @@ class UpdateProfileRequest(BaseModel):
     last_name: Optional[str] = Field(None, min_length=1, max_length=100)
     phone: Optional[str] = Field(None, max_length=20)
     avatar: Optional[str] = Field(None, max_length=500)
+
+
+# Add to schemas.py - new schemas for role management and invite resend
+
+
+class RoleAssignRequest(BaseModel):
+    """Schema for role assignment requests."""
+
+    tenant_id: uuid.UUID
+    role: Literal["teacher", "staff", "district_admin"]
+
+
+class RoleRevokeRequest(BaseModel):
+    """Schema for role revocation requests."""
+
+    tenant_id: uuid.UUID
+    role: Literal["teacher", "staff", "district_admin"]
+
+
+class RoleOperationResponse(BaseModel):
+    """Schema for role operation responses."""
+
+    user_id: uuid.UUID
+    tenant_id: uuid.UUID
+    role: str
+    action: Literal["assigned", "revoked"]
+    message: str
+
+
+class InviteResendResponse(BaseModel):
+    """Schema for invite resend responses."""
+
+    invite_id: uuid.UUID
+    email: str
+    status: Literal["sent", "failed"]
+    message: str

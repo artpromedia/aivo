@@ -1,9 +1,9 @@
-﻿"""Models module for i18n service with clean imports."""
+"""Models module for i18n service with clean imports."""
 
 __all__ = [
     "Base",
     "SupportedLocale",
-    "AccessibilityLevel", 
+    "AccessibilityLevel",
     "TranslationKey",
     "Translation",
     "LocaleConfiguration",

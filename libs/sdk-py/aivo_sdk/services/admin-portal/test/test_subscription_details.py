@@ -36,38 +36,38 @@ class TestSubscriptionDetails(unittest.TestCase):
             return SubscriptionDetails(
                 tenant_id = '456e7890-e89b-12d3-a456-426614174000',
                 plan = aivo_sdk.models.subscription_details_plan.SubscriptionDetails_plan(
-                    name = 'Professional', 
-                    tier = 'professional', 
-                    features = [Advanced Analytics, API Access, Custom Branding, SSO], 
+                    name = 'Professional',
+                    tier = 'professional',
+                    features = [Advanced Analytics, API Access, Custom Branding, SSO],
                     price_per_seat = 49.99, ),
                 seats = aivo_sdk.models.subscription_details_seats.SubscriptionDetails_seats(
-                    current = 200, 
-                    included = 100, 
+                    current = 200,
+                    included = 100,
                     additional = 100, ),
                 renewal = aivo_sdk.models.subscription_details_renewal.SubscriptionDetails_renewal(
-                    next_billing_date = '2024-01-15', 
-                    amount = 9999.0, 
-                    currency = 'USD', 
-                    auto_renew = True, 
+                    next_billing_date = '2024-01-15',
+                    amount = 9999.0,
+                    currency = 'USD',
+                    auto_renew = True,
                     days_until_renewal = 15, ),
                 status = 'active',
                 coupons = [
                     aivo_sdk.models.subscription_details_coupons_inner.SubscriptionDetails_coupons_inner(
-                        code = 'WELCOME20', 
-                        discount = '20% off', 
-                        valid_until = '2024-01-31', 
+                        code = 'WELCOME20',
+                        discount = '20% off',
+                        valid_until = '2024-01-31',
                         status = 'active', )
                     ],
                 discounts = [
                     aivo_sdk.models.subscription_details_discounts_inner.SubscriptionDetails_discounts_inner(
-                        name = 'Annual Discount', 
-                        type = 'percentage', 
-                        value = 15.0, 
+                        name = 'Annual Discount',
+                        type = 'percentage',
+                        value = 15.0,
                         description = '15% discount for annual billing', )
                     ],
                 trial_info = aivo_sdk.models.subscription_details_trial_info.SubscriptionDetails_trialInfo(
-                    is_trialing = False, 
-                    trial_ends_at = '2023-12-31T23:59:59Z', 
+                    is_trialing = False,
+                    trial_ends_at = '2023-12-31T23:59:59Z',
                     days_remaining = 0, ),
                 last_updated = '2023-12-01T10:30:00Z'
             )
@@ -75,19 +75,19 @@ class TestSubscriptionDetails(unittest.TestCase):
             return SubscriptionDetails(
                 tenant_id = '456e7890-e89b-12d3-a456-426614174000',
                 plan = aivo_sdk.models.subscription_details_plan.SubscriptionDetails_plan(
-                    name = 'Professional', 
-                    tier = 'professional', 
-                    features = [Advanced Analytics, API Access, Custom Branding, SSO], 
+                    name = 'Professional',
+                    tier = 'professional',
+                    features = [Advanced Analytics, API Access, Custom Branding, SSO],
                     price_per_seat = 49.99, ),
                 seats = aivo_sdk.models.subscription_details_seats.SubscriptionDetails_seats(
-                    current = 200, 
-                    included = 100, 
+                    current = 200,
+                    included = 100,
                     additional = 100, ),
                 renewal = aivo_sdk.models.subscription_details_renewal.SubscriptionDetails_renewal(
-                    next_billing_date = '2024-01-15', 
-                    amount = 9999.0, 
-                    currency = 'USD', 
-                    auto_renew = True, 
+                    next_billing_date = '2024-01-15',
+                    amount = 9999.0,
+                    currency = 'USD',
+                    auto_renew = True,
                     days_until_renewal = 15, ),
                 status = 'active',
                 last_updated = '2023-12-01T10:30:00Z',

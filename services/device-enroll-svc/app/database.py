@@ -14,8 +14,7 @@ from .models import Base
 # Database configuration
 DATABASE_URL = os.getenv(
     "DATABASE_URL",
-    "postgresql+asyncpg://device_user:device_password@localhost:5432/"
-    "device_db",
+    "postgresql+asyncpg://device_user:device_password@localhost:5432/" "device_db",
 )
 
 # Create async engine

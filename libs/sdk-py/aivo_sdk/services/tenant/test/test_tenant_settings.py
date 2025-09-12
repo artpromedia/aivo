@@ -36,36 +36,36 @@ class TestTenantSettings(unittest.TestCase):
             return TenantSettings(
                 tenant_id = '456e7890-e89b-12d3-a456-426614174000',
                 features = aivo_sdk.models.tenant_settings_features.TenantSettings_features(
-                    enable_sso = True, 
-                    enable_api = True, 
-                    enable_reporting = True, 
+                    enable_sso = True,
+                    enable_api = True,
+                    enable_reporting = True,
                     enable_custom_branding = True, ),
                 branding = aivo_sdk.models.tenant_settings_branding.TenantSettings_branding(
-                    primary_color = '#007bff', 
-                    secondary_color = '#6c757d', 
-                    logo = 'https://example.com/logo.png', 
+                    primary_color = '#007bff',
+                    secondary_color = '#6c757d',
+                    logo = 'https://example.com/logo.png',
                     favicon = 'https://example.com/favicon.ico', ),
                 notifications = aivo_sdk.models.tenant_settings_notifications.TenantSettings_notifications(
-                    email_notifications = True, 
-                    slack_webhook = 'https://hooks.slack.com/services/...', 
+                    email_notifications = True,
+                    slack_webhook = 'https://hooks.slack.com/services/...',
                     webhook_url = 'https://api.acme.com/webhooks/aivo', )
             )
         else:
             return TenantSettings(
                 tenant_id = '456e7890-e89b-12d3-a456-426614174000',
                 features = aivo_sdk.models.tenant_settings_features.TenantSettings_features(
-                    enable_sso = True, 
-                    enable_api = True, 
-                    enable_reporting = True, 
+                    enable_sso = True,
+                    enable_api = True,
+                    enable_reporting = True,
                     enable_custom_branding = True, ),
                 branding = aivo_sdk.models.tenant_settings_branding.TenantSettings_branding(
-                    primary_color = '#007bff', 
-                    secondary_color = '#6c757d', 
-                    logo = 'https://example.com/logo.png', 
+                    primary_color = '#007bff',
+                    secondary_color = '#6c757d',
+                    logo = 'https://example.com/logo.png',
                     favicon = 'https://example.com/favicon.ico', ),
                 notifications = aivo_sdk.models.tenant_settings_notifications.TenantSettings_notifications(
-                    email_notifications = True, 
-                    slack_webhook = 'https://hooks.slack.com/services/...', 
+                    email_notifications = True,
+                    slack_webhook = 'https://hooks.slack.com/services/...',
                     webhook_url = 'https://api.acme.com/webhooks/aivo', ),
         )
         """

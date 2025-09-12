@@ -1,12 +1,12 @@
-﻿"""
+"""
 Database configuration for chat service.
 """
 
 import os
 from typing import AsyncGenerator
 
-from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker, create_async_engine
 from sqlalchemy.exc import SQLAlchemyError
+from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker, create_async_engine
 
 from .models import Base
 
@@ -33,9 +33,7 @@ if not DATABASE_URL.startswith("sqlite"):
 engine = create_async_engine(DATABASE_URL, **engine_kwargs)
 
 # Create session factory
-async_session_factory = async_sessionmaker(
-    engine, class_=AsyncSession, expire_on_commit=False
-)
+async_session_factory = async_sessionmaker(engine, class_=AsyncSession, expire_on_commit=False)
 
 
 async def get_db() -> AsyncGenerator[AsyncSession, None]:

@@ -103,9 +103,7 @@ class HeartbeatService:
             for hb in heartbeats
         ]
 
-    async def get_device_status(
-        self: "HeartbeatService", device_id: UUID
-    ) -> dict:
+    async def get_device_status(self: "HeartbeatService", device_id: UUID) -> dict:
         """Get current device status based on latest heartbeat."""
         # Get latest heartbeat
         stmt = (
@@ -145,15 +143,11 @@ class HeartbeatService:
             "battery_level": latest_heartbeat.battery_level,
             "uptime_seconds": latest_heartbeat.uptime_seconds,
             "network_type": latest_heartbeat.network_type,
-            "time_since_heartbeat_minutes": int(
-                time_since_heartbeat.total_seconds() / 60
-            ),
+            "time_since_heartbeat_minutes": int(time_since_heartbeat.total_seconds() / 60),
         }
 
     async def _should_check_for_updates(
-        self: "HeartbeatService",
-        _device_id: UUID,
-        last_update_check: datetime | None
+        self: "HeartbeatService", _device_id: UUID, last_update_check: datetime | None
     ) -> bool:
         """Determine if device should check for updates."""
         # If never checked, should check

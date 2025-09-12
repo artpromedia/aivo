@@ -4,6 +4,7 @@ Business logic services for ink capture functionality.
 This module contains the core business logic for processing digital ink
 strokes, managing sessions, storing data in S3, and publishing events.
 """
+
 import json
 from datetime import datetime, timedelta
 from typing import Any, Self
@@ -42,14 +43,10 @@ class S3StorageService:
             self.bucket_name = settings.s3_bucket_name
             self.key_prefix = settings.s3_key_prefix
         except NoCredentialsError:
-            logger.warning(
-                "AWS credentials not found, S3 functionality disabled"
-            )
+            logger.warning("AWS credentials not found, S3 functionality disabled")
             self.s3_client = None
 
-    def generate_s3_key(
-        self: Self, session_id: UUID, page_id: UUID, learner_id: UUID
-    ) -> str:
+    def generate_s3_key(self: Self, session_id: UUID, page_id: UUID, learner_id: UUID) -> str:
         """Generate S3 key for ink page data."""
         date_str = datetime.utcnow().strftime("%Y/%m/%d")
         return (
@@ -57,9 +54,7 @@ class S3StorageService:
             f"session_{session_id}/page_{page_id}.ndjson"
         )
 
-    async def store_page_data(
-        self: Self, s3_key: str, page_data: InkPageData
-    ) -> bool:
+    async def store_page_data(self: Self, s3_key: str, page_data: InkPageData) -> bool:
         """
         Store ink page data as NDJSON in S3.
 
@@ -286,9 +281,7 @@ class InkCaptureService:
             InkSession model instance
         """
         # Check if session exists
-        result = await db.execute(
-            select(InkSession).where(InkSession.session_id == session_id)
-        )
+        result = await db.execute(select(InkSession).where(InkSession.session_id == session_id))
         existing_session = result.scalar_one_or_none()
 
         if existing_session:
@@ -338,19 +331,15 @@ class InkCaptureService:
             RuntimeError: If processing fails
         """
         # Validate consent and media policies
-        consent_valid, consent_error = (
-            await self.consent_service.validate_consent(
-                stroke_request.learner_id,
-                stroke_request.subject,
-                stroke_request.metadata,
-            )
+        consent_valid, consent_error = await self.consent_service.validate_consent(
+            stroke_request.learner_id,
+            stroke_request.subject,
+            stroke_request.metadata,
         )
         if not consent_valid:
             raise ValueError(f"Consent validation failed: {consent_error}")
 
-        media_valid, media_error = (
-            await self.consent_service.validate_media_policy(stroke_request)
-        )
+        media_valid, media_error = await self.consent_service.validate_media_policy(stroke_request)
         if not media_valid:
             raise ValueError(f"Media policy validation failed: {media_error}")
 
@@ -382,9 +371,7 @@ class InkCaptureService:
         )
 
         # Store in S3
-        storage_success = await self.storage_service.store_page_data(
-            s3_key, page_data
-        )
+        storage_success = await self.storage_service.store_page_data(s3_key, page_data)
         if not storage_success:
             raise RuntimeError("Failed to store page data in S3")
 
@@ -464,9 +451,7 @@ class InkCaptureService:
         Returns:
             Number of sessions cleaned up
         """
-        cutoff_time = datetime.utcnow() - timedelta(
-            minutes=settings.session_timeout_minutes
-        )
+        cutoff_time = datetime.utcnow() - timedelta(minutes=settings.session_timeout_minutes)
 
         result = await db.execute(
             update(InkSession)

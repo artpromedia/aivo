@@ -56,11 +56,7 @@ class OpenSearchService:
             logger.error("OpenSearch health check failed: %s", str(e))
             return {"status": "error", "error": str(e)}
 
-    async def create_index(
-        self,
-        index_name: str,
-        mapping: dict[str, Any] | None = None
-    ) -> bool:
+    async def create_index(self, index_name: str, mapping: dict[str, Any] | None = None) -> bool:
         """Create an index with optional mapping."""
         try:
             body = {}
@@ -116,11 +112,7 @@ class OpenSearchService:
         try:
             return self.client.indices.exists(index=index_name)
         except Exception as e:  # pylint: disable=broad-exception-caught
-            logger.error(
-                "Failed to check index existence %s: %s",
-                index_name,
-                str(e)
-            )
+            logger.error("Failed to check index existence %s: %s", index_name, str(e))
             return False
 
     async def index_document(self, request: IndexRequest) -> dict[str, Any]:
@@ -147,10 +139,7 @@ class OpenSearchService:
             )
             raise
 
-    async def bulk_index_documents(
-        self,
-        request: BulkIndexRequest
-    ) -> dict[str, Any]:
+    async def bulk_index_documents(self, request: BulkIndexRequest) -> dict[str, Any]:
         """Bulk index multiple documents."""
         try:
             actions = []
@@ -240,9 +229,7 @@ class OpenSearchService:
                     "id": source.get("id", hit["_id"]),
                     "type": source.get("type", "unknown"),
                     "title": source.get("title", ""),
-                    "content": self._truncate_content(
-                        source.get("content", "")
-                    ),
+                    "content": self._truncate_content(source.get("content", "")),
                     "score": hit["_score"],
                     "metadata": source.get("metadata", {}),
                     "highlighted": highlights,
@@ -260,9 +247,7 @@ class OpenSearchService:
             logger.error("Search failed: %s", str(e))
             raise
 
-    async def get_suggestions(
-        self, request: SuggestionRequest
-    ) -> SuggestionResponse:
+    async def get_suggestions(self, request: SuggestionRequest) -> SuggestionResponse:
         """Get search suggestions."""
         try:
             suggest_body = {

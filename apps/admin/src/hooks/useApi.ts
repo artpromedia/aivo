@@ -132,3 +132,56 @@ export const useRestartNamespace = () => {
     },
   });
 };
+
+// Role management hooks
+export const useRoles = () => {
+  return useQuery({
+    queryKey: ['roles'],
+    queryFn: UserAPI.getRoles,
+  });
+};
+
+export const useAssignRole = () => {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: ({ userId, role }: { userId: string; role: string }) =>
+      UserAPI.assignRole(userId, role),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['users'] });
+      queryClient.invalidateQueries({ queryKey: ['dashboard'] });
+    },
+  });
+};
+
+export const useRevokeRole = () => {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: ({ userId, role }: { userId: string; role: string }) =>
+      UserAPI.revokeRole(userId, role),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['users'] });
+      queryClient.invalidateQueries({ queryKey: ['dashboard'] });
+    },
+  });
+};
+
+// Invite management hooks
+export const useInvites = () => {
+  return useQuery({
+    queryKey: ['invites'],
+    queryFn: UserAPI.getInvites,
+  });
+};
+
+export const useResendInvite = () => {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: (inviteId: string) => UserAPI.resendInvite(inviteId),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['invites'] });
+    },
+  });
+};

@@ -1,5 +1,5 @@
-﻿"""Zoom LTI 1.3 integration for live class sessions."""
-import base64
+"""Zoom LTI 1.3 integration for live class sessions."""
+
 import hashlib
 import hmac
 import json
@@ -7,14 +7,11 @@ import logging
 import secrets
 import time
 import uuid
-from datetime import datetime, timedelta
-from typing import Any, Dict, List, Optional
+from datetime import datetime
+from typing import Any
 
 import httpx
 import jwt
-from cryptography.hazmat.primitives import hashes, serialization
-from cryptography.hazmat.primitives.asymmetric import rsa
-from fastapi import HTTPException
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
@@ -26,6 +23,7 @@ logger = logging.getLogger(__name__)
 
 class ZoomLTIError(Exception):
     """Custom exception for Zoom LTI integration errors."""
+
     pass
 
 
@@ -40,16 +38,16 @@ class ZoomLTIHandler:
         self,
         id_token: str,
         config: ZoomLTIConfig,
-    ) -> Dict[str, Any]:
+    ) -> dict[str, Any]:
         """Verify LTI 1.3 launch request.
-        
+
         Args:
             id_token: JWT ID token from LTI launch
             config: LTI configuration for organization
-            
+
         Returns:
             Decoded and verified LTI claims
-            
+
         Raises:
             ZoomLTIError: If verification fails
         """
@@ -58,21 +56,21 @@ class ZoomLTIHandler:
             response = await self.http_client.get(config.key_set_url)
             response.raise_for_status()
             jwks = response.json()
-            
+
             # Decode and verify JWT
             header = jwt.get_unverified_header(id_token)
             kid = header.get("kid")
-            
+
             # Find matching public key
             public_key = None
             for key in jwks.get("keys", []):
                 if key.get("kid") == kid:
                     public_key = jwt.algorithms.RSAAlgorithm.from_jwk(key)
                     break
-            
+
             if not public_key:
                 raise ZoomLTIError(f"No matching public key found for kid: {kid}")
-            
+
             # Verify and decode JWT
             payload = jwt.decode(
                 id_token,
@@ -81,7 +79,7 @@ class ZoomLTIHandler:
                 audience=config.client_id,
                 issuer=config.issuer,
             )
-            
+
             # Validate required LTI claims
             required_claims = [
                 "iss",
@@ -94,58 +92,64 @@ class ZoomLTIHandler:
                 "https://purl.imsglobal.org/spec/lti/claim/version",
                 "https://purl.imsglobal.org/spec/lti/claim/deployment_id",
             ]
-            
+
             for claim in required_claims:
                 if claim not in payload:
                     raise ZoomLTIError(f"Missing required LTI claim: {claim}")
-            
+
             # Validate deployment ID
-            if payload["https://purl.imsglobal.org/spec/lti/claim/deployment_id"] != config.deployment_id:
+            if (
+                payload["https://purl.imsglobal.org/spec/lti/claim/deployment_id"]
+                != config.deployment_id
+            ):
                 raise ZoomLTIError("Deployment ID mismatch")
-            
+
             # Validate message type
             message_type = payload["https://purl.imsglobal.org/spec/lti/claim/message_type"]
             if message_type != "LtiResourceLinkRequest":
                 raise ZoomLTIError(f"Unsupported message type: {message_type}")
-            
+
             logger.info("LTI launch verified successfully for user: %s", payload["sub"])
             return payload
-            
-        except jwt.ExpiredSignatureError:
-            raise ZoomLTIError("ID token has expired")
+
+        except jwt.ExpiredSignatureError as e:
+            raise ZoomLTIError("ID token has expired") from e
         except jwt.InvalidTokenError as e:
-            raise ZoomLTIError(f"Invalid ID token: {e}")
+            raise ZoomLTIError(f"Invalid ID token: {e}") from e
         except httpx.RequestError as e:
-            raise ZoomLTIError(f"Failed to fetch JWKS: {e}")
+            raise ZoomLTIError(f"Failed to fetch JWKS: {e}") from e
         except Exception as e:
             logger.error("LTI verification failed: %s", e)
-            raise ZoomLTIError(f"LTI verification failed: {e}")
+            raise ZoomLTIError(f"LTI verification failed: {e}") from e
 
     async def create_zoom_meeting(
         self,
-        session_data: Dict[str, Any],
+        session_data: dict[str, Any],
         config: ZoomLTIConfig,
-    ) -> Dict[str, Any]:
+    ) -> dict[str, Any]:
         """Create Zoom meeting for live session.
-        
+
         Args:
             session_data: Session configuration data
             config: Zoom LTI configuration
-            
+
         Returns:
             Zoom meeting details
         """
         try:
             # Generate Zoom JWT token
             zoom_token = self._generate_zoom_jwt(config)
-            
+
             # Prepare meeting data
             meeting_data = {
                 "topic": session_data["session_name"],
                 "type": 2,  # Scheduled meeting
                 "start_time": session_data["scheduled_start"].isoformat(),
                 "duration": int(
-                    (session_data["scheduled_end"] - session_data["scheduled_start"]).total_seconds() / 60
+                    (
+                        session_data["scheduled_end"] - session_data["scheduled_start"]
+                    ).total_seconds()
+                    / 60
                 ),
                 "timezone": "UTC",
                 "password": self._generate_meeting_password(),
@@ -168,28 +172,28 @@ class ZoomLTIHandler:
                     "allow_multiple_devices": True,
                 },
             }
-            
+
             # API request to create meeting
             headers = {
                 "Authorization": f"Bearer {zoom_token}",
                 "Content-Type": "application/json",
             }
-            
+
             response = await self.http_client.post(
                 f"{config.zoom_base_url}/users/{session_data['zoom_host_id']}/meetings",
                 json=meeting_data,
                 headers=headers,
             )
             response.raise_for_status()
-            
+
             meeting_response = response.json()
-            
+
             logger.info(
                 "Created Zoom meeting %s for session %s",
                 meeting_response["id"],
                 session_data["session_name"],
             )
-            
+
             return {
                 "meeting_id": str(meeting_response["id"]),
                 "meeting_uuid": meeting_response["uuid"],
@@ -198,20 +202,20 @@ class ZoomLTIHandler:
                 "password": meeting_response.get("password"),
                 "host_id": session_data["zoom_host_id"],
             }
-            
+
         except httpx.HTTPStatusError as e:
             logger.error("Zoom API error: %s - %s", e.response.status_code, e.response.text)
-            raise ZoomLTIError(f"Failed to create Zoom meeting: {e.response.text}")
+            raise ZoomLTIError(f"Failed to create Zoom meeting: {e.response.text}") from e
         except Exception as e:
             logger.error("Failed to create Zoom meeting: %s", e)
-            raise ZoomLTIError(f"Failed to create Zoom meeting: {e}")
+            raise ZoomLTIError(f"Failed to create Zoom meeting: {e}") from e
 
     def _generate_zoom_jwt(self, config: ZoomLTIConfig) -> str:
         """Generate JWT token for Zoom API authentication.
-        
+
         Args:
             config: Zoom LTI configuration
-            
+
         Returns:
             JWT token string
         """
@@ -224,12 +228,12 @@ class ZoomLTIHandler:
             "tokenExp": int(time.time()) + 3600,
             "alg": "HS256",
         }
-        
+
         return jwt.encode(payload, config.zoom_api_secret, algorithm="HS256")
 
     def _generate_meeting_password(self) -> str:
         """Generate secure meeting password.
-        
+
         Returns:
             6-digit numeric password
         """
@@ -237,12 +241,12 @@ class ZoomLTIHandler:
 
     async def handle_zoom_webhook(
         self,
-        payload: Dict[str, Any],
+        payload: dict[str, Any],
         signature: str,
         config: ZoomLTIConfig,
     ) -> None:
         """Handle Zoom webhook events for attendance tracking.
-        
+
         Args:
             payload: Webhook payload data
             signature: Webhook signature for verification
@@ -252,12 +256,12 @@ class ZoomLTIHandler:
             # Verify webhook signature
             if config.zoom_webhook_secret:
                 self._verify_webhook_signature(payload, signature, config.zoom_webhook_secret)
-            
+
             event_type = payload.get("event")
             meeting_data = payload.get("payload", {}).get("object", {})
-            
+
             logger.info("Processing Zoom webhook event: %s", event_type)
-            
+
             # Handle different event types
             if event_type == "meeting.participant_joined":
                 await self._handle_participant_joined(meeting_data, config)
@@ -269,24 +273,24 @@ class ZoomLTIHandler:
                 await self._handle_meeting_ended(meeting_data)
             else:
                 logger.info("Unhandled webhook event type: %s", event_type)
-                
+
         except Exception as e:
             logger.error("Failed to process Zoom webhook: %s", e)
-            raise ZoomLTIError(f"Webhook processing failed: {e}")
+            raise ZoomLTIError(f"Webhook processing failed: {e}") from e
 
     def _verify_webhook_signature(
         self,
-        payload: Dict[str, Any],
+        payload: dict[str, Any],
         signature: str,
         secret: str,
     ) -> None:
         """Verify Zoom webhook signature.
-        
+
         Args:
             payload: Webhook payload
             signature: Provided signature
             secret: Webhook secret
-            
+
         Raises:
             ZoomLTIError: If signature verification fails
         """
@@ -295,17 +299,17 @@ class ZoomLTIHandler:
             json.dumps(payload, separators=(",", ":")).encode(),
             hashlib.sha256,
         ).hexdigest()
-        
+
         if not hmac.compare_digest(signature, expected_signature):
             raise ZoomLTIError("Invalid webhook signature")
 
     async def _handle_participant_joined(
         self,
-        meeting_data: Dict[str, Any],
+        meeting_data: dict[str, Any],
         config: ZoomLTIConfig,
     ) -> None:
         """Handle participant joined event.
-        
+
         Args:
             meeting_data: Meeting data from webhook
             config: LTI configuration
@@ -313,7 +317,7 @@ class ZoomLTIHandler:
         try:
             meeting_id = str(meeting_data.get("id"))
             participant = meeting_data.get("participant", {})
-            
+
             # Find corresponding live session
             async with AsyncSession(engine) as session:
                 result = await session.execute(
@@ -322,11 +326,11 @@ class ZoomLTIHandler:
                     .where(LiveSession.lti_config_id == config.id)
                 )
                 live_session = result.scalar_one_or_none()
-                
+
                 if not live_session:
                     logger.warning("No live session found for Zoom meeting %s", meeting_id)
                     return
-                
+
                 # Create or update attendance record
                 participant_id = participant.get("id")
                 user_name = participant.get("user_name", "Unknown")
@@ -334,7 +338,7 @@ class ZoomLTIHandler:
                 join_time = datetime.fromisoformat(
                     participant.get("join_time", datetime.utcnow().isoformat())
                 )
-                
+
                 # Try to find existing attendance record
                 existing_result = await session.execute(
                     select(AttendanceRecord)
@@ -342,7 +346,7 @@ class ZoomLTIHandler:
                     .where(AttendanceRecord.zoom_participant_id == participant_id)
                 )
                 existing_record = existing_result.scalar_one_or_none()
-                
+
                 if existing_record:
                     # Update existing record
                     existing_record.joined_at = join_time
@@ -361,26 +365,26 @@ class ZoomLTIHandler:
                         recorded_by="zoom_webhook",
                     )
                     session.add(attendance_record)
-                
+
                 await session.commit()
-                
+
                 logger.info(
                     "Recorded participant join: %s (%s) in session %s",
                     user_name,
                     participant_id,
                     live_session.id,
                 )
-                
+
         except Exception as e:
             logger.error("Failed to handle participant joined event: %s", e)
 
     async def _handle_participant_left(
         self,
-        meeting_data: Dict[str, Any],
+        meeting_data: dict[str, Any],
         config: ZoomLTIConfig,
     ) -> None:
         """Handle participant left event.
-        
+
         Args:
             meeting_data: Meeting data from webhook
             config: LTI configuration
@@ -389,11 +393,11 @@ class ZoomLTIHandler:
             meeting_id = str(meeting_data.get("id"))
             participant = meeting_data.get("participant", {})
             participant_id = participant.get("id")
-            
+
             leave_time = datetime.fromisoformat(
                 participant.get("leave_time", datetime.utcnow().isoformat())
             )
-            
+
             # Update attendance record
             async with AsyncSession(engine) as session:
                 result = await session.execute(
@@ -403,29 +407,29 @@ class ZoomLTIHandler:
                     .where(AttendanceRecord.zoom_participant_id == participant_id)
                 )
                 attendance_record = result.scalar_one_or_none()
-                
+
                 if attendance_record:
                     attendance_record.left_at = leave_time
-                    
+
                     # Calculate duration
                     if attendance_record.joined_at:
                         duration = (leave_time - attendance_record.joined_at).total_seconds() / 60
                         attendance_record.duration_minutes = int(duration)
-                    
+
                     await session.commit()
-                    
+
                     logger.info(
                         "Updated participant leave: %s in session %s",
                         participant_id,
                         attendance_record.session_id,
                     )
-                
+
         except Exception as e:
             logger.error("Failed to handle participant left event: %s", e)
 
-    async def _handle_meeting_started(self, meeting_data: Dict[str, Any]) -> None:
+    async def _handle_meeting_started(self, meeting_data: dict[str, Any]) -> None:
         """Handle meeting started event.
-        
+
         Args:
             meeting_data: Meeting data from webhook
         """
@@ -434,28 +438,27 @@ class ZoomLTIHandler:
             start_time = datetime.fromisoformat(
                 meeting_data.get("start_time", datetime.utcnow().isoformat())
             )
-            
+
             # Update live session status
             async with AsyncSession(engine) as session:
                 result = await session.execute(
-                    select(LiveSession)
-                    .where(LiveSession.zoom_meeting_id == meeting_id)
+                    select(LiveSession).where(LiveSession.zoom_meeting_id == meeting_id)
                 )
                 live_session = result.scalar_one_or_none()
-                
+
                 if live_session:
                     live_session.status = "started"
                     live_session.actual_start = start_time
                     await session.commit()
-                    
+
                     logger.info("Meeting %s started at %s", meeting_id, start_time)
-                    
+
         except Exception as e:
             logger.error("Failed to handle meeting started event: %s", e)
 
-    async def _handle_meeting_ended(self, meeting_data: Dict[str, Any]) -> None:
+    async def _handle_meeting_ended(self, meeting_data: dict[str, Any]) -> None:
         """Handle meeting ended event.
-        
+
         Args:
             meeting_data: Meeting data from webhook
         """
@@ -464,34 +467,33 @@ class ZoomLTIHandler:
             end_time = datetime.fromisoformat(
                 meeting_data.get("end_time", datetime.utcnow().isoformat())
             )
-            
+
             # Update live session status
             async with AsyncSession(engine) as session:
                 result = await session.execute(
-                    select(LiveSession)
-                    .where(LiveSession.zoom_meeting_id == meeting_id)
+                    select(LiveSession).where(LiveSession.zoom_meeting_id == meeting_id)
                 )
                 live_session = result.scalar_one_or_none()
-                
+
                 if live_session:
                     live_session.status = "ended"
                     live_session.actual_end = end_time
                     await session.commit()
-                    
+
                     logger.info("Meeting %s ended at %s", meeting_id, end_time)
-                    
+
         except Exception as e:
             logger.error("Failed to handle meeting ended event: %s", e)
 
     async def get_attendance_report(
         self,
         session_id: uuid.UUID,
-    ) -> Dict[str, Any]:
+    ) -> dict[str, Any]:
         """Generate attendance report for a live session.
-        
+
         Args:
             session_id: Live session ID
-            
+
         Returns:
             Attendance report data
         """
@@ -502,10 +504,10 @@ class ZoomLTIHandler:
                     select(LiveSession).where(LiveSession.id == session_id)
                 )
                 live_session = session_result.scalar_one_or_none()
-                
+
                 if not live_session:
                     raise ZoomLTIError(f"Live session {session_id} not found")
-                
+
                 # Get attendance records
                 attendance_result = await session.execute(
                     select(AttendanceRecord)
@@ -513,29 +515,35 @@ class ZoomLTIHandler:
                     .order_by(AttendanceRecord.joined_at)
                 )
                 attendance_records = attendance_result.scalars().all()
-                
+
                 # Calculate statistics
                 total_participants = len(attendance_records)
-                present_count = len([r for r in attendance_records if r.attendance_status == "present"])
-                
+                present_count = len(
+                    [r for r in attendance_records if r.attendance_status == "present"]
+                )
+
                 average_duration = 0
                 if attendance_records:
                     durations = [r.duration_minutes or 0 for r in attendance_records]
                     average_duration = sum(durations) / len(durations)
-                
+
                 # Status distribution
                 status_distribution = {}
                 for record in attendance_records:
                     status = record.attendance_status
                     status_distribution[status] = status_distribution.get(status, 0) + 1
-                
+
                 return {
                     "session_id": str(session_id),
                     "session_name": live_session.session_name,
                     "scheduled_start": live_session.scheduled_start.isoformat(),
                     "scheduled_end": live_session.scheduled_end.isoformat(),
-                    "actual_start": live_session.actual_start.isoformat() if live_session.actual_start else None,
-                    "actual_end": live_session.actual_end.isoformat() if live_session.actual_end else None,
+                    "actual_start": live_session.actual_start.isoformat()
+                    if live_session.actual_start
+                    else None,
+                    "actual_end": live_session.actual_end.isoformat()
+                    if live_session.actual_end
+                    else None,
                     "status": live_session.status,
                     "total_participants": total_participants,
                     "present_count": present_count,
@@ -553,10 +561,10 @@ class ZoomLTIHandler:
                         for record in attendance_records
                     ],
                 }
-                
+
         except Exception as e:
             logger.error("Failed to generate attendance report: %s", e)
-            raise ZoomLTIError(f"Failed to generate attendance report: {e}")
+            raise ZoomLTIError(f"Failed to generate attendance report: {e}") from e
 
     async def cleanup(self) -> None:
         """Clean up HTTP client resources."""

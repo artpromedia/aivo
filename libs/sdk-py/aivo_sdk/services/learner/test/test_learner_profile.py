@@ -37,25 +37,25 @@ class TestLearnerProfile(unittest.TestCase):
                 learner_id = '123e4567-e89b-12d3-a456-426614174000',
                 bio = 'Passionate software engineer with 5 years of experience',
                 preferences = aivo_sdk.models.learner_profile_preferences.LearnerProfile_preferences(
-                    learning_style = 'visual', 
-                    difficulty_level = 'intermediate', 
-                    notifications_enabled = True, 
-                    email_digest = True, 
+                    learning_style = 'visual',
+                    difficulty_level = 'intermediate',
+                    notifications_enabled = True,
+                    email_digest = True,
                     preferred_learning_time = 'morning', ),
                 skills = [
                     aivo_sdk.models.learner_profile_skills_inner.LearnerProfile_skills_inner(
-                        skill_id = '', 
-                        skill_name = '', 
-                        level = 'beginner', 
+                        skill_id = '',
+                        skill_name = '',
+                        level = 'beginner',
                         verified_at = datetime.datetime.strptime('2013-10-20 19:20:30.00', '%Y-%m-%d %H:%M:%S.%f'), )
                     ],
                 goals = [
                     aivo_sdk.models.learner_profile_goals_inner.LearnerProfile_goals_inner(
-                        goal_id = '', 
-                        title = '', 
-                        description = '', 
-                        target_date = datetime.datetime.strptime('1975-12-30', '%Y-%m-%d').date(), 
-                        status = 'active', 
+                        goal_id = '',
+                        title = '',
+                        description = '',
+                        target_date = datetime.datetime.strptime('1975-12-30', '%Y-%m-%d').date(),
+                        status = 'active',
                         progress = 0, )
                     ],
                 interests = [JavaScript, Machine Learning, Leadership]
@@ -64,25 +64,25 @@ class TestLearnerProfile(unittest.TestCase):
             return LearnerProfile(
                 learner_id = '123e4567-e89b-12d3-a456-426614174000',
                 preferences = aivo_sdk.models.learner_profile_preferences.LearnerProfile_preferences(
-                    learning_style = 'visual', 
-                    difficulty_level = 'intermediate', 
-                    notifications_enabled = True, 
-                    email_digest = True, 
+                    learning_style = 'visual',
+                    difficulty_level = 'intermediate',
+                    notifications_enabled = True,
+                    email_digest = True,
                     preferred_learning_time = 'morning', ),
                 skills = [
                     aivo_sdk.models.learner_profile_skills_inner.LearnerProfile_skills_inner(
-                        skill_id = '', 
-                        skill_name = '', 
-                        level = 'beginner', 
+                        skill_id = '',
+                        skill_name = '',
+                        level = 'beginner',
                         verified_at = datetime.datetime.strptime('2013-10-20 19:20:30.00', '%Y-%m-%d %H:%M:%S.%f'), )
                     ],
                 goals = [
                     aivo_sdk.models.learner_profile_goals_inner.LearnerProfile_goals_inner(
-                        goal_id = '', 
-                        title = '', 
-                        description = '', 
-                        target_date = datetime.datetime.strptime('1975-12-30', '%Y-%m-%d').date(), 
-                        status = 'active', 
+                        goal_id = '',
+                        title = '',
+                        description = '',
+                        target_date = datetime.datetime.strptime('1975-12-30', '%Y-%m-%d').date(),
+                        status = 'active',
                         progress = 0, )
                     ],
         )

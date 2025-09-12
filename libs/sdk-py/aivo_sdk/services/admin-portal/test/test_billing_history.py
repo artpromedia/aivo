@@ -37,24 +37,24 @@ class TestBillingHistory(unittest.TestCase):
                 tenant_id = '456e7890-e89b-12d3-a456-426614174000',
                 invoices = [
                     aivo_sdk.models.billing_history_invoices_inner.BillingHistory_invoices_inner(
-                        id = 'inv_123e4567-e89b-12d3-a456-426614174000', 
-                        invoice_number = 'INV-2023-001', 
-                        amount = 9999.0, 
-                        currency = 'USD', 
-                        status = 'paid', 
-                        due_date = '2023-12-31', 
-                        paid_at = '2023-12-15T14:30:00Z', 
-                        download_url = 'https://api.aivo.com/invoices/inv_123/download', 
+                        id = 'inv_123e4567-e89b-12d3-a456-426614174000',
+                        invoice_number = 'INV-2023-001',
+                        amount = 9999.0,
+                        currency = 'USD',
+                        status = 'paid',
+                        due_date = '2023-12-31',
+                        paid_at = '2023-12-15T14:30:00Z',
+                        download_url = 'https://api.aivo.com/invoices/inv_123/download',
                         description = 'Professional Plan - December 2023', )
                     ],
                 summary = aivo_sdk.models.billing_history_summary.BillingHistory_summary(
-                    total_paid = 29997.0, 
-                    total_outstanding = 0.0, 
+                    total_paid = 29997.0,
+                    total_outstanding = 0.0,
                     average_monthly_spend = 9999.0, ),
                 webhooks_status = aivo_sdk.models.billing_history_webhooks_status.BillingHistory_webhooksStatus(
-                    is_configured = True, 
-                    last_success = '2023-12-01T10:30:00Z', 
-                    failure_count = 0, 
+                    is_configured = True,
+                    last_success = '2023-12-01T10:30:00Z',
+                    failure_count = 0,
                     endpoint = 'https://api.customer.com/aivo-webhooks', ),
                 last_updated = '2023-12-01T10:30:00Z'
             )
@@ -63,20 +63,20 @@ class TestBillingHistory(unittest.TestCase):
                 tenant_id = '456e7890-e89b-12d3-a456-426614174000',
                 invoices = [
                     aivo_sdk.models.billing_history_invoices_inner.BillingHistory_invoices_inner(
-                        id = 'inv_123e4567-e89b-12d3-a456-426614174000', 
-                        invoice_number = 'INV-2023-001', 
-                        amount = 9999.0, 
-                        currency = 'USD', 
-                        status = 'paid', 
-                        due_date = '2023-12-31', 
-                        paid_at = '2023-12-15T14:30:00Z', 
-                        download_url = 'https://api.aivo.com/invoices/inv_123/download', 
+                        id = 'inv_123e4567-e89b-12d3-a456-426614174000',
+                        invoice_number = 'INV-2023-001',
+                        amount = 9999.0,
+                        currency = 'USD',
+                        status = 'paid',
+                        due_date = '2023-12-31',
+                        paid_at = '2023-12-15T14:30:00Z',
+                        download_url = 'https://api.aivo.com/invoices/inv_123/download',
                         description = 'Professional Plan - December 2023', )
                     ],
                 webhooks_status = aivo_sdk.models.billing_history_webhooks_status.BillingHistory_webhooksStatus(
-                    is_configured = True, 
-                    last_success = '2023-12-01T10:30:00Z', 
-                    failure_count = 0, 
+                    is_configured = True,
+                    last_success = '2023-12-01T10:30:00Z',
+                    failure_count = 0,
                     endpoint = 'https://api.customer.com/aivo-webhooks', ),
                 last_updated = '2023-12-01T10:30:00Z',
         )

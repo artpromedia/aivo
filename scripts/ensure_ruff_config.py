@@ -1,4 +1,4 @@
-﻿#!/usr/bin/env python3
+#!/usr/bin/env python3
 """
 Idempotently ensure `pyproject.toml` contains a Ruff config with:
   - [tool.ruff] line-length = 100, target-version = "py311"
@@ -9,6 +9,7 @@ Usage:
   python scripts/ensure_ruff_config.py --write     # modify file in place
   python scripts/ensure_ruff_config.py --check     # exit 1 if change needed
 """
+
 from __future__ import annotations
 
 import argparse
@@ -19,6 +20,7 @@ PYPROJECT = Path("pyproject.toml")
 
 RUFF_HDR_RE = re.compile(r"^\[tool\.ruff\]\s*$")
 TABLE_HDR_RE = re.compile(r"^\[[^\]]+\]\s*$")
+
 
 def _find_table(lines: list[str], header_re: re.Pattern[str]) -> tuple[int | None, int | None]:
     """Return (start_idx, end_idx_exclusive) for table header; end is next table or EOF."""
@@ -35,6 +37,7 @@ def _find_table(lines: list[str], header_re: re.Pattern[str]) -> tuple[int | Non
             return start, j
     return start, len(lines)
 
+
 def _ensure_kv(block_lines: list[str], key: str, value_line: str) -> list[str]:
     """Ensure 'key = ...' exists in block_lines; replace if present, append if not."""
     key_re = re.compile(rf"^\s*{re.escape(key)}\s*=")
@@ -50,6 +53,7 @@ def _ensure_kv(block_lines: list[str], key: str, value_line: str) -> list[str]:
     block_lines.append("\n")
     return block_lines
 
+
 def _ensure_section(lines: list[str]) -> tuple[list[str], bool]:
     """
     Ensure [tool.ruff] and [tool.ruff.lint] sections exist and contain desired keys.
@@ -64,12 +68,14 @@ def _ensure_section(lines: list[str]) -> tuple[list[str], bool]:
         append = []
         if lines and lines[-1].strip() != "":
             append.append("\n")
-        append.extend([
-            "[tool.ruff]\n",
-            'line-length = 100\n',
-            'target-version = "py311"\n',
-            "\n",
-        ])
+        append.extend(
+            [
+                "[tool.ruff]\n",
+                "line-length = 100\n",
+                'target-version = "py311"\n',
+                "\n",
+            ]
+        )
         lines = lines + append
         changed = True
         # refresh indices
@@ -108,6 +114,7 @@ def _ensure_section(lines: list[str]) -> tuple[list[str], bool]:
 
     return lines, changed
 
+
 def main() -> int:
     ap = argparse.ArgumentParser()
     ap.add_argument("--write", action="store_true", help="write changes to pyproject.toml")
@@ -136,6 +143,7 @@ def main() -> int:
 
     print("pyproject.toml already contains the desired Ruff configuration.")
     return 0
+
 
 if __name__ == "__main__":
     raise SystemExit(main())

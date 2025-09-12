@@ -1,4 +1,4 @@
-﻿"""
+"""
 Consent & Preferences Ledger Service
 
 Centralized consent management with parental rights and cascaded deletes.

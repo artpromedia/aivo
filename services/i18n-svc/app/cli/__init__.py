@@ -1,4 +1,4 @@
-﻿"""CLI tools package for i18n service."""
+"""CLI tools package for i18n service."""
 
 from .i18n_cli import cli
 

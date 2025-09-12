@@ -42,31 +42,20 @@ class GameGenerationService:
             difficulty = self._calculate_difficulty(grade)
 
             # Generate game scenes based on duration
-            num_scenes = self._calculate_scene_count(
-                duration_minutes, difficulty
-            )
+            num_scenes = self._calculate_scene_count(duration_minutes, difficulty)
             scenes = []
 
             for scene_index in range(num_scenes):
                 scene = await self._generate_scene(
-                    subject,
-                    game_type,
-                    difficulty,
-                    scene_index,
-                    accessibility,
-                    duration_minutes
+                    subject, game_type, difficulty, scene_index, accessibility, duration_minutes
                 )
                 scenes.append(scene)
 
             # Generate scoring configuration
-            scoring = self._generate_scoring_config(
-                subject, game_type, difficulty
-            )
+            scoring = self._generate_scoring_config(subject, game_type, difficulty)
 
             # Apply accessibility adaptations
-            scenes = self._apply_accessibility_adaptations(
-                scenes, accessibility
-            )
+            scenes = self._apply_accessibility_adaptations(scenes, accessibility)
 
             # Create manifest
             manifest = GameManifest(
@@ -76,12 +65,9 @@ class GameGenerationService:
                 game_type=game_type,
                 difficulty=difficulty,
                 duration_minutes=duration_minutes,
-                title=(
-                    f"{subject.value.title()} {game_type.value.title()} Game"
-                ),
+                title=(f"{subject.value.title()} {game_type.value.title()} Game"),
                 description=(
-                    f"A {difficulty.value} level {subject.value} game "
-                    f"for grade {grade}"
+                    f"A {difficulty.value} level {subject.value} game " f"for grade {grade}"
                 ),
                 scenes=scenes,
                 scoring=scoring,
@@ -102,21 +88,11 @@ class GameGenerationService:
     def _select_game_type(self, subject: SubjectType, grade: int) -> GameType:
         """Select appropriate game type for subject and grade."""
         subject_games = {
-            SubjectType.MATH: [
-                GameType.PUZZLE, GameType.QUIZ, GameType.SORTING
-            ],
-            SubjectType.ENGLISH: [
-                GameType.WORD_BUILDER, GameType.MATCHING, GameType.QUIZ
-            ],
-            SubjectType.SCIENCE: [
-                GameType.QUIZ, GameType.MATCHING, GameType.SORTING
-            ],
-            SubjectType.ART: [
-                GameType.DRAWING, GameType.MATCHING, GameType.MEMORY
-            ],
-            SubjectType.MUSIC: [
-                GameType.RHYTHM, GameType.MEMORY, GameType.MATCHING
-            ],
+            SubjectType.MATH: [GameType.PUZZLE, GameType.QUIZ, GameType.SORTING],
+            SubjectType.ENGLISH: [GameType.WORD_BUILDER, GameType.MATCHING, GameType.QUIZ],
+            SubjectType.SCIENCE: [GameType.QUIZ, GameType.MATCHING, GameType.SORTING],
+            SubjectType.ART: [GameType.DRAWING, GameType.MATCHING, GameType.MEMORY],
+            SubjectType.MUSIC: [GameType.RHYTHM, GameType.MEMORY, GameType.MATCHING],
         }
 
         available_games = subject_games.get(subject, [GameType.QUIZ])
@@ -124,12 +100,8 @@ class GameGenerationService:
         # Adjust for grade level
         if grade <= 2:
             # Simpler games for younger students
-            simple_games = [
-                GameType.MATCHING, GameType.SORTING, GameType.MEMORY
-            ]
-            available_games = [
-                g for g in available_games if g in simple_games
-            ] or simple_games
+            simple_games = [GameType.MATCHING, GameType.SORTING, GameType.MEMORY]
+            available_games = [g for g in available_games if g in simple_games] or simple_games
 
         return random.choice(available_games)
 
@@ -144,9 +116,7 @@ class GameGenerationService:
         else:
             return DifficultyLevel.EXPERT
 
-    def _calculate_scene_count(
-        self, duration_minutes: int, difficulty: DifficultyLevel
-    ) -> int:
+    def _calculate_scene_count(self, duration_minutes: int, difficulty: DifficultyLevel) -> int:
         """Calculate number of scenes based on duration and difficulty."""
         base_scenes = max(1, duration_minutes // 3)  # ~3 minutes per scene
 
@@ -178,9 +148,7 @@ class GameGenerationService:
         )
 
         # Generate assets for the scene
-        assets = self._generate_scene_assets(
-            subject, game_type, difficulty, accessibility
-        )
+        assets = self._generate_scene_assets(subject, game_type, difficulty, accessibility)
 
         # Calculate scene duration
         scene_count = self._calculate_scene_count(duration_minutes, difficulty)
@@ -212,8 +180,7 @@ class GameGenerationService:
             ),
             (SubjectType.MATH, GameType.QUIZ): (
                 f"Math Challenge {scene_index + 1}",
-                "Answer the math questions as quickly and accurately "
-                "as possible.",
+                "Answer the math questions as quickly and accurately " "as possible.",
             ),
             (SubjectType.ENGLISH, GameType.WORD_BUILDER): (
                 f"Word Builder {scene_index + 1}",
@@ -239,10 +206,7 @@ class GameGenerationService:
 
         return content_templates.get(
             (subject, game_type),
-            (
-                f"Challenge {scene_index + 1}",
-                "Complete the challenge to proceed."
-            ),
+            (f"Challenge {scene_index + 1}", "Complete the challenge to proceed."),
         )
 
     def _generate_scene_assets(
@@ -259,10 +223,7 @@ class GameGenerationService:
         bg_asset = GameAsset(
             asset_id="background",
             asset_type="image",
-            url=(
-                f"{settings.assets_base_url}/backgrounds/"
-                f"{subject.value}_bg.jpg"
-            ),
+            url=(f"{settings.assets_base_url}/backgrounds/" f"{subject.value}_bg.jpg"),
             alt_text=f"{subject.value} themed background",
             width=1920,
             height=1080,
@@ -275,10 +236,7 @@ class GameGenerationService:
                 piece_asset = GameAsset(
                     asset_id=f"puzzle_piece_{i}",
                     asset_type="image",
-                    url=(
-                        f"{settings.assets_base_url}/puzzle/"
-                        f"{subject.value}_piece_{i}.png"
-                    ),
+                    url=(f"{settings.assets_base_url}/puzzle/" f"{subject.value}_piece_{i}.png"),
                     alt_text=f"Puzzle piece {i + 1}",
                     width=100,
                     height=100,
@@ -291,10 +249,7 @@ class GameGenerationService:
                 audio_asset = GameAsset(
                     asset_id="question_audio",
                     asset_type="audio",
-                    url=(
-                        f"{settings.assets_base_url}/audio/"
-                        f"{subject.value}_question.mp3"
-                    ),
+                    url=(f"{settings.assets_base_url}/audio/" f"{subject.value}_question.mp3"),
                     alt_text="Question audio narration",
                 )
                 assets.append(audio_asset)
@@ -304,10 +259,7 @@ class GameGenerationService:
                 card_asset = GameAsset(
                     asset_id=f"match_card_{i}",
                     asset_type="image",
-                    url=(
-                        f"{settings.assets_base_url}/cards/"
-                        f"{subject.value}_card_{i}.png"
-                    ),
+                    url=(f"{settings.assets_base_url}/cards/" f"{subject.value}_card_{i}.png"),
                     alt_text=f"Matching card {i + 1}",
                     width=150,
                     height=200,
@@ -371,9 +323,7 @@ class GameGenerationService:
 
         return ScoringConfig(
             max_points=base_points[difficulty] * 10,  # Max points
-            time_bonus=difficulty in [
-                DifficultyLevel.ADVANCED, DifficultyLevel.EXPERT
-            ],
+            time_bonus=difficulty in [DifficultyLevel.ADVANCED, DifficultyLevel.EXPERT],
             accuracy_weight=0.7,
             speed_weight=0.3,
             hint_penalty=5 if difficulty != DifficultyLevel.BEGINNER else 0,
@@ -392,15 +342,11 @@ class GameGenerationService:
             # Modify description for accessibility
             if accessibility.simplified_ui:
                 description = scene.description
-                adapted_scene.description = self._simplify_instructions(
-                    description
-                )
+                adapted_scene.description = self._simplify_instructions(description)
 
             # Adjust timing for reduced motion
             if accessibility.reduced_motion:
-                adapted_scene.duration_seconds = int(
-                    scene.duration_seconds * 1.5
-                )
+                adapted_scene.duration_seconds = int(scene.duration_seconds * 1.5)
 
             adapted_scenes.append(adapted_scene)
 
@@ -426,8 +372,7 @@ class GameGenerationService:
             "average_generation_time_ms": avg_generation_time * 1000,
             "target_time_ms": settings.target_generation_time_ms,
             "performance_ratio": (
-                (avg_generation_time * 1000)
-                / settings.target_generation_time_ms
+                (avg_generation_time * 1000) / settings.target_generation_time_ms
                 if avg_generation_time > 0
                 else 0
             ),

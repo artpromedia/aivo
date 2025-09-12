@@ -36,28 +36,28 @@ class TestTeamOverview(unittest.TestCase):
             return TeamOverview(
                 tenant_id = '456e7890-e89b-12d3-a456-426614174000',
                 users_by_role = aivo_sdk.models.team_overview_users_by_role.TeamOverview_usersByRole(
-                    tenant_admin = 2, 
-                    instructor = 8, 
-                    learner = 135, 
+                    tenant_admin = 2,
+                    instructor = 8,
+                    learner = 135,
                     total = 145, ),
                 pending_invites = aivo_sdk.models.team_overview_pending_invites.TeamOverview_pendingInvites(
-                    total = 5, 
+                    total = 5,
                     by_role = aivo_sdk.models.team_overview_pending_invites_by_role.TeamOverview_pendingInvites_byRole(
-                        tenant_admin = 0, 
-                        instructor = 2, 
-                        learner = 3, ), 
+                        tenant_admin = 0,
+                        instructor = 2,
+                        learner = 3, ),
                     oldest_invite = '2023-11-15T09:00:00Z', ),
                 recent_activity = aivo_sdk.models.team_overview_recent_activity.TeamOverview_recentActivity(
-                    new_users_this_week = 3, 
-                    new_users_this_month = 12, 
+                    new_users_this_week = 3,
+                    new_users_this_month = 12,
                     last_user_joined = '2023-11-28T14:22:00Z', ),
                 top_users = [
                     aivo_sdk.models.team_overview_top_users_inner.TeamOverview_topUsers_inner(
-                        user_id = '', 
-                        name = 'John Doe', 
-                        email = 'john@example.com', 
-                        role = 'instructor', 
-                        last_active = '2023-12-01T09:15:00Z', 
+                        user_id = '',
+                        name = 'John Doe',
+                        email = 'john@example.com',
+                        role = 'instructor',
+                        last_active = '2023-12-01T09:15:00Z',
                         enrollments = 15, )
                     ],
                 last_updated = '2023-12-01T10:30:00Z'
@@ -66,20 +66,20 @@ class TestTeamOverview(unittest.TestCase):
             return TeamOverview(
                 tenant_id = '456e7890-e89b-12d3-a456-426614174000',
                 users_by_role = aivo_sdk.models.team_overview_users_by_role.TeamOverview_usersByRole(
-                    tenant_admin = 2, 
-                    instructor = 8, 
-                    learner = 135, 
+                    tenant_admin = 2,
+                    instructor = 8,
+                    learner = 135,
                     total = 145, ),
                 pending_invites = aivo_sdk.models.team_overview_pending_invites.TeamOverview_pendingInvites(
-                    total = 5, 
+                    total = 5,
                     by_role = aivo_sdk.models.team_overview_pending_invites_by_role.TeamOverview_pendingInvites_byRole(
-                        tenant_admin = 0, 
-                        instructor = 2, 
-                        learner = 3, ), 
+                        tenant_admin = 0,
+                        instructor = 2,
+                        learner = 3, ),
                     oldest_invite = '2023-11-15T09:00:00Z', ),
                 recent_activity = aivo_sdk.models.team_overview_recent_activity.TeamOverview_recentActivity(
-                    new_users_this_week = 3, 
-                    new_users_this_month = 12, 
+                    new_users_this_week = 3,
+                    new_users_this_month = 12,
                     last_user_joined = '2023-11-28T14:22:00Z', ),
                 last_updated = '2023-12-01T10:30:00Z',
         )

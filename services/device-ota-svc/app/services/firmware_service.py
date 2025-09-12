@@ -95,9 +95,7 @@ class FirmwareService:
 
         return list(updates), total
 
-    async def get_update_by_id(
-        self: "FirmwareService", update_id: UUID
-    ) -> FirmwareUpdate | None:
+    async def get_update_by_id(self: "FirmwareService", update_id: UUID) -> FirmwareUpdate | None:
         """Get firmware update by ID."""
         stmt = (
             select(FirmwareUpdate)
@@ -161,26 +159,20 @@ class FirmwareService:
     ) -> tuple[bool, str | None]:
         """Check if device is eligible for update."""
         # Check battery level
-        if (
-            battery_level is not None
-            and battery_level < firmware_update.minimum_battery_level
-        ):
+        if battery_level is not None and battery_level < firmware_update.minimum_battery_level:
             return (
                 False,
                 f"Battery level {battery_level}% below minimum "
-                f"{firmware_update.minimum_battery_level}%"
+                f"{firmware_update.minimum_battery_level}%",
             )
 
         # Check storage space (estimate 50MB overhead)
         required_storage = firmware_update.file_size // (1024 * 1024) + 50
-        if (
-            storage_available_mb is not None
-            and storage_available_mb < required_storage
-        ):
+        if storage_available_mb is not None and storage_available_mb < required_storage:
             return (
                 False,
                 f"Insufficient storage: {storage_available_mb}MB available, "
-                f"{required_storage}MB required"
+                f"{required_storage}MB required",
             )
 
         # Check if device already has this update
@@ -188,11 +180,13 @@ class FirmwareService:
             and_(
                 DeviceUpdate.device_id == device_id,
                 DeviceUpdate.update_id == firmware_update.update_id,
-                DeviceUpdate.status.in_([
-                    DeviceUpdateStatus.INSTALLED,
-                    DeviceUpdateStatus.INSTALLING,
-                    DeviceUpdateStatus.DOWNLOADING,
-                ]),
+                DeviceUpdate.status.in_(
+                    [
+                        DeviceUpdateStatus.INSTALLED,
+                        DeviceUpdateStatus.INSTALLING,
+                        DeviceUpdateStatus.DOWNLOADING,
+                    ]
+                ),
             )
         )
         result = await self.db.execute(stmt)

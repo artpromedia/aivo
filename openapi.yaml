@@ -1,0 +1,10 @@
+﻿openapi: 3.1.0
+info:
+  title: AIVO API
+  version: 0.1.0
+  contact: { name: AIVO Support, email: support@aivo.local }
+servers:
+  - url: https://api.aivo.local
+tags:
+  - name: admin
+  - name: internal

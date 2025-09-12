@@ -37,8 +37,8 @@ class TestNamespacesOverviewHealthSummary(unittest.TestCase):
                 health_score = 94.2,
                 common_issues = [
                     aivo_sdk.models.namespaces_overview_health_summary_common_issues_inner.NamespacesOverview_healthSummary_commonIssues_inner(
-                        issue = 'Storage quota exceeded', 
-                        count = 3, 
+                        issue = 'Storage quota exceeded',
+                        count = 3,
                         severity = 'medium', )
                     ]
             )

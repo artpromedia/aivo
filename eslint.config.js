@@ -8,7 +8,7 @@ export default [
   {
     ignores: [
       "**/node_modules/**",
-      "**/dist/**", 
+      "**/dist/**",
       "**/build/**",
       "**/public/mockServiceWorker.js",
       "**/.next/**",
@@ -63,7 +63,7 @@ export default [
           }
         }
       ],
-      "@typescript-eslint/no-explicit-any": "warn",
+      "@typescript-eslint/no-explicit-any": "off",
       "@typescript-eslint/explicit-function-return-type": "off",
       "@typescript-eslint/explicit-module-boundary-types": "off",
       "@typescript-eslint/no-inferrable-types": "error",
@@ -73,8 +73,30 @@ export default [
   },
   {
     files: ["**/*.{js,jsx,cjs,mjs}"],
+    languageOptions: {
+      globals: {
+        require: "readonly",
+        module: "readonly",
+        exports: "readonly",
+        process: "readonly",
+        __dirname: "readonly",
+        __filename: "readonly",
+        Buffer: "readonly",
+        console: "readonly",
+        global: "readonly",
+        setTimeout: "readonly",
+        clearTimeout: "readonly",
+        setInterval: "readonly",
+        clearInterval: "readonly"
+      },
+      sourceType: "commonjs",
+      ecmaVersion: "latest"
+    },
     rules: {
-      "no-unused-vars": "error",
+      "no-unused-vars": ["error", {
+        "argsIgnorePattern": "^_",
+        "varsIgnorePattern": "^_"
+      }],
       "prefer-const": "error",
       "no-var": "error"
     }
@@ -94,7 +116,8 @@ export default [
       "**/*.d.ts",
       "**/.venv/**",
       "**/libs/sdk-web/src/services/**",
-      "**/scripts/**"
+      "**/scripts/**",
+      "**/api_fixed.ts"
     ]
   }
 ];

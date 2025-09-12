@@ -4,6 +4,7 @@ Pydantic models for ink capture service API schemas.
 This module defines the request/response models for the digital ink capture
 API, including stroke data structures, session management, and event payloads.
 """
+
 from datetime import datetime
 from typing import Any, Self
 from uuid import UUID
@@ -21,12 +22,8 @@ class Point(BaseModel):
 
     x: float = Field(..., description="X coordinate", ge=0)
     y: float = Field(..., description="Y coordinate", ge=0)
-    pressure: float = Field(
-        default=1.0, description="Pressure value", ge=0.0, le=1.0
-    )
-    timestamp: int = Field(
-        ..., description="Timestamp in milliseconds since stroke start"
-    )
+    pressure: float = Field(default=1.0, description="Pressure value", ge=0.0, le=1.0)
+    timestamp: int = Field(..., description="Timestamp in milliseconds since stroke start")
 
 
 class Stroke(BaseModel):
@@ -37,24 +34,15 @@ class Stroke(BaseModel):
     and drawing context.
     """
 
-    stroke_id: UUID = Field(
-        ..., description="Unique identifier for the stroke"
-    )
+    stroke_id: UUID = Field(..., description="Unique identifier for the stroke")
     points: list[Point] = Field(
         ..., description="Ordered list of points in the stroke", min_items=1
     )
-    tool_type: str = Field(
-        default="pen", description="Input tool type: pen, finger, eraser"
-    )
-    color: str = Field(
-        default="#000000", description="Stroke color in hex format"
-    )
-    width: float = Field(
-        default=2.0, description="Stroke width in pixels", gt=0
-    )
+    tool_type: str = Field(default="pen", description="Input tool type: pen, finger, eraser")
+    color: str = Field(default="#000000", description="Stroke color in hex format")
+    width: float = Field(default=2.0, description="Stroke width in pixels", gt=0)
     created_at: datetime = Field(
-        default_factory=datetime.utcnow,
-        description="Stroke creation timestamp"
+        default_factory=datetime.utcnow, description="Stroke creation timestamp"
     )
 
     @validator("tool_type")
@@ -71,9 +59,7 @@ class Stroke(BaseModel):
     def validate_color(cls: type[Self], v: str) -> str:  # noqa: N805
         """Validate color is a valid hex color."""
         if not v.startswith("#") or len(v) != 7:
-            raise ValueError(
-                "Color must be a 7-character hex string starting with #"
-            )
+            raise ValueError("Color must be a 7-character hex string starting with #")
         try:
             int(v[1:], 16)
         except ValueError as exc:
@@ -90,27 +76,13 @@ class StrokeRequest(BaseModel):
     """
 
     session_id: UUID = Field(..., description="Unique session identifier")
-    learner_id: UUID = Field(
-        ..., description="Learner who created the strokes"
-    )
-    subject: str = Field(
-        ..., description="Subject area (math, science, etc.)", min_length=1
-    )
-    strokes: list[Stroke] = Field(
-        ..., description="List of strokes to submit", min_items=1
-    )
-    page_number: int = Field(
-        default=1, description="Page number within the session", ge=1
-    )
-    canvas_width: float = Field(
-        ..., description="Canvas width in pixels", gt=0
-    )
-    canvas_height: float = Field(
-        ..., description="Canvas height in pixels", gt=0
-    )
-    metadata: dict[str, Any] = Field(
-        default_factory=dict, description="Additional metadata"
-    )
+    learner_id: UUID = Field(..., description="Learner who created the strokes")
+    subject: str = Field(..., description="Subject area (math, science, etc.)", min_length=1)
+    strokes: list[Stroke] = Field(..., description="List of strokes to submit", min_items=1)
+    page_number: int = Field(default=1, description="Page number within the session", ge=1)
+    canvas_width: float = Field(..., description="Canvas width in pixels", gt=0)
+    canvas_height: float = Field(..., description="Canvas height in pixels", gt=0)
+    metadata: dict[str, Any] = Field(default_factory=dict, description="Additional metadata")
 
     @validator("strokes")
     @classmethod
@@ -120,9 +92,7 @@ class StrokeRequest(BaseModel):
         """Validate stroke count doesn't exceed limits."""
         max_strokes = 1000  # Could be made configurable
         if len(v) > max_strokes:
-            raise ValueError(
-                f"Too many strokes. Maximum allowed: {max_strokes}"
-            )
+            raise ValueError(f"Too many strokes. Maximum allowed: {max_strokes}")
         return v
 
 
@@ -136,9 +106,7 @@ class StrokeResponse(BaseModel):
     recognition_job_id: UUID | None = Field(
         default=None, description="ID of triggered recognition job"
     )
-    created_at: datetime = Field(
-        default_factory=datetime.utcnow, description="Response timestamp"
-    )
+    created_at: datetime = Field(default_factory=datetime.utcnow, description="Response timestamp")
 
 
 class InkSession(BaseModel):
@@ -153,9 +121,7 @@ class InkSession(BaseModel):
     last_activity: datetime = Field(
         default_factory=datetime.utcnow, description="Last activity timestamp"
     )
-    page_count: int = Field(
-        default=0, description="Number of pages in session"
-    )
+    page_count: int = Field(default=0, description="Number of pages in session")
     status: str = Field(default="active", description="Session status")
 
     @validator("status")
@@ -183,12 +149,8 @@ class InkPageData(BaseModel):
     canvas_width: float = Field(..., description="Canvas dimensions")
     canvas_height: float = Field(..., description="Canvas dimensions")
     strokes: list[Stroke] = Field(..., description="All strokes on the page")
-    created_at: datetime = Field(
-        default_factory=datetime.utcnow, description="Page creation time"
-    )
-    metadata: dict[str, Any] = Field(
-        default_factory=dict, description="Additional metadata"
-    )
+    created_at: datetime = Field(default_factory=datetime.utcnow, description="Page creation time")
+    metadata: dict[str, Any] = Field(default_factory=dict, description="Additional metadata")
 
 
 class InkReadyEvent(BaseModel):
@@ -201,9 +163,7 @@ class InkReadyEvent(BaseModel):
     subject: str = Field(..., description="Subject area")
     s3_key: str = Field(..., description="S3 storage key")
     stroke_count: int = Field(..., description="Number of strokes")
-    created_at: datetime = Field(
-        default_factory=datetime.utcnow, description="Event timestamp"
-    )
+    created_at: datetime = Field(default_factory=datetime.utcnow, description="Event timestamp")
 
 
 class ErrorResponse(BaseModel):
@@ -211,9 +171,7 @@ class ErrorResponse(BaseModel):
 
     error: str = Field(..., description="Error type")
     message: str = Field(..., description="Human-readable error message")
-    details: dict[str, Any] = Field(
-        default_factory=dict, description="Additional error details"
-    )
+    details: dict[str, Any] = Field(default_factory=dict, description="Additional error details")
 
 
 class HealthResponse(BaseModel):
@@ -224,6 +182,4 @@ class HealthResponse(BaseModel):
         default_factory=datetime.utcnow, description="Health check timestamp"
     )
     version: str = Field(..., description="Service version")
-    dependencies: dict[str, str] = Field(
-        default_factory=dict, description="Dependency status"
-    )
+    dependencies: dict[str, str] = Field(default_factory=dict, description="Dependency status")

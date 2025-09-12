@@ -18,10 +18,14 @@ from .schemas import (
     AcceptInviteRequest,
     AuthResponse,
     GuardianRegister,
+    InviteResendResponse,
     InviteTeacherRequest,
     InviteTokenResponse,
     LoginRequest,
     RefreshTokenRequest,
+    RoleAssignRequest,
+    RoleOperationResponse,
+    RoleRevokeRequest,
     StaffLoginRequest,
     UserResponse,
 )
@@ -568,3 +572,195 @@ async def get_current_user_profile(
 ) -> UserResponse:
     """Get current user profile."""
     return UserResponse.model_validate(current_user)
+
+
+# New endpoints for role management and invite resend
+
+
+@router.post("/users/{user_id}/roles", response_model=RoleOperationResponse)
+async def assign_user_role(
+    user_id: uuid.UUID,
+    request: RoleAssignRequest,
+    current_user: Annotated[User, Depends(get_current_user)],
+    db: AsyncSession = Depends(get_db_dependency),
+) -> RoleOperationResponse:
+    """Assign a role to a user within a tenant."""
+
+    # Check permissions - only staff and district_admin can assign roles
+    if current_user.role not in ["staff", "district_admin"]:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Insufficient permissions to assign roles",
+        )
+
+    # Staff can only assign roles within their own tenant
+    if current_user.role == "staff" and current_user.tenant_id != request.tenant_id:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Cannot assign roles in different tenant",
+        )
+
+    # Get target user
+    result = await db.execute(select(User).where(User.id == user_id))
+    target_user = result.scalar_one_or_none()
+
+    if not target_user:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="User not found",
+        )
+
+    # Update user role and tenant association
+    target_user.role = request.role
+    target_user.tenant_id = request.tenant_id
+    target_user.updated_at = datetime.now(timezone.utc)
+
+    try:
+        await db.commit()
+        await db.refresh(target_user)
+    except IntegrityError:
+        await db.rollback()
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Failed to assign role",
+        )
+
+    return RoleOperationResponse(
+        user_id=target_user.id,
+        tenant_id=request.tenant_id,
+        role=request.role,
+        action="assigned",
+        message=f"Role {request.role} assigned successfully",
+    )
+
+
+@router.delete("/users/{user_id}/roles", response_model=RoleOperationResponse)
+async def revoke_user_role(
+    user_id: uuid.UUID,
+    request: RoleRevokeRequest,
+    current_user: Annotated[User, Depends(get_current_user)],
+    db: AsyncSession = Depends(get_db_dependency),
+) -> RoleOperationResponse:
+    """Revoke a role from a user within a tenant."""
+
+    # Check permissions - only staff and district_admin can revoke roles
+    if current_user.role not in ["staff", "district_admin"]:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Insufficient permissions to revoke roles",
+        )
+
+    # Staff can only revoke roles within their own tenant
+    if current_user.role == "staff" and current_user.tenant_id != request.tenant_id:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Cannot revoke roles in different tenant",
+        )
+
+    # Get target user
+    result = await db.execute(select(User).where(User.id == user_id))
+    target_user = result.scalar_one_or_none()
+
+    if not target_user:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="User not found",
+        )
+
+    # Check if user has the role in the specified tenant
+    if target_user.role != request.role or target_user.tenant_id != request.tenant_id:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="User does not have the specified role in this tenant",
+        )
+
+    # Revoke role by setting to basic teacher or removing tenant association
+    target_user.role = "teacher"  # Default fallback role
+    target_user.tenant_id = None
+    target_user.updated_at = datetime.now(timezone.utc)
+
+    try:
+        await db.commit()
+        await db.refresh(target_user)
+    except IntegrityError:
+        await db.rollback()
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Failed to revoke role",
+        )
+
+    return RoleOperationResponse(
+        user_id=target_user.id,
+        tenant_id=request.tenant_id,
+        role=request.role,
+        action="revoked",
+        message=f"Role {request.role} revoked successfully",
+    )
+
+
+@router.post("/invites/{invite_id}/resend", response_model=InviteResendResponse)
+async def resend_invite(
+    invite_id: uuid.UUID,
+    current_user: Annotated[User, Depends(get_current_user)],
+    db: AsyncSession = Depends(get_db_dependency),
+) -> InviteResendResponse:
+    """Resend an invitation email."""
+
+    # Check permissions - only staff and district_admin can resend invites
+    if current_user.role not in ["staff", "district_admin"]:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Insufficient permissions to resend invites",
+        )
+
+    # Get invite token
+    result = await db.execute(
+        select(InviteToken).where(
+            InviteToken.id == invite_id,
+            not InviteToken.is_used,
+            InviteToken.expires_at > datetime.now(timezone.utc),
+        )
+    )
+    invite_token = result.scalar_one_or_none()
+
+    if not invite_token:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Invite not found or already used/expired",
+        )
+
+    # Staff can only resend invites for their own tenant
+    if current_user.role == "staff" and current_user.tenant_id != invite_token.tenant_id:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Cannot resend invite for different tenant",
+        )
+
+    # Send invitation email via notification service
+    notification_client = get_notification_client()
+    email_sent = await notification_client.send_invite_email(
+        email=invite_token.email,
+        invite_token=invite_token.token,
+        role=invite_token.role,
+        invited_by=f"{current_user.first_name} {current_user.last_name}",
+        organization_name="SchoolApp",
+    )
+
+    if email_sent:
+        # Update the invite with new timestamp
+        invite_token.updated_at = datetime.now(timezone.utc)
+        await db.commit()
+
+        return InviteResendResponse(
+            invite_id=invite_token.id,
+            email=invite_token.email,
+            status="sent",
+            message="Invitation resent successfully",
+        )
+    else:
+        return InviteResendResponse(
+            invite_id=invite_token.id,
+            email=invite_token.email,
+            status="failed",
+            message="Failed to resend invitation email",
+        )

@@ -44,8 +44,8 @@ class TestCreateLearningPathRequest(unittest.TestCase):
                     ],
                 courses = [
                     aivo_sdk.models.create_learning_path_request_courses_inner.CreateLearningPathRequest_courses_inner(
-                        course_id = '', 
-                        order = 1, 
+                        course_id = '',
+                        order = 1,
                         is_optional = True, )
                     ]
             )
@@ -56,8 +56,8 @@ class TestCreateLearningPathRequest(unittest.TestCase):
                 category = 'Software Development',
                 courses = [
                     aivo_sdk.models.create_learning_path_request_courses_inner.CreateLearningPathRequest_courses_inner(
-                        course_id = '', 
-                        order = 1, 
+                        course_id = '',
+                        order = 1,
                         is_optional = True, )
                     ],
         )

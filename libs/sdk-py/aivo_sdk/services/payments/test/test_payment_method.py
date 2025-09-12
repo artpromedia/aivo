@@ -39,13 +39,13 @@ class TestPaymentMethod(unittest.TestCase):
                 type = 'card',
                 is_default = True,
                 card = aivo_sdk.models.payment_method_card.PaymentMethod_card(
-                    brand = 'visa', 
-                    last4 = '4242', 
-                    exp_month = 12, 
+                    brand = 'visa',
+                    last4 = '4242',
+                    exp_month = 12,
                     exp_year = 2025, ),
                 bank_account = aivo_sdk.models.payment_method_bank_account.PaymentMethod_bankAccount(
-                    bank_name = 'Chase Bank', 
-                    last4 = '6789', 
+                    bank_name = 'Chase Bank',
+                    last4 = '6789',
                     account_type = 'checking', ),
                 created_at = '2023-11-01T00:00:00Z'
             )

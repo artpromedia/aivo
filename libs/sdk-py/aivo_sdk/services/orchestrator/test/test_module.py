@@ -45,8 +45,8 @@ class TestModule(unittest.TestCase):
                 transcript_url = 'https://example.com/transcripts/module1.vtt',
                 resources = [
                     aivo_sdk.models.module_resources_inner.Module_resources_inner(
-                        title = '', 
-                        url = '', 
+                        title = '',
+                        url = '',
                         type = 'pdf', )
                     ],
                 is_optional = True,

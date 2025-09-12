@@ -44,14 +44,14 @@ class TestLearnerAnalytics(unittest.TestCase):
                 average_session_length = 45,
                 activity_data = [
                     aivo_sdk.models.learner_analytics_activity_data_inner.LearnerAnalytics_activityData_inner(
-                        date = datetime.datetime.strptime('1975-12-30', '%Y-%m-%d').date(), 
-                        minutes_learned = 56, 
+                        date = datetime.datetime.strptime('1975-12-30', '%Y-%m-%d').date(),
+                        minutes_learned = 56,
                         sessions_count = 56, )
                     ],
                 subject_breakdown = [
                     aivo_sdk.models.learner_analytics_subject_breakdown_inner.LearnerAnalytics_subjectBreakdown_inner(
-                        subject = '', 
-                        minutes_learned = 56, 
+                        subject = '',
+                        minutes_learned = 56,
                         percentage = 1.337, )
                     ]
             )
@@ -64,8 +64,8 @@ class TestLearnerAnalytics(unittest.TestCase):
                 streak_days = 7,
                 activity_data = [
                     aivo_sdk.models.learner_analytics_activity_data_inner.LearnerAnalytics_activityData_inner(
-                        date = datetime.datetime.strptime('1975-12-30', '%Y-%m-%d').date(), 
-                        minutes_learned = 56, 
+                        date = datetime.datetime.strptime('1975-12-30', '%Y-%m-%d').date(),
+                        minutes_learned = 56,
                         sessions_count = 56, )
                     ],
         )

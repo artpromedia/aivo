@@ -13,12 +13,8 @@ class BundleRequest(BaseModel):
     """Schema for bundle creation request."""
 
     learner_id: UUID = Field(..., description="Learner UUID")
-    subjects: list[str] = Field(
-        ..., min_items=1, max_items=10, description="Subject list"
-    )
-    bundle_name: str | None = Field(
-        None, max_length=255, description="Optional bundle name"
-    )
+    subjects: list[str] = Field(..., min_items=1, max_items=10, description="Subject list")
+    bundle_name: str | None = Field(None, max_length=255, description="Optional bundle name")
     max_bundle_size: int = Field(
         52428800, ge=1048576, le=104857600, description="Max bundle size (1MB-100MB)"
     )
@@ -28,9 +24,7 @@ class BundleRequest(BaseModel):
     compression_type: CompressionType = Field(
         CompressionType.GZIP, description="Compression algorithm"
     )
-    bundle_version: str = Field(
-        "1.0.0", pattern=r"^\d+\.\d+\.\d+$", description="Semantic version"
-    )
+    bundle_version: str = Field("1.0.0", pattern=r"^\d+\.\d+\.\d+$", description="Semantic version")
     include_adapters: bool = Field(True, description="Include lesson adapters")
     precache_priority: list[str] = Field(
         default_factory=list, description="High-priority content for precaching"
@@ -41,9 +35,7 @@ class BundleRequest(BaseModel):
 
     @validator("max_precache_size")
     @classmethod
-    def validate_precache_size(
-        cls: type["BundleRequest"], v: int, values: dict
-    ) -> int:
+    def validate_precache_size(cls: type["BundleRequest"], v: int, values: dict) -> int:
         """Ensure precache size doesn't exceed bundle size."""
         if "max_bundle_size" in values and v > values["max_bundle_size"]:
             raise ValueError("Precache size cannot exceed bundle size")

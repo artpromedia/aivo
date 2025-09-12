@@ -1,26 +1,22 @@
-﻿"""
+"""
 Basic tests for chat service.
 """
 
 import pytest
-import asyncio
-from httpx import AsyncClient
 from fastapi.testclient import TestClient
+from httpx import AsyncClient
+from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker, create_async_engine
 
-from app.main import app
 from app.database import get_db
+from app.main import app
 from app.models import Base
-from sqlalchemy.ext.asyncio import create_async_engine, AsyncSession, async_sessionmaker
-
 
 # Test database URL (use SQLite for tests)
 TEST_DATABASE_URL = "sqlite+aiosqlite:///./test.db"
 
 # Create test engine
 test_engine = create_async_engine(TEST_DATABASE_URL)
-test_session_factory = async_sessionmaker(
-    test_engine, class_=AsyncSession, expire_on_commit=False
-)
+test_session_factory = async_sessionmaker(test_engine, class_=AsyncSession, expire_on_commit=False)
 
 
 async def get_test_db():
@@ -70,7 +66,7 @@ def test_sync_client():
     client = TestClient(app)
     response = client.get("/health")
     assert response.status_code == 200
-    
+
     response = client.get("/")
     assert response.status_code == 200
 

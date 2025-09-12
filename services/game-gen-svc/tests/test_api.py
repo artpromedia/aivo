@@ -148,12 +148,9 @@ def test_clear_cache(client: TestClient):
 
 
 @pytest.mark.parametrize(
-    "subject,grade",
-    [("math", 1), ("english", 3), ("science", 5), ("art", 2), ("music", 4)]
+    "subject,grade", [("math", 1), ("english", 3), ("science", 5), ("art", 2), ("music", 4)]
 )
-def test_generate_manifest_all_subjects(
-    client: TestClient, subject: str, grade: int
-):
+def test_generate_manifest_all_subjects(client: TestClient, subject: str, grade: int):
     """Test manifest generation for all supported subjects."""
     request_data = {
         "learner_id": f"test-learner-{subject}",

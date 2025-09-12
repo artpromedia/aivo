@@ -36,9 +36,7 @@ class Settings(BaseSettings):
         default="postgresql://user:pass@localhost:5432/slp_sel_db",
         description="Database connection URL",
     )
-    database_echo: bool = Field(
-        default=False, description="Echo SQL queries"
-    )
+    database_echo: bool = Field(default=False, description="Echo SQL queries")
 
     # Redis Configuration
     redis_url: str = Field(
@@ -69,9 +67,30 @@ class Settings(BaseSettings):
     # Articulation Scoring Configuration
     target_phonemes: list[str] = Field(
         default=[
-            "p", "b", "t", "d", "k", "g", "f", "v", "θ", "ð",
-            "s", "z", "ʃ", "ʒ", "tʃ", "dʒ", "m", "n", "ŋ",
-            "l", "r", "w", "j", "h"
+            "p",
+            "b",
+            "t",
+            "d",
+            "k",
+            "g",
+            "f",
+            "v",
+            "θ",
+            "ð",
+            "s",
+            "z",
+            "ʃ",
+            "ʒ",
+            "tʃ",
+            "dʒ",
+            "m",
+            "n",
+            "ŋ",
+            "l",
+            "r",
+            "w",
+            "j",
+            "h",
         ],
         description="Target phonemes for articulation assessment",
     )
@@ -143,7 +162,9 @@ class Settings(BaseSettings):
     def is_development(self) -> bool:
         """Check if running in development mode."""
         return self.debug or os.getenv("ENVIRONMENT", "").lower() in [
-            "dev", "development", "local"
+            "dev",
+            "development",
+            "local",
         ]
 
     def get_cors_config(self) -> dict[str, Any]:

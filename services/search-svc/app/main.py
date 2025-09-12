@@ -58,9 +58,7 @@ async def lifespan(
 # Create FastAPI application
 app = FastAPI(
     title="Search Service",
-    description=(
-        "Unified search service with OpenSearch, RBAC, and PII masking"
-    ),
+    description=("Unified search service with OpenSearch, RBAC, and PII masking"),
     version="1.0.0",
     lifespan=lifespan,
 )
@@ -101,9 +99,7 @@ async def get_user_context(
         district_id=district_id,
         school_id=school_id,
         class_ids=[id.strip() for id in class_ids.split(",") if id.strip()],
-        learner_ids=[
-            id.strip() for id in learner_ids.split(",") if id.strip()
-        ],
+        learner_ids=[id.strip() for id in learner_ids.split(",") if id.strip()],
     )
 
 
@@ -127,9 +123,7 @@ async def search(
     q: str = Query(..., description="Search query", min_length=1),
     scope: SearchScope = Query(SearchScope.ALL, description="Search scope"),
     size: int = Query(20, description="Number of results", ge=1, le=100),
-    from_: int = Query(
-        0, description="Offset for pagination", ge=0, alias="from"
-    ),
+    from_: int = Query(0, description="Offset for pagination", ge=0, alias="from"),
     service: SearchService = Depends(get_search_service),
     user_context: UserContext = Depends(get_user_context),
 ) -> SearchResponse:
@@ -163,9 +157,7 @@ async def search(
 async def suggest(
     q: str = Query(..., description="Query for suggestions", min_length=1),
     size: int = Query(5, description="Number of suggestions", ge=1, le=10),
-    scope: SearchScope = Query(
-        SearchScope.ALL, description="Suggestion scope"
-    ),
+    scope: SearchScope = Query(SearchScope.ALL, description="Suggestion scope"),
     service: SearchService = Depends(get_search_service),
     user_context: UserContext = Depends(get_user_context),
 ) -> SuggestionResponse:
@@ -179,8 +171,7 @@ async def suggest(
 
         result = await service.suggest(request, user_context)
         logger.debug(
-            "Suggestion request completed: %d suggestions for "
-            "query '%s' by user %s",
+            "Suggestion request completed: %d suggestions for " "query '%s' by user %s",
             len(result.suggestions),
             q,
             user_context.user_id,

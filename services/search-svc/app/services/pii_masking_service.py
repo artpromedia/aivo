@@ -18,18 +18,11 @@ class PIIMaskingService:
         """Initialize PII masking service."""
         # Common PII patterns
         self.patterns = {
-            "email": re.compile(
-                r"\b[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\."
-                r"[A-Z|a-z]{2,}\b"
-            ),
+            "email": re.compile(r"\b[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\." r"[A-Z|a-z]{2,}\b"),
             "phone": re.compile(
-                r"\b(?:\+?1[-.\s]?)?\(?([0-9]{3})\)?[-.\s]?"
-                r"([0-9]{3})[-.\s]?([0-9]{4})\b"
+                r"\b(?:\+?1[-.\s]?)?\(?([0-9]{3})\)?[-.\s]?" r"([0-9]{3})[-.\s]?([0-9]{4})\b"
             ),
-            "ssn": re.compile(
-                r"\b(?!000|666|9\d{2})\d{3}[-.]?"
-                r"(?!00)\d{2}[-.]?(?!0000)\d{4}\b"
-            ),
+            "ssn": re.compile(r"\b(?!000|666|9\d{2})\d{3}[-.]?" r"(?!00)\d{2}[-.]?(?!0000)\d{4}\b"),
             "credit_card": re.compile(
                 r"\b(?:4[0-9]{12}(?:[0-9]{3})?|5[1-5][0-9]{14}|"
                 r"3[47][0-9]{13}|3[0-9]{13}|"
@@ -43,9 +36,7 @@ class PIIMaskingService:
 
         # Masking characters
         self.mask_char = settings.pii_masking.mask_character
-        self.partial_mask_threshold = (
-            settings.pii_masking.partial_mask_threshold
-        )
+        self.partial_mask_threshold = settings.pii_masking.partial_mask_threshold
 
     async def mask_document(
         self, document: dict[str, Any], user_context: UserContext
@@ -65,18 +56,12 @@ class PIIMaskingService:
         doc_type = document.get("type", "")
 
         if doc_type == "learner":
-            masked_doc = await self._mask_learner_document(
-                masked_doc, user_context
-            )
+            masked_doc = await self._mask_learner_document(masked_doc, user_context)
         elif doc_type in ["lesson", "coursework"]:
-            masked_doc = await self._mask_content_document(
-                masked_doc, user_context
-            )
+            masked_doc = await self._mask_content_document(masked_doc, user_context)
         else:
             # Generic masking for unknown types
-            masked_doc = await self._mask_generic_document(
-                masked_doc, user_context
-            )
+            masked_doc = await self._mask_generic_document(masked_doc, user_context)
 
         return masked_doc
 
@@ -101,21 +86,15 @@ class PIIMaskingService:
             document["title"] = self._generate_masked_name(document["title"])
 
         if "masked_name" in document:
-            document["masked_name"] = self._generate_masked_name(
-                document["masked_name"]
-            )
+            document["masked_name"] = self._generate_masked_name(document["masked_name"])
 
         # Mask content that might contain PII
         if "content" in document:
-            document["content"] = await self._mask_text_content(
-                document["content"], user_context
-            )
+            document["content"] = await self._mask_text_content(document["content"], user_context)
 
         # Mask metadata
         if "metadata" in document:
-            document["metadata"] = await self._mask_metadata(
-                document["metadata"], user_context
-            )
+            document["metadata"] = await self._mask_metadata(document["metadata"], user_context)
 
         return document
 
@@ -125,21 +104,15 @@ class PIIMaskingService:
         """Mask PII in lesson/coursework documents."""
         # Mask content that might reference learners
         if "content" in document:
-            document["content"] = await self._mask_text_content(
-                document["content"], user_context
-            )
+            document["content"] = await self._mask_text_content(document["content"], user_context)
 
         # Mask title if it contains PII
         if "title" in document:
-            document["title"] = await self._mask_text_content(
-                document["title"], user_context
-            )
+            document["title"] = await self._mask_text_content(document["title"], user_context)
 
         # Mask metadata
         if "metadata" in document:
-            document["metadata"] = await self._mask_metadata(
-                document["metadata"], user_context
-            )
+            document["metadata"] = await self._mask_metadata(document["metadata"], user_context)
 
         return document
 
@@ -150,21 +123,15 @@ class PIIMaskingService:
         # Mask common text fields
         for field in ["title", "content", "description"]:
             if field in document:
-                document[field] = await self._mask_text_content(
-                    document[field], user_context
-                )
+                document[field] = await self._mask_text_content(document[field], user_context)
 
         # Mask metadata
         if "metadata" in document:
-            document["metadata"] = await self._mask_metadata(
-                document["metadata"], user_context
-            )
+            document["metadata"] = await self._mask_metadata(document["metadata"], user_context)
 
         return document
 
-    async def _mask_text_content(
-        self, content: str, user_context: UserContext
-    ) -> str:
+    async def _mask_text_content(self, content: str, user_context: UserContext) -> str:
         """Mask PII patterns in text content."""
         if not content or not isinstance(content, str):
             return content
@@ -181,9 +148,7 @@ class PIIMaskingService:
 
         # Mask names if enabled
         if settings.pii_masking.mask_names:
-            masked_content = await self._mask_names_in_text(
-                masked_content, user_context
-            )
+            masked_content = await self._mask_names_in_text(masked_content, user_context)
 
         return masked_content
 
@@ -197,22 +162,16 @@ class PIIMaskingService:
             if isinstance(value, str):
                 # Check if this field should be masked
                 if self._should_mask_field(key):
-                    masked_metadata[key] = await self._mask_text_content(
-                        value, user_context
-                    )
+                    masked_metadata[key] = await self._mask_text_content(value, user_context)
                 else:
                     masked_metadata[key] = value
             elif isinstance(value, dict):
-                masked_metadata[key] = await self._mask_metadata(
-                    value, user_context
-                )
+                masked_metadata[key] = await self._mask_metadata(value, user_context)
             elif isinstance(value, list):
                 masked_list = []
                 for item in value:
                     if isinstance(item, str) and self._should_mask_field(key):
-                        masked_list.append(
-                            await self._mask_text_content(item, user_context)
-                        )
+                        masked_list.append(await self._mask_text_content(item, user_context))
                     else:
                         masked_list.append(item)
                 masked_metadata[key] = masked_list
@@ -244,9 +203,9 @@ class PIIMaskingService:
             return original_name
 
         # Create a hash of the name for consistency
-        name_hash = hashlib.md5(
-            (original_name + settings.pii_masking.salt).encode()
-        ).hexdigest()[:8]
+        name_hash = hashlib.md5((original_name + settings.pii_masking.salt).encode()).hexdigest()[
+            :8
+        ]
 
         # Generate a masked name based on length
         if len(original_name.split()) > 1:
@@ -260,9 +219,7 @@ class PIIMaskingService:
             # Mask email: show first char and domain
             if "@" in match_text:
                 username, domain = match_text.split("@", 1)
-                masked_username = username[0] + self.mask_char * (
-                    len(username) - 1
-                )
+                masked_username = username[0] + self.mask_char * (len(username) - 1)
                 return f"{masked_username}@{domain}"
 
         elif pattern_name == "phone":
@@ -275,9 +232,7 @@ class PIIMaskingService:
             # Mask SSN: show last 4 digits
             digits = re.sub(r"[^\d]", "", match_text)
             if len(digits) == 9:
-                return (
-                    f"{self.mask_char * 3}-{self.mask_char * 2}-{digits[-4:]}"
-                )
+                return f"{self.mask_char * 3}-{self.mask_char * 2}-{digits[-4:]}"
 
         elif pattern_name == "credit_card":
             # Mask credit card: show last 4 digits
@@ -289,11 +244,7 @@ class PIIMaskingService:
             return self.mask_char * len(match_text)
         else:
             # Show first and last character, mask middle
-            return (
-                match_text[0]
-                + self.mask_char * (len(match_text) - 2)
-                + match_text[-1]
-            )
+            return match_text[0] + self.mask_char * (len(match_text) - 2) + match_text[-1]
 
     def _should_mask_field(self, field_name: str) -> bool:
         """Check if a field should be masked based on its name."""
@@ -314,9 +265,7 @@ class PIIMaskingService:
 
         return field_name.lower() in sensitive_fields
 
-    def _can_see_unmasked_data(
-        self, user_context: UserContext, document: dict[str, Any]
-    ) -> bool:
+    def _can_see_unmasked_data(self, user_context: UserContext, document: dict[str, Any]) -> bool:
         """Check if user can see unmasked data."""
         # System admins can see everything
         if user_context.role == UserRole.SYSTEM_ADMIN:
@@ -338,10 +287,7 @@ class PIIMaskingService:
                 return True
             if doc_class_id in user_context.class_ids:
                 return True
-            if any(
-                class_id in user_context.class_ids
-                for class_id in doc_class_ids
-            ):
+            if any(class_id in user_context.class_ids for class_id in doc_class_ids):
                 return True
 
         # Guardians can see unmasked data for their learners
@@ -363,9 +309,7 @@ class PIIMaskingService:
 
         return False
 
-    async def get_masking_level(
-        self, user_context: UserContext, document: dict[str, Any]
-    ) -> str:
+    async def get_masking_level(self, user_context: UserContext, document: dict[str, Any]) -> str:
         """Get the level of masking to apply."""
         if self._can_see_unmasked_data(user_context, document):
             return "none"

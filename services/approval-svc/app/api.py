@@ -44,14 +44,10 @@ async def create_approval(
 
     except ValueError as e:
         logger.warning("Validation error creating approval: %s", e)
-        return ApprovalCreationResult(
-            success=False, message="Validation error", errors=[str(e)]
-        )
+        return ApprovalCreationResult(success=False, message="Validation error", errors=[str(e)])
     except Exception as e:
         logger.error("Failed to create approval: %s", e)
-        raise HTTPException(
-            status_code=500, detail="Internal server error"
-        ) from e
+        raise HTTPException(status_code=500, detail="Internal server error") from e
 
 
 @router.get("/{approval_id}", response_model=ApprovalResponse)
@@ -72,44 +68,20 @@ async def get_approval(
 @router.get("", response_model=ApprovalListResponse)
 async def list_approvals(
     tenant_id: str | None = Query(None, description="Tenant ID for filtering"),
-    status: ApprovalStatus | None = Query(
-        None, description="Filter by status"
-    ),
-    approval_type: ApprovalType | None = Query(
-        None, description="Filter by type"
-    ),
+    status: ApprovalStatus | None = Query(None, description="Filter by status"),
+    approval_type: ApprovalType | None = Query(None, description="Filter by type"),
     priority: Priority | None = Query(None, description="Filter by priority"),
-    resource_type: str | None = Query(
-        None, description="Filter by resource type"
-    ),
+    resource_type: str | None = Query(None, description="Filter by resource type"),
     created_by: str | None = Query(None, description="Filter by creator"),
-    participant_user_id: str | None = Query(
-        None, description="Filter by participant"
-    ),
-    expires_before: datetime | None = Query(
-        None, description="Filter by expiry before date"
-    ),
-    expires_after: datetime | None = Query(
-        None, description="Filter by expiry after date"
-    ),
-    created_before: datetime | None = Query(
-        None, description="Filter by creation before date"
-    ),
-    created_after: datetime | None = Query(
-        None, description="Filter by creation after date"
-    ),
-    limit: int = Query(
-        default=50, ge=1, le=1000, description="Number of items to return"
-    ),
-    offset: int = Query(
-        default=0, ge=0, description="Number of items to skip"
-    ),
-    order_by: str = Query(
-        default="created_at", description="Field to order by"
-    ),
-    order_desc: bool = Query(
-        default=True, description="Order in descending order"
-    ),
+    participant_user_id: str | None = Query(None, description="Filter by participant"),
+    expires_before: datetime | None = Query(None, description="Filter by expiry before date"),
+    expires_after: datetime | None = Query(None, description="Filter by expiry after date"),
+    created_before: datetime | None = Query(None, description="Filter by creation before date"),
+    created_after: datetime | None = Query(None, description="Filter by creation after date"),
+    limit: int = Query(default=50, ge=1, le=1000, description="Number of items to return"),
+    offset: int = Query(default=0, ge=0, description="Number of items to skip"),
+    order_by: str = Query(default="created_at", description="Field to order by"),
+    order_desc: bool = Query(default=True, description="Order in descending order"),
     db: AsyncSession = Depends(get_db),
 ) -> ApprovalListResponse:
     """List approvals with filtering and pagination."""
@@ -140,9 +112,7 @@ async def list_approvals(
 async def make_decision(
     approval_id: UUID,
     decision_data: DecisionInput,
-    user_id: str = Query(
-        ..., description="ID of the user making the decision"
-    ),
+    user_id: str = Query(..., description="ID of the user making the decision"),
     tenant_id: str | None = Query(None, description="Tenant ID for filtering"),
     request: Request = None,
     db: AsyncSession = Depends(get_db),
@@ -197,8 +167,7 @@ async def cancel_approval(
     if approval.status != ApprovalStatus.PENDING:
         raise HTTPException(
             status_code=409,
-            detail=f"Cannot cancel approval with status "
-            f"{approval.status.value}",
+            detail=f"Cannot cancel approval with status " f"{approval.status.value}",
         )
 
     # NOTE: Cancellation logic is pending implementation

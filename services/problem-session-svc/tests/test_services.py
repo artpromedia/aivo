@@ -89,9 +89,7 @@ class TestInkService:
         """Create InkService instance."""
         return InkService()
 
-    async def test_create_session_success(
-        self, service, sample_learner_id
-    ):
+    async def test_create_session_success(self, service, sample_learner_id):
         """Test successful ink session creation."""
         session_id = uuid4()
 

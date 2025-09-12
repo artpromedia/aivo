@@ -68,12 +68,8 @@ class FirmwareUpdate(Base):  # pylint: disable=too-few-public-methods
 
     __tablename__ = "firmware_updates"
 
-    update_id: Mapped[UUID] = mapped_column(
-        PGUUID(as_uuid=True), primary_key=True, default=uuid4
-    )
-    update_type: Mapped[UpdateType] = mapped_column(
-        String(20), nullable=False, index=True
-    )
+    update_id: Mapped[UUID] = mapped_column(PGUUID(as_uuid=True), primary_key=True, default=uuid4)
+    update_type: Mapped[UpdateType] = mapped_column(String(20), nullable=False, index=True)
     version: Mapped[str] = mapped_column(String(50), nullable=False, index=True)
     previous_version: Mapped[str] = mapped_column(String(50), nullable=True)
 
@@ -117,9 +113,7 @@ class FirmwareUpdate(Base):  # pylint: disable=too-few-public-methods
         DateTime, server_default=text("CURRENT_TIMESTAMP"), index=True
     )
     updated_at: Mapped[datetime] = mapped_column(
-        DateTime,
-        server_default=text("CURRENT_TIMESTAMP"),
-        onupdate=text("CURRENT_TIMESTAMP")
+        DateTime, server_default=text("CURRENT_TIMESTAMP"), onupdate=text("CURRENT_TIMESTAMP")
     )
     deployed_at: Mapped[datetime] = mapped_column(DateTime, nullable=True)
     completed_at: Mapped[datetime] = mapped_column(DateTime, nullable=True)
@@ -130,9 +124,7 @@ class FirmwareUpdate(Base):  # pylint: disable=too-few-public-methods
     rollback_completed_at: Mapped[datetime] = mapped_column(DateTime, nullable=True)
 
     # Created by
-    created_by: Mapped[UUID] = mapped_column(
-        PGUUID(as_uuid=True), nullable=False, index=True
-    )
+    created_by: Mapped[UUID] = mapped_column(PGUUID(as_uuid=True), nullable=False, index=True)
 
     # Soft delete
     is_deleted: Mapped[bool] = mapped_column(Boolean, default=False, index=True)
@@ -152,22 +144,15 @@ class DeviceUpdate(Base):  # pylint: disable=too-few-public-methods
         PGUUID(as_uuid=True), primary_key=True, default=uuid4
     )
     update_id: Mapped[UUID] = mapped_column(
-        PGUUID(as_uuid=True),
-        ForeignKey("firmware_updates.update_id"),
-        nullable=False,
-        index=True
+        PGUUID(as_uuid=True), ForeignKey("firmware_updates.update_id"), nullable=False, index=True
     )
-    device_id: Mapped[UUID] = mapped_column(
-        PGUUID(as_uuid=True), nullable=False, index=True
-    )
+    device_id: Mapped[UUID] = mapped_column(PGUUID(as_uuid=True), nullable=False, index=True)
 
     # Update status
     status: Mapped[DeviceUpdateStatus] = mapped_column(
         String(20), default=DeviceUpdateStatus.PENDING, index=True
     )
-    assigned_ring: Mapped[DeploymentRing] = mapped_column(
-        String(20), nullable=False, index=True
-    )
+    assigned_ring: Mapped[DeploymentRing] = mapped_column(String(20), nullable=False, index=True)
 
     # Progress tracking
     download_progress: Mapped[float] = mapped_column(Float, default=0.0)
@@ -211,9 +196,7 @@ class DeviceHeartbeat(Base):  # pylint: disable=too-few-public-methods
     heartbeat_id: Mapped[UUID] = mapped_column(
         PGUUID(as_uuid=True), primary_key=True, default=uuid4
     )
-    device_id: Mapped[UUID] = mapped_column(
-        PGUUID(as_uuid=True), nullable=False, index=True
-    )
+    device_id: Mapped[UUID] = mapped_column(PGUUID(as_uuid=True), nullable=False, index=True)
 
     # Device identification
     device_type: Mapped[str] = mapped_column(String(50), nullable=False, index=True)
@@ -246,9 +229,7 @@ class DeviceHeartbeat(Base):  # pylint: disable=too-few-public-methods
     location_accuracy: Mapped[float] = mapped_column(Float, nullable=True)
 
     # Update status
-    pending_update_id: Mapped[UUID] = mapped_column(
-        PGUUID(as_uuid=True), nullable=True, index=True
-    )
+    pending_update_id: Mapped[UUID] = mapped_column(PGUUID(as_uuid=True), nullable=True, index=True)
     last_update_check: Mapped[datetime] = mapped_column(DateTime, nullable=True)
     update_available: Mapped[bool] = mapped_column(Boolean, default=False)
 
@@ -275,15 +256,9 @@ class UpdateRolloutMetrics(Base):  # pylint: disable=too-few-public-methods
 
     __tablename__ = "update_rollout_metrics"
 
-    metric_id: Mapped[UUID] = mapped_column(
-        PGUUID(as_uuid=True), primary_key=True, default=uuid4
-    )
-    update_id: Mapped[UUID] = mapped_column(
-        PGUUID(as_uuid=True), nullable=False, index=True
-    )
-    deployment_ring: Mapped[DeploymentRing] = mapped_column(
-        String(20), nullable=False, index=True
-    )
+    metric_id: Mapped[UUID] = mapped_column(PGUUID(as_uuid=True), primary_key=True, default=uuid4)
+    update_id: Mapped[UUID] = mapped_column(PGUUID(as_uuid=True), nullable=False, index=True)
+    deployment_ring: Mapped[DeploymentRing] = mapped_column(String(20), nullable=False, index=True)
 
     # Rollout statistics
     total_devices: Mapped[int] = mapped_column(Integer, default=0)

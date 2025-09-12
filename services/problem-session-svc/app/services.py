@@ -714,13 +714,10 @@ class ProblemSessionOrchestrator:
                 return
 
             # Simple completion logic - complete after 5 problems or time limit
-            should_complete = (
-                session.total_problems_attempted >= 5
-                or (
-                    session.started_at
-                    and datetime.utcnow() - session.started_at
-                    > timedelta(minutes=session.session_duration_minutes)
-                )
+            should_complete = session.total_problems_attempted >= 5 or (
+                session.started_at
+                and datetime.utcnow() - session.started_at
+                > timedelta(minutes=session.session_duration_minutes)
             )
 
             if should_complete:
