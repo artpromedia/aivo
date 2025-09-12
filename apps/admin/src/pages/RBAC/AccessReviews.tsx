@@ -163,8 +163,7 @@ export default function AccessReviews({ tenantId }: AccessReviewsProps) {
       setShowCreateForm(false);
 
       await refetchReviews();
-       
-    } catch (error) {
+    } catch {
       setErrors({ form: 'Failed to create access review. Please try again.' });
     }
   };
@@ -184,8 +183,7 @@ export default function AccessReviews({ tenantId }: AccessReviewsProps) {
 
       setReviewDecision(null);
       // Refetch review items to update the list
-       
-    } catch (error) {
+    } catch {
       setErrors({ decision: 'Failed to submit decision. Please try again.' });
     }
   };

@@ -295,8 +295,8 @@ export const useRevokeUserRole = () => {
       userRoleId: string;
       tenantId?: string;
     }) => RBACAPI.revokeUserRole(userRoleId, tenantId),
-     
-    onSuccess: (_data, _variables) => {
+
+    onSuccess: () => {
       queryClient.invalidateQueries({
         queryKey: ['rbac'],
       });

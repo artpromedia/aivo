@@ -150,8 +150,7 @@ export default function CustomRoles({ tenantId }: CustomRolesProps) {
       setShowCreateForm(false);
 
       await refetchRoles();
-       
-    } catch (error) {
+    } catch {
       setErrors({ form: 'Failed to create role. Please try again.' });
     }
   };
@@ -197,8 +196,7 @@ export default function CustomRoles({ tenantId }: CustomRolesProps) {
 
       setEditingRole(null);
       await refetchRoles();
-       
-    } catch (error) {
+    } catch {
       setErrors({ form: 'Failed to update role. Please try again.' });
     }
   };
@@ -211,8 +209,7 @@ export default function CustomRoles({ tenantId }: CustomRolesProps) {
     try {
       await deleteRoleMutation.mutateAsync({ roleId, tenantId });
       await refetchRoles();
-       
-    } catch (error) {
+    } catch {
       setErrors({ form: 'Failed to delete role. Please try again.' });
     }
   };
