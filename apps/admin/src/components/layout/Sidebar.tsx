@@ -18,6 +18,7 @@ import {
   Bell,
   Eye,
   Activity,
+  Beaker,
 } from 'lucide-react';
 import { useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
@@ -64,6 +65,11 @@ const navigationItems = [
     name: 'Ink Operations',
     href: '/ink-ops',
     icon: Pen,
+  },
+  {
+    name: 'Experiments',
+    href: '/experiments',
+    icon: Beaker,
   },
   {
     name: 'Incident Center',
