@@ -6,3 +6,4 @@ export * from './ink';
 export * from './subscriptions';
 export * from './billing';
 export * from './namespaces';
+export * from './integrations';

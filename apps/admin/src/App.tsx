@@ -35,6 +35,10 @@ const ExperimentsPage = lazy(() =>
     default: module.ExperimentsPage,
   }))
 );
+const Hub = lazy(() =>
+  import('@/pages/Integrations').then(module => ({ default: module.Hub }))
+);
+const Secrets = lazy(() => import('@/pages/Integrations/Secrets'));
 const InkOps = lazy(() =>
   import('@/pages/InkOps').then(module => ({ default: module.InkOps }))
 );
@@ -143,6 +147,22 @@ function App() {
               element={
                 <Suspense fallback={<PageLoader />}>
                   <ExperimentsPage />
+                </Suspense>
+              }
+            />
+            <Route
+              path='secrets'
+              element={
+                <Suspense fallback={<PageLoader />}>
+                  <Secrets />
+                </Suspense>
+              }
+            />
+            <Route
+              path='integrations'
+              element={
+                <Suspense fallback={<PageLoader />}>
+                  <Hub />
                 </Suspense>
               }
             />

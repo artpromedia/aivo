@@ -19,6 +19,8 @@ import {
   Eye,
   Activity,
   Beaker,
+  Plug,
+  Key,
 } from 'lucide-react';
 import { useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
@@ -70,6 +72,16 @@ const navigationItems = [
     name: 'Experiments',
     href: '/experiments',
     icon: Beaker,
+  },
+  {
+    name: 'Integrations Hub',
+    href: '/integrations',
+    icon: Plug,
+  },
+  {
+    name: 'Secrets & Keys Vault',
+    href: '/secrets',
+    icon: Key,
   },
   {
     name: 'Incident Center',
