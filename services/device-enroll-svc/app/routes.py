@@ -12,20 +12,29 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from .database import get_db
 from .models import Device
 from .schemas import (
+    AlertMetricsResponse,
+    AlertRuleListResponse,
+    AlertRuleRequest,
+    AlertRuleResponse,
     AttestationChallengeRequest,
     AttestationChallengeResponse,
     AttestationSubmissionRequest,
     AttestationSubmissionResponse,
     CertificateRevokeRequest,
     CertificateRevokeResponse,
+    DeviceActionRequest,
+    DeviceActionResponse,
     DeviceInfoResponse,
     DeviceListResponse,
     EnrollmentRequest,
     EnrollmentResponse,
     ErrorResponse,
+    FleetHealthResponse,
     HealthResponse,
 )
 from .services import AttestationService, DeviceEnrollmentService
+from .services.alert_service import AlertRulesService
+from .services.fleet_service import FleetHealthService
 
 logger = structlog.get_logger(__name__)
 
@@ -34,6 +43,8 @@ router = APIRouter()
 # Service instances
 enrollment_service = DeviceEnrollmentService()
 attestation_service = AttestationService()
+fleet_service = FleetHealthService()
+alert_service = AlertRulesService()
 
 
 @router.post(
@@ -424,3 +435,237 @@ async def health_check(
         version="1.0.0",
         database=db_status,
     )
+
+
+# Fleet Health & Alerts Routes
+
+@router.get(
+    "/fleet/health",
+    response_model=FleetHealthResponse,
+    summary="Get Fleet Health Metrics",
+    description="Get aggregated fleet health metrics including uptime, heartbeat gaps, and firmware drift",
+    responses={
+        200: {"description": "Fleet health metrics retrieved"},
+        500: {"model": ErrorResponse, "description": "Internal server error"},
+    },
+)
+async def get_fleet_health(
+    tenant_id: UUID = None,
+    range_days: int = 30,
+    db: Annotated[AsyncSession, Depends(get_db)] = None,
+) -> FleetHealthResponse:
+    """Get fleet health metrics."""
+    try:
+        health_data = await fleet_service.get_fleet_health(
+            db=db, tenant_id=tenant_id, range_days=range_days
+        )
+        return FleetHealthResponse(**health_data)
+
+    except Exception as e:
+        logger.error("Failed to get fleet health", error=str(e))
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail="Failed to retrieve fleet health metrics",
+        ) from e
+
+
+@router.get(
+    "/alerts/rules",
+    response_model=AlertRuleListResponse,
+    summary="List Alert Rules",
+    description="Get list of alert rules with optional filtering",
+)
+async def list_alert_rules(
+    tenant_id: UUID = None,
+    is_enabled: bool = None,
+    db: Annotated[AsyncSession, Depends(get_db)] = None,
+) -> AlertRuleListResponse:
+    """List alert rules."""
+    try:
+        rules = await alert_service.get_alert_rules(
+            db=db, tenant_id=tenant_id, is_enabled=is_enabled
+        )
+
+        rule_responses = []
+        for rule in rules:
+            rule_responses.append(
+                AlertRuleResponse(
+                    rule_id=rule.rule_id,
+                    name=rule.name,
+                    description=rule.description,
+                    metric=rule.metric,
+                    condition=rule.condition.value,
+                    threshold=rule.threshold,
+                    window_minutes=rule.window_minutes,
+                    tenant_id=rule.tenant_id,
+                    device_filter=rule.device_filter,
+                    actions=[action.value for action in rule.actions],
+                    action_config=rule.action_config,
+                    is_enabled=rule.is_enabled,
+                    trigger_count=rule.trigger_count,
+                    last_triggered_at=rule.last_triggered_at,
+                    created_by=rule.created_by,
+                    created_at=rule.created_at,
+                    updated_at=rule.updated_at,
+                )
+            )
+
+        return AlertRuleListResponse(rules=rule_responses, total=len(rule_responses))
+
+    except Exception as e:
+        logger.error("Failed to list alert rules", error=str(e))
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail="Failed to retrieve alert rules",
+        ) from e
+
+
+@router.post(
+    "/alerts/rules",
+    response_model=AlertRuleResponse,
+    status_code=status.HTTP_201_CREATED,
+    summary="Create Alert Rule",
+    description="Create a new alert rule",
+)
+async def create_alert_rule(
+    request: AlertRuleRequest,
+    created_by: UUID,  # This would come from authentication middleware
+    db: Annotated[AsyncSession, Depends(get_db)] = None,
+) -> AlertRuleResponse:
+    """Create a new alert rule."""
+    try:
+        from .models import AlertRuleAction, AlertRuleCondition
+
+        actions = [AlertRuleAction(action) for action in request.actions]
+        condition = AlertRuleCondition(request.condition)
+
+        rule = await alert_service.create_alert_rule(
+            db=db,
+            name=request.name,
+            description=request.description,
+            metric=request.metric,
+            condition=condition,
+            threshold=request.threshold,
+            window_minutes=request.window_minutes,
+            tenant_id=request.tenant_id,
+            device_filter=request.device_filter,
+            actions=actions,
+            action_config=request.action_config,
+            created_by=created_by,
+        )
+
+        return AlertRuleResponse(
+            rule_id=rule.rule_id,
+            name=rule.name,
+            description=rule.description,
+            metric=rule.metric,
+            condition=rule.condition.value,
+            threshold=rule.threshold,
+            window_minutes=rule.window_minutes,
+            tenant_id=rule.tenant_id,
+            device_filter=rule.device_filter,
+            actions=[action.value for action in rule.actions],
+            action_config=rule.action_config,
+            is_enabled=rule.is_enabled,
+            trigger_count=rule.trigger_count,
+            last_triggered_at=rule.last_triggered_at,
+            created_by=rule.created_by,
+            created_at=rule.created_at,
+            updated_at=rule.updated_at,
+        )
+
+    except ValueError as e:
+        logger.warning("Invalid alert rule request", error=str(e))
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail=str(e),
+        ) from e
+    except Exception as e:
+        logger.error("Failed to create alert rule", error=str(e))
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail="Failed to create alert rule",
+        ) from e
+
+
+@router.get(
+    "/alerts/metrics",
+    response_model=AlertMetricsResponse,
+    summary="Get Available Alert Metrics",
+    description="Get list of available metrics, conditions, and actions for alert rules",
+)
+async def get_alert_metrics() -> AlertMetricsResponse:
+    """Get available alert metrics, conditions, and actions."""
+    return AlertMetricsResponse(
+        metrics=alert_service.get_available_metrics(),
+        conditions=alert_service.get_available_conditions(),
+        actions=alert_service.get_available_actions(),
+    )
+
+
+@router.post(
+    "/devices/{device_id}/actions/{action_type}",
+    response_model=DeviceActionResponse,
+    status_code=status.HTTP_201_CREATED,
+    summary="Execute Device Action",
+    description="Execute a remote device action (wipe, reboot, lock)",
+)
+async def execute_device_action(
+    device_id: UUID,
+    action_type: str,
+    request: DeviceActionRequest,
+    initiated_by: UUID,  # This would come from authentication middleware
+    db: Annotated[AsyncSession, Depends(get_db)] = None,
+) -> DeviceActionResponse:
+    """Execute a remote device action."""
+    try:
+        valid_actions = ["wipe", "reboot", "lock"]
+        if action_type not in valid_actions:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail=f"Invalid action type. Must be one of: {', '.join(valid_actions)}",
+            )
+
+        from .models import DeviceAction
+
+        action = DeviceAction(
+            device_id=device_id,
+            action_type=action_type,
+            reason=request.reason,
+            parameters=request.parameters,
+            initiated_by=initiated_by,
+        )
+
+        db.add(action)
+        await db.commit()
+        await db.refresh(action)
+
+        logger.info(
+            "Device action initiated",
+            device_id=device_id,
+            action_type=action_type,
+            action_id=action.action_id,
+            initiated_by=initiated_by,
+        )
+
+        return DeviceActionResponse(
+            action_id=action.action_id,
+            device_id=action.device_id,
+            action_type=action.action_type,
+            status=action.status,
+            reason=action.reason,
+            initiated_by=action.initiated_by,
+            created_at=action.created_at,
+            sent_at=action.sent_at,
+            completed_at=action.completed_at,
+            error_message=action.error_message,
+        )
+
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error("Failed to execute device action", device_id=device_id, error=str(e))
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail="Failed to execute device action",
+        ) from e

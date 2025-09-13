@@ -313,3 +313,54 @@ class ErrorResponse(BaseModel):
     message: str
     details: dict | None = None
     timestamp: datetime = Field(default_factory=datetime.utcnow)
+
+
+# Remote Action Schemas
+
+class RemoteActionRequest(BaseModel):
+    """Schema for creating a remote device action."""
+
+    reason: str | None = Field(None, description="Reason for the action")
+    parameters: dict | None = Field(None, description="Action-specific parameters")
+    priority: int = Field(1, ge=1, le=5, description="Action priority (1=low, 5=critical)")
+    initiated_by: UUID = Field(..., description="User ID who initiated the action")
+    correlation_id: str | None = Field(None, description="Correlation ID for tracking")
+    client_ip: str | None = Field(None, description="Client IP address")
+
+
+class RemoteActionResponse(BaseModel):
+    """Schema for remote device action response."""
+
+    action_id: UUID
+    device_id: UUID
+    action_type: str
+    status: str
+    reason: str | None
+    parameters: dict | None
+    priority: int
+    initiated_by: UUID
+    created_at: datetime
+    sent_at: datetime | None
+    acknowledged_at: datetime | None
+    completed_at: datetime | None
+    expires_at: datetime
+    error_message: str | None
+    attempts: int
+    max_attempts: int
+
+
+class RemoteActionListResponse(BaseModel):
+    """Schema for list of remote device actions."""
+
+    actions: list[RemoteActionResponse]
+    total: int
+    device_id: UUID
+
+
+class RemoteActionStatsResponse(BaseModel):
+    """Schema for remote action statistics."""
+
+    period_days: int
+    status_distribution: dict[str, int]
+    action_type_distribution: dict[str, int]
+    total_actions: int

@@ -1,7 +1,7 @@
 """Database models for Device OTA & Heartbeat Service."""
 # flake8: noqa: E501
 
-from datetime import datetime
+from datetime import datetime, timedelta
 from enum import Enum
 from uuid import UUID, uuid4
 
@@ -289,3 +289,73 @@ class UpdateRolloutMetrics(Base):  # pylint: disable=too-few-public-methods
     )
     period_start: Mapped[datetime] = mapped_column(DateTime, nullable=False)
     period_end: Mapped[datetime] = mapped_column(DateTime, nullable=False)
+
+
+class RemoteActionType(str, Enum):  # pylint: disable=too-few-public-methods
+    """Type of remote device action."""
+
+    WIPE = "wipe"
+    REBOOT = "reboot"
+    LOCK = "lock"
+    UNLOCK = "unlock"
+    LOCATE = "locate"
+
+
+class RemoteActionStatus(str, Enum):  # pylint: disable=too-few-public-methods
+    """Status of remote device action."""
+
+    PENDING = "pending"
+    SENT = "sent"
+    ACKNOWLEDGED = "acknowledged"
+    IN_PROGRESS = "in_progress"
+    COMPLETED = "completed"
+    FAILED = "failed"
+    EXPIRED = "expired"
+
+
+class RemoteDeviceAction(Base):  # pylint: disable=too-few-public-methods
+    """Remote device actions for fleet management."""
+
+    __tablename__ = "remote_device_actions"
+
+    action_id: Mapped[UUID] = mapped_column(PGUUID(as_uuid=True), primary_key=True, default=uuid4)
+    device_id: Mapped[UUID] = mapped_column(PGUUID(as_uuid=True), nullable=False, index=True)
+    action_type: Mapped[RemoteActionType] = mapped_column(String(20), nullable=False, index=True)
+
+    # Action details
+    reason: Mapped[str] = mapped_column(Text, nullable=True)
+    parameters: Mapped[dict] = mapped_column(JSON, nullable=True)
+    priority: Mapped[int] = mapped_column(Integer, default=1)  # 1=low, 5=critical
+
+    # Execution tracking
+    status: Mapped[RemoteActionStatus] = mapped_column(
+        String(20), default=RemoteActionStatus.PENDING, index=True
+    )
+    attempts: Mapped[int] = mapped_column(Integer, default=0)
+    max_attempts: Mapped[int] = mapped_column(Integer, default=3)
+
+    # Results
+    result_data: Mapped[dict] = mapped_column(JSON, nullable=True)
+    error_message: Mapped[str] = mapped_column(Text, nullable=True)
+    device_response: Mapped[dict] = mapped_column(JSON, nullable=True)
+
+    # Timing
+    sent_at: Mapped[datetime] = mapped_column(DateTime, nullable=True)
+    acknowledged_at: Mapped[datetime] = mapped_column(DateTime, nullable=True)
+    completed_at: Mapped[datetime] = mapped_column(DateTime, nullable=True)
+    expires_at: Mapped[datetime] = mapped_column(
+        DateTime, nullable=False, default=lambda: datetime.utcnow() + timedelta(hours=24)
+    )
+
+    # Metadata
+    initiated_by: Mapped[UUID] = mapped_column(PGUUID(as_uuid=True), nullable=False, index=True)
+    client_ip: Mapped[str] = mapped_column(String(45), nullable=True)
+    correlation_id: Mapped[str] = mapped_column(String(100), nullable=True, index=True)
+
+    # Timestamps
+    created_at: Mapped[datetime] = mapped_column(
+        DateTime, server_default=text("CURRENT_TIMESTAMP"), index=True
+    )
+    updated_at: Mapped[datetime] = mapped_column(
+        DateTime, server_default=text("CURRENT_TIMESTAMP"), onupdate=text("CURRENT_TIMESTAMP")
+    )

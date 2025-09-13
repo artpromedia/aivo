@@ -17,6 +17,7 @@ import {
   Megaphone,
   Bell,
   Eye,
+  Activity,
 } from 'lucide-react';
 import { useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
@@ -43,6 +44,11 @@ const navigationItems = [
     name: 'Device Management',
     href: '/devices',
     icon: Smartphone,
+  },
+  {
+    name: 'Fleet Health & Alerts',
+    href: '/fleet-health',
+    icon: Activity,
   },
   {
     name: 'Device Policies',

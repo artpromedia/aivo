@@ -180,9 +180,8 @@ const Moderation: React.FC = () => {
 
         const data = await response.json();
         setStats(data);
-      } catch (err) {
-         
-        console.error('Error loading stats:', err);
+      } catch {
+        // Handle statistics loading error silently
       } finally {
         setStatsLoading(false);
       }
@@ -196,9 +195,8 @@ const Moderation: React.FC = () => {
 
         const data = await response.json();
         setAuditLogs(data || []);
-      } catch (err) {
-         
-        console.error('Error loading audit logs:', err);
+      } catch {
+        // Handle audit logs loading error silently
       } finally {
         setAuditLoading(false);
       }
@@ -279,9 +277,8 @@ const Moderation: React.FC = () => {
       setDecisionReason('');
       setDecisionNotes('');
       await refreshQueue();
-    } catch (err) {
-       
-      console.error('Error making decision:', err);
+    } catch {
+      setQueueError('Failed to make decision');
     } finally {
       setDecisionLoading(false);
     }

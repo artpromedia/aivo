@@ -9,7 +9,7 @@ from fastapi.middleware.trustedhost import TrustedHostMiddleware
 # pylint: disable=import-error
 from app.config import get_settings
 from app.database import create_tables
-from app.routes import firmware, health, heartbeat
+from app.routes import firmware, health, heartbeat, remote_actions
 
 
 @asynccontextmanager
@@ -77,6 +77,12 @@ def create_app() -> FastAPI:
         heartbeat.router,
         prefix="/api/v1",
         tags=["Device Heartbeat"],
+    )
+
+    application.include_router(
+        remote_actions.router,
+        prefix="/api/v1",
+        tags=["Remote Actions"],
     )
 
     return application

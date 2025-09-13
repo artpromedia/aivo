@@ -116,9 +116,9 @@ const DataGovernance: React.FC = () => {
       if (!response.ok) throw new Error('Failed to load policies');
       const data = await response.json();
       setPolicies(data.policies || []);
-    } catch (err) {
-       
-      console.error('Error loading policies:', err);
+    } catch {
+      // Handle error silently or use proper error handling
+      setError('Failed to load retention policies');
     }
   };
 
@@ -128,9 +128,9 @@ const DataGovernance: React.FC = () => {
       if (!response.ok) throw new Error('Failed to load DSR requests');
       const data = await response.json();
       setDsrRequests(data.requests || []);
-    } catch (err) {
-       
-      console.error('Error loading DSR requests:', err);
+    } catch {
+      // Handle error silently or use proper error handling
+      setError('Failed to load DSR requests');
     }
   };
 
@@ -140,9 +140,8 @@ const DataGovernance: React.FC = () => {
       if (!response.ok) throw new Error('Failed to load legal holds');
       const data = await response.json();
       setLegalHolds(data.holds || []);
-    } catch (err) {
-       
-      console.error('Error loading legal holds:', err);
+    } catch {
+      setError('Failed to load legal holds');
     }
   };
 
@@ -152,9 +151,8 @@ const DataGovernance: React.FC = () => {
       if (!response.ok) throw new Error('Failed to load DSR stats');
       const data = await response.json();
       setDsrStats(data);
-    } catch (err) {
-       
-      console.error('Error loading DSR stats:', err);
+    } catch {
+      setError('Failed to load DSR stats');
     }
   };
 

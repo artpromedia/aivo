@@ -7,6 +7,7 @@ import { BillingPage } from '@/pages/BillingPage';
 import { Dashboard } from '@/pages/Dashboard';
 import { DevicePolicy } from '@/pages/DevicePolicy';
 import { Devices } from '@/pages/Devices';
+import { FleetHealth } from '@/pages/Devices/FleetHealth';
 import { InkOps } from '@/pages/InkOps';
 import { NamespacesPage } from '@/pages/NamespacesPage';
 import BannersPage from '@/pages/Operations/Banners';
@@ -37,6 +38,7 @@ function App() {
             <Route index element={<Dashboard />} />
             <Route path='users' element={<UsersPage />} />
             <Route path='devices' element={<Devices />} />
+            <Route path='fleet-health' element={<FleetHealth />} />
             <Route path='device-policies' element={<DevicePolicy />} />
             <Route path='ota' element={<OTA />} />
             <Route path='ink-ops' element={<InkOps />} />

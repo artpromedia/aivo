@@ -40,7 +40,7 @@ interface AuditEvent {
   resource_id: string;
   user_id: string;
   action: string;
-  details: Record<string, any>;
+  details: Record<string, string | number | boolean>;
   ip_address: string;
   user_agent: string;
   session_id?: string;
