@@ -13,7 +13,9 @@ import BannersPage from '@/pages/Operations/Banners';
 import IncidentsPage from '@/pages/Operations/Incidents';
 import NotificationSubscriptionsPage from '@/pages/Operations/NotificationSubscriptions';
 import { OTA } from '@/pages/OTA';
+import DataGovernance from '@/pages/Security/DataGovernance';
 import { SubscriptionsPage } from '@/pages/SubscriptionsPage';
+import Moderation from '@/pages/Trust/Moderation';
 import { UsersPage } from '@/pages/UsersPage';
 
 // Create a client
@@ -47,6 +49,8 @@ function App() {
               path='notification-subscriptions'
               element={<NotificationSubscriptionsPage />}
             />
+            <Route path='data-governance' element={<DataGovernance />} />
+            <Route path='moderation' element={<Moderation />} />
             <Route
               path='support'
               element={<div>Support Page (Coming Soon)</div>}

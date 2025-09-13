@@ -16,6 +16,7 @@ import {
   AlertTriangle,
   Megaphone,
   Bell,
+  Eye,
 } from 'lucide-react';
 import { useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
@@ -92,6 +93,16 @@ const navigationItems = [
     name: 'Support & Help',
     href: '/support',
     icon: HelpCircle,
+  },
+  {
+    name: 'Data Governance',
+    href: '/data-governance',
+    icon: Shield,
+  },
+  {
+    name: 'Content Moderation',
+    href: '/moderation',
+    icon: Eye,
   },
 ];
 
