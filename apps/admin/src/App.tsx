@@ -62,6 +62,10 @@ const SubscriptionsPage = lazy(() =>
 );
 const Moderation = lazy(() => import('@/pages/Trust/Moderation'));
 const SearchPage = lazy(() => import('@/pages/SearchPage'));
+const IdentityPage = lazy(() => import('@/pages/enterprise/IdentityPage'));
+const RBACPage = lazy(() => import('@/pages/enterprise/RBACPage'));
+const SecretsPage = lazy(() => import('@/pages/enterprise/SecretsPage'));
+const APIUsagePage = lazy(() => import('@/pages/enterprise/APIUsagePage'));
 
 // Loading component
 const PageLoader = () => (
@@ -221,6 +225,95 @@ function App() {
                   <Moderation />
                 </Suspense>
               }
+            />
+            {/* Enterprise Feature Routes */}
+            <Route
+              path='settings'
+              element={<div>Settings Dashboard (Coming Soon)</div>}
+            />
+            <Route
+              path='identity'
+              element={
+                <Suspense fallback={<PageLoader />}>
+                  <IdentityPage />
+                </Suspense>
+              }
+            />
+            <Route
+              path='rbac'
+              element={
+                <Suspense fallback={<PageLoader />}>
+                  <RBACPage />
+                </Suspense>
+              }
+            />
+            <Route
+              path='secrets'
+              element={
+                <Suspense fallback={<PageLoader />}>
+                  <SecretsPage />
+                </Suspense>
+              }
+            />
+            {/* Security Section Routes */}
+            <Route
+              path='security/audit-logs'
+              element={<div>Audit Logs & Security Events (Coming Soon)</div>}
+            />
+            <Route
+              path='security/data-governance'
+              element={
+                <Suspense fallback={<PageLoader />}>
+                  <DataGovernance />
+                </Suspense>
+              }
+            />
+            {/* Operations Section Routes */}
+            <Route
+              path='operations/incidents'
+              element={
+                <Suspense fallback={<PageLoader />}>
+                  <IncidentsPage />
+                </Suspense>
+              }
+            />
+            <Route
+              path='operations/api-usage'
+              element={
+                <Suspense fallback={<PageLoader />}>
+                  <APIUsagePage />
+                </Suspense>
+              }
+            />
+            <Route
+              path='operations/fleet-health'
+              element={<div>Operational Fleet Health (Coming Soon)</div>}
+            />
+            <Route
+              path='operations/banners'
+              element={
+                <Suspense fallback={<PageLoader />}>
+                  <BannersPage />
+                </Suspense>
+              }
+            />
+            <Route
+              path='operations/notification-subscriptions'
+              element={
+                <Suspense fallback={<PageLoader />}>
+                  <NotificationSubscriptionsPage />
+                </Suspense>
+              }
+            />
+            {/* Experiments Section Routes */}
+            <Route
+              path='experiments/flags'
+              element={<div>Feature Flags Management (Coming Soon)</div>}
+            />
+            {/* Analytics Section Routes */}
+            <Route
+              path='analytics/reports'
+              element={<div>Reports & Analytics Dashboard (Coming Soon)</div>}
             />
             <Route
               path='support'

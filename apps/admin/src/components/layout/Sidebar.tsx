@@ -22,6 +22,13 @@ import {
   Plug,
   Search,
   Command,
+  Settings,
+  Key,
+  UserCheck,
+  Database,
+  BarChart3,
+  Flag,
+  Zap,
 } from 'lucide-react';
 import { useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
@@ -70,10 +77,21 @@ const navigationItems = [
     href: '/ink-ops',
     icon: Pen,
   },
+  // Enterprise Features
   {
-    name: 'Experiments',
-    href: '/experiments',
-    icon: Beaker,
+    name: 'Settings',
+    href: '/settings',
+    icon: Settings,
+  },
+  {
+    name: 'Identity & Access',
+    href: '/identity',
+    icon: UserCheck,
+  },
+  {
+    name: 'RBAC & Permissions',
+    href: '/rbac',
+    icon: Key,
   },
   {
     name: 'Integrations Hub',
@@ -81,20 +99,65 @@ const navigationItems = [
     icon: Plug,
   },
   {
+    name: 'Secrets & Keys Vault',
+    href: '/secrets',
+    icon: Database,
+  },
+  // Security Section
+  {
+    name: 'Audit Logs',
+    href: '/security/audit-logs',
+    icon: Shield,
+  },
+  {
+    name: 'Data Governance',
+    href: '/security/data-governance',
+    icon: Eye,
+  },
+  // Operations Section
+  {
     name: 'Incident Center',
-    href: '/incidents',
+    href: '/operations/incidents',
     icon: AlertTriangle,
   },
   {
+    name: 'API Usage & Limits',
+    href: '/operations/api-usage',
+    icon: Zap,
+  },
+  {
+    name: 'Fleet Health',
+    href: '/operations/fleet-health',
+    icon: Activity,
+  },
+  {
     name: 'Announcements',
-    href: '/banners',
+    href: '/operations/banners',
     icon: Megaphone,
   },
   {
     name: 'Notifications',
-    href: '/notification-subscriptions',
+    href: '/operations/notification-subscriptions',
     icon: Bell,
   },
+  // Experiments Section
+  {
+    name: 'Feature Flags',
+    href: '/experiments/flags',
+    icon: Flag,
+  },
+  {
+    name: 'Experiments',
+    href: '/experiments',
+    icon: Beaker,
+  },
+  // Analytics Section
+  {
+    name: 'Reports & Analytics',
+    href: '/analytics/reports',
+    icon: BarChart3,
+  },
+  // Other
   {
     name: 'Subscriptions',
     href: '/subscriptions',
@@ -114,16 +177,6 @@ const navigationItems = [
     name: 'Support & Help',
     href: '/support',
     icon: HelpCircle,
-  },
-  {
-    name: 'Data Governance',
-    href: '/data-governance',
-    icon: Shield,
-  },
-  {
-    name: 'Content Moderation',
-    href: '/moderation',
-    icon: Eye,
   },
 ];
 
@@ -196,7 +249,7 @@ export function Sidebar({ onThemeToggle, isDark, onSearchOpen }: SidebarProps) {
           )}
 
           {/* Navigation */}
-          <nav className='flex-1 p-4 space-y-2'>
+          <nav className='flex-1 p-4 space-y-2' data-testid='sidebar-nav'>
             {navigationItems.map(item => {
               const Icon = item.icon;
               const isActive = location.pathname === item.href;
