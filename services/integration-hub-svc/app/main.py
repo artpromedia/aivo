@@ -13,7 +13,7 @@ import structlog
 
 from app.config import settings
 from app.database import init_db
-from app.routes import api_keys, health, webhooks
+from app.routes import api_keys, health, integrations, webhooks
 
 
 # Configure structured logging
@@ -84,6 +84,7 @@ app.add_middleware(
 # Add routes
 app.include_router(health.router, prefix=settings.api_v1_str, tags=["Health"])
 app.include_router(api_keys.router, prefix=settings.api_v1_str, tags=["API Keys"])
+app.include_router(integrations.router, prefix=settings.api_v1_str, tags=["Integrations"])
 app.include_router(webhooks.router, prefix=settings.api_v1_str, tags=["Webhooks"])
 
 # Add metrics endpoint

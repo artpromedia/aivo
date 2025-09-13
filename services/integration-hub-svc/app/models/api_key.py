@@ -4,7 +4,7 @@ from datetime import datetime
 from typing import TYPE_CHECKING
 from uuid import UUID
 
-from sqlalchemy import Boolean, DateTime, ForeignKey, String, Text
+from sqlalchemy import Boolean, DateTime, ForeignKey, String, Text, JSON
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from .base import Base, TimestampMixin
@@ -44,6 +44,7 @@ class ApiKey(Base, TimestampMixin):
 
     # Permissions (JSON array of scopes)
     scopes: Mapped[list[str]] = mapped_column(
+        JSON,
         default=["read", "write"],
         nullable=False,
     )

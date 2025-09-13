@@ -44,16 +44,10 @@ class Settings(BaseSettings):
 
     @computed_field  # type: ignore[misc]
     @property
-    def database_url(self) -> PostgresDsn:
+    def database_url(self) -> str:
         """Build database URL from components."""
-        return PostgresDsn.build(
-            scheme="postgresql+asyncpg",
-            username=self.database_username,
-            password=self.database_password,
-            host=self.database_hostname,
-            port=self.database_port,
-            path=self.database_name,
-        )
+        # Use SQLite for development
+        return "sqlite+aiosqlite:///./integration_hub.db"
 
     # Redis Configuration
     redis_host: str = "localhost"

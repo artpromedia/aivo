@@ -2,6 +2,15 @@
 
 from .api_key import ApiKey
 from .base import Base, TimestampMixin
+from .integration import (
+    Integration,
+    ConnectionLog,
+    IntegrationTest,
+    ConnectorConfig,
+    ConnectorType,
+    ConnectionStatus,
+    LogLevel,
+)
 from .tenant import Tenant
 from .webhook import Webhook, WebhookDelivery, WebhookEvent
 
@@ -13,4 +22,11 @@ __all__ = [
     "Webhook",
     "WebhookDelivery",
     "WebhookEvent",
+    "Integration",
+    "ConnectionLog",
+    "IntegrationTest",
+    "ConnectorConfig",
+    "ConnectorType",
+    "ConnectionStatus",
+    "LogLevel",
 ]
