@@ -295,9 +295,9 @@ class SecretService:
     async def get_secret_value(
         self,
         secret_id: str,
-        db: AsyncSession,
-        context: Dict[str, Any],
-    ) -> Optional[str]:
+        accessor: Optional[str] = None,
+        service_name: Optional[str] = None,
+    ) -> str:
         """Get decrypted secret value with access control."""
         secret = await self.get_secret(secret_id, accessor, service_name)
 

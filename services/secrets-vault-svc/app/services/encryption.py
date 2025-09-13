@@ -298,10 +298,10 @@ class EncryptionService:
 
 def get_kms_provider() -> KMSProvider:
     """Get configured KMS provider."""
-    provider_type = settings.KMS_PROVIDER.lower()
+    provider_type = settings.kms_provider.lower()
 
     if provider_type == "local":
-        return LocalKMSProvider(settings.KMS_KEY_STORAGE_PATH)
+        return LocalKMSProvider()
     elif provider_type == "aws":
         # TODO: Initialize with AWS credentials
         raise NotImplementedError("AWS KMS provider not yet implemented")

@@ -328,3 +328,40 @@ async def check_rotation_due_secrets(
 
     except Exception as e:
         raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail=str(e))
+
+
+@router.get("/stats")
+async def get_secrets_stats(
+    secret_service: SecretService = Depends(get_secret_service),
+):
+    """Get secrets statistics."""
+    try:
+        # Get all secrets to calculate stats
+        secrets = await secret_service.list_secrets()
+
+        total_secrets = len(secrets)
+        active_secrets = len([s for s in secrets if s.status.value == "active"])
+        expired_secrets = len([s for s in secrets if s.expires_at and s.expires_at < datetime.utcnow()])
+
+        # Get namespaces count
+        from ..services import NamespaceService
+        namespace_service = NamespaceService()
+        from ..database import AsyncSessionLocal
+
+        async with AsyncSessionLocal() as db:
+            namespaces = await namespace_service.list_namespaces(db)
+            namespaces_count = len(namespaces)
+
+        # Calculate total accesses
+        total_accesses = sum(s.access_count for s in secrets)
+
+        return {
+            "total_secrets": total_secrets,
+            "active_secrets": active_secrets,
+            "expired_secrets": expired_secrets,
+            "namespaces_count": namespaces_count,
+            "total_accesses": total_accesses,
+        }
+
+    except Exception as e:
+        raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail=str(e))
