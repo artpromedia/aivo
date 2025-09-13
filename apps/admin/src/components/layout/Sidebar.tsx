@@ -21,6 +21,7 @@ import {
   Beaker,
   Plug,
   Key,
+  BarChart3,
 } from 'lucide-react';
 import { useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
@@ -97,6 +98,11 @@ const navigationItems = [
     name: 'Notifications',
     href: '/notification-subscriptions',
     icon: Bell,
+  },
+  {
+    name: 'API Usage & Limits',
+    href: '/api-usage',
+    icon: BarChart3,
   },
   {
     name: 'Subscriptions',

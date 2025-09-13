@@ -52,6 +52,7 @@ const IncidentsPage = lazy(() => import('@/pages/Operations/Incidents'));
 const NotificationSubscriptionsPage = lazy(
   () => import('@/pages/Operations/NotificationSubscriptions')
 );
+const ApiUsagePage = lazy(() => import('@/pages/Operations/ApiUsage'));
 const OTA = lazy(() =>
   import('@/pages/OTA').then(module => ({ default: module.OTA }))
 );
@@ -211,6 +212,14 @@ function App() {
               element={
                 <Suspense fallback={<PageLoader />}>
                   <NotificationSubscriptionsPage />
+                </Suspense>
+              }
+            />
+            <Route
+              path='api-usage'
+              element={
+                <Suspense fallback={<PageLoader />}>
+                  <ApiUsagePage />
                 </Suspense>
               }
             />
