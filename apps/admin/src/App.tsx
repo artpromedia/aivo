@@ -9,6 +9,9 @@ import { DevicePolicy } from '@/pages/DevicePolicy';
 import { Devices } from '@/pages/Devices';
 import { InkOps } from '@/pages/InkOps';
 import { NamespacesPage } from '@/pages/NamespacesPage';
+import BannersPage from '@/pages/Operations/Banners';
+import IncidentsPage from '@/pages/Operations/Incidents';
+import NotificationSubscriptionsPage from '@/pages/Operations/NotificationSubscriptions';
 import { OTA } from '@/pages/OTA';
 import { SubscriptionsPage } from '@/pages/SubscriptionsPage';
 import { UsersPage } from '@/pages/UsersPage';
@@ -38,6 +41,12 @@ function App() {
             <Route path='subscriptions' element={<SubscriptionsPage />} />
             <Route path='billing' element={<BillingPage />} />
             <Route path='namespaces' element={<NamespacesPage />} />
+            <Route path='incidents' element={<IncidentsPage />} />
+            <Route path='banners' element={<BannersPage />} />
+            <Route
+              path='notification-subscriptions'
+              element={<NotificationSubscriptionsPage />}
+            />
             <Route
               path='support'
               element={<div>Support Page (Coming Soon)</div>}

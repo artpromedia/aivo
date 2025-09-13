@@ -1,6 +1,8 @@
 import { useState, useEffect } from 'react';
 import { Outlet } from 'react-router-dom';
 
+import BannerDisplay from '../common/BannerDisplay';
+
 import { Sidebar } from './Sidebar';
 
 export function Layout() {
@@ -40,6 +42,7 @@ export function Layout() {
         {/* Main content */}
         <div className='flex-1 lg:ml-0'>
           <main className='p-6 lg:p-8'>
+            <BannerDisplay audience='admins' />
             <Outlet />
           </main>
         </div>

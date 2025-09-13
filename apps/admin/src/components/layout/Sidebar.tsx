@@ -13,6 +13,9 @@ import {
   Shield,
   Download,
   Pen,
+  AlertTriangle,
+  Megaphone,
+  Bell,
 } from 'lucide-react';
 import { useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
@@ -54,6 +57,21 @@ const navigationItems = [
     name: 'Ink Operations',
     href: '/ink-ops',
     icon: Pen,
+  },
+  {
+    name: 'Incident Center',
+    href: '/incidents',
+    icon: AlertTriangle,
+  },
+  {
+    name: 'Announcements',
+    href: '/banners',
+    icon: Megaphone,
+  },
+  {
+    name: 'Notifications',
+    href: '/notification-subscriptions',
+    icon: Bell,
   },
   {
     name: 'Subscriptions',
