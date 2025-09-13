@@ -1,57 +1,75 @@
 openapi: 3.1.0
 info:
   title: Device Policy & MDM Service
-  description: |
-    Aivo Pad device policy management service providing:
+  description: 'Aivo Pad device policy management service providing:
+
     - Single-app kiosk policy management
+
     - Network profile configuration
+
     - DNS filtering and allowlist management
+
     - Study window scheduling
+
     - Long-poll policy synchronization
+
+    '
   version: 1.0.0
   contact:
     name: Aivo Development Team
     email: dev@aivo.com
-
 servers:
-  - url: http://localhost:8000/api/v1
-    description: Development server
-  - url: https://api.aivo.com/device-policy/v1
-    description: Production server
-
+- url: http://localhost:8000/api/v1
+  description: Development server
+- url: https://api.aivo.com/device-policy/v1
+  description: Production server
 paths:
   /policies:
     get:
       summary: List device policies
       description: Retrieve a paginated list of device policies with optional filtering
       parameters:
-        - name: policy_type
-          in: query
-          schema:
-            type: string
-            enum: [kiosk, network, dns, study_window, allowlist]
-        - name: status
-          in: query
-          schema:
-            type: string
-            enum: [draft, active, inactive, archived]
-        - name: tenant_id
-          in: query
-          schema:
-            type: string
-        - name: page
-          in: query
-          schema:
-            type: integer
-            minimum: 1
-            default: 1
-        - name: size
-          in: query
-          schema:
-            type: integer
-            minimum: 1
-            maximum: 100
-            default: 50
+      - name: policy_type
+        in: query
+        schema:
+          type: string
+          enum:
+          - kiosk
+          - network
+          - dns
+          - study_window
+          - allowlist
+        description: The policy_type query parameter
+      - name: status
+        in: query
+        schema:
+          type: string
+          enum:
+          - draft
+          - active
+          - inactive
+          - archived
+        description: The status query parameter
+      - name: tenant_id
+        in: query
+        schema:
+          type: string
+        description: The tenant_id query parameter
+      - name: page
+        in: query
+        schema:
+          type: integer
+          minimum: 1
+          default: 1
+        description: The page query parameter
+      - name: size
+        in: query
+        schema:
+          type: integer
+          minimum: 1
+          maximum: 100
+          default: 50
+        description: The size query parameter
       responses:
         '200':
           description: List of policies
@@ -59,7 +77,9 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/PolicyListResponse'
-
+      operationId: getPolicies
+      tags:
+      - policies
     post:
       summary: Create a new device policy
       description: Create a new policy configuration for device management
@@ -73,32 +93,34 @@ paths:
               kiosk_policy:
                 summary: Single-app kiosk policy
                 value:
-                  name: "Study Mode Kiosk"
-                  description: "Single-app kiosk for study sessions"
-                  policy_type: "kiosk"
+                  name: Study Mode Kiosk
+                  description: Single-app kiosk for study sessions
+                  policy_type: kiosk
                   config:
-                    mode: "single_app"
+                    mode: single_app
                     apps:
-                      - package_name: "com.aivo.study"
-                        app_name: "Aivo Study"
-                        auto_launch: true
-                        allow_exit: false
-                        fullscreen: true
+                    - package_name: com.aivo.study
+                      app_name: Aivo Study
+                      auto_launch: true
+                      allow_exit: false
+                      fullscreen: true
                   priority: 100
               network_policy:
                 summary: Network configuration policy
                 value:
-                  name: "School WiFi Profile"
-                  description: "Managed WiFi configuration"
-                  policy_type: "network"
+                  name: School WiFi Profile
+                  description: Managed WiFi configuration
+                  policy_type: network
                   config:
                     profiles:
-                      - ssid: "AivoSchool"
-                        security_type: "wpa2"
-                        password: "secretpassword"
-                        auto_connect: true
-                        priority: 1
-                    dns_servers: ["8.8.8.8", "8.8.4.4"]
+                    - ssid: AivoSchool
+                      security_type: wpa2
+                      password: secretpassword
+                      auto_connect: true
+                      priority: 1
+                    dns_servers:
+                    - 8.8.8.8
+                    - 8.8.4.4
                   priority: 200
       responses:
         '201':
@@ -111,17 +133,20 @@ paths:
           description: Invalid policy configuration
         '500':
           description: Internal server error
-
+      operationId: postPolicies
+      tags:
+      - policies
   /policies/{policy_id}:
     get:
       summary: Get a specific policy
       parameters:
-        - name: policy_id
-          in: path
-          required: true
-          schema:
-            type: string
-            format: uuid
+      - name: policy_id
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+        description: The policy_id path parameter
       responses:
         '200':
           description: Policy details
@@ -131,16 +156,20 @@ paths:
                 $ref: '#/components/schemas/PolicyResponse'
         '404':
           description: Policy not found
-
+      description: Retrieve a specific Policie
+      operationId: getPoliciesBy
+      tags:
+      - policies
     put:
       summary: Update a policy
       parameters:
-        - name: policy_id
-          in: path
-          required: true
-          schema:
-            type: string
-            format: uuid
+      - name: policy_id
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+        description: The policy_id path parameter
       requestBody:
         required: true
         content:
@@ -156,22 +185,29 @@ paths:
                 $ref: '#/components/schemas/PolicyResponse'
         '404':
           description: Policy not found
-
+      description: Update a Policie
+      operationId: putPoliciesBy
+      tags:
+      - policies
     delete:
       summary: Delete a policy
       parameters:
-        - name: policy_id
-          in: path
-          required: true
-          schema:
-            type: string
-            format: uuid
+      - name: policy_id
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+        description: The policy_id path parameter
       responses:
         '204':
           description: Policy deleted successfully
         '404':
           description: Policy not found
-
+      description: Delete a Policie
+      operationId: deletePoliciesBy
+      tags:
+      - policies
   /device-policies:
     post:
       summary: Assign policy to device
@@ -191,18 +227,21 @@ paths:
                 $ref: '#/components/schemas/DevicePolicyResponse'
         '400':
           description: Policy already assigned or invalid request
-
+      operationId: postDevicePolicies
+      tags:
+      - device_policies
   /devices/{device_id}/policies:
     get:
       summary: Get device policies
       description: Retrieve all policies assigned to a specific device
       parameters:
-        - name: device_id
-          in: path
-          required: true
-          schema:
-            type: string
-            format: uuid
+      - name: device_id
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+        description: The device_id path parameter
       responses:
         '200':
           description: List of device policies
@@ -212,7 +251,9 @@ paths:
                 type: array
                 items:
                   $ref: '#/components/schemas/DevicePolicyResponse'
-
+      operationId: getDevicesByPolicies
+      tags:
+      - devices
   /policy/sync:
     post:
       summary: Synchronize policies
@@ -224,10 +265,10 @@ paths:
             schema:
               $ref: '#/components/schemas/PolicySyncRequest'
             example:
-              device_id: "550e8400-e29b-41d4-a716-446655440000"
+              device_id: 550e8400-e29b-41d4-a716-446655440000
               current_policies:
-                "policy-id-1": 1
-                "policy-id-2": 3
+                policy-id-1: 1
+                policy-id-2: 3
       responses:
         '200':
           description: Policy sync response
@@ -235,30 +276,34 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/PolicySyncResponse'
-
+      operationId: postPolicySync
+      tags:
+      - policy
     get:
       summary: Long-poll policy sync
       description: Long-polling endpoint for real-time policy updates
       parameters:
-        - name: device_id
-          in: query
-          required: true
-          schema:
-            type: string
-            format: uuid
-        - name: current_policies
-          in: query
-          description: JSON string of current policy versions
-          schema:
-            type: string
-            default: "{}"
-        - name: timeout
-          in: query
-          schema:
-            type: integer
-            minimum: 30
-            maximum: 600
-            default: 300
+      - name: device_id
+        in: query
+        required: true
+        schema:
+          type: string
+          format: uuid
+        description: The device_id query parameter
+      - name: current_policies
+        in: query
+        description: JSON string of current policy versions
+        schema:
+          type: string
+          default: '{}'
+      - name: timeout
+        in: query
+        schema:
+          type: integer
+          minimum: 30
+          maximum: 600
+          default: 300
+        description: The timeout query parameter
       responses:
         '200':
           description: Policy updates available
@@ -270,42 +315,54 @@ paths:
           description: No updates available (timeout reached)
         '400':
           description: Invalid current_policies JSON
-
+      operationId: getPolicySync
+      tags:
+      - policy
   /allowlist:
     get:
       summary: List allowlist entries
       description: Retrieve network allowlist entries for walled garden
       parameters:
-        - name: entry_type
-          in: query
-          schema:
-            type: string
-            enum: [domain, url, ip, subnet]
-        - name: category
-          in: query
-          schema:
-            type: string
-        - name: is_active
-          in: query
-          schema:
-            type: boolean
-        - name: tenant_id
-          in: query
-          schema:
-            type: string
-        - name: page
-          in: query
-          schema:
-            type: integer
-            minimum: 1
-            default: 1
-        - name: size
-          in: query
-          schema:
-            type: integer
-            minimum: 1
-            maximum: 100
-            default: 50
+      - name: entry_type
+        in: query
+        schema:
+          type: string
+          enum:
+          - domain
+          - url
+          - ip
+          - subnet
+        description: The entry_type query parameter
+      - name: category
+        in: query
+        schema:
+          type: string
+        description: The category query parameter
+      - name: is_active
+        in: query
+        schema:
+          type: boolean
+        description: The is_active query parameter
+      - name: tenant_id
+        in: query
+        schema:
+          type: string
+        description: The tenant_id query parameter
+      - name: page
+        in: query
+        schema:
+          type: integer
+          minimum: 1
+          default: 1
+        description: The page query parameter
+      - name: size
+        in: query
+        schema:
+          type: integer
+          minimum: 1
+          maximum: 100
+          default: 50
+        description: The size query parameter
       responses:
         '200':
           description: List of allowlist entries
@@ -313,7 +370,9 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/AllowlistResponse'
-
+      operationId: getAllowlist
+      tags:
+      - allowlist
     post:
       summary: Create allowlist entry
       description: Add a new entry to the network allowlist
@@ -327,19 +386,21 @@ paths:
               domain_entry:
                 summary: Domain allowlist entry
                 value:
-                  entry_type: "domain"
-                  value: "example.com"
-                  description: "Educational website"
-                  category: "education"
-                  tags: ["safe", "educational"]
+                  entry_type: domain
+                  value: example.com
+                  description: Educational website
+                  category: education
+                  tags:
+                  - safe
+                  - educational
                   priority: 100
               url_entry:
                 summary: URL allowlist entry
                 value:
-                  entry_type: "url"
-                  value: "https://api.aivo.com/v1/*"
-                  description: "Aivo API endpoints"
-                  category: "api"
+                  entry_type: url
+                  value: https://api.aivo.com/v1/*
+                  description: Aivo API endpoints
+                  category: api
                   priority: 200
       responses:
         '201':
@@ -348,16 +409,19 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/AllowlistEntryResponse'
-
+      operationId: postAllowlist
+      tags:
+      - allowlist
   /allowlist/active:
     get:
       summary: Get active allowlist
       description: Retrieve all active allowlist entries for walled garden implementation
       parameters:
-        - name: tenant_id
-          in: query
-          schema:
-            type: string
+      - name: tenant_id
+        in: query
+        schema:
+          type: string
+        description: The tenant_id query parameter
       responses:
         '200':
           description: Active allowlist entries
@@ -367,17 +431,20 @@ paths:
                 type: array
                 items:
                   $ref: '#/components/schemas/AllowlistEntryResponse'
-
+      operationId: getAllowlistActive
+      tags:
+      - allowlist
   /allowlist/{entry_id}:
     get:
       summary: Get allowlist entry
       parameters:
-        - name: entry_id
-          in: path
-          required: true
-          schema:
-            type: string
-            format: uuid
+      - name: entry_id
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+        description: The entry_id path parameter
       responses:
         '200':
           description: Allowlist entry details
@@ -387,16 +454,20 @@ paths:
                 $ref: '#/components/schemas/AllowlistEntryResponse'
         '404':
           description: Entry not found
-
+      description: Retrieve a specific Allowlist
+      operationId: getAllowlistBy
+      tags:
+      - allowlist
     put:
       summary: Update allowlist entry
       parameters:
-        - name: entry_id
-          in: path
-          required: true
-          schema:
-            type: string
-            format: uuid
+      - name: entry_id
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+        description: The entry_id path parameter
       requestBody:
         required: true
         content:
@@ -412,22 +483,29 @@ paths:
                 $ref: '#/components/schemas/AllowlistEntryResponse'
         '404':
           description: Entry not found
-
+      description: Update a Allowlist
+      operationId: putAllowlistBy
+      tags:
+      - allowlist
     delete:
       summary: Delete allowlist entry
       parameters:
-        - name: entry_id
-          in: path
-          required: true
-          schema:
-            type: string
-            format: uuid
+      - name: entry_id
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+        description: The entry_id path parameter
       responses:
         '204':
           description: Entry deleted successfully
         '404':
           description: Entry not found
-
+      description: Delete a Allowlist
+      operationId: deleteAllowlistBy
+      tags:
+      - allowlist
   /health:
     get:
       summary: Health check
@@ -442,30 +520,46 @@ paths:
                 properties:
                   status:
                     type: string
-                    example: "healthy"
+                    example: healthy
                   timestamp:
                     type: string
                     format: date-time
         '503':
           description: Service is unhealthy
-
+      operationId: getHealth
+      tags:
+      - health
 components:
   schemas:
     PolicyType:
       type: string
-      enum: [kiosk, network, dns, study_window, allowlist]
-
+      enum:
+      - kiosk
+      - network
+      - dns
+      - study_window
+      - allowlist
     PolicyStatus:
       type: string
-      enum: [draft, active, inactive, archived]
-
+      enum:
+      - draft
+      - active
+      - inactive
+      - archived
     SyncStatus:
       type: string
-      enum: [pending, in_progress, synced, failed, outdated]
-
+      enum:
+      - pending
+      - in_progress
+      - synced
+      - failed
+      - outdated
     PolicyCreate:
       type: object
-      required: [name, policy_type, config]
+      required:
+      - name
+      - policy_type
+      - config
       properties:
         name:
           type: string
@@ -496,7 +590,6 @@ components:
         tenant_id:
           type: string
           maxLength: 255
-
     PolicyUpdate:
       type: object
       properties:
@@ -523,7 +616,6 @@ components:
           format: date-time
         status:
           $ref: '#/components/schemas/PolicyStatus'
-
     PolicyResponse:
       type: object
       properties:
@@ -564,7 +656,6 @@ components:
         updated_at:
           type: string
           format: date-time
-
     PolicyListResponse:
       type: object
       properties:
@@ -580,10 +671,11 @@ components:
           type: integer
         pages:
           type: integer
-
     DevicePolicyAssign:
       type: object
-      required: [device_id, policy_id]
+      required:
+      - device_id
+      - policy_id
       properties:
         device_id:
           type: string
@@ -591,7 +683,6 @@ components:
         policy_id:
           type: string
           format: uuid
-
     DevicePolicyResponse:
       type: object
       properties:
@@ -625,10 +716,10 @@ components:
         updated_at:
           type: string
           format: date-time
-
     PolicySyncRequest:
       type: object
-      required: [device_id]
+      required:
+      - device_id
       properties:
         device_id:
           type: string
@@ -638,17 +729,21 @@ components:
           additionalProperties:
             type: integer
           description: Current policy versions by policy_id
-
     PolicyDiff:
       type: object
-      required: [policy_id, action]
+      required:
+      - policy_id
+      - action
       properties:
         policy_id:
           type: string
           format: uuid
         action:
           type: string
-          enum: [add, update, remove]
+          enum:
+          - add
+          - update
+          - remove
         from_version:
           type: integer
         to_version:
@@ -657,7 +752,6 @@ components:
           type: object
         checksum:
           type: string
-
     PolicySyncResponse:
       type: object
       properties:
@@ -666,7 +760,10 @@ components:
           format: uuid
         sync_type:
           type: string
-          enum: [full, diff, patch]
+          enum:
+          - full
+          - diff
+          - patch
         policies:
           type: array
           items:
@@ -674,14 +771,19 @@ components:
         sync_timestamp:
           type: string
           format: date-time
-
     AllowlistEntryCreate:
       type: object
-      required: [entry_type, value]
+      required:
+      - entry_type
+      - value
       properties:
         entry_type:
           type: string
-          enum: [domain, url, ip, subnet]
+          enum:
+          - domain
+          - url
+          - ip
+          - subnet
         value:
           type: string
           minLength: 1
@@ -704,7 +806,6 @@ components:
         tenant_id:
           type: string
           maxLength: 255
-
     AllowlistEntryUpdate:
       type: object
       properties:
@@ -728,7 +829,6 @@ components:
           maximum: 1000
         is_active:
           type: boolean
-
     AllowlistEntryResponse:
       type: object
       properties:
@@ -737,7 +837,11 @@ components:
           format: uuid
         entry_type:
           type: string
-          enum: [domain, url, ip, subnet]
+          enum:
+          - domain
+          - url
+          - ip
+          - subnet
         value:
           type: string
         description:
@@ -762,7 +866,6 @@ components:
         updated_at:
           type: string
           format: date-time
-
     AllowlistResponse:
       type: object
       properties:
@@ -778,7 +881,6 @@ components:
           type: integer
         pages:
           type: integer
-
     ErrorResponse:
       type: object
       properties:
@@ -788,12 +890,23 @@ components:
           type: string
         details:
           type: object
-
   securitySchemes:
     bearerAuth:
       type: http
       scheme: bearer
       bearerFormat: JWT
-
 security:
-  - bearerAuth: []
+- bearerAuth: []
+tags:
+- name: devices
+  description: Devices operations
+- name: health
+  description: Health operations
+- name: device_policies
+  description: Device_Policies operations
+- name: allowlist
+  description: Allowlist operations
+- name: policies
+  description: Policies operations
+- name: policy
+  description: Policy operations

@@ -1,37 +1,41 @@
 openapi: 3.1.0
 info:
   title: Lesson Registry API
-  description: |
-    API for managing versioned lessons with signed CDN assets.
-    
+  description: 'API for managing versioned lessons with signed CDN assets.
+
+
     This service provides:
+
     - Versioned lesson management with DRAFT/PUBLISHED states
+
     - Role-based access control (teacher draft, admin/district publish)
+
     - Presigned CDN URLs for secure asset delivery (expires in 600s)
+
     - Search functionality by subject, grade band, and keywords
+
     - Asset management with multiple file types
-    
-  version: "0.1.0"
+
+    '
+  version: 0.1.0
   contact:
     name: Aivo API Team
     email: api@aivo.com
-
 servers:
-  - url: http://localhost:8003
-    description: Development server
-  - url: https://api-staging.aivo.com
-    description: Staging server
-  - url: https://api.aivo.com
-    description: Production server
-
+- url: http://localhost:8003
+  description: Development server
+- url: https://api-staging.aivo.com
+  description: Staging server
+- url: https://api.aivo.com
+  description: Production server
 security:
-  - BearerAuth: []
-
+- BearerAuth: []
 paths:
   /:
     get:
       summary: Root endpoint
-      tags: [Health]
+      tags:
+      - Health
       security: []
       responses:
         '200':
@@ -46,15 +50,17 @@ paths:
                     example: lesson-registry-svc
                   version:
                     type: string
-                    example: "0.1.0"
+                    example: 0.1.0
                   status:
                     type: string
                     example: running
-
+      description: GET operation for /
+      operationId: getRoot
   /healthz:
     get:
       summary: Health check
-      tags: [Health]
+      tags:
+      - Health
       security: []
       responses:
         '200':
@@ -65,13 +71,15 @@ paths:
                 $ref: '#/components/schemas/HealthCheck'
         '503':
           description: Service is unhealthy
-
+      description: Retrieve all Healthz
+      operationId: getHealthz
   /api/v1/lessons:
     post:
       summary: Create a new lesson
-      tags: [Lessons]
+      tags:
+      - Lessons
       security:
-        - BearerAuth: []
+      - BearerAuth: []
       requestBody:
         required: true
         content:
@@ -91,18 +99,21 @@ paths:
           description: Unauthorized
         '403':
           description: Insufficient permissions
-
+      description: Create a new Lesson
+      operationId: postApiV1Lessons
   /api/v1/lessons/{lesson_id}:
     get:
       summary: Get a lesson by ID
-      tags: [Lessons]
+      tags:
+      - Lessons
       parameters:
-        - name: lesson_id
-          in: path
-          required: true
-          schema:
-            type: string
-            format: uuid
+      - name: lesson_id
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+        description: The lesson_id path parameter
       responses:
         '200':
           description: Lesson found
@@ -114,17 +125,20 @@ paths:
           description: Lesson not found
         '401':
           description: Unauthorized
-
+      description: Retrieve a specific Lesson
+      operationId: getApiV1LessonsBy
     put:
       summary: Update a lesson
-      tags: [Lessons]
+      tags:
+      - Lessons
       parameters:
-        - name: lesson_id
-          in: path
-          required: true
-          schema:
-            type: string
-            format: uuid
+      - name: lesson_id
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+        description: The lesson_id path parameter
       requestBody:
         required: true
         content:
@@ -142,17 +156,20 @@ paths:
           description: Lesson not found
         '403':
           description: Insufficient permissions
-
+      description: Update a Lesson
+      operationId: putApiV1LessonsBy
     delete:
       summary: Delete a lesson
-      tags: [Lessons]
+      tags:
+      - Lessons
       parameters:
-        - name: lesson_id
-          in: path
-          required: true
-          schema:
-            type: string
-            format: uuid
+      - name: lesson_id
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+        description: The lesson_id path parameter
       responses:
         '204':
           description: Lesson deleted successfully
@@ -160,18 +177,21 @@ paths:
           description: Lesson not found
         '403':
           description: Insufficient permissions
-
+      description: Delete a Lesson
+      operationId: deleteApiV1LessonsBy
   /api/v1/lessons/{lesson_id}/versions:
     post:
       summary: Create a new version of a lesson
-      tags: [Versions]
+      tags:
+      - Versions
       parameters:
-        - name: lesson_id
-          in: path
-          required: true
-          schema:
-            type: string
-            format: uuid
+      - name: lesson_id
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+        description: The lesson_id path parameter
       requestBody:
         required: true
         content:
@@ -189,18 +209,21 @@ paths:
           description: Lesson not found
         '403':
           description: Insufficient permissions
-
+      description: Create a new Version
+      operationId: postApiV1LessonsByVersions
   /api/v1/versions/{version_id}:
     put:
       summary: Update a lesson version (DRAFT only)
-      tags: [Versions]
+      tags:
+      - Versions
       parameters:
-        - name: version_id
-          in: path
-          required: true
-          schema:
-            type: string
-            format: uuid
+      - name: version_id
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+        description: The version_id path parameter
       requestBody:
         required: true
         content:
@@ -218,18 +241,21 @@ paths:
           description: Version not found or not in DRAFT state
         '403':
           description: Insufficient permissions
-
+      description: Update a Version
+      operationId: putApiV1VersionsBy
   /api/v1/versions/{version_id}/publish:
     post:
       summary: Publish a lesson version (admin only)
-      tags: [Versions]
+      tags:
+      - Versions
       parameters:
-        - name: version_id
-          in: path
-          required: true
-          schema:
-            type: string
-            format: uuid
+      - name: version_id
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+        description: The version_id path parameter
       responses:
         '200':
           description: Version published successfully
@@ -241,18 +267,21 @@ paths:
           description: Version not found
         '403':
           description: Insufficient permissions (admin required)
-
+      description: Create a new Publish
+      operationId: postApiV1VersionsByPublish
   /api/v1/versions/{version_id}/assets:
     post:
       summary: Add an asset to a lesson version
-      tags: [Assets]
+      tags:
+      - Assets
       parameters:
-        - name: version_id
-          in: path
-          required: true
-          schema:
-            type: string
-            format: uuid
+      - name: version_id
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+        description: The version_id path parameter
       requestBody:
         required: true
         content:
@@ -270,24 +299,27 @@ paths:
           description: Version not found
         '403':
           description: Insufficient permissions
-
+      description: Create a new Asset
+      operationId: postApiV1VersionsByAssets
   /api/v1/assets/{asset_id}/upload-url:
     get:
       summary: Get presigned upload URL for asset
-      tags: [Assets]
+      tags:
+      - Assets
       parameters:
-        - name: asset_id
-          in: path
-          required: true
-          schema:
-            type: string
-            format: uuid
-        - name: content_type
-          in: query
-          required: true
-          schema:
-            type: string
-          description: MIME type of the asset
+      - name: asset_id
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+        description: The asset_id path parameter
+      - name: content_type
+        in: query
+        required: true
+        schema:
+          type: string
+        description: MIME type of the asset
       responses:
         '200':
           description: Upload URL generated
@@ -303,63 +335,71 @@ paths:
                     type: object
         '500':
           description: Failed to generate upload URL
-
+      description: Retrieve a specific Upload Url
+      operationId: getApiV1AssetsByUploadUrl
   /api/v1/search:
     get:
       summary: Search lessons
-      tags: [Search]
+      tags:
+      - Search
       parameters:
-        - name: q
-          in: query
-          schema:
+      - name: q
+        in: query
+        schema:
+          type: string
+        description: Search query
+      - name: subject
+        in: query
+        schema:
+          type: string
+        description: Filter by subject
+      - name: grade_band
+        in: query
+        schema:
+          $ref: '#/components/schemas/GradeBand'
+        description: Filter by grade band
+      - name: keywords
+        in: query
+        schema:
+          type: array
+          items:
             type: string
-          description: Search query
-        - name: subject
-          in: query
-          schema:
-            type: string
-          description: Filter by subject
-        - name: grade_band
-          in: query
-          schema:
-            $ref: '#/components/schemas/GradeBand'
-          description: Filter by grade band
-        - name: keywords
-          in: query
-          schema:
-            type: array
-            items:
-              type: string
-          description: Filter by keywords
-        - name: page
-          in: query
-          schema:
-            type: integer
-            minimum: 1
-            default: 1
-          description: Page number
-        - name: page_size
-          in: query
-          schema:
-            type: integer
-            minimum: 1
-            maximum: 100
-            default: 20
-          description: Items per page
-        - name: sort_by
-          in: query
-          schema:
-            type: string
-            enum: [created_at, updated_at, title, subject]
-            default: created_at
-          description: Sort field
-        - name: sort_order
-          in: query
-          schema:
-            type: string
-            enum: [asc, desc]
-            default: desc
-          description: Sort order
+        description: Filter by keywords
+      - name: page
+        in: query
+        schema:
+          type: integer
+          minimum: 1
+          default: 1
+        description: Page number
+      - name: page_size
+        in: query
+        schema:
+          type: integer
+          minimum: 1
+          maximum: 100
+          default: 20
+        description: Items per page
+      - name: sort_by
+        in: query
+        schema:
+          type: string
+          enum:
+          - created_at
+          - updated_at
+          - title
+          - subject
+          default: created_at
+        description: Sort field
+      - name: sort_order
+        in: query
+        schema:
+          type: string
+          enum:
+          - asc
+          - desc
+          default: desc
+        description: Sort order
       responses:
         '200':
           description: Search results
@@ -367,30 +407,43 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/SearchResults'
-
+      description: Retrieve all Search
+      operationId: getApiV1Search
 components:
   securitySchemes:
     BearerAuth:
       type: http
       scheme: bearer
       bearerFormat: JWT
-
   schemas:
     LessonState:
       type: string
-      enum: [DRAFT, PUBLISHED]
-
+      enum:
+      - DRAFT
+      - PUBLISHED
     GradeBand:
       type: string
-      enum: [K-2, K-5, 3-5, 6-8, 9-12, adult]
-
+      enum:
+      - K-2
+      - K-5
+      - 3-5
+      - 6-8
+      - 9-12
+      - adult
     AssetType:
       type: string
-      enum: [video, document, image, audio, interactive]
-
+      enum:
+      - video
+      - document
+      - image
+      - audio
+      - interactive
     LessonCreate:
       type: object
-      required: [title, subject, grade_band]
+      required:
+      - title
+      - subject
+      - grade_band
       properties:
         title:
           type: string
@@ -411,7 +464,6 @@ components:
             type: string
         metadata:
           type: object
-
     LessonUpdate:
       type: object
       properties:
@@ -434,7 +486,6 @@ components:
             type: string
         metadata:
           type: object
-
     Lesson:
       type: object
       properties:
@@ -471,10 +522,10 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/LessonVersion'
-
     LessonVersionCreate:
       type: object
-      required: [content]
+      required:
+      - content
       properties:
         content:
           type: object
@@ -489,7 +540,6 @@ components:
           type: integer
           minimum: 1
           maximum: 480
-
     LessonVersionUpdate:
       type: object
       properties:
@@ -506,7 +556,6 @@ components:
           type: integer
           minimum: 1
           maximum: 480
-
     LessonVersion:
       type: object
       properties:
@@ -546,10 +595,12 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/Asset'
-
     AssetCreate:
       type: object
-      required: [name, asset_type, file_path]
+      required:
+      - name
+      - asset_type
+      - file_path
       properties:
         name:
           type: string
@@ -572,7 +623,6 @@ components:
           maxLength: 500
         metadata:
           type: object
-
     Asset:
       type: object
       properties:
@@ -613,7 +663,6 @@ components:
         updated_at:
           type: string
           format: date-time
-
     SearchResults:
       type: object
       properties:
@@ -633,7 +682,6 @@ components:
           type: boolean
         has_prev:
           type: boolean
-
     PublishResponse:
       type: object
       properties:
@@ -643,7 +691,6 @@ components:
           type: string
         version:
           $ref: '#/components/schemas/LessonVersion'
-
     HealthCheck:
       type: object
       properties:
@@ -659,15 +706,14 @@ components:
           type: boolean
         storage:
           type: boolean
-
 tags:
-  - name: Health
-    description: Health check and service information
-  - name: Lessons
-    description: Lesson management operations
-  - name: Versions
-    description: Lesson version management
-  - name: Assets
-    description: Asset management and CDN operations
-  - name: Search
-    description: Search and discovery operations
+- name: Health
+  description: Health check and service information
+- name: Lessons
+  description: Lesson management operations
+- name: Versions
+  description: Lesson version management
+- name: Assets
+  description: Asset management and CDN operations
+- name: Search
+  description: Search and discovery operations

@@ -7,28 +7,28 @@ info:
     name: API Support
     email: api-support@aivo.com
 servers:
-  - url: https://api.aivo.com/admin/v1
-    description: Production server
-  - url: https://staging-api.aivo.com/admin/v1
-    description: Staging server
+- url: https://api.aivo.com/admin/v1
+  description: Production server
+- url: https://staging-api.aivo.com/admin/v1
+  description: Staging server
 paths:
   /summary:
     get:
       summary: Get tenant KPI summary
       operationId: getTenantSummary
       tags:
-        - Dashboard
+      - Dashboard
       security:
-        - bearerAuth: []
+      - bearerAuth: []
       parameters:
-        - name: tenantId
-          in: query
-          required: true
-          schema:
-            type: string
-            format: uuid
-          description: Tenant ID to get summary for
-          example: "456e7890-e89b-12d3-a456-426614174000"
+      - name: tenantId
+        in: query
+        required: true
+        schema:
+          type: string
+          format: uuid
+        description: Tenant ID to get summary for
+        example: 456e7890-e89b-12d3-a456-426614174000
       responses:
         '200':
           description: Tenant summary retrieved successfully
@@ -54,24 +54,24 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Error'
-
+      description: Retrieve all Summary
   /subscription:
     get:
       summary: Get tenant subscription details
       operationId: getTenantSubscription
       tags:
-        - Subscription
+      - Subscription
       security:
-        - bearerAuth: []
+      - bearerAuth: []
       parameters:
-        - name: tenantId
-          in: query
-          required: true
-          schema:
-            type: string
-            format: uuid
-          description: Tenant ID to get subscription for
-          example: "456e7890-e89b-12d3-a456-426614174000"
+      - name: tenantId
+        in: query
+        required: true
+        schema:
+          type: string
+          format: uuid
+        description: Tenant ID to get subscription for
+        example: 456e7890-e89b-12d3-a456-426614174000
       responses:
         '200':
           description: Subscription details retrieved successfully
@@ -97,32 +97,32 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Error'
-
+      description: Retrieve all Subscription
   /billing-history:
     get:
       summary: Get tenant billing history
       operationId: getTenantBillingHistory
       tags:
-        - Billing
+      - Billing
       security:
-        - bearerAuth: []
+      - bearerAuth: []
       parameters:
-        - name: tenantId
-          in: query
-          required: true
-          schema:
-            type: string
-            format: uuid
-          description: Tenant ID to get billing history for
-          example: "456e7890-e89b-12d3-a456-426614174000"
-        - name: limit
-          in: query
-          schema:
-            type: integer
-            minimum: 1
-            maximum: 50
-            default: 10
-          description: Number of recent invoices to return
+      - name: tenantId
+        in: query
+        required: true
+        schema:
+          type: string
+          format: uuid
+        description: Tenant ID to get billing history for
+        example: 456e7890-e89b-12d3-a456-426614174000
+      - name: limit
+        in: query
+        schema:
+          type: integer
+          minimum: 1
+          maximum: 50
+          default: 10
+        description: Number of recent invoices to return
       responses:
         '200':
           description: Billing history retrieved successfully
@@ -148,24 +148,24 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Error'
-
+      description: Retrieve all Billing History
   /team:
     get:
       summary: Get tenant team overview
       operationId: getTenantTeam
       tags:
-        - Team
+      - Team
       security:
-        - bearerAuth: []
+      - bearerAuth: []
       parameters:
-        - name: tenantId
-          in: query
-          required: true
-          schema:
-            type: string
-            format: uuid
-          description: Tenant ID to get team overview for
-          example: "456e7890-e89b-12d3-a456-426614174000"
+      - name: tenantId
+        in: query
+        required: true
+        schema:
+          type: string
+          format: uuid
+        description: Tenant ID to get team overview for
+        example: 456e7890-e89b-12d3-a456-426614174000
       responses:
         '200':
           description: Team overview retrieved successfully
@@ -191,31 +191,35 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Error'
-
+      description: Retrieve all Team
   /usage:
     get:
       summary: Get tenant usage analytics
       operationId: getTenantUsage
       tags:
-        - Analytics
+      - Analytics
       security:
-        - bearerAuth: []
+      - bearerAuth: []
       parameters:
-        - name: tenantId
-          in: query
-          required: true
-          schema:
-            type: string
-            format: uuid
-          description: Tenant ID to get usage for
-          example: "456e7890-e89b-12d3-a456-426614174000"
-        - name: range
-          in: query
-          schema:
-            type: string
-            enum: [7d, 30d, 90d, 1y]
-            default: 30d
-          description: Time range for usage analytics
+      - name: tenantId
+        in: query
+        required: true
+        schema:
+          type: string
+          format: uuid
+        description: Tenant ID to get usage for
+        example: 456e7890-e89b-12d3-a456-426614174000
+      - name: range
+        in: query
+        schema:
+          type: string
+          enum:
+          - 7d
+          - 30d
+          - 90d
+          - 1y
+          default: 30d
+        description: Time range for usage analytics
       responses:
         '200':
           description: Usage analytics retrieved successfully
@@ -241,24 +245,24 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Error'
-
+      description: Retrieve all Usage
   /namespaces:
     get:
       summary: Get tenant namespaces overview
       operationId: getTenantNamespaces
       tags:
-        - Namespaces
+      - Namespaces
       security:
-        - bearerAuth: []
+      - bearerAuth: []
       parameters:
-        - name: tenantId
-          in: query
-          required: true
-          schema:
-            type: string
-            format: uuid
-          description: Tenant ID to get namespaces for
-          example: "456e7890-e89b-12d3-a456-426614174000"
+      - name: tenantId
+        in: query
+        required: true
+        schema:
+          type: string
+          format: uuid
+        description: Tenant ID to get namespaces for
+        example: 456e7890-e89b-12d3-a456-426614174000
       responses:
         '200':
           description: Namespaces overview retrieved successfully
@@ -284,36 +288,35 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Error'
-
+      description: Retrieve all Namespaces
 components:
   securitySchemes:
     bearerAuth:
       type: http
       scheme: bearer
       bearerFormat: JWT
-
   schemas:
     TenantSummary:
       type: object
       required:
-        - tenantId
-        - learners
-        - seats
-        - trialCount
-        - openApprovals
-        - lastUpdated
+      - tenantId
+      - learners
+      - seats
+      - trialCount
+      - openApprovals
+      - lastUpdated
       properties:
         tenantId:
           type: string
           format: uuid
-          example: "456e7890-e89b-12d3-a456-426614174000"
+          example: 61d95feb-dd56-4c69-9e55-e6a7642710b2
         learners:
           type: object
           required:
-            - total
-            - active
-            - inactive
-            - pending
+          - total
+          - active
+          - inactive
+          - pending
           properties:
             total:
               type: integer
@@ -334,10 +337,10 @@ components:
         seats:
           type: object
           required:
-            - total
-            - free
-            - reserved
-            - assigned
+          - total
+          - free
+          - reserved
+          - assigned
           properties:
             total:
               type: integer
@@ -378,43 +381,50 @@ components:
         lastUpdated:
           type: string
           format: date-time
-          example: "2023-12-01T10:30:00Z"
+          example: '2025-09-13T00:14:42.900720+00:00'
           description: When this summary was last calculated
-
     SubscriptionDetails:
       type: object
       required:
-        - tenantId
-        - plan
-        - seats
-        - renewal
-        - status
-        - lastUpdated
+      - tenantId
+      - plan
+      - seats
+      - renewal
+      - status
+      - lastUpdated
       properties:
         tenantId:
           type: string
           format: uuid
-          example: "456e7890-e89b-12d3-a456-426614174000"
+          example: 33ea2992-176c-4a36-b338-ac86fff971d1
         plan:
           type: object
           required:
-            - name
-            - tier
-            - features
+          - name
+          - tier
+          - features
           properties:
             name:
               type: string
-              example: "Professional"
+              example: cb5b8d0e-17cb-408c-88cf-bf350c56f4ef
               description: Plan name
             tier:
               type: string
-              enum: [free, starter, professional, enterprise]
-              example: "professional"
+              enum:
+              - free
+              - starter
+              - professional
+              - enterprise
+              example: free
             features:
               type: array
               items:
                 type: string
-              example: ["Advanced Analytics", "API Access", "Custom Branding", "SSO"]
+              example:
+              - Advanced Analytics
+              - API Access
+              - Custom Branding
+              - SSO
             pricePerSeat:
               type: number
               example: 49.99
@@ -422,9 +432,9 @@ components:
         seats:
           type: object
           required:
-            - current
-            - included
-            - additional
+          - current
+          - included
+          - additional
           properties:
             current:
               type: integer
@@ -441,21 +451,21 @@ components:
         renewal:
           type: object
           required:
-            - nextBillingDate
-            - amount
-            - autoRenew
+          - nextBillingDate
+          - amount
+          - autoRenew
           properties:
             nextBillingDate:
               type: string
               format: date
-              example: "2024-01-15"
+              example: '2024-01-15'
             amount:
               type: number
-              example: 9999.00
+              example: 9999.0
               description: Next billing amount
             currency:
               type: string
-              example: "USD"
+              example: USD
             autoRenew:
               type: boolean
               example: true
@@ -464,8 +474,12 @@ components:
               example: 15
         status:
           type: string
-          enum: [active, past_due, canceled, trialing]
-          example: "active"
+          enum:
+          - active
+          - past_due
+          - canceled
+          - trialing
+          example: active
         coupons:
           type: array
           items:
@@ -473,18 +487,21 @@ components:
             properties:
               code:
                 type: string
-                example: "WELCOME20"
+                example: WELCOME20
               discount:
                 type: string
-                example: "20% off"
+                example: 20% off
               validUntil:
                 type: string
                 format: date
-                example: "2024-01-31"
+                example: '2024-01-31'
               status:
                 type: string
-                enum: [active, used, expired]
-                example: "active"
+                enum:
+                - active
+                - used
+                - expired
+                example: active
         discounts:
           type: array
           items:
@@ -492,17 +509,19 @@ components:
             properties:
               name:
                 type: string
-                example: "Annual Discount"
+                example: d7546d2c-2d1a-4e2d-a076-9409054ca117
               type:
                 type: string
-                enum: [percentage, fixed_amount]
-                example: "percentage"
+                enum:
+                - percentage
+                - fixed_amount
+                example: percentage
               value:
                 type: number
                 example: 15.0
               description:
                 type: string
-                example: "15% discount for annual billing"
+                example: e342d687-110d-4cb7-bdfd-97d80c9fc461
         trialInfo:
           type: object
           nullable: true
@@ -513,95 +532,99 @@ components:
             trialEndsAt:
               type: string
               format: date-time
-              example: "2023-12-31T23:59:59Z"
+              example: '2025-09-13T00:14:42.901721+00:00'
             daysRemaining:
               type: integer
               example: 0
         lastUpdated:
           type: string
           format: date-time
-          example: "2023-12-01T10:30:00Z"
-
+          example: '2025-09-13T00:14:42.901721+00:00'
     BillingHistory:
       type: object
       required:
-        - tenantId
-        - invoices
-        - webhooksStatus
-        - lastUpdated
+      - tenantId
+      - invoices
+      - webhooksStatus
+      - lastUpdated
       properties:
         tenantId:
           type: string
           format: uuid
-          example: "456e7890-e89b-12d3-a456-426614174000"
+          example: aa9681f7-3499-4039-8c2d-9af196a14a3f
         invoices:
           type: array
           items:
             type: object
             required:
-              - id
-              - invoiceNumber
-              - amount
-              - status
-              - dueDate
-              - paidAt
+            - id
+            - invoiceNumber
+            - amount
+            - status
+            - dueDate
+            - paidAt
             properties:
               id:
                 type: string
                 format: uuid
-                example: "inv_123e4567-e89b-12d3-a456-426614174000"
+                example: b002ad1d-c3cd-4015-be0a-ac5ce6bbefac
               invoiceNumber:
                 type: string
-                example: "INV-2023-001"
+                example: 527cd4b8-d36c-40b5-80b2-ae6f03d37368
               amount:
                 type: number
-                example: 9999.00
+                example: 9999.0
                 description: Invoice amount
               currency:
                 type: string
-                example: "USD"
+                example: USD
               status:
                 type: string
-                enum: [draft, open, paid, void, uncollectible]
-                example: "paid"
+                enum:
+                - draft
+                - open
+                - paid
+                - void
+                - uncollectible
+                example: paid
               dueDate:
                 type: string
                 format: date
-                example: "2023-12-31"
+                example: '2023-12-31'
               paidAt:
                 type: string
                 format: date-time
                 nullable: true
-                example: "2023-12-15T14:30:00Z"
+                example: '2025-09-13T00:14:42.902720+00:00'
               downloadUrl:
                 type: string
                 format: uri
                 nullable: true
-                example: "https://api.aivo.com/invoices/inv_123/download"
+                example: https://example.com
               description:
                 type: string
-                example: "Professional Plan - December 2023"
+                example: 59786727-94ec-4006-9845-b9c65bde3d28
         summary:
           type: object
           properties:
             totalPaid:
               type: number
-              example: 29997.00
+              example: 29997.0
               description: Total amount paid to date
             totalOutstanding:
               type: number
-              example: 0.00
+              example: 0.0
               description: Total outstanding amount
             averageMonthlySpend:
               type: number
-              example: 9999.00
+              example: 9999.0
               description: Average monthly spend
         webhooksStatus:
           type: object
           required:
-            - isConfigured
-            - lastSuccess
-            - failureCount
+          - isConfigured
+          - lastSuccess
+          - failureCount
           properties:
             isConfigured:
               type: boolean
@@ -611,7 +634,7 @@ components:
               type: string
               format: date-time
               nullable: true
-              example: "2023-12-01T10:30:00Z"
+              example: '2025-09-13T00:14:42.902720+00:00'
               description: Last successful webhook delivery
             failureCount:
               type: integer
@@ -621,32 +644,31 @@ components:
               type: string
               format: uri
               nullable: true
-              example: "https://api.customer.com/aivo-webhooks"
+              example: https://example.com
               description: Configured webhook endpoint
         lastUpdated:
           type: string
           format: date-time
-          example: "2023-12-01T10:30:00Z"
-
+          example: '2025-09-13T00:14:42.902720+00:00'
     TeamOverview:
       type: object
       required:
-        - tenantId
-        - usersByRole
-        - pendingInvites
-        - recentActivity
-        - lastUpdated
+      - tenantId
+      - usersByRole
+      - pendingInvites
+      - recentActivity
+      - lastUpdated
       properties:
         tenantId:
           type: string
           format: uuid
-          example: "456e7890-e89b-12d3-a456-426614174000"
+          example: 3ae1037f-612f-4a32-b25e-318dd7ab1bf5
         usersByRole:
           type: object
           required:
-            - tenant_admin
-            - instructor
-            - learner
+          - tenant_admin
+          - instructor
+          - learner
           properties:
             tenant_admin:
               type: integer
@@ -667,8 +689,8 @@ components:
         pendingInvites:
           type: object
           required:
-            - total
-            - byRole
+          - total
+          - byRole
           properties:
             total:
               type: integer
@@ -690,7 +712,7 @@ components:
               type: string
               format: date-time
               nullable: true
-              example: "2023-11-15T09:00:00Z"
+              example: '2025-09-13T00:14:42.902720+00:00'
               description: Date of oldest pending invite
         recentActivity:
           type: object
@@ -705,7 +727,7 @@ components:
               type: string
               format: date-time
               nullable: true
-              example: "2023-11-28T14:22:00Z"
+              example: '2025-09-13T00:14:42.902720+00:00'
         topUsers:
           type: array
           items:
@@ -716,18 +738,18 @@ components:
                 format: uuid
               name:
                 type: string
-                example: "John Doe"
+                example: John Doe
               email:
                 type: string
                 format: email
-                example: "john@example.com"
+                example: user@example.com
               role:
                 type: string
-                example: "instructor"
+                example: instructor
               lastActive:
                 type: string
                 format: date-time
-                example: "2023-12-01T09:15:00Z"
+                example: '2025-09-13T00:14:42.902720+00:00'
               enrollments:
                 type: integer
                 example: 15
@@ -736,27 +758,30 @@ components:
         lastUpdated:
           type: string
           format: date-time
-          example: "2023-12-01T10:30:00Z"
-
+          example: '2025-09-13T00:14:42.902720+00:00'
     UsageAnalytics:
       type: object
       required:
-        - tenantId
-        - range
-        - totalMinutesLearned
-        - activeLearners
-        - subjectMix
-        - trends
-        - lastUpdated
+      - tenantId
+      - range
+      - totalMinutesLearned
+      - activeLearners
+      - subjectMix
+      - trends
+      - lastUpdated
       properties:
         tenantId:
           type: string
           format: uuid
-          example: "456e7890-e89b-12d3-a456-426614174000"
+          example: 83971e04-740c-466c-b1f2-01655715da1d
         range:
           type: string
-          enum: [7d, 30d, 90d, 1y]
-          example: "30d"
+          enum:
+          - 7d
+          - 30d
+          - 90d
+          - 1y
+          example: 30d
           description: Time range for this analytics data
         totalMinutesLearned:
           type: integer
@@ -765,8 +790,8 @@ components:
         activeLearners:
           type: object
           required:
-            - count
-            - percentage
+          - count
+          - percentage
           properties:
             count:
               type: integer
@@ -799,14 +824,14 @@ components:
           items:
             type: object
             required:
-              - subject
-              - minutesLearned
-              - percentage
-              - learnerCount
+            - subject
+            - minutesLearned
+            - percentage
+            - learnerCount
             properties:
               subject:
                 type: string
-                example: "JavaScript"
+                example: JavaScript
                 description: Subject or course category
               minutesLearned:
                 type: integer
@@ -834,7 +859,7 @@ components:
                   date:
                     type: string
                     format: date
-                    example: "2023-12-01"
+                    example: '2023-12-01'
                   minutesLearned:
                     type: integer
                     example: 245
@@ -873,21 +898,20 @@ components:
         lastUpdated:
           type: string
           format: date-time
-          example: "2023-12-01T10:30:00Z"
-
+          example: '2025-09-13T00:14:42.902720+00:00'
     NamespacesOverview:
       type: object
       required:
-        - tenantId
-        - totalNamespaces
-        - statusCounts
-        - topNamespaces
-        - lastUpdated
+      - tenantId
+      - totalNamespaces
+      - statusCounts
+      - topNamespaces
+      - lastUpdated
       properties:
         tenantId:
           type: string
           format: uuid
-          example: "456e7890-e89b-12d3-a456-426614174000"
+          example: 65c6aeaf-8e84-4a2c-b5bb-e03b9da41d5d
         totalNamespaces:
           type: integer
           example: 135
@@ -895,10 +919,10 @@ components:
         statusCounts:
           type: object
           required:
-            - active
-            - inactive
-            - initializing
-            - error
+          - active
+          - inactive
+          - initializing
+          - error
           properties:
             active:
               type: integer
@@ -936,27 +960,31 @@ components:
           items:
             type: object
             required:
-              - namespaceId
-              - learnerId
-              - status
-              - storageUsed
-              - lastActivity
+            - namespaceId
+            - learnerId
+            - status
+            - storageUsed
+            - lastActivity
             properties:
               namespaceId:
                 type: string
                 format: uuid
-                example: "ns_123e4567-e89b-12d3-a456-426614174000"
+                example: f88986ec-9193-4171-b8ab-a65ccfe80b32
               learnerId:
                 type: string
                 format: uuid
-                example: "123e4567-e89b-12d3-a456-426614174000"
+                example: 148ad53d-1056-4289-911e-950f604e593a
               learnerName:
                 type: string
-                example: "John Doe"
+                example: John Doe
               status:
                 type: string
-                enum: [active, inactive, initializing, error]
-                example: "active"
+                enum:
+                - active
+                - inactive
+                - initializing
+                - error
+                example: active
               storageUsed:
                 type: integer
                 example: 125
@@ -968,7 +996,7 @@ components:
               lastActivity:
                 type: string
                 format: date-time
-                example: "2023-12-01T09:15:00Z"
+                example: '2025-09-13T00:14:42.903720+00:00'
               vectorCount:
                 type: integer
                 example: 15420
@@ -1003,31 +1031,47 @@ components:
                 properties:
                   issue:
                     type: string
-                    example: "Storage quota exceeded"
+                    example: f2b195dc-4b36-47b5-8ddf-e7ce97b8feb4
                   count:
                     type: integer
                     example: 3
                   severity:
                     type: string
-                    enum: [low, medium, high, critical]
-                    example: "medium"
+                    enum:
+                    - low
+                    - medium
+                    - high
+                    - critical
+                    example: medium
         lastUpdated:
           type: string
           format: date-time
-          example: "2023-12-01T10:30:00Z"
-
+          example: '2025-09-13T00:14:42.903720+00:00'
     Error:
       type: object
       required:
-        - error
-        - message
+      - error
+      - message
       properties:
         error:
           type: string
-          example: "tenant_not_found"
+          example: fa7a260f-639a-491f-9eb0-7d8a4a384d4f
         message:
           type: string
-          example: "Tenant not found or access denied"
+          example: 3f52966f-cca0-49c1-8a8d-91f9d387101f
         details:
           type: object
           additionalProperties: true
+tags:
+- name: Subscription
+  description: Subscription operations
+- name: Team
+  description: Team operations
+- name: Billing
+  description: Billing operations
+- name: Namespaces
+  description: Namespaces operations
+- name: Dashboard
+  description: Dashboard operations
+- name: Analytics
+  description: Analytics operations

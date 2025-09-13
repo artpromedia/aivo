@@ -1,4 +1,4 @@
-﻿openapi: 3.1.0
+openapi: 3.1.0
 info:
   title: Chat Service API
   description: Chat service with parental controls, moderation, and audit capabilities
@@ -7,23 +7,21 @@ info:
     name: API Support
     email: api-support@aivo.com
 servers:
-  - url: https://api.aivo.com/chat/v1
-    description: Production server
-  - url: https://staging-api.aivo.com/chat/v1
-    description: Staging server
-  - url: http://localhost:8000/api/v1/chat
-    description: Development server
-
+- url: https://api.aivo.com/chat/v1
+  description: Production server
+- url: https://staging-api.aivo.com/chat/v1
+  description: Staging server
+- url: http://localhost:8000/api/v1/chat
+  description: Development server
 security:
-  - bearerAuth: []
-
+- bearerAuth: []
 paths:
   /sessions:
     post:
       summary: Create chat session
       operationId: createChatSession
       tags:
-        - Chat Sessions
+      - Chat Sessions
       requestBody:
         required: true
         content:
@@ -43,38 +41,43 @@ paths:
           $ref: '#/components/responses/Unauthorized'
         '403':
           $ref: '#/components/responses/Forbidden'
-
+      description: Create a new Session
     get:
       summary: Get chat sessions
       operationId: getChatSessions
       tags:
-        - Chat Sessions
+      - Chat Sessions
       parameters:
-        - name: user_id
-          in: query
-          schema:
-            type: string
-            format: uuid
-        - name: chat_type
-          in: query
-          schema:
-            $ref: '#/components/schemas/ChatType'
-        - name: is_active
-          in: query
-          schema:
-            type: boolean
-        - name: limit
-          in: query
-          schema:
-            type: integer
-            maximum: 100
-            default: 50
-        - name: offset
-          in: query
-          schema:
-            type: integer
-            minimum: 0
-            default: 0
+      - name: user_id
+        in: query
+        schema:
+          type: string
+          format: uuid
+        description: The user_id query parameter
+      - name: chat_type
+        in: query
+        schema:
+          $ref: '#/components/schemas/ChatType'
+        description: The chat_type query parameter
+      - name: is_active
+        in: query
+        schema:
+          type: boolean
+        description: The is_active query parameter
+      - name: limit
+        in: query
+        schema:
+          type: integer
+          maximum: 100
+          default: 50
+        description: The limit query parameter
+      - name: offset
+        in: query
+        schema:
+          type: integer
+          minimum: 0
+          default: 0
+        description: The offset query parameter
       responses:
         '200':
           description: List of chat sessions
@@ -84,20 +87,21 @@ paths:
                 type: array
                 items:
                   $ref: '#/components/schemas/ChatSessionResponse'
-
+      description: Retrieve all Sessions
   /sessions/{sessionId}:
     get:
       summary: Get chat session by ID
       operationId: getChatSession
       tags:
-        - Chat Sessions
+      - Chat Sessions
       parameters:
-        - name: sessionId
-          in: path
-          required: true
-          schema:
-            type: string
-            format: uuid
+      - name: sessionId
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+        description: The sessionId path parameter
       responses:
         '200':
           description: Chat session details
@@ -107,13 +111,13 @@ paths:
                 $ref: '#/components/schemas/ChatSessionResponse'
         '404':
           $ref: '#/components/responses/NotFound'
-
+      description: Retrieve a specific Session
   /messages:
     post:
       summary: Create message
       operationId: createMessage
       tags:
-        - Messages
+      - Messages
       requestBody:
         required: true
         content:
@@ -131,12 +135,12 @@ paths:
           $ref: '#/components/responses/BadRequest'
         '403':
           $ref: '#/components/responses/Forbidden'
-
+      description: Create a new Message
     delete:
       summary: Delete chat data
       operationId: deleteChatData
       tags:
-        - Data Management
+      - Data Management
       requestBody:
         required: true
         content:
@@ -157,37 +161,41 @@ paths:
                     type: integer
                   hard_delete:
                     type: boolean
-
+      description: Delete a Message
   /sessions/{sessionId}/messages:
     get:
       summary: Get messages for session
       operationId: getSessionMessages
       tags:
-        - Messages
+      - Messages
       parameters:
-        - name: sessionId
-          in: path
-          required: true
-          schema:
-            type: string
-            format: uuid
-        - name: include_blocked
-          in: query
-          schema:
-            type: boolean
-            default: false
-        - name: limit
-          in: query
-          schema:
-            type: integer
-            maximum: 100
-            default: 50
-        - name: offset
-          in: query
-          schema:
-            type: integer
-            minimum: 0
-            default: 0
+      - name: sessionId
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+        description: The sessionId path parameter
+      - name: include_blocked
+        in: query
+        schema:
+          type: boolean
+          default: false
+        description: The include_blocked query parameter
+      - name: limit
+        in: query
+        schema:
+          type: integer
+          maximum: 100
+          default: 50
+        description: The limit query parameter
+      - name: offset
+        in: query
+        schema:
+          type: integer
+          minimum: 0
+          default: 0
+        description: The offset query parameter
       responses:
         '200':
           description: List of messages
@@ -197,13 +205,13 @@ paths:
                 type: array
                 items:
                   $ref: '#/components/schemas/MessageResponse'
-
+      description: Retrieve a specific Message
   /parental-controls:
     post:
       summary: Create parental controls
       operationId: createParentalControls
       tags:
-        - Parental Controls
+      - Parental Controls
       requestBody:
         required: true
         content:
@@ -219,26 +227,28 @@ paths:
                 $ref: '#/components/schemas/ParentalControlResponse'
         '409':
           description: Parental controls already exist
-
+      description: Create a new Parental Control
   /parental-controls/{parentId}/{learnerId}:
     get:
       summary: Get parental controls
       operationId: getParentalControls
       tags:
-        - Parental Controls
+      - Parental Controls
       parameters:
-        - name: parentId
-          in: path
-          required: true
-          schema:
-            type: string
-            format: uuid
-        - name: learnerId
-          in: path
-          required: true
-          schema:
-            type: string
-            format: uuid
+      - name: parentId
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+        description: The parentId path parameter
+      - name: learnerId
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+        description: The learnerId path parameter
       responses:
         '200':
           description: Parental control settings
@@ -246,20 +256,21 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/ParentalControlResponse'
-
+      description: Retrieve a specific Parental Control
   /parental-controls/{controlId}:
     put:
       summary: Update parental controls
       operationId: updateParentalControls
       tags:
-        - Parental Controls
+      - Parental Controls
       parameters:
-        - name: controlId
-          in: path
-          required: true
-          schema:
-            type: string
-            format: uuid
+      - name: controlId
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+        description: The controlId path parameter
       requestBody:
         required: true
         content:
@@ -273,13 +284,13 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/ParentalControlResponse'
-
+      description: Update a Parental Control
   /export:
     post:
       summary: Export chat data
       operationId: exportChatData
       tags:
-        - Data Management
+      - Data Management
       requestBody:
         required: true
         content:
@@ -302,24 +313,26 @@ paths:
                       type: string
                   total_messages:
                     type: integer
-
+      description: Create a new Export
   /stats/moderation:
     get:
       summary: Get moderation statistics
       operationId: getModerationStats
       tags:
-        - Statistics
+      - Statistics
       parameters:
-        - name: start_date
-          in: query
-          schema:
-            type: string
-            format: date-time
-        - name: end_date
-          in: query
-          schema:
-            type: string
-            format: date-time
+      - name: start_date
+        in: query
+        schema:
+          type: string
+          format: date-time
+        description: The start_date query parameter
+      - name: end_date
+        in: query
+        schema:
+          type: string
+          format: date-time
+        description: The end_date query parameter
       responses:
         '200':
           description: Moderation statistics
@@ -327,24 +340,26 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/ModerationStats'
-
+      description: Retrieve all Moderation
   /stats/sessions:
     get:
       summary: Get session statistics
       operationId: getSessionStats
       tags:
-        - Statistics
+      - Statistics
       parameters:
-        - name: start_date
-          in: query
-          schema:
-            type: string
-            format: date-time
-        - name: end_date
-          in: query
-          schema:
-            type: string
-            format: date-time
+      - name: start_date
+        in: query
+        schema:
+          type: string
+          format: date-time
+        description: The start_date query parameter
+      - name: end_date
+        in: query
+        schema:
+          type: string
+          format: date-time
+        description: The end_date query parameter
       responses:
         '200':
           description: Session statistics
@@ -352,20 +367,21 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/ChatSessionStats'
-
+      description: Retrieve all Sessions
   /audit/{messageId}:
     get:
       summary: Get message audit trail
       operationId: getMessageAuditTrail
       tags:
-        - Audit
+      - Audit
       parameters:
-        - name: messageId
-          in: path
-          required: true
-          schema:
-            type: string
-            format: uuid
+      - name: messageId
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+        description: The messageId path parameter
       responses:
         '200':
           description: Audit trail entries
@@ -375,13 +391,13 @@ paths:
                 type: array
                 items:
                   $ref: '#/components/schemas/AuditEntryResponse'
-
+      description: Retrieve a specific Audit
   /health:
     get:
       summary: Health check
       operationId: chatServiceHealthCheck
       tags:
-        - Health
+      - Health
       security: []
       responses:
         '200':
@@ -390,55 +406,50 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/HealthResponse'
-
+      description: Retrieve all Health
 components:
   securitySchemes:
     bearerAuth:
       type: http
       scheme: bearer
       bearerFormat: JWT
-
   schemas:
     ChatType:
       type: string
       enum:
-        - parent_teacher
-        - parent_ai_coach
-        - learner_ai_tutor
-        - teacher_ai_coach
-
+      - parent_teacher
+      - parent_ai_coach
+      - learner_ai_tutor
+      - teacher_ai_coach
     UserRole:
       type: string
       enum:
-        - learner
-        - teacher
-        - parent
-        - ai_coach
-        - ai_tutor
-
+      - learner
+      - teacher
+      - parent
+      - ai_coach
+      - ai_tutor
     MessageStatus:
       type: string
       enum:
-        - pending
-        - approved
-        - blocked
-        - flagged
-        - archived
-
+      - pending
+      - approved
+      - blocked
+      - flagged
+      - archived
     ModerationAction:
       type: string
       enum:
-        - approved
-        - soft_block
-        - hard_block
-        - human_review
-        - pii_scrubbed
-
+      - approved
+      - soft_block
+      - hard_block
+      - human_review
+      - pii_scrubbed
     ChatSessionCreate:
       type: object
       required:
-        - chat_type
-        - participants
+      - chat_type
+      - participants
       properties:
         chat_type:
           $ref: '#/components/schemas/ChatType'
@@ -464,8 +475,7 @@ components:
           default: true
         moderation_level:
           type: string
-          default: "strict"
-
+          default: strict
     ChatSessionResponse:
       type: object
       properties:
@@ -507,14 +517,13 @@ components:
           type: boolean
         auto_archive_days:
           type: integer
-
     MessageCreate:
       type: object
       required:
-        - session_id
-        - sender_id
-        - sender_role
-        - content
+      - session_id
+      - sender_id
+      - sender_role
+      - content
       properties:
         session_id:
           type: string
@@ -530,8 +539,7 @@ components:
           maxLength: 10000
         message_type:
           type: string
-          default: "text"
-
+          default: text
     MessageResponse:
       type: object
       properties:
@@ -573,12 +581,11 @@ components:
           type: array
           items:
             type: string
-
     ParentalControlCreate:
       type: object
       required:
-        - parent_id
-        - learner_id
+      - parent_id
+      - learner_id
       properties:
         parent_id:
           type: string
@@ -593,7 +600,7 @@ components:
           type: object
         content_filter_level:
           type: string
-          default: "strict"
+          default: strict
         allowed_topics:
           type: array
           items:
@@ -617,22 +624,20 @@ components:
         auto_delete_enabled:
           type: boolean
           default: false
-
     ParentalControlResponse:
       allOf:
-        - $ref: '#/components/schemas/ParentalControlCreate'
-        - type: object
-          properties:
-            id:
-              type: string
-              format: uuid
-            created_at:
-              type: string
-              format: date-time
-            updated_at:
-              type: string
-              format: date-time
-
+      - $ref: '#/components/schemas/ParentalControlCreate'
+      - type: object
+        properties:
+          id:
+            type: string
+            format: uuid
+          created_at:
+            type: string
+            format: date-time
+          updated_at:
+            type: string
+            format: date-time
     ParentalControlUpdate:
       type: object
       properties:
@@ -660,12 +665,11 @@ components:
           type: integer
         auto_delete_enabled:
           type: boolean
-
     ChatExportRequest:
       type: object
       required:
-        - requester_id
-        - requester_role
+      - requester_id
+      - requester_role
       properties:
         session_ids:
           type: array
@@ -680,8 +684,11 @@ components:
           format: date-time
         export_format:
           type: string
-          enum: [json, parquet, csv]
-          default: "parquet"
+          enum:
+          - json
+          - parquet
+          - csv
+          default: parquet
         include_pii:
           type: boolean
           default: false
@@ -690,13 +697,12 @@ components:
           format: uuid
         requester_role:
           $ref: '#/components/schemas/UserRole'
-
     ChatDeleteRequest:
       type: object
       required:
-        - reason
-        - requester_id
-        - requester_role
+      - reason
+      - requester_id
+      - requester_role
       properties:
         session_ids:
           type: array
@@ -720,7 +726,6 @@ components:
           format: uuid
         requester_role:
           $ref: '#/components/schemas/UserRole'
-
     ModerationStats:
       type: object
       properties:
@@ -739,7 +744,6 @@ components:
           type: integer
         pii_detections:
           type: integer
-
     ChatSessionStats:
       type: object
       properties:
@@ -757,7 +761,6 @@ components:
         messages_per_session:
           type: number
           format: float
-
     AuditEntryResponse:
       type: object
       properties:
@@ -786,7 +789,6 @@ components:
           type: string
         parquet_exported:
           type: boolean
-
     HealthResponse:
       type: object
       properties:
@@ -804,7 +806,6 @@ components:
           type: string
         s3_status:
           type: string
-
     ErrorResponse:
       type: object
       properties:
@@ -814,7 +815,6 @@ components:
           type: string
         details:
           type: object
-
   responses:
     BadRequest:
       description: Bad request
@@ -822,24 +822,36 @@ components:
         application/json:
           schema:
             $ref: '#/components/schemas/ErrorResponse'
-
     Unauthorized:
       description: Unauthorized
       content:
         application/json:
           schema:
             $ref: '#/components/schemas/ErrorResponse'
-
     Forbidden:
       description: Forbidden
       content:
         application/json:
           schema:
             $ref: '#/components/schemas/ErrorResponse'
-
     NotFound:
       description: Not found
       content:
         application/json:
           schema:
             $ref: '#/components/schemas/ErrorResponse'
+tags:
+- name: Audit
+  description: Audit operations
+- name: Messages
+  description: Messages operations
+- name: Statistics
+  description: Statistics operations
+- name: Health
+  description: Health operations
+- name: Chat Sessions
+  description: Chat Sessions operations
+- name: Parental Controls
+  description: Parental Controls operations
+- name: Data Management
+  description: Data Management operations

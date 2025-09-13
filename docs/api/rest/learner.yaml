@@ -7,49 +7,58 @@ info:
     name: API Support
     email: api-support@aivo.com
 servers:
-  - url: https://api.aivo.com/learner/v1
-    description: Production server
-  - url: https://staging-api.aivo.com/learner/v1
-    description: Staging server
+- url: https://api.aivo.com/learner/v1
+  description: Production server
+- url: https://staging-api.aivo.com/learner/v1
+  description: Staging server
 paths:
   /learners:
     get:
       summary: List learners
       operationId: listLearners
       tags:
-        - Learners
+      - Learners
       security:
-        - bearerAuth: []
+      - bearerAuth: []
       parameters:
-        - name: tenantId
-          in: query
-          required: true
-          schema:
-            type: string
-            format: uuid
-        - name: status
-          in: query
-          schema:
-            type: string
-            enum: [active, inactive, pending, suspended]
-        - name: search
-          in: query
-          schema:
-            type: string
-            description: Search by name or email
-        - name: limit
-          in: query
-          schema:
-            type: integer
-            minimum: 1
-            maximum: 100
-            default: 20
-        - name: offset
-          in: query
-          schema:
-            type: integer
-            minimum: 0
-            default: 0
+      - name: tenantId
+        in: query
+        required: true
+        schema:
+          type: string
+          format: uuid
+        description: The tenantId query parameter
+      - name: status
+        in: query
+        schema:
+          type: string
+          enum:
+          - active
+          - inactive
+          - pending
+          - suspended
+        description: The status query parameter
+      - name: search
+        in: query
+        schema:
+          type: string
+          description: Search by name or email
+        description: The search query parameter
+      - name: limit
+        in: query
+        schema:
+          type: integer
+          minimum: 1
+          maximum: 100
+          default: 20
+        description: The limit query parameter
+      - name: offset
+        in: query
+        schema:
+          type: integer
+          minimum: 0
+          default: 0
+        description: The offset query parameter
       responses:
         '200':
           description: Learners retrieved successfully
@@ -58,10 +67,10 @@ paths:
               schema:
                 type: object
                 required:
-                  - data
-                  - total
-                  - limit
-                  - offset
+                - data
+                - total
+                - limit
+                - offset
                 properties:
                   data:
                     type: array
@@ -82,14 +91,14 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Error'
-
+      description: Retrieve all Learners
     post:
       summary: Create new learner
       operationId: createLearner
       tags:
-        - Learners
+      - Learners
       security:
-        - bearerAuth: []
+      - bearerAuth: []
       requestBody:
         required: true
         content:
@@ -127,22 +136,23 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/ValidationError'
-
+      description: Create a new Learner
   /learners/{learnerId}:
     get:
       summary: Get learner by ID
       operationId: getLearner
       tags:
-        - Learners
+      - Learners
       security:
-        - bearerAuth: []
+      - bearerAuth: []
       parameters:
-        - name: learnerId
-          in: path
-          required: true
-          schema:
-            type: string
-            format: uuid
+      - name: learnerId
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+        description: The learnerId path parameter
       responses:
         '200':
           description: Learner retrieved successfully
@@ -162,21 +172,22 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Error'
-
+      description: Retrieve a specific Learner
     put:
       summary: Update learner
       operationId: updateLearner
       tags:
-        - Learners
+      - Learners
       security:
-        - bearerAuth: []
+      - bearerAuth: []
       parameters:
-        - name: learnerId
-          in: path
-          required: true
-          schema:
-            type: string
-            format: uuid
+      - name: learnerId
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+        description: The learnerId path parameter
       requestBody:
         required: true
         content:
@@ -208,21 +219,22 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Error'
-
+      description: Update a Learner
     delete:
       summary: Delete learner
       operationId: deleteLearner
       tags:
-        - Learners
+      - Learners
       security:
-        - bearerAuth: []
+      - bearerAuth: []
       parameters:
-        - name: learnerId
-          in: path
-          required: true
-          schema:
-            type: string
-            format: uuid
+      - name: learnerId
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+        description: The learnerId path parameter
       responses:
         '204':
           description: Learner deleted successfully
@@ -238,22 +250,23 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Error'
-
+      description: Delete a Learner
   /learners/{learnerId}/profile:
     get:
       summary: Get learner profile
       operationId: getLearnerProfile
       tags:
-        - Learner Profile
+      - Learner Profile
       security:
-        - bearerAuth: []
+      - bearerAuth: []
       parameters:
-        - name: learnerId
-          in: path
-          required: true
-          schema:
-            type: string
-            format: uuid
+      - name: learnerId
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+        description: The learnerId path parameter
       responses:
         '200':
           description: Learner profile retrieved successfully
@@ -273,21 +286,22 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Error'
-
+      description: Retrieve a specific Profile
     put:
       summary: Update learner profile
       operationId: updateLearnerProfile
       tags:
-        - Learner Profile
+      - Learner Profile
       security:
-        - bearerAuth: []
+      - bearerAuth: []
       parameters:
-        - name: learnerId
-          in: path
-          required: true
-          schema:
-            type: string
-            format: uuid
+      - name: learnerId
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+        description: The learnerId path parameter
       requestBody:
         required: true
         content:
@@ -319,28 +333,34 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Error'
-
+      description: Update a Profile
   /learners/{learnerId}/analytics:
     get:
       summary: Get learner analytics
       operationId: getLearnerAnalytics
       tags:
-        - Analytics
+      - Analytics
       security:
-        - bearerAuth: []
+      - bearerAuth: []
       parameters:
-        - name: learnerId
-          in: path
-          required: true
-          schema:
-            type: string
-            format: uuid
-        - name: range
-          in: query
-          schema:
-            type: string
-            enum: [7d, 30d, 90d, 1y]
-            default: 30d
+      - name: learnerId
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+        description: The learnerId path parameter
+      - name: range
+        in: query
+        schema:
+          type: string
+          enum:
+          - 7d
+          - 30d
+          - 90d
+          - 1y
+          default: 30d
+        description: The range query parameter
       responses:
         '200':
           description: Learner analytics retrieved successfully
@@ -360,22 +380,23 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Error'
-
+      description: Retrieve a specific Analytic
   /learners/{learnerId}/achievements:
     get:
       summary: Get learner achievements
       operationId: getLearnerAchievements
       tags:
-        - Achievements
+      - Achievements
       security:
-        - bearerAuth: []
+      - bearerAuth: []
       parameters:
-        - name: learnerId
-          in: path
-          required: true
-          schema:
-            type: string
-            format: uuid
+      - name: learnerId
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+        description: The learnerId path parameter
       responses:
         '200':
           description: Learner achievements retrieved successfully
@@ -397,21 +418,22 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Error'
-
+      description: Retrieve a specific Achievement
     post:
       summary: Award achievement to learner
       operationId: awardAchievement
       tags:
-        - Achievements
+      - Achievements
       security:
-        - bearerAuth: []
+      - bearerAuth: []
       parameters:
-        - name: learnerId
-          in: path
-          required: true
-          schema:
-            type: string
-            format: uuid
+      - name: learnerId
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+        description: The learnerId path parameter
       requestBody:
         required: true
         content:
@@ -443,15 +465,15 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Error'
-
+      description: Create a new Achievement
   /bulk-import:
     post:
       summary: Bulk import learners
       operationId: bulkImportLearners
       tags:
-        - Bulk Operations
+      - Bulk Operations
       security:
-        - bearerAuth: []
+      - bearerAuth: []
       requestBody:
         required: true
         content:
@@ -477,78 +499,81 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Error'
-
+      description: Create a new Bulk Import
 components:
   securitySchemes:
     bearerAuth:
       type: http
       scheme: bearer
       bearerFormat: JWT
-
   schemas:
     Learner:
       type: object
       required:
-        - id
-        - tenantId
-        - email
-        - firstName
-        - lastName
-        - status
-        - createdAt
-        - updatedAt
+      - id
+      - tenantId
+      - email
+      - firstName
+      - lastName
+      - status
+      - createdAt
+      - updatedAt
       properties:
         id:
           type: string
           format: uuid
-          example: "123e4567-e89b-12d3-a456-426614174000"
+          example: 9ddeffbb-80f8-4937-826a-51418af5a7e7
         tenantId:
           type: string
           format: uuid
-          example: "456e7890-e89b-12d3-a456-426614174000"
+          example: 57dad1ac-6045-41d4-89d8-bf5f33ab253e
         email:
           type: string
           format: email
-          example: "learner@example.com"
+          example: user@example.com
         firstName:
           type: string
-          example: "Jane"
+          example: Jane
         lastName:
           type: string
-          example: "Smith"
+          example: Smith
         status:
           type: string
-          enum: [active, inactive, pending, suspended]
-          example: "active"
+          enum:
+          - active
+          - inactive
+          - pending
+          - suspended
+          example: active
         avatar:
           type: string
           format: uri
           nullable: true
-          example: "https://example.com/avatar.jpg"
+          example: https://example.com
         timezone:
           type: string
-          example: "America/New_York"
+          example: c22028a0-82d2-4d5c-b07a-15e9d4f1334d
         language:
           type: string
-          example: "en"
+          example: en
         department:
           type: string
           nullable: true
-          example: "Engineering"
+          example: 3b65fa78-430c-4293-b248-124cefe7c060
         jobTitle:
           type: string
           nullable: true
-          example: "Software Engineer"
+          example: ca333caf-761d-4984-9782-fcb68253e59f
         manager:
           type: string
           format: uuid
           nullable: true
-          example: "234e5678-e89b-12d3-a456-426614174000"
+          example: 93d59a44-1888-4759-9b3e-ac2a92bbcdc6
         lastLoginAt:
           type: string
           format: date-time
           nullable: true
-          example: "2023-12-01T10:30:00Z"
+          example: '2025-09-13T00:14:43.069770+00:00'
         enrollmentCount:
           type: integer
           example: 5
@@ -562,65 +587,63 @@ components:
           type: object
           additionalProperties: true
           example:
-            employeeId: "EMP001"
-            hireDate: "2022-01-15"
+            employeeId: EMP001
+            hireDate: '2022-01-15'
         createdAt:
           type: string
           format: date-time
-          example: "2023-01-01T00:00:00Z"
+          example: '2025-09-13T00:14:43.069770+00:00'
         updatedAt:
           type: string
           format: date-time
-          example: "2023-12-01T10:30:00Z"
-
+          example: '2025-09-13T00:14:43.069770+00:00'
     CreateLearnerRequest:
       type: object
       required:
-        - tenantId
-        - email
-        - firstName
-        - lastName
+      - tenantId
+      - email
+      - firstName
+      - lastName
       properties:
         tenantId:
           type: string
           format: uuid
-          example: "456e7890-e89b-12d3-a456-426614174000"
+          example: 0d949bea-f11f-4e67-b811-b19401069a46
         email:
           type: string
           format: email
-          example: "learner@example.com"
+          example: user@example.com
         firstName:
           type: string
           minLength: 1
           maxLength: 50
-          example: "Jane"
+          example: Jane
         lastName:
           type: string
           minLength: 1
           maxLength: 50
-          example: "Smith"
+          example: Smith
         timezone:
           type: string
-          example: "America/New_York"
+          example: 4dc1cdeb-7e06-411c-b53d-94237de77aa8
         language:
           type: string
-          example: "en"
+          example: en
         department:
           type: string
           maxLength: 100
-          example: "Engineering"
+          example: 6a4a458d-d4ae-4b13-be5d-4b9abe39a235
         jobTitle:
           type: string
           maxLength: 100
-          example: "Software Engineer"
+          example: d746fdf7-ad44-4ed8-98b8-a66c7296857e
         manager:
           type: string
           format: uuid
-          example: "234e5678-e89b-12d3-a456-426614174000"
+          example: 2b8ef6b9-d651-4d50-a208-d2ed85c90eff
         metadata:
           type: object
           additionalProperties: true
-
     UpdateLearnerRequest:
       type: object
       properties:
@@ -628,66 +651,76 @@ components:
           type: string
           minLength: 1
           maxLength: 50
-          example: "Jane"
+          example: Jane
         lastName:
           type: string
           minLength: 1
           maxLength: 50
-          example: "Smith"
+          example: Smith
         status:
           type: string
-          enum: [active, inactive, pending, suspended]
-          example: "active"
+          enum:
+          - active
+          - inactive
+          - pending
+          - suspended
+          example: active
         timezone:
           type: string
-          example: "America/New_York"
+          example: 83e18795-6129-432a-abeb-e253534412d8
         language:
           type: string
-          example: "en"
+          example: en
         department:
           type: string
           maxLength: 100
-          example: "Engineering"
+          example: 5711a228-d45b-4b61-b280-f532941e8dba
         jobTitle:
           type: string
           maxLength: 100
-          example: "Senior Software Engineer"
+          example: 520d745c-832f-45ab-8033-26d752a9fada
         manager:
           type: string
           format: uuid
-          example: "234e5678-e89b-12d3-a456-426614174000"
+          example: d596f2aa-c2b9-40f8-a1fc-a65bd75d28e4
         metadata:
           type: object
           additionalProperties: true
-
     LearnerProfile:
       type: object
       required:
-        - learnerId
-        - preferences
-        - skills
-        - goals
+      - learnerId
+      - preferences
+      - skills
+      - goals
       properties:
         learnerId:
           type: string
           format: uuid
-          example: "123e4567-e89b-12d3-a456-426614174000"
+          example: ed60010d-20a2-4be5-8804-2a7894ee4582
         bio:
           type: string
           maxLength: 500
           nullable: true
-          example: "Passionate software engineer with 5 years of experience"
+          example: 1d20ea79-5c15-4fe4-9a5b-c2b5c32a868a
         preferences:
           type: object
           properties:
             learningStyle:
               type: string
-              enum: [visual, auditory, kinesthetic, reading]
-              example: "visual"
+              enum:
+              - visual
+              - auditory
+              - kinesthetic
+              - reading
+              example: visual
             difficultyLevel:
               type: string
-              enum: [beginner, intermediate, advanced]
-              example: "intermediate"
+              enum:
+              - beginner
+              - intermediate
+              - advanced
+              example: beginner
             notificationsEnabled:
               type: boolean
               default: true
@@ -696,8 +729,12 @@ components:
               default: true
             preferredLearningTime:
               type: string
-              enum: [morning, afternoon, evening, night]
-              example: "morning"
+              enum:
+              - morning
+              - afternoon
+              - evening
+              - night
+              example: morning
         skills:
           type: array
           items:
@@ -710,7 +747,11 @@ components:
                 type: string
               level:
                 type: string
-                enum: [beginner, intermediate, advanced, expert]
+                enum:
+                - beginner
+                - intermediate
+                - advanced
+                - expert
               verifiedAt:
                 type: string
                 format: date-time
@@ -732,7 +773,11 @@ components:
                 format: date
               status:
                 type: string
-                enum: [active, completed, paused, canceled]
+                enum:
+                - active
+                - completed
+                - paused
+                - canceled
               progress:
                 type: number
                 minimum: 0
@@ -741,53 +786,65 @@ components:
           type: array
           items:
             type: string
-          example: ["JavaScript", "Machine Learning", "Leadership"]
-
+          example:
+          - JavaScript
+          - Machine Learning
+          - Leadership
     UpdateLearnerProfileRequest:
       type: object
       properties:
         bio:
           type: string
           maxLength: 500
-          example: "Passionate software engineer with 5 years of experience"
+          example: 470bd712-49d7-438e-9e57-2136a4333165
         preferences:
           type: object
           properties:
             learningStyle:
               type: string
-              enum: [visual, auditory, kinesthetic, reading]
+              enum:
+              - visual
+              - auditory
+              - kinesthetic
+              - reading
             difficultyLevel:
               type: string
-              enum: [beginner, intermediate, advanced]
+              enum:
+              - beginner
+              - intermediate
+              - advanced
             notificationsEnabled:
               type: boolean
             emailDigest:
               type: boolean
             preferredLearningTime:
               type: string
-              enum: [morning, afternoon, evening, night]
+              enum:
+              - morning
+              - afternoon
+              - evening
+              - night
         interests:
           type: array
           items:
             type: string
-
     LearnerAnalytics:
       type: object
       required:
-        - learnerId
-        - range
-        - totalLearningTime
-        - completionRate
-        - streakDays
-        - activityData
+      - learnerId
+      - range
+      - totalLearningTime
+      - completionRate
+      - streakDays
+      - activityData
       properties:
         learnerId:
           type: string
           format: uuid
-          example: "123e4567-e89b-12d3-a456-426614174000"
+          example: 5af56902-e5d7-490e-926c-de29464f70b6
         range:
           type: string
-          example: "30d"
+          example: 30d
         totalLearningTime:
           type: integer
           description: Total learning time in minutes
@@ -833,43 +890,47 @@ components:
                 type: integer
               percentage:
                 type: number
-
     Achievement:
       type: object
       required:
-        - id
-        - learnerId
-        - type
-        - title
-        - description
-        - earnedAt
+      - id
+      - learnerId
+      - type
+      - title
+      - description
+      - earnedAt
       properties:
         id:
           type: string
           format: uuid
-          example: "ach_123e4567-e89b-12d3-a456-426614174000"
+          example: a5b551f7-3922-4333-9ba1-a9a0aa4e390b
         learnerId:
           type: string
           format: uuid
-          example: "123e4567-e89b-12d3-a456-426614174000"
+          example: b87af91d-b63c-4ada-8851-09a8ade038df
         type:
           type: string
-          enum: [course_completion, streak, skill_mastery, certification, milestone]
-          example: "course_completion"
+          enum:
+          - course_completion
+          - streak
+          - skill_mastery
+          - certification
+          - milestone
+          example: course_completion
         title:
           type: string
-          example: "JavaScript Master"
+          example: 157c0a67-eb96-4d77-930d-b77c9702a1be
         description:
           type: string
-          example: "Completed advanced JavaScript course with 95% score"
+          example: 8e292ed2-908a-491d-90ce-19fde16f3b9c
         iconUrl:
           type: string
           format: uri
-          example: "https://example.com/icons/js-master.png"
+          example: https://example.com
         badgeUrl:
           type: string
           format: uri
-          example: "https://example.com/badges/js-master.png"
+          example: https://example.com
         points:
           type: integer
           example: 100
@@ -877,38 +938,42 @@ components:
           type: object
           additionalProperties: true
           example:
-            courseId: "course_123"
+            courseId: course_123
             score: 95
         earnedAt:
           type: string
           format: date-time
-          example: "2023-12-01T16:45:00Z"
-
+          example: '2025-09-13T00:14:43.070813+00:00'
     AwardAchievementRequest:
       type: object
       required:
-        - type
-        - title
-        - description
+      - type
+      - title
+      - description
       properties:
         type:
           type: string
-          enum: [course_completion, streak, skill_mastery, certification, milestone]
-          example: "course_completion"
+          enum:
+          - course_completion
+          - streak
+          - skill_mastery
+          - certification
+          - milestone
+          example: course_completion
         title:
           type: string
-          example: "JavaScript Master"
+          example: 664b0a60-ebc8-44a4-ab6b-c126da43fc34
         description:
           type: string
-          example: "Completed advanced JavaScript course with 95% score"
+          example: d36e9f96-3ad7-45d7-8c19-ab8f9b939d37
         iconUrl:
           type: string
           format: uri
-          example: "https://example.com/icons/js-master.png"
+          example: https://example.com
         badgeUrl:
           type: string
           format: uri
-          example: "https://example.com/badges/js-master.png"
+          example: https://example.com
         points:
           type: integer
           default: 0
@@ -916,30 +981,28 @@ components:
         metadata:
           type: object
           additionalProperties: true
-
     BulkImportRequest:
       type: object
       required:
-        - tenantId
-        - learners
+      - tenantId
+      - learners
       properties:
         tenantId:
           type: string
           format: uuid
-          example: "456e7890-e89b-12d3-a456-426614174000"
+          example: a1fbfda2-d73b-4f0f-bb71-78b5a6990709
         learners:
           type: array
           items:
             $ref: '#/components/schemas/CreateLearnerRequest'
           minItems: 1
           maxItems: 1000
-
     BulkImportResponse:
       type: object
       required:
-        - successful
-        - failed
-        - total
+      - successful
+      - failed
+      - total
       properties:
         successful:
           type: integer
@@ -963,47 +1026,56 @@ components:
                 type: string
               message:
                 type: string
-
     Error:
       type: object
       required:
-        - error
-        - message
+      - error
+      - message
       properties:
         error:
           type: string
-          example: "learner_not_found"
+          example: 270ee73a-7196-4beb-adb2-a62e692516fe
         message:
           type: string
-          example: "Learner not found"
+          example: a5e1c37d-4b9a-42e3-8493-ebc685d32dbe
         details:
           type: object
           additionalProperties: true
-
     ValidationError:
       type: object
       required:
-        - error
-        - message
-        - validationErrors
+      - error
+      - message
+      - validationErrors
       properties:
         error:
           type: string
-          example: "validation_failed"
+          example: dcf1b0d0-15e7-42e4-a60c-5de62753e911
         message:
           type: string
-          example: "Request validation failed"
+          example: b90b9030-7ee8-41da-8fa8-34c2b5819b8c
         validationErrors:
           type: array
           items:
             type: object
             required:
-              - field
-              - message
+            - field
+            - message
             properties:
               field:
                 type: string
-                example: "email"
+                example: email
               message:
                 type: string
-                example: "Valid email is required"
+                example: 5a825799-3a06-4bf2-a99e-7d16f63a7d6d
+tags:
+- name: Achievements
+  description: Achievements operations
+- name: Learners
+  description: Learners operations
+- name: Learner Profile
+  description: Learner Profile operations
+- name: Bulk Operations
+  description: Bulk Operations operations
+- name: Analytics
+  description: Analytics operations

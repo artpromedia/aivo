@@ -1,114 +1,141 @@
 openapi: 3.1.0
 info:
   title: Event Collector Service API
-  description: |
-    High-performance microservice for collecting learner events via HTTP and gRPC,
+  description: 'High-performance microservice for collecting learner events via HTTP
+    and gRPC,
+
     with reliable buffering and publishing to Redpanda/Kafka.
 
+
     ## Features
+
     - **Dual Protocol Support**: HTTP REST API and gRPC streaming
+
     - **Reliable Buffering**: 24-hour on-disk event buffering with automatic cleanup
+
     - **Dead Letter Queue**: Failed events are sent to DLQ for investigation
+
     - **High Performance**: Async/await throughout, batched processing
+
     - **Compression**: Gzip compression support for HTTP requests
+
     - **Authentication**: Optional API key authentication
+
     - **Event Validation**: Pydantic-based validation with detailed error messages
 
-  version: "0.1.0"
+    '
+  version: 0.1.0
   contact:
     name: Aivo Data Pipeline Team
     email: data-engineering@aivo.com
   license:
     name: Proprietary
     url: https://aivo.com/license
-
 servers:
-  - url: http://localhost:8005
-    description: Local development server
-  - url: https://api-staging.aivo.com/event-collector
-    description: Staging environment
-  - url: https://api.aivo.com/event-collector
-    description: Production environment
-
+- url: http://localhost:8005
+  description: Local development server
+- url: https://api-staging.aivo.com/event-collector
+  description: Staging environment
+- url: https://api.aivo.com/event-collector
+  description: Production environment
 security:
-  - BearerAuth: []
-  - {}
-
+- BearerAuth: []
+- {}
 paths:
   /collect:
     post:
       summary: Collect batch of learner events
-      description: |
-        Accept a batch of learner events with optional gzip compression.
-        Events are validated, buffered on disk for reliability, and published to the `events_raw` topic
+      description: 'Accept a batch of learner events with optional gzip compression.
+
+        Events are validated, buffered on disk for reliability, and published to the
+        `events_raw` topic
+
         in Redpanda/Kafka with `learner_id` as the partition key.
 
+
         ## Request Format
+
         - **Content-Type**: `application/json`
+
         - **Content-Encoding** (optional): `gzip` for compression
-        - **Authorization** (optional): `Bearer <api_key>` if API key authentication is enabled
+
+        - **Authorization** (optional): `Bearer <api_key>` if API key authentication
+        is enabled
+
 
         ## Batch Processing
+
         - Maximum batch size: 1000 events
+
         - Maximum request size: 10MB
+
         - Events are processed asynchronously with 24-hour disk buffering
+
         - Failed events are automatically sent to the dead letter queue
 
+
         ## Response Codes
+
         - **200**: All events accepted successfully
+
         - **207**: Partial success (some events rejected)
+
         - **400**: Bad request (all events rejected)
+
         - **413**: Request too large
+
         - **422**: Event validation failed
+
         - **503**: Service unavailable
 
+        '
       operationId: collectEvents
       tags:
-        - Events
+      - Events
       requestBody:
         required: true
         content:
           application/json:
             schema:
               oneOf:
-                - $ref: '#/components/schemas/EventBatch'
-                - type: array
-                  items:
-                    $ref: '#/components/schemas/LearnerEvent'
-                  maxItems: 1000
+              - $ref: '#/components/schemas/EventBatch'
+              - type: array
+                items:
+                  $ref: '#/components/schemas/LearnerEvent'
+                maxItems: 1000
             examples:
               eventBatch:
                 summary: Event batch format
                 value:
                   events:
-                    - learner_id: "learner_123"
-                      event_type: "lesson_start"
-                      event_id: "evt_456"
-                      session_id: "session_789"
-                      timestamp: "2025-09-05T10:30:00Z"
-                      data:
-                        lesson_id: "lesson_001"
-                        title: "Introduction to Mathematics"
-                      metadata:
-                        source: "web_app"
-                        user_agent: "Mozilla/5.0..."
-                      version: "1.0"
-                  batch_id: "batch_abc123"
-                  source: "web_frontend"
+                  - learner_id: learner_123
+                    event_type: lesson_start
+                    event_id: evt_456
+                    session_id: session_789
+                    timestamp: '2025-09-05T10:30:00Z'
+                    data:
+                      lesson_id: lesson_001
+                      title: Introduction to Mathematics
+                    metadata:
+                      source: web_app
+                      user_agent: Mozilla/5.0...
+                    version: '1.0'
+                  batch_id: batch_abc123
+                  source: web_frontend
               directArray:
                 summary: Direct array format
                 value:
-                  - learner_id: "learner_123"
-                    event_type: "assessment_complete"
-                    event_id: "evt_789"
-                    timestamp: "2025-09-05T10:35:00Z"
-                    data:
-                      assessment_id: "assess_001"
-                      score: 85
-                      duration_seconds: 1200
-                    metadata:
-                      source: "mobile_app"
-                    version: "1.0"
+                - learner_id: learner_123
+                  event_type: assessment_complete
+                  event_id: evt_789
+                  timestamp: '2025-09-05T10:35:00Z'
+                  data:
+                    assessment_id: assess_001
+                    score: 85
+                    duration_seconds: 1200
+                  metadata:
+                    source: mobile_app
+                  version: '1.0'
       responses:
         '200':
           description: All events accepted successfully
@@ -119,8 +146,8 @@ paths:
               example:
                 accepted: 5
                 rejected: 0
-                batch_id: "batch_abc123"
-                message: "All events processed successfully"
+                batch_id: batch_abc123
+                message: All events processed successfully
                 errors: []
                 success: true
         '207':
@@ -132,11 +159,11 @@ paths:
               example:
                 accepted: 3
                 rejected: 2
-                batch_id: "batch_abc123"
-                message: "Partial batch processed"
+                batch_id: batch_abc123
+                message: Partial batch processed
                 errors:
-                  - "Event evt_001: Invalid event_type 'unknown_type'"
-                  - "Event evt_002: Missing required field 'learner_id'"
+                - 'Event evt_001: Invalid event_type ''unknown_type'''
+                - 'Event evt_002: Missing required field ''learner_id'''
                 success: false
         '400':
           description: Bad request - all events rejected
@@ -145,7 +172,7 @@ paths:
               schema:
                 $ref: '#/components/schemas/ErrorResponse'
               example:
-                detail: "Invalid JSON: Expecting ',' delimiter"
+                detail: 'Invalid JSON: Expecting '','' delimiter'
                 status_code: 400
         '413':
           description: Request entity too large
@@ -154,7 +181,7 @@ paths:
               schema:
                 $ref: '#/components/schemas/ErrorResponse'
               example:
-                detail: "Batch size exceeds limit of 10485760 bytes"
+                detail: Batch size exceeds limit of 10485760 bytes
                 status_code: 413
         '422':
           description: Unprocessable entity - validation failed
@@ -163,7 +190,7 @@ paths:
               schema:
                 $ref: '#/components/schemas/ErrorResponse'
               example:
-                detail: "Event validation failed: Invalid event type: 'unknown'"
+                detail: 'Event validation failed: Invalid event type: ''unknown'''
                 status_code: 422
         '503':
           description: Service unavailable
@@ -172,18 +199,19 @@ paths:
               schema:
                 $ref: '#/components/schemas/ErrorResponse'
               example:
-                detail: "Service not ready"
+                detail: Service not ready
                 status_code: 503
-
   /health:
     get:
       summary: Health check endpoint
-      description: |
-        Returns the current health status of the service.
+      description: 'Returns the current health status of the service.
+
         Used by load balancers and monitoring systems for health checks.
+
+        '
       operationId: eventCollectorGetHealth
       tags:
-        - Health
+      - Health
       security: []
       responses:
         '200':
@@ -193,9 +221,9 @@ paths:
               schema:
                 $ref: '#/components/schemas/HealthResponse'
               example:
-                status: "healthy"
-                timestamp: "2025-09-05T10:30:00Z"
-                version: "0.1.0"
+                status: healthy
+                timestamp: '2025-09-05T10:30:00Z'
+                version: 0.1.0
                 uptime_seconds: 3600
         '503':
           description: Service is unhealthy
@@ -204,21 +232,23 @@ paths:
               schema:
                 $ref: '#/components/schemas/HealthResponse'
               example:
-                status: "unhealthy"
-                timestamp: "2025-09-05T10:30:00Z"
-                version: "0.1.0"
+                status: unhealthy
+                timestamp: '2025-09-05T10:30:00Z'
+                version: 0.1.0
                 uptime_seconds: 3600
-
   /readiness:
     get:
       summary: Readiness check endpoint
-      description: |
-        Returns whether the service is ready to accept requests.
+      description: 'Returns whether the service is ready to accept requests.
+
         Checks dependencies like Kafka connectivity and buffer storage.
+
         Used by Kubernetes readiness probes.
+
+        '
       operationId: getReadiness
       tags:
-        - Health
+      - Health
       security: []
       responses:
         '200':
@@ -229,11 +259,11 @@ paths:
                 $ref: '#/components/schemas/ReadinessResponse'
               example:
                 ready: true
-                timestamp: "2025-09-05T10:30:00Z"
+                timestamp: '2025-09-05T10:30:00Z'
                 checks:
-                  kafka: "connected"
-                  buffer_storage: "available"
-                  disk_space: "sufficient"
+                  kafka: connected
+                  buffer_storage: available
+                  disk_space: sufficient
         '503':
           description: Service is not ready
           content:
@@ -242,90 +272,89 @@ paths:
                 $ref: '#/components/schemas/ReadinessResponse'
               example:
                 ready: false
-                timestamp: "2025-09-05T10:30:00Z"
+                timestamp: '2025-09-05T10:30:00Z'
                 checks:
-                  kafka: "disconnected"
-                  buffer_storage: "available"
-                  disk_space: "sufficient"
-
+                  kafka: disconnected
+                  buffer_storage: available
+                  disk_space: sufficient
 components:
   securitySchemes:
     BearerAuth:
       type: http
       scheme: bearer
       bearerFormat: API Key
-      description: |
-        API key authentication (optional).
+      description: 'API key authentication (optional).
+
         Include the API key in the Authorization header as: `Bearer <your_api_key>`
 
+        '
   schemas:
     LearnerEvent:
       type: object
       required:
-        - learner_id
-        - event_type
-        - event_id
-        - timestamp
+      - learner_id
+      - event_type
+      - event_id
+      - timestamp
       properties:
         learner_id:
           type: string
           maxLength: 255
           description: Unique learner identifier (used as Kafka partition key)
-          example: "learner_123"
+          example: bd5b55d1-126c-4439-844a-96e2a566dcc8
         event_type:
           type: string
           enum:
-            - page_view
-            - interaction
-            - assessment_start
-            - assessment_complete
-            - lesson_start
-            - lesson_complete
-            - resource_access
-            - error
-            - custom
+          - page_view
+          - interaction
+          - assessment_start
+          - assessment_complete
+          - lesson_start
+          - lesson_complete
+          - resource_access
+          - error
+          - custom
           description: Type of event
-          example: "lesson_start"
+          example: page_view
         event_id:
           type: string
           description: Unique event identifier
-          example: "evt_456"
+          example: evt_456
         session_id:
           type: string
           nullable: true
           description: Session identifier (optional)
-          example: "session_789"
+          example: aa9135c3-956d-4eef-8c01-0fdabf53f54b
         timestamp:
           type: string
           format: date-time
           description: Event timestamp (ISO 8601 format)
-          example: "2025-09-05T10:30:00Z"
+          example: '2025-09-13T00:14:43.014490+00:00'
         data:
           type: object
           additionalProperties: true
           description: Event data payload (flexible structure)
           example:
-            lesson_id: "lesson_001"
-            title: "Introduction to Mathematics"
+            lesson_id: lesson_001
+            title: Introduction to Mathematics
             duration: 1800
         metadata:
           type: object
           additionalProperties: true
           description: Event metadata (flexible structure)
           example:
-            source: "web_app"
-            user_agent: "Mozilla/5.0 (Windows NT 10.0; Win64; x64)..."
-            ip_address: "192.168.1.100"
+            source: web_app
+            user_agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64)...
+            ip_address: 192.168.1.100
         version:
           type: string
-          default: "1.0"
+          default: '1.0'
           description: Event schema version
-          example: "1.0"
-
+          example: '1.0'
     EventBatch:
       type: object
       required:
-        - events
+      - events
       properties:
         events:
           type: array
@@ -336,19 +365,18 @@ components:
         batch_id:
           type: string
           description: Optional batch identifier for tracking
-          example: "batch_abc123"
+          example: 566853c7-c369-4b2c-a9dd-99458534735f
         source:
           type: string
           description: Source system or application
-          example: "web_frontend"
-
+          example: 0384ecd9-c671-4729-9717-12a77459b193
     CollectResponse:
       type: object
       required:
-        - accepted
-        - rejected
-        - batch_id
-        - success
+      - accepted
+      - rejected
+      - batch_id
+      - success
       properties:
         accepted:
           type: integer
@@ -363,11 +391,11 @@ components:
         batch_id:
           type: string
           description: Unique identifier for this batch
-          example: "batch_abc123"
+          example: e268fc64-e1c6-49c0-9ee8-aca53d117f8b
         message:
           type: string
           description: Human-readable status message
-          example: "All events processed successfully"
+          example: 1917fdb2-97d9-43d2-b311-748aeaaef265
         errors:
           type: array
           items:
@@ -378,41 +406,39 @@ components:
           type: boolean
           description: Whether the batch was fully successful
           example: true
-
     HealthResponse:
       type: object
       required:
-        - status
-        - timestamp
-        - version
+      - status
+      - timestamp
+      - version
       properties:
         status:
           type: string
           enum:
-            - healthy
-            - unhealthy
+          - healthy
+          - unhealthy
           description: Current health status
-          example: "healthy"
+          example: healthy
         timestamp:
           type: string
           format: date-time
           description: Timestamp of the health check
-          example: "2025-09-05T10:30:00Z"
+          example: '2025-09-13T00:14:43.014490+00:00'
         version:
           type: string
           description: Service version
-          example: "0.1.0"
+          example: 0.1.0
         uptime_seconds:
           type: integer
           minimum: 0
           description: Service uptime in seconds
           example: 3600
-
     ReadinessResponse:
       type: object
       required:
-        - ready
-        - timestamp
+      - ready
+      - timestamp
       properties:
         ready:
           type: boolean
@@ -422,38 +448,35 @@ components:
           type: string
           format: date-time
           description: Timestamp of the readiness check
-          example: "2025-09-05T10:30:00Z"
+          example: '2025-09-13T00:14:43.014490+00:00'
         checks:
           type: object
           additionalProperties:
             type: string
           description: Status of individual readiness checks
           example:
-            kafka: "connected"
-            buffer_storage: "available"
-            disk_space: "sufficient"
-
+            kafka: connected
+            buffer_storage: available
+            disk_space: sufficient
     ErrorResponse:
       type: object
       required:
-        - detail
-        - status_code
+      - detail
+      - status_code
       properties:
         detail:
           type: string
           description: Error message
-          example: "Invalid JSON format"
+          example: 98e39882-6d66-4ff4-9555-ddc126377405
         status_code:
           type: integer
           description: HTTP status code
           example: 400
-
 tags:
-  - name: Events
-    description: Event collection endpoints
-  - name: Health
-    description: Health and readiness check endpoints
-
+- name: Events
+  description: Event collection endpoints
+- name: Health
+  description: Health and readiness check endpoints
 externalDocs:
   description: Event Collector Service Documentation
   url: https://docs.aivo.com/services/event-collector

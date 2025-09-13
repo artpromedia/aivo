@@ -7,17 +7,17 @@ info:
     name: API Support
     email: api-support@aivo.com
 servers:
-  - url: https://api.aivo.com/auth/v1
-    description: Production server
-  - url: https://staging-api.aivo.com/auth/v1
-    description: Staging server
+- url: https://api.aivo.com/auth/v1
+  description: Production server
+- url: https://staging-api.aivo.com/auth/v1
+  description: Staging server
 paths:
   /login:
     post:
       summary: Authenticate user
       operationId: login
       tags:
-        - Authentication
+      - Authentication
       requestBody:
         required: true
         content:
@@ -25,8 +25,8 @@ paths:
             schema:
               type: object
               required:
-                - email
-                - password
+              - email
+              - password
               properties:
                 email:
                   type: string
@@ -36,7 +36,7 @@ paths:
                   type: string
                   format: password
                   minLength: 8
-                  example: "********"
+                  example: '********'
       responses:
         '200':
           description: Authentication successful
@@ -56,15 +56,15 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/ValidationError'
-
+      description: Create a new Login
   /refresh:
     post:
       summary: Refresh access token
       operationId: refreshToken
       tags:
-        - Authentication
+      - Authentication
       security:
-        - bearerAuth: []
+      - bearerAuth: []
       requestBody:
         required: true
         content:
@@ -72,11 +72,11 @@ paths:
             schema:
               type: object
               required:
-                - refreshToken
+              - refreshToken
               properties:
                 refreshToken:
                   type: string
-                  example: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
+                  example: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
       responses:
         '200':
           description: Token refreshed successfully
@@ -90,15 +90,15 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Error'
-
+      description: Create a new Refresh
   /logout:
     post:
       summary: Logout user
       operationId: logout
       tags:
-        - Authentication
+      - Authentication
       security:
-        - bearerAuth: []
+      - bearerAuth: []
       responses:
         '204':
           description: Logout successful
@@ -108,15 +108,15 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Error'
-
+      description: Create a new Logout
   /me:
     get:
       summary: Get current user profile
       operationId: getCurrentUser
       tags:
-        - Profile
+      - Profile
       security:
-        - bearerAuth: []
+      - bearerAuth: []
       responses:
         '200':
           description: User profile retrieved successfully
@@ -130,136 +130,145 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Error'
-
+      description: Retrieve all Me
 components:
   securitySchemes:
     bearerAuth:
       type: http
       scheme: bearer
       bearerFormat: JWT
-
   schemas:
     AuthResponse:
       type: object
       required:
-        - accessToken
-        - refreshToken
-        - user
-        - expiresIn
+      - accessToken
+      - refreshToken
+      - user
+      - expiresIn
       properties:
         accessToken:
           type: string
           description: JWT access token
-          example: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
+          example: 5d4e43c3-4c4d-4fd8-a0a7-87ece2c50a23
         refreshToken:
           type: string
           description: JWT refresh token
-          example: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
+          example: 1571d1b7-aeb3-4ee3-96b1-f86a9738b5f3
         user:
           $ref: '#/components/schemas/User'
         expiresIn:
           type: integer
           description: Token expiration time in seconds
           example: 3600
-
     User:
       type: object
       required:
-        - id
-        - email
-        - firstName
-        - lastName
-        - role
-        - tenantId
-        - status
-        - createdAt
-        - updatedAt
+      - id
+      - email
+      - firstName
+      - lastName
+      - role
+      - tenantId
+      - status
+      - createdAt
+      - updatedAt
       properties:
         id:
           type: string
           format: uuid
-          example: "123e4567-e89b-12d3-a456-426614174000"
+          example: 7e17602d-9494-424e-b1c8-32350924670c
         email:
           type: string
           format: email
-          example: "user@example.com"
+          example: user@example.com
         firstName:
           type: string
-          example: "John"
+          example: John
         lastName:
           type: string
-          example: "Doe"
+          example: Doe
         role:
           type: string
-          enum: [super_admin, tenant_admin, instructor, learner]
-          example: "learner"
+          enum:
+          - super_admin
+          - tenant_admin
+          - instructor
+          - learner
+          example: learner
         tenantId:
           type: string
           format: uuid
-          example: "456e7890-e89b-12d3-a456-426614174000"
+          example: 0cb00126-36f3-4951-ba43-99a44687774c
         status:
           type: string
-          enum: [active, inactive, pending, suspended]
-          example: "active"
+          enum:
+          - active
+          - inactive
+          - pending
+          - suspended
+          example: active
         avatar:
           type: string
           format: uri
           nullable: true
-          example: "https://example.com/avatar.jpg"
+          example: https://example.com
         lastLoginAt:
           type: string
           format: date-time
           nullable: true
-          example: "2023-12-01T10:30:00Z"
+          example: '2025-09-13T00:14:42.935897+00:00'
         createdAt:
           type: string
           format: date-time
-          example: "2023-01-01T00:00:00Z"
+          example: '2025-09-13T00:14:42.935897+00:00'
         updatedAt:
           type: string
           format: date-time
-          example: "2023-12-01T10:30:00Z"
-
+          example: '2025-09-13T00:14:42.935897+00:00'
     Error:
       type: object
       required:
-        - error
-        - message
+      - error
+      - message
       properties:
         error:
           type: string
-          example: "unauthorized"
+          example: aa985d70-5503-44df-b84e-d0aad2cdc97f
         message:
           type: string
-          example: "Invalid credentials"
+          example: 60ad0d29-2d2d-4d90-b334-7a5171f12f9e
         details:
           type: object
           additionalProperties: true
-
     ValidationError:
       type: object
       required:
-        - error
-        - message
-        - validationErrors
+      - error
+      - message
+      - validationErrors
       properties:
         error:
           type: string
-          example: "validation_failed"
+          example: 1c9bfcc3-1cc2-4cf1-9c0c-1fe9ebd61fa7
         message:
           type: string
-          example: "Request validation failed"
+          example: ee79aa00-3572-4353-94f4-e97b4b4e1a7b
         validationErrors:
           type: array
           items:
             type: object
             required:
-              - field
-              - message
+            - field
+            - message
             properties:
               field:
                 type: string
-                example: "email"
+                example: email
               message:
                 type: string
-                example: "Invalid email format"
+                example: cc013a3f-178b-4159-9579-d4831bcfd8dc
+tags:
+- name: Profile
+  description: Profile operations
+- name: Authentication
+  description: Authentication operations

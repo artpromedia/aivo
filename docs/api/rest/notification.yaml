@@ -3,43 +3,67 @@ info:
   title: Notification Service API
   version: 1.0.0
   description: Real-time notification delivery with WebSocket, Push, and SMS
-
+  contact:
+    name: Aivo API Support
+    email: api-support@aivo.com
+    url: https://aivo.com/support
 servers:
-  - url: http://localhost:8000
-    description: Development server
-  - url: https://api.example.com/notify
-    description: Production server
-
+- url: http://localhost:8000
+  description: Development server
+- url: https://api.api.aivo.com/notify
+  description: Production server
 paths:
   /ws/notify:
     get:
       summary: WebSocket connection for real-time notifications
       parameters:
-        - name: token
-          in: query
-          required: true
-          schema:
-            type: string
-          description: JWT authentication token
-        - name: replay_id
-          in: query
-          required: false
-          schema:
-            type: string
-          description: Last received message ID for replay
+      - name: token
+        in: query
+        required: true
+        schema:
+          type: string
+        description: JWT authentication token
+      - name: replay_id
+        in: query
+        required: false
+        schema:
+          type: string
+        description: Last received message ID for replay
       responses:
         '101':
-          description: Switching to WebSocket protocol
+          description: Switching Protocols - WebSocket connection established
+          headers:
+            Upgrade:
+              description: Upgrade to WebSocket
+              schema:
+                type: string
+                example: websocket
+            Connection:
+              description: Connection upgrade
+              schema:
+                type: string
+                example: Upgrade
+        '400':
+          description: Bad Request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
         '401':
           description: Unauthorized - Invalid token
-        '1008':
-          description: Policy Violation - Missing token
-
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+      description: Retrieve all Notify
+      operationId: getWsNotify
+      tags:
+      - ws
   /push/subscribe:
     post:
       summary: Subscribe to push notifications
       security:
-        - bearerAuth: []
+      - bearerAuth: []
       requestBody:
         required: true
         content:
@@ -60,12 +84,15 @@ paths:
                     type: string
         '401':
           description: Unauthorized
-
+      description: Create a new Subscribe
+      operationId: postPushSubscribe
+      tags:
+      - push
   /push/unsubscribe:
     post:
       summary: Unsubscribe from push notifications
       security:
-        - bearerAuth: []
+      - bearerAuth: []
       requestBody:
         required: true
         content:
@@ -73,7 +100,7 @@ paths:
             schema:
               type: object
               required:
-                - endpoint
+              - endpoint
               properties:
                 endpoint:
                   type: string
@@ -83,12 +110,15 @@ paths:
           description: Unsubscription successful
         '401':
           description: Unauthorized
-
+      description: Create a new Unsubscribe
+      operationId: postPushUnsubscribe
+      tags:
+      - push
   /notify:
     post:
       summary: Send notification through available channels
       security:
-        - bearerAuth: []
+      - bearerAuth: []
       requestBody:
         required: true
         content:
@@ -106,7 +136,10 @@ paths:
           description: Bad request
         '500':
           description: Internal server error
-
+      description: Create a new Notify
+      operationId: postNotify
+      tags:
+      - notify
   /health:
     get:
       summary: Health check endpoint
@@ -125,20 +158,22 @@ paths:
                     format: date-time
                   connections:
                     type: integer
-
+      description: Retrieve all Health
+      operationId: getHealth
+      tags:
+      - health
 components:
   securitySchemes:
     bearerAuth:
       type: http
       scheme: bearer
       bearerFormat: JWT
-
   schemas:
     PushSubscription:
       type: object
       required:
-        - endpoint
-        - keys
+      - endpoint
+      - keys
       properties:
         endpoint:
           type: string
@@ -146,8 +181,8 @@ components:
         keys:
           type: object
           required:
-            - p256dh
-            - auth
+          - p256dh
+          - auth
           properties:
             p256dh:
               type: string
@@ -159,15 +194,14 @@ components:
           type: string
           format: date-time
           nullable: true
-
     NotificationRequest:
       type: object
       required:
-        - user_id
-        - notification_type
-        - channels
-        - template_id
-        - data
+      - user_id
+      - notification_type
+      - channels
+      - template_id
+      - data
       properties:
         user_id:
           type: string
@@ -175,20 +209,20 @@ components:
         notification_type:
           type: string
           enum:
-            - iep_reminder
-            - meeting_alert
-            - document_update
-            - system_message
-            - urgent_alert
+          - iep_reminder
+          - meeting_alert
+          - document_update
+          - system_message
+          - urgent_alert
         channels:
           type: array
           items:
             type: string
             enum:
-              - websocket
-              - push
-              - sms
-              - email
+            - websocket
+            - push
+            - sms
+            - email
         template_id:
           type: string
           description: Notification template ID
@@ -202,10 +236,10 @@ components:
         priority:
           type: string
           enum:
-            - low
-            - medium
-            - high
-            - critical
+          - low
+          - medium
+          - high
+          - critical
           default: medium
         phone_number:
           type: string
@@ -219,7 +253,6 @@ components:
           type: integer
           default: 86400
           description: Time to live in seconds
-
     NotificationResponse:
       type: object
       properties:
@@ -234,7 +267,6 @@ components:
         queued:
           type: boolean
           description: Whether notification was queued
-
     WebSocketMessage:
       type: object
       properties:
@@ -253,3 +285,27 @@ components:
         metadata:
           type: object
           nullable: true
+    ErrorResponse:
+      type: object
+      required:
+      - error
+      - message
+      properties:
+        error:
+          type: string
+          description: Error type
+        message:
+          type: string
+          description: Error description
+        code:
+          type: integer
+          description: Error code
+tags:
+- name: notify
+  description: Notify operations
+- name: ws
+  description: Ws operations
+- name: push
+  description: Push operations
+- name: health
+  description: Health operations

@@ -6,13 +6,11 @@ info:
   contact:
     name: Aivo Platform Team
     email: platform@aivo.com
-
 servers:
-  - url: http://localhost:8000
-    description: Local development server
-  - url: https://api.aivo.com/analytics
-    description: Production server
-
+- url: http://localhost:8000
+  description: Local development server
+- url: https://api.aivo.com/analytics
+  description: Production server
 paths:
   /health:
     get:
@@ -29,41 +27,49 @@ paths:
                 properties:
                   status:
                     type: string
-                    enum: [healthy, unhealthy]
+                    enum:
+                    - healthy
+                    - unhealthy
                   timestamp:
                     type: string
                     format: date-time
                   version:
                     type: string
-
+      tags:
+      - health
   /metrics/aggregated:
     get:
       summary: Get aggregated analytics metrics
       description: Retrieve aggregated metrics for reporting and dashboards
       operationId: getAggregatedMetrics
       parameters:
-        - name: start_date
-          in: query
-          required: true
-          schema:
-            type: string
-            format: date
-          description: Start date for metrics (YYYY-MM-DD)
-        - name: end_date
-          in: query
-          required: true
-          schema:
-            type: string
-            format: date
-          description: End date for metrics (YYYY-MM-DD)
-        - name: granularity
-          in: query
-          required: false
-          schema:
-            type: string
-            enum: [minute, hour, day, week, month]
-            default: day
-          description: Granularity of the metrics
+      - name: start_date
+        in: query
+        required: true
+        schema:
+          type: string
+          format: date
+        description: Start date for metrics (YYYY-MM-DD)
+      - name: end_date
+        in: query
+        required: true
+        schema:
+          type: string
+          format: date
+        description: End date for metrics (YYYY-MM-DD)
+      - name: granularity
+        in: query
+        required: false
+        schema:
+          type: string
+          enum:
+          - minute
+          - hour
+          - day
+          - week
+          - month
+          default: day
+        description: Granularity of the metrics
       responses:
         '200':
           description: Aggregated metrics data
@@ -87,7 +93,8 @@ paths:
                       end:
                         type: string
                         format: date
-
+      tags:
+      - metrics
 components:
   schemas:
     AggregatedMetric:
@@ -109,3 +116,8 @@ components:
         avg_session_duration:
           type: number
           format: float
+tags:
+- name: metrics
+  description: Metrics operations
+- name: health
+  description: Health operations

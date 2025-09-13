@@ -1,24 +1,26 @@
 openapi: 3.1.0
 info:
   title: SLP/SEL Engine API
-  description: |
-    Speech Language Pathology and Social Emotional Learning service providing:
+  description: 'Speech Language Pathology and Social Emotional Learning service providing:
+
     - Speech articulation analysis and drill management
+
     - Secure SEL journaling with sentiment analysis
+
     - Privacy-preserving therapeutic tools for educational platforms
+
+    '
   version: 1.0.0
   contact:
     name: SLP/SEL Engine Support
     email: support@artpromedia.com
   license:
     name: Proprietary
-
 servers:
-  - url: http://localhost:8000
-    description: Development server
-  - url: https://api.artpromedia.com/slp-sel
-    description: Production server
-
+- url: http://localhost:8000
+  description: Development server
+- url: https://api.artpromedia.com/slp-sel
+  description: Production server
 paths:
   /health:
     get:
@@ -26,7 +28,7 @@ paths:
       description: Check service health and status
       operationId: slpSelHealthCheck
       tags:
-        - Health
+      - Health
       responses:
         '200':
           description: Service is healthy
@@ -41,14 +43,13 @@ paths:
                   service:
                     type: string
                     example: slp-sel-engine
-
   /speech/analyze-phonemes:
     post:
       summary: Analyze phoneme timing
       description: Extract phoneme-level timing data from audio recordings
       operationId: analyze_phonemes
       tags:
-        - Speech Processing
+      - Speech Processing
       requestBody:
         required: true
         content:
@@ -61,7 +62,7 @@ paths:
                   format: binary
                   description: Audio file to analyze (WAV, MP3, etc.)
               required:
-                - audio_file
+              - audio_file
       responses:
         '200':
           description: Phoneme timing analysis results
@@ -77,14 +78,13 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/ErrorResponse'
-
   /speech/score-articulation:
     post:
       summary: Score articulation quality
       description: Evaluate articulation quality based on phoneme timing data
       operationId: score_articulation
       tags:
-        - Speech Processing
+      - Speech Processing
       requestBody:
         required: true
         content:
@@ -102,30 +102,29 @@ paths:
                 type: array
                 items:
                   $ref: '#/components/schemas/ArticulationScore'
-
   /speech/drill-session:
     post:
       summary: Create drill session
       description: Create a new speech therapy drill session
       operationId: create_drill_session
       tags:
-        - Speech Processing
+      - Speech Processing
       parameters:
-        - name: student_id
-          in: query
-          required: true
-          schema:
+      - name: student_id
+        in: query
+        required: true
+        schema:
+          type: string
+          format: uuid
+        description: Student identifier
+      - name: target_phonemes
+        in: query
+        required: true
+        schema:
+          type: array
+          items:
             type: string
-            format: uuid
-          description: Student identifier
-        - name: target_phonemes
-          in: query
-          required: true
-          schema:
-            type: array
-            items:
-              type: string
-          description: Target phonemes for practice
+        description: Target phonemes for practice
       responses:
         '200':
           description: Drill session created
@@ -133,22 +132,21 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/DrillSession'
-
   /journal/entries:
     post:
       summary: Create journal entry
       description: Create a new SEL journal entry with sentiment analysis
       operationId: create_journal_entry
       tags:
-        - SEL Journaling
+      - SEL Journaling
       parameters:
-        - name: student_id
-          in: query
-          required: true
-          schema:
-            type: string
-            format: uuid
-          description: Student identifier
+      - name: student_id
+        in: query
+        required: true
+        schema:
+          type: string
+          format: uuid
+        description: Student identifier
       requestBody:
         required: true
         content:
@@ -162,35 +160,36 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/JournalEntryResponse'
-
   /journal/entries/{student_id}:
     get:
       summary: Get journal history
       description: Retrieve paginated journal history for a student
       operationId: get_journal_history
       tags:
-        - SEL Journaling
+      - SEL Journaling
       parameters:
-        - name: student_id
-          in: path
-          required: true
-          schema:
-            type: string
-            format: uuid
-          description: Student identifier
-        - name: limit
-          in: query
-          schema:
-            type: integer
-            default: 50
-            minimum: 1
-            maximum: 1000
-        - name: offset
-          in: query
-          schema:
-            type: integer
-            default: 0
-            minimum: 0
+      - name: student_id
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+        description: Student identifier
+      - name: limit
+        in: query
+        schema:
+          type: integer
+          default: 50
+          minimum: 1
+          maximum: 1000
+        description: The limit query parameter
+      - name: offset
+        in: query
+        schema:
+          type: integer
+          default: 0
+          minimum: 0
+        description: The offset query parameter
       responses:
         '200':
           description: Journal history with sentiment trends
@@ -198,27 +197,28 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/JournalHistoryResponse'
-
   /journal/entries/{student_id}/{entry_id}:
     get:
       summary: Get specific journal entry
       description: Retrieve a specific journal entry with privacy validation
       operationId: get_journal_entry
       tags:
-        - SEL Journaling
+      - SEL Journaling
       parameters:
-        - name: student_id
-          in: path
-          required: true
-          schema:
-            type: string
-            format: uuid
-        - name: entry_id
-          in: path
-          required: true
-          schema:
-            type: string
-            format: uuid
+      - name: student_id
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+        description: The student_id path parameter
+      - name: entry_id
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+        description: The entry_id path parameter
       responses:
         '200':
           description: Journal entry details
@@ -228,26 +228,27 @@ paths:
                 $ref: '#/components/schemas/JournalEntryResponse'
         '404':
           description: Entry not found or access denied
-
     delete:
       summary: Delete journal entry
       description: Securely delete a journal entry with audit logging
       operationId: delete_journal_entry
       tags:
-        - SEL Journaling
+      - SEL Journaling
       parameters:
-        - name: student_id
-          in: path
-          required: true
-          schema:
-            type: string
-            format: uuid
-        - name: entry_id
-          in: path
-          required: true
-          schema:
-            type: string
-            format: uuid
+      - name: student_id
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+        description: The student_id path parameter
+      - name: entry_id
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+        description: The entry_id path parameter
       responses:
         '200':
           description: Entry deleted successfully
@@ -259,14 +260,13 @@ paths:
                   message:
                     type: string
                     example: Entry deleted successfully
-
   /admin/speech-analytics:
     get:
       summary: Get speech therapy analytics
       description: Aggregate analytics and progress reports for speech therapy
       operationId: get_speech_analytics
       tags:
-        - Administration
+      - Administration
       responses:
         '200':
           description: Speech therapy analytics
@@ -288,14 +288,13 @@ paths:
                     type: object
                   student_progress_summary:
                     type: object
-
   /admin/journal-analytics:
     get:
       summary: Get SEL journaling analytics
       description: Analyze journal sentiment trends and engagement metrics
       operationId: get_journal_analytics
       tags:
-        - Administration
+      - Administration
       responses:
         '200':
           description: SEL journaling analytics
@@ -314,21 +313,20 @@ paths:
                     type: object
                   privacy_compliance_status:
                     type: string
-
 components:
   schemas:
     PhonemeTimingData:
       type: object
       required:
-        - phoneme
-        - start_time
-        - end_time
-        - confidence
+      - phoneme
+      - start_time
+      - end_time
+      - confidence
       properties:
         phoneme:
           type: string
           description: IPA phoneme symbol
-          example: "p"
+          example: p
         start_time:
           type: number
           format: float
@@ -351,23 +349,22 @@ components:
         expected_phoneme:
           type: string
           description: Expected phoneme for comparison
-          example: "p"
-
+          example: p
     ArticulationScore:
       type: object
       required:
-        - phoneme
-        - accuracy_score
-        - timing_score
-        - consistency_score
-        - fluency_score
-        - overall_score
-        - feedback
+      - phoneme
+      - accuracy_score
+      - timing_score
+      - consistency_score
+      - fluency_score
+      - overall_score
+      - feedback
       properties:
         phoneme:
           type: string
           description: Evaluated phoneme
-          example: "p"
+          example: p
         accuracy_score:
           type: number
           format: float
@@ -381,14 +378,14 @@ components:
           minimum: 0.0
           maximum: 1.0
           description: Timing score
-          example: 0.90
+          example: 0.9
         consistency_score:
           type: number
           format: float
           minimum: 0.0
           maximum: 1.0
           description: Consistency score
-          example: 0.80
+          example: 0.8
         fluency_score:
           type: number
           format: float
@@ -408,18 +405,19 @@ components:
           items:
             type: string
           description: Feedback messages
-          example: ["Good pronunciation", "Try to maintain consistent timing"]
-
+          example:
+          - Good pronunciation
+          - Try to maintain consistent timing
     DrillSession:
       type: object
       required:
-        - session_id
-        - student_id
-        - drill_type
-        - target_phonemes
-        - articulation_level
-        - scores
-        - notes
+      - session_id
+      - student_id
+      - drill_type
+      - target_phonemes
+      - articulation_level
+      - scores
+      - notes
       properties:
         session_id:
           type: string
@@ -431,7 +429,11 @@ components:
           description: Student identifier
         drill_type:
           type: string
-          enum: [phoneme, word, sentence, paragraph]
+          enum:
+          - phoneme
+          - word
+          - sentence
+          - paragraph
           description: Type of drill
           example: phoneme
         target_phonemes:
@@ -439,10 +441,16 @@ components:
           items:
             type: string
           description: Target phonemes for session
-          example: ["p", "b", "t"]
+          example:
+          - p
+          - b
+          - t
         articulation_level:
           type: string
-          enum: [beginner, intermediate, advanced]
+          enum:
+          - beginner
+          - intermediate
+          - advanced
           description: Difficulty level
           example: beginner
         scores:
@@ -462,27 +470,29 @@ components:
         notes:
           type: string
           description: Session notes
-          example: "Good progress on plosive sounds"
-
+          example: 5a417485-f3b1-41b8-9ba3-064f17f5855b
     JournalEntryRequest:
       type: object
       required:
-        - title
-        - content
+      - title
+      - content
       properties:
         title:
           type: string
           maxLength: 200
           description: Entry title
-          example: "Today's Reflection"
+          example: 7f5cf229-bfdc-41fe-bcbb-cd22ba8e7d2e
         content:
           type: string
           maxLength: 5000
           description: Entry content
-          example: "Today I felt happy because..."
+          example: b84947eb-ff07-42b9-9691-eccf145b409f
         privacy_level:
           type: string
-          enum: [private, therapist_only, team_shared]
+          enum:
+          - private
+          - therapist_only
+          - team_shared
           default: private
           description: Privacy level
         mood_rating:
@@ -496,17 +506,18 @@ components:
           items:
             type: string
           description: Entry tags
-          example: ["reflection", "progress"]
-
+          example:
+          - reflection
+          - progress
     JournalEntry:
       type: object
       required:
-        - entry_id
-        - student_id
-        - title
-        - content
-        - privacy_level
-        - created_at
+      - entry_id
+      - student_id
+      - title
+      - content
+      - privacy_level
+      - created_at
       properties:
         entry_id:
           type: string
@@ -524,7 +535,10 @@ components:
           description: Entry content
         privacy_level:
           type: string
-          enum: [private, therapist_only, team_shared]
+          enum:
+          - private
+          - therapist_only
+          - team_shared
           description: Privacy level
         mood_rating:
           type: integer
@@ -544,20 +558,23 @@ components:
           type: string
           format: date-time
           description: Last update timestamp
-
     SentimentAnalysis:
       type: object
       required:
-        - sentiment
-        - confidence
-        - positive_score
-        - negative_score
-        - neutral_score
-        - key_emotions
+      - sentiment
+      - confidence
+      - positive_score
+      - negative_score
+      - neutral_score
+      - key_emotions
       properties:
         sentiment:
           type: string
-          enum: [positive, negative, neutral, mixed]
+          enum:
+          - positive
+          - negative
+          - neutral
+          - mixed
           description: Overall sentiment
           example: positive
         confidence:
@@ -593,14 +610,16 @@ components:
           items:
             type: string
           description: Detected emotions
-          example: ["happy", "excited", "grateful"]
-
+          example:
+          - happy
+          - excited
+          - grateful
     JournalEntryResponse:
       type: object
       required:
-        - entry
-        - word_count
-        - reading_time_minutes
+      - entry
+      - word_count
+      - reading_time_minutes
       properties:
         entry:
           $ref: '#/components/schemas/JournalEntry'
@@ -617,15 +636,14 @@ components:
           minimum: 0.0
           description: Estimated reading time in minutes
           example: 0.75
-
     JournalHistoryResponse:
       type: object
       required:
-        - entries
-        - total_count
-        - page_count
-        - current_page
-        - has_more
+      - entries
+      - total_count
+      - page_count
+      - current_page
+      - has_more
       properties:
         entries:
           type: array
@@ -656,33 +674,29 @@ components:
           description: Sentiment analysis trends
           example:
             weekly_average: 0.65
-            trend_direction: "improving"
-
+            trend_direction: improving
     ErrorResponse:
       type: object
       required:
-        - detail
+      - detail
       properties:
         detail:
           type: string
           description: Error description
-          example: "File must be an audio file"
-
+          example: da736778-ca6d-4296-8a4b-29f0d761278e
   securitySchemes:
     BearerAuth:
       type: http
       scheme: bearer
       bearerFormat: JWT
-
 security:
-  - BearerAuth: []
-
+- BearerAuth: []
 tags:
-  - name: Health
-    description: Service health and status
-  - name: Speech Processing
-    description: Speech articulation analysis and drill management
-  - name: SEL Journaling
-    description: Social emotional learning journaling with sentiment analysis
-  - name: Administration
-    description: Analytics and administrative functions
+- name: Health
+  description: Service health and status
+- name: Speech Processing
+  description: Speech articulation analysis and drill management
+- name: SEL Journaling
+  description: Social emotional learning journaling with sentiment analysis
+- name: Administration
+  description: Analytics and administrative functions

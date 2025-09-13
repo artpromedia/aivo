@@ -1,29 +1,45 @@
 openapi: 3.1.0
 info:
   title: Problem Session Orchestrator API
-  description: |
-    Coordinates interactive learning sessions across multiple subject-specific services.
-    
+  description: 'Coordinates interactive learning sessions across multiple subject-specific
+    services.
+
+
     Implements the plan→present→ink→recognize→grade→feedback workflow for interactive
+
     learning experiences in mathematics and science subjects.
-    
+
+
     ## Workflow
-    
+
+
     1. **PLAN** - Create activity plan using Subject Brain service
+
     2. **PRESENT** - Present problems to learner
+
     3. **INK** - Capture digital ink from learner responses
+
     4. **RECOGNIZE** - Process ink using math/science recognition services
+
     5. **GRADE** - Evaluate responses for correctness
+
     6. **FEEDBACK** - Provide feedback and continue session
-    
+
+
     ## Features
-    
+
+
     - Subject-aware orchestration (Mathematics, Science, Physics, Chemistry, Biology)
+
     - Real-time ink capture and recognition
+
     - Automated grading and feedback
+
     - Session state management
+
     - Event publishing for analytics
-    
+
+    '
   version: 0.1.0
   contact:
     name: AIVO Engineering Team
@@ -31,11 +47,9 @@ info:
   license:
     name: MIT
     url: https://opensource.org/licenses/MIT
-
 servers:
-  - url: http://localhost:8000
-    description: Development server
-
+- url: http://localhost:8000
+  description: Development server
 paths:
   /health:
     get:
@@ -43,7 +57,7 @@ paths:
       description: Check service health and dependency status
       operationId: problemSessionHealthCheck
       tags:
-        - Health
+      - Health
       responses:
         '200':
           description: Service is healthy
@@ -61,22 +75,28 @@ paths:
                   math_service: unknown
                   science_service: unknown
                   subject_brain: unknown
-
   /start:
     post:
       summary: Start Problem Session
-      description: |
-        Start a new interactive problem session for a learner in a specific subject.
-        
+      description: 'Start a new interactive problem session for a learner in a specific
+        subject.
+
+
         This endpoint coordinates the creation of:
+
         - Activity plan from Subject Brain service
+
         - Ink capture session for digital handwriting
+
         - Session tracking and state management
-        
+
+
         The session will progress through phases: plan→present→ink→recognize→grade→feedback
+
+        '
       operationId: startSession
       tags:
-        - Sessions
+      - Sessions
       requestBody:
         required: true
         content:
@@ -123,22 +143,28 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/ErrorResponse'
-
   /ink:
     post:
       summary: Submit Ink for Recognition
-      description: |
-        Submit digital ink strokes for recognition and processing.
-        
+      description: 'Submit digital ink strokes for recognition and processing.
+
+
         This triggers the ink→recognize→grade→feedback workflow:
+
         1. Ink strokes are submitted to the ink capture service
+
         2. Recognition is performed based on session subject (math/science)
+
         3. Response is graded for correctness
+
         4. Feedback is provided to the learner
+
         5. Session progresses to next activity
+
+        '
       operationId: submitInk
       tags:
-        - Sessions
+      - Sessions
       requestBody:
         required: true
         content:
@@ -149,19 +175,19 @@ paths:
               session_id: 550e8400-e29b-41d4-a716-446655440002
               page_number: 1
               strokes:
-                - stroke_id: 550e8400-e29b-41d4-a716-446655440004
-                  tool_type: pen
-                  color: '#000000'
-                  width: 2.0
-                  points:
-                    - x: 100
-                      y: 150
-                      pressure: 0.8
-                      timestamp: 0
-                    - x: 110
-                      y: 155
-                      pressure: 0.9
-                      timestamp: 50
+              - stroke_id: 550e8400-e29b-41d4-a716-446655440004
+                tool_type: pen
+                color: '#000000'
+                width: 2.0
+                points:
+                - x: 100
+                  y: 150
+                  pressure: 0.8
+                  timestamp: 0
+                - x: 110
+                  y: 155
+                  pressure: 0.9
+                  timestamp: 50
               metadata:
                 device: tablet
                 stylus_type: apple_pencil
@@ -190,26 +216,27 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/ErrorResponse'
-
   /sessions/{sessionId}:
     get:
       summary: Get Session Status
-      description: |
-        Retrieve current status and details of a problem session.
-        
+      description: 'Retrieve current status and details of a problem session.
+
+
         Returns session state, progress, current activity, and performance metrics.
+
+        '
       operationId: getSession
       tags:
-        - Sessions
+      - Sessions
       parameters:
-        - name: sessionId
-          in: path
-          required: true
-          description: Unique session identifier
-          schema:
-            type: string
-            format: uuid
-          example: 550e8400-e29b-41d4-a716-446655440002
+      - name: sessionId
+        in: path
+        required: true
+        description: Unique session identifier
+        schema:
+          type: string
+          format: uuid
+        example: 550e8400-e29b-41d4-a716-446655440002
       responses:
         '200':
           description: Session details retrieved successfully
@@ -251,27 +278,30 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/ErrorResponse'
-
   /sessions/{sessionId}/complete:
     post:
       summary: Complete Session
-      description: |
-        Manually complete a problem session and publish SESSION_RESULT event.
-        
+      description: 'Manually complete a problem session and publish SESSION_RESULT
+        event.
+
+
         This will finalize the session, calculate performance metrics, and
+
         emit events for analytics processing.
+
+        '
       operationId: completeSession
       tags:
-        - Sessions
+      - Sessions
       parameters:
-        - name: sessionId
-          in: path
-          required: true
-          description: Unique session identifier
-          schema:
-            type: string
-            format: uuid
-          example: 550e8400-e29b-41d4-a716-446655440002
+      - name: sessionId
+        in: path
+        required: true
+        description: Unique session identifier
+        schema:
+          type: string
+          format: uuid
+        example: 550e8400-e29b-41d4-a716-446655440002
       responses:
         '200':
           description: Session completed successfully
@@ -299,14 +329,13 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/ErrorResponse'
-
   /:
     get:
       summary: Service Information
       description: Get basic service information and capabilities
       operationId: getServiceInfo
       tags:
-        - Health
+      - Health
       responses:
         '200':
           description: Service information
@@ -323,56 +352,53 @@ paths:
                     example: 0.1.0
                   description:
                     type: string
-                    example: Coordinates interactive learning sessions across multiple subject-specific services
-
+                    example: Coordinates interactive learning sessions across multiple
+                      subject-specific services
 components:
   schemas:
     SubjectType:
       type: string
       enum:
-        - mathematics
-        - science
-        - physics
-        - chemistry
-        - biology
+      - mathematics
+      - science
+      - physics
+      - chemistry
+      - biology
       description: Subject areas supported by the orchestrator
-
     SessionPhase:
       type: string
       enum:
-        - plan
-        - present
-        - ink
-        - recognize
-        - grade
-        - feedback
+      - plan
+      - present
+      - ink
+      - recognize
+      - grade
+      - feedback
       description: Current phase within the problem session workflow
-
     SessionStatus:
       type: string
       enum:
-        - planning
-        - active
-        - waiting_ink
-        - recognizing
-        - grading
-        - providing_feedback
-        - completed
-        - failed
-        - timeout
+      - planning
+      - active
+      - waiting_ink
+      - recognizing
+      - grading
+      - providing_feedback
+      - completed
+      - failed
+      - timeout
       description: Overall session status
-
     StartSessionRequest:
       type: object
       required:
-        - learner_id
-        - subject
+      - learner_id
+      - subject
       properties:
         learner_id:
           type: string
           format: uuid
           description: Unique learner identifier
-          example: 550e8400-e29b-41d4-a716-446655440001
+          example: efdf65ad-9a72-45f7-9a9f-d0c57c42c78a
         subject:
           $ref: '#/components/schemas/SubjectType'
         session_duration_minutes:
@@ -401,32 +427,31 @@ components:
           default: false
           description: Force refresh of activity plan from Subject Brain
           example: false
-
     SessionResponse:
       type: object
       required:
-        - session_id
-        - learner_id
-        - subject
-        - status
-        - current_phase
-        - created_at
-        - session_duration_minutes
-        - total_problems_attempted
-        - total_problems_correct
-        - canvas_width
-        - canvas_height
+      - session_id
+      - learner_id
+      - subject
+      - status
+      - current_phase
+      - created_at
+      - session_duration_minutes
+      - total_problems_attempted
+      - total_problems_correct
+      - canvas_width
+      - canvas_height
       properties:
         session_id:
           type: string
           format: uuid
           description: Unique session identifier
-          example: 550e8400-e29b-41d4-a716-446655440002
+          example: afd4b3d7-b418-4d49-8bf2-92f5cd40e568
         learner_id:
           type: string
           format: uuid
           description: Learner identifier
-          example: 550e8400-e29b-41d4-a716-446655440001
+          example: bd09e998-415c-4731-a996-3fcc17b02852
         subject:
           $ref: '#/components/schemas/SubjectType'
         status:
@@ -437,19 +462,19 @@ components:
           type: string
           format: date-time
           description: Session creation timestamp
-          example: '2025-09-09T10:30:00Z'
+          example: '2025-09-13T00:14:43.264071+00:00'
         started_at:
           type: string
           format: date-time
           nullable: true
           description: Session start timestamp
-          example: '2025-09-09T10:30:01Z'
+          example: '2025-09-13T00:14:43.264071+00:00'
         completed_at:
           type: string
           format: date-time
           nullable: true
           description: Session completion timestamp
-          example: '2025-09-09T11:00:30Z'
+          example: '2025-09-13T00:14:43.264071+00:00'
         session_duration_minutes:
           type: integer
           description: Planned session duration in minutes
@@ -492,24 +517,23 @@ components:
           format: uuid
           nullable: true
           description: Associated ink capture session ID
-          example: 550e8400-e29b-41d4-a716-446655440003
+          example: 7166434b-92c7-4ee5-8d8a-d79f080b2653
         error_message:
           type: string
           nullable: true
           description: Error message if session failed
           example: null
-
     InkSubmissionRequest:
       type: object
       required:
-        - session_id
-        - strokes
+      - session_id
+      - strokes
       properties:
         session_id:
           type: string
           format: uuid
           description: Session identifier
-          example: 550e8400-e29b-41d4-a716-446655440002
+          example: 9ae99845-8848-49a4-9823-5fffa74793dd
         page_number:
           type: integer
           default: 1
@@ -521,14 +545,14 @@ components:
           items:
             type: object
             required:
-              - stroke_id
-              - points
+            - stroke_id
+            - points
             properties:
               stroke_id:
                 type: string
                 format: uuid
                 description: Unique stroke identifier
-                example: 550e8400-e29b-41d4-a716-446655440004
+                example: 5f37bfa7-5a7e-422b-bb5d-3d91eb398919
               tool_type:
                 type: string
                 default: pen
@@ -551,9 +575,9 @@ components:
                 items:
                   type: object
                   required:
-                    - x
-                    - y
-                    - timestamp
+                  - x
+                  - y
+                  - timestamp
                   properties:
                     x:
                       type: number
@@ -581,31 +605,30 @@ components:
           example:
             device: tablet
             stylus_type: apple_pencil
-
     InkSubmissionResponse:
       type: object
       required:
-        - session_id
-        - page_id
-        - status
-        - message
+      - session_id
+      - page_id
+      - status
+      - message
       properties:
         session_id:
           type: string
           format: uuid
           description: Session identifier
-          example: 550e8400-e29b-41d4-a716-446655440002
+          example: b521a1e1-177d-4062-8c76-f57042ce71f6
         page_id:
           type: string
           format: uuid
           description: Ink page identifier
-          example: 550e8400-e29b-41d4-a716-446655440005
+          example: 04802e96-a0dc-4925-9360-2431395124b1
         recognition_job_id:
           type: string
           format: uuid
           nullable: true
           description: Recognition job identifier
-          example: 550e8400-e29b-41d4-a716-446655440006
+          example: 073130f2-be97-403b-9e96-9d02896cb825
         status:
           type: string
           description: Submission status
@@ -613,14 +636,13 @@ components:
         message:
           type: string
           description: Status message
-          example: Ink submitted successfully
-
+          example: 2042c3fe-1549-4a63-9f26-1ad7856ff6ca
     HealthResponse:
       type: object
       required:
-        - status
-        - service
-        - timestamp
+      - status
+      - service
+      - timestamp
       properties:
         status:
           type: string
@@ -629,12 +651,12 @@ components:
         service:
           type: string
           description: Service name
-          example: problem-session-svc
+          example: 9a910fd3-8649-49cc-80be-59250474fcc2
         timestamp:
           type: string
           format: date-time
           description: Health check timestamp
-          example: '2025-09-09T10:30:00Z'
+          example: '2025-09-13T00:14:43.264071+00:00'
         dependencies:
           type: object
           description: Status of external dependencies
@@ -645,21 +667,20 @@ components:
             ink_service: unknown
             math_service: unknown
             science_service: unknown
-
     ErrorResponse:
       type: object
       required:
-        - error
-        - message
+      - error
+      - message
       properties:
         error:
           type: string
           description: Error type identifier
-          example: session_not_found
+          example: c238052c-0c45-4e44-b9a2-1a21f8cdd53c
         message:
           type: string
           description: Human-readable error message
-          example: The specified session was not found
+          example: 427f91e8-ad55-420f-9fa1-6a20b05d2158
         details:
           type: object
           description: Additional error details
@@ -667,9 +688,8 @@ components:
           example:
             session_id: 550e8400-e29b-41d4-a716-446655440002
             timestamp: '2025-09-09T10:30:00Z'
-
 tags:
-  - name: Health
-    description: Service health and monitoring endpoints
-  - name: Sessions
-    description: Problem session management and workflow orchestration
+- name: Health
+  description: Service health and monitoring endpoints
+- name: Sessions
+  description: Problem session management and workflow orchestration

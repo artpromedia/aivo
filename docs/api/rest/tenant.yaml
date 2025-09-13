@@ -7,38 +7,45 @@ info:
     name: API Support
     email: api-support@aivo.com
 servers:
-  - url: https://api.aivo.com/tenant/v1
-    description: Production server
-  - url: https://staging-api.aivo.com/tenant/v1
-    description: Staging server
+- url: https://api.aivo.com/tenant/v1
+  description: Production server
+- url: https://staging-api.aivo.com/tenant/v1
+  description: Staging server
 paths:
   /tenants:
     get:
       summary: List tenants
       operationId: listTenants
       tags:
-        - Tenants
+      - Tenants
       security:
-        - bearerAuth: []
+      - bearerAuth: []
       parameters:
-        - name: limit
-          in: query
-          schema:
-            type: integer
-            minimum: 1
-            maximum: 100
-            default: 20
-        - name: offset
-          in: query
-          schema:
-            type: integer
-            minimum: 0
-            default: 0
-        - name: status
-          in: query
-          schema:
-            type: string
-            enum: [active, inactive, trial, suspended]
+      - name: limit
+        in: query
+        schema:
+          type: integer
+          minimum: 1
+          maximum: 100
+          default: 20
+        description: The limit query parameter
+      - name: offset
+        in: query
+        schema:
+          type: integer
+          minimum: 0
+          default: 0
+        description: The offset query parameter
+      - name: status
+        in: query
+        schema:
+          type: string
+          enum:
+          - active
+          - inactive
+          - trial
+          - suspended
+        description: The status query parameter
       responses:
         '200':
           description: Tenants retrieved successfully
@@ -47,10 +54,10 @@ paths:
               schema:
                 type: object
                 required:
-                  - data
-                  - total
-                  - limit
-                  - offset
+                - data
+                - total
+                - limit
+                - offset
                 properties:
                   data:
                     type: array
@@ -71,14 +78,14 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Error'
-
+      description: Retrieve all Tenants
     post:
       summary: Create new tenant
       operationId: createTenant
       tags:
-        - Tenants
+      - Tenants
       security:
-        - bearerAuth: []
+      - bearerAuth: []
       requestBody:
         required: true
         content:
@@ -110,22 +117,23 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/ValidationError'
-
+      description: Create a new Tenant
   /tenants/{tenantId}:
     get:
       summary: Get tenant by ID
       operationId: getTenant
       tags:
-        - Tenants
+      - Tenants
       security:
-        - bearerAuth: []
+      - bearerAuth: []
       parameters:
-        - name: tenantId
-          in: path
-          required: true
-          schema:
-            type: string
-            format: uuid
+      - name: tenantId
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+        description: The tenantId path parameter
       responses:
         '200':
           description: Tenant retrieved successfully
@@ -145,21 +153,22 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Error'
-
+      description: Retrieve a specific Tenant
     put:
       summary: Update tenant
       operationId: updateTenant
       tags:
-        - Tenants
+      - Tenants
       security:
-        - bearerAuth: []
+      - bearerAuth: []
       parameters:
-        - name: tenantId
-          in: path
-          required: true
-          schema:
-            type: string
-            format: uuid
+      - name: tenantId
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+        description: The tenantId path parameter
       requestBody:
         required: true
         content:
@@ -197,21 +206,22 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/ValidationError'
-
+      description: Update a Tenant
     delete:
       summary: Delete tenant
       operationId: deleteTenant
       tags:
-        - Tenants
+      - Tenants
       security:
-        - bearerAuth: []
+      - bearerAuth: []
       parameters:
-        - name: tenantId
-          in: path
-          required: true
-          schema:
-            type: string
-            format: uuid
+      - name: tenantId
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+        description: The tenantId path parameter
       responses:
         '204':
           description: Tenant deleted successfully
@@ -227,22 +237,23 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Error'
-
+      description: Delete a Tenant
   /tenants/{tenantId}/settings:
     get:
       summary: Get tenant settings
       operationId: getTenantSettings
       tags:
-        - Tenant Settings
+      - Tenant Settings
       security:
-        - bearerAuth: []
+      - bearerAuth: []
       parameters:
-        - name: tenantId
-          in: path
-          required: true
-          schema:
-            type: string
-            format: uuid
+      - name: tenantId
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+        description: The tenantId path parameter
       responses:
         '200':
           description: Tenant settings retrieved successfully
@@ -262,21 +273,22 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Error'
-
+      description: Retrieve a specific Setting
     put:
       summary: Update tenant settings
       operationId: updateTenantSettings
       tags:
-        - Tenant Settings
+      - Tenant Settings
       security:
-        - bearerAuth: []
+      - bearerAuth: []
       parameters:
-        - name: tenantId
-          in: path
-          required: true
-          schema:
-            type: string
-            format: uuid
+      - name: tenantId
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+        description: The tenantId path parameter
       requestBody:
         required: true
         content:
@@ -308,59 +320,66 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Error'
-
+      description: Update a Setting
 components:
   securitySchemes:
     bearerAuth:
       type: http
       scheme: bearer
       bearerFormat: JWT
-
   schemas:
     Tenant:
       type: object
       required:
-        - id
-        - name
-        - slug
-        - status
-        - plan
-        - createdAt
-        - updatedAt
+      - id
+      - name
+      - slug
+      - status
+      - plan
+      - createdAt
+      - updatedAt
       properties:
         id:
           type: string
           format: uuid
-          example: "456e7890-e89b-12d3-a456-426614174000"
+          example: dfed82ff-d8fc-4bdb-abcb-a07f69bf1ebe
         name:
           type: string
-          example: "Acme Corporation"
+          example: 7b1c0cf1-98df-4bf4-9ff6-73f012ec0f35
         slug:
           type: string
-          pattern: "^[a-z0-9-]+$"
-          example: "acme-corp"
+          pattern: ^[a-z0-9-]+$
+          example: acme-corp
         description:
           type: string
           nullable: true
-          example: "Leading provider of educational content"
+          example: 8cbe4ed6-71be-4fde-906b-d9e0458a82c0
         logo:
           type: string
           format: uri
           nullable: true
-          example: "https://example.com/logo.png"
+          example: https://example.com
         website:
           type: string
           format: uri
           nullable: true
-          example: "https://acme.com"
+          example: https://example.com
         status:
           type: string
-          enum: [active, inactive, trial, suspended]
-          example: "active"
+          enum:
+          - active
+          - inactive
+          - trial
+          - suspended
+          example: active
         plan:
           type: string
-          enum: [free, starter, professional, enterprise]
-          example: "professional"
+          enum:
+          - free
+          - starter
+          - professional
+          - enterprise
+          example: free
         maxUsers:
           type: integer
           minimum: 1
@@ -373,52 +392,54 @@ components:
           type: string
           format: date-time
           nullable: true
-          example: "2024-01-31T23:59:59Z"
+          example: '2025-09-13T00:14:43.363218+00:00'
         createdAt:
           type: string
           format: date-time
-          example: "2023-01-01T00:00:00Z"
+          example: '2025-09-13T00:14:43.363218+00:00'
         updatedAt:
           type: string
           format: date-time
-          example: "2023-12-01T10:30:00Z"
-
+          example: '2025-09-13T00:14:43.363218+00:00'
     CreateTenantRequest:
       type: object
       required:
-        - name
-        - slug
-        - plan
+      - name
+      - slug
+      - plan
       properties:
         name:
           type: string
           minLength: 2
           maxLength: 100
-          example: "Acme Corporation"
+          example: f3a38c0f-e6e1-4cf6-ac3c-e3e6ab89212c
         slug:
           type: string
-          pattern: "^[a-z0-9-]+$"
+          pattern: ^[a-z0-9-]+$
           minLength: 2
           maxLength: 50
-          example: "acme-corp"
+          example: acme-corp
         description:
           type: string
           maxLength: 500
-          example: "Leading provider of educational content"
+          example: 80b405fd-ab27-4319-8193-b36b193fe657
         website:
           type: string
           format: uri
-          example: "https://acme.com"
+          example: https://example.com
         plan:
           type: string
-          enum: [free, starter, professional, enterprise]
-          example: "professional"
+          enum:
+          - free
+          - starter
+          - professional
+          - enterprise
+          example: free
         maxUsers:
           type: integer
           minimum: 1
           maximum: 10000
           example: 100
-
     UpdateTenantRequest:
       type: object
       properties:
@@ -426,36 +447,39 @@ components:
           type: string
           minLength: 2
           maxLength: 100
-          example: "Acme Corporation"
+          example: 8bbe8a9e-4874-46d8-be1d-09da5c8a6400
         description:
           type: string
           maxLength: 500
-          example: "Leading provider of educational content"
+          example: c227c65e-34c2-4f62-ac28-c8bfbd25f8a1
         logo:
           type: string
           format: uri
-          example: "https://example.com/logo.png"
+          example: https://example.com
         website:
           type: string
           format: uri
-          example: "https://acme.com"
+          example: https://example.com
         status:
           type: string
-          enum: [active, inactive, trial, suspended]
-          example: "active"
-
+          enum:
+          - active
+          - inactive
+          - trial
+          - suspended
+          example: active
     TenantSettings:
       type: object
       required:
-        - tenantId
-        - features
-        - branding
-        - notifications
+      - tenantId
+      - features
+      - branding
+      - notifications
       properties:
         tenantId:
           type: string
           format: uuid
-          example: "456e7890-e89b-12d3-a456-426614174000"
+          example: 17a24621-0814-4b68-b2f2-7ebdb642dc12
         features:
           type: object
           properties:
@@ -476,20 +500,20 @@ components:
           properties:
             primaryColor:
               type: string
-              pattern: "^#[0-9A-Fa-f]{6}$"
-              example: "#007bff"
+              pattern: ^#[0-9A-Fa-f]{6}$
+              example: '#007bff'
             secondaryColor:
               type: string
-              pattern: "^#[0-9A-Fa-f]{6}$"
-              example: "#6c757d"
+              pattern: ^#[0-9A-Fa-f]{6}$
+              example: '#6c757d'
             logo:
               type: string
               format: uri
-              example: "https://example.com/logo.png"
+              example: https://example.com
             favicon:
               type: string
               format: uri
-              example: "https://example.com/favicon.ico"
+              example: https://example.com
         notifications:
           type: object
           properties:
@@ -500,53 +524,56 @@ components:
               type: string
               format: uri
               nullable: true
-              example: "https://hooks.slack.com/services/..."
+              example: https://example.com
             webhookUrl:
               type: string
               format: uri
               nullable: true
-              example: "https://api.acme.com/webhooks/aivo"
-
+              example: https://example.com
     Error:
       type: object
       required:
-        - error
-        - message
+      - error
+      - message
       properties:
         error:
           type: string
-          example: "tenant_not_found"
+          example: c29d2802-b068-488d-8a53-a79b141d46d2
         message:
           type: string
-          example: "Tenant not found"
+          example: cc9585fe-daf8-47f1-b97f-762ca6944751
         details:
           type: object
           additionalProperties: true
-
     ValidationError:
       type: object
       required:
-        - error
-        - message
-        - validationErrors
+      - error
+      - message
+      - validationErrors
       properties:
         error:
           type: string
-          example: "validation_failed"
+          example: 268cc435-df80-467e-bfae-d56572970b88
         message:
           type: string
-          example: "Request validation failed"
+          example: b8f7d84d-3eea-465e-9d1b-9b2ed7bf0db8
         validationErrors:
           type: array
           items:
             type: object
             required:
-              - field
-              - message
+            - field
+            - message
             properties:
               field:
                 type: string
-                example: "name"
+                example: name
               message:
                 type: string
-                example: "Name is required"
+                example: d60e5a46-e458-4afb-8feb-174853251945
+tags:
+- name: Tenants
+  description: Tenants operations
+- name: Tenant Settings
+  description: Tenant Settings operations

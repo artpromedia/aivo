@@ -7,43 +7,52 @@ info:
     name: API Support
     email: api-support@aivo.com
 servers:
-  - url: https://api.aivo.com/payments/v1
-    description: Production server
-  - url: https://staging-api.aivo.com/payments/v1
-    description: Staging server
+- url: https://api.aivo.com/payments/v1
+  description: Production server
+- url: https://staging-api.aivo.com/payments/v1
+  description: Staging server
 paths:
   /subscriptions:
     get:
       summary: List subscriptions
       operationId: listSubscriptions
       tags:
-        - Subscriptions
+      - Subscriptions
       security:
-        - bearerAuth: []
+      - bearerAuth: []
       parameters:
-        - name: tenantId
-          in: query
-          schema:
-            type: string
-            format: uuid
-        - name: status
-          in: query
-          schema:
-            type: string
-            enum: [active, inactive, past_due, canceled, trialing]
-        - name: limit
-          in: query
-          schema:
-            type: integer
-            minimum: 1
-            maximum: 100
-            default: 20
-        - name: offset
-          in: query
-          schema:
-            type: integer
-            minimum: 0
-            default: 0
+      - name: tenantId
+        in: query
+        schema:
+          type: string
+          format: uuid
+        description: The tenantId query parameter
+      - name: status
+        in: query
+        schema:
+          type: string
+          enum:
+          - active
+          - inactive
+          - past_due
+          - canceled
+          - trialing
+        description: The status query parameter
+      - name: limit
+        in: query
+        schema:
+          type: integer
+          minimum: 1
+          maximum: 100
+          default: 20
+        description: The limit query parameter
+      - name: offset
+        in: query
+        schema:
+          type: integer
+          minimum: 0
+          default: 0
+        description: The offset query parameter
       responses:
         '200':
           description: Subscriptions retrieved successfully
@@ -52,10 +61,10 @@ paths:
               schema:
                 type: object
                 required:
-                  - data
-                  - total
-                  - limit
-                  - offset
+                - data
+                - total
+                - limit
+                - offset
                 properties:
                   data:
                     type: array
@@ -76,14 +85,14 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Error'
-
+      description: Retrieve all Subscriptions
     post:
       summary: Create new subscription
       operationId: createSubscription
       tags:
-        - Subscriptions
+      - Subscriptions
       security:
-        - bearerAuth: []
+      - bearerAuth: []
       requestBody:
         required: true
         content:
@@ -115,22 +124,23 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/ValidationError'
-
+      description: Create a new Subscription
   /subscriptions/{subscriptionId}:
     get:
       summary: Get subscription by ID
       operationId: getSubscription
       tags:
-        - Subscriptions
+      - Subscriptions
       security:
-        - bearerAuth: []
+      - bearerAuth: []
       parameters:
-        - name: subscriptionId
-          in: path
-          required: true
-          schema:
-            type: string
-            format: uuid
+      - name: subscriptionId
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+        description: The subscriptionId path parameter
       responses:
         '200':
           description: Subscription retrieved successfully
@@ -150,21 +160,22 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Error'
-
+      description: Retrieve a specific Subscription
     put:
       summary: Update subscription
       operationId: updateSubscription
       tags:
-        - Subscriptions
+      - Subscriptions
       security:
-        - bearerAuth: []
+      - bearerAuth: []
       parameters:
-        - name: subscriptionId
-          in: path
-          required: true
-          schema:
-            type: string
-            format: uuid
+      - name: subscriptionId
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+        description: The subscriptionId path parameter
       requestBody:
         required: true
         content:
@@ -196,22 +207,23 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Error'
-
+      description: Update a Subscription
   /subscriptions/{subscriptionId}/cancel:
     post:
       summary: Cancel subscription
       operationId: cancelSubscription
       tags:
-        - Subscriptions
+      - Subscriptions
       security:
-        - bearerAuth: []
+      - bearerAuth: []
       parameters:
-        - name: subscriptionId
-          in: path
-          required: true
-          schema:
-            type: string
-            format: uuid
+      - name: subscriptionId
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+        description: The subscriptionId path parameter
       requestBody:
         required: false
         content:
@@ -221,7 +233,7 @@ paths:
               properties:
                 reason:
                   type: string
-                  example: "Customer requested cancellation"
+                  example: Customer requested cancellation
                 cancelAtPeriodEnd:
                   type: boolean
                   default: true
@@ -250,44 +262,54 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Error'
-
+      description: Create a new Cancel
   /invoices:
     get:
       summary: List invoices
       operationId: listInvoices
       tags:
-        - Invoices
+      - Invoices
       security:
-        - bearerAuth: []
+      - bearerAuth: []
       parameters:
-        - name: tenantId
-          in: query
-          schema:
-            type: string
-            format: uuid
-        - name: subscriptionId
-          in: query
-          schema:
-            type: string
-            format: uuid
-        - name: status
-          in: query
-          schema:
-            type: string
-            enum: [draft, open, paid, void, uncollectible]
-        - name: limit
-          in: query
-          schema:
-            type: integer
-            minimum: 1
-            maximum: 100
-            default: 20
-        - name: offset
-          in: query
-          schema:
-            type: integer
-            minimum: 0
-            default: 0
+      - name: tenantId
+        in: query
+        schema:
+          type: string
+          format: uuid
+        description: The tenantId query parameter
+      - name: subscriptionId
+        in: query
+        schema:
+          type: string
+          format: uuid
+        description: The subscriptionId query parameter
+      - name: status
+        in: query
+        schema:
+          type: string
+          enum:
+          - draft
+          - open
+          - paid
+          - void
+          - uncollectible
+        description: The status query parameter
+      - name: limit
+        in: query
+        schema:
+          type: integer
+          minimum: 1
+          maximum: 100
+          default: 20
+        description: The limit query parameter
+      - name: offset
+        in: query
+        schema:
+          type: integer
+          minimum: 0
+          default: 0
+        description: The offset query parameter
       responses:
         '200':
           description: Invoices retrieved successfully
@@ -296,10 +318,10 @@ paths:
               schema:
                 type: object
                 required:
-                  - data
-                  - total
-                  - limit
-                  - offset
+                - data
+                - total
+                - limit
+                - offset
                 properties:
                   data:
                     type: array
@@ -320,22 +342,23 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Error'
-
+      description: Retrieve all Invoices
   /invoices/{invoiceId}:
     get:
       summary: Get invoice by ID
       operationId: getInvoice
       tags:
-        - Invoices
+      - Invoices
       security:
-        - bearerAuth: []
+      - bearerAuth: []
       parameters:
-        - name: invoiceId
-          in: path
-          required: true
-          schema:
-            type: string
-            format: uuid
+      - name: invoiceId
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+        description: The invoiceId path parameter
       responses:
         '200':
           description: Invoice retrieved successfully
@@ -355,22 +378,23 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Error'
-
+      description: Retrieve a specific Invoice
   /payment-methods:
     get:
       summary: List payment methods
       operationId: listPaymentMethods
       tags:
-        - Payment Methods
+      - Payment Methods
       security:
-        - bearerAuth: []
+      - bearerAuth: []
       parameters:
-        - name: tenantId
-          in: query
-          required: true
-          schema:
-            type: string
-            format: uuid
+      - name: tenantId
+        in: query
+        required: true
+        schema:
+          type: string
+          format: uuid
+        description: The tenantId query parameter
       responses:
         '200':
           description: Payment methods retrieved successfully
@@ -386,14 +410,14 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Error'
-
+      description: Retrieve all Payment Methods
     post:
       summary: Add payment method
       operationId: addPaymentMethod
       tags:
-        - Payment Methods
+      - Payment Methods
       security:
-        - bearerAuth: []
+      - bearerAuth: []
       requestBody:
         required: true
         content:
@@ -419,22 +443,23 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Error'
-
+      description: Create a new Payment Method
   /payment-methods/{paymentMethodId}:
     delete:
       summary: Remove payment method
       operationId: removePaymentMethod
       tags:
-        - Payment Methods
+      - Payment Methods
       security:
-        - bearerAuth: []
+      - bearerAuth: []
       parameters:
-        - name: paymentMethodId
-          in: path
-          required: true
-          schema:
-            type: string
-            format: uuid
+      - name: paymentMethodId
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+        description: The paymentMethodId path parameter
       responses:
         '204':
           description: Payment method removed successfully
@@ -450,32 +475,35 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Error'
-
+      description: Delete a Payment Method
   /coupons:
     get:
       summary: List coupons
       operationId: listCoupons
       tags:
-        - Coupons
+      - Coupons
       security:
-        - bearerAuth: []
+      - bearerAuth: []
       parameters:
-        - name: tenantId
-          in: query
-          schema:
-            type: string
-            format: uuid
-        - name: active
-          in: query
-          schema:
-            type: boolean
-        - name: limit
-          in: query
-          schema:
-            type: integer
-            minimum: 1
-            maximum: 100
-            default: 20
+      - name: tenantId
+        in: query
+        schema:
+          type: string
+          format: uuid
+        description: The tenantId query parameter
+      - name: active
+        in: query
+        schema:
+          type: boolean
+        description: The active query parameter
+      - name: limit
+        in: query
+        schema:
+          type: integer
+          minimum: 1
+          maximum: 100
+          default: 20
+        description: The limit query parameter
       responses:
         '200':
           description: Coupons retrieved successfully
@@ -491,14 +519,14 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Error'
-
+      description: Retrieve all Coupons
     post:
       summary: Create coupon
       operationId: createCoupon
       tags:
-        - Coupons
+      - Coupons
       security:
-        - bearerAuth: []
+      - bearerAuth: []
       requestBody:
         required: true
         content:
@@ -524,42 +552,46 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Error'
-
+      description: Create a new Coupon
 components:
   securitySchemes:
     bearerAuth:
       type: http
       scheme: bearer
       bearerFormat: JWT
-
   schemas:
     Subscription:
       type: object
       required:
-        - id
-        - tenantId
-        - planId
-        - status
-        - currentPeriodStart
-        - currentPeriodEnd
-        - createdAt
-        - updatedAt
+      - id
+      - tenantId
+      - planId
+      - status
+      - currentPeriodStart
+      - currentPeriodEnd
+      - createdAt
+      - updatedAt
       properties:
         id:
           type: string
           format: uuid
-          example: "sub_123e4567-e89b-12d3-a456-426614174000"
+          example: fbfe5892-2a21-4793-bc86-e19d8f3e267b
         tenantId:
           type: string
           format: uuid
-          example: "456e7890-e89b-12d3-a456-426614174000"
+          example: 79e5b3d9-a140-4750-83b9-8f576c88cf8f
         planId:
           type: string
-          example: "professional_monthly"
+          example: c9396c00-1e1f-43db-a0b0-2032650d01ad
         status:
           type: string
-          enum: [active, inactive, past_due, canceled, trialing]
-          example: "active"
+          enum:
+          - active
+          - inactive
+          - past_due
+          - canceled
+          - trialing
+          example: active
         quantity:
           type: integer
           minimum: 1
@@ -570,25 +602,25 @@ components:
           example: 4999
         currency:
           type: string
-          example: "usd"
+          example: usd
         currentPeriodStart:
           type: string
           format: date-time
-          example: "2023-12-01T00:00:00Z"
+          example: '2025-09-13T00:14:43.213064+00:00'
         currentPeriodEnd:
           type: string
           format: date-time
-          example: "2024-01-01T00:00:00Z"
+          example: '2025-09-13T00:14:43.213064+00:00'
         trialStart:
           type: string
           format: date-time
           nullable: true
-          example: "2023-11-01T00:00:00Z"
+          example: '2025-09-13T00:14:43.213064+00:00'
         trialEnd:
           type: string
           format: date-time
           nullable: true
-          example: "2023-12-01T00:00:00Z"
+          example: '2025-09-13T00:14:43.213064+00:00'
         cancelAtPeriodEnd:
           type: boolean
           default: false
@@ -604,25 +636,24 @@ components:
         createdAt:
           type: string
           format: date-time
-          example: "2023-11-01T00:00:00Z"
+          example: '2025-09-13T00:14:43.213064+00:00'
         updatedAt:
           type: string
           format: date-time
-          example: "2023-12-01T10:30:00Z"
-
+          example: '2025-09-13T00:14:43.214060+00:00'
     CreateSubscriptionRequest:
       type: object
       required:
-        - tenantId
-        - planId
+      - tenantId
+      - planId
       properties:
         tenantId:
           type: string
           format: uuid
-          example: "456e7890-e89b-12d3-a456-426614174000"
+          example: 2640566f-d698-4bf9-b353-fabd4d19e719
         planId:
           type: string
-          example: "professional_monthly"
+          example: c6c80dee-dbc6-4e6b-ad0e-86c419c5606d
         quantity:
           type: integer
           minimum: 1
@@ -634,21 +665,20 @@ components:
           example: 14
         couponCode:
           type: string
-          example: "WELCOME20"
+          example: WELCOME20
         paymentMethodId:
           type: string
           format: uuid
-          example: "pm_123e4567-e89b-12d3-a456-426614174000"
+          example: 53d3b77d-c3f4-4f8b-8010-e4f61a3a18b1
         metadata:
           type: object
           additionalProperties: true
-
     UpdateSubscriptionRequest:
       type: object
       properties:
         planId:
           type: string
-          example: "enterprise_monthly"
+          example: 62b5af27-664f-4fc5-b3e0-4aee0b20ba66
         quantity:
           type: integer
           minimum: 1
@@ -656,39 +686,43 @@ components:
         metadata:
           type: object
           additionalProperties: true
-
     Invoice:
       type: object
       required:
-        - id
-        - subscriptionId
-        - tenantId
-        - status
-        - amountDue
-        - amountPaid
-        - currency
-        - dueDate
-        - createdAt
+      - id
+      - subscriptionId
+      - tenantId
+      - status
+      - amountDue
+      - amountPaid
+      - currency
+      - dueDate
+      - createdAt
       properties:
         id:
           type: string
           format: uuid
-          example: "inv_123e4567-e89b-12d3-a456-426614174000"
+          example: f78288f0-133e-4864-b65e-2b539d260cd1
         subscriptionId:
           type: string
           format: uuid
-          example: "sub_123e4567-e89b-12d3-a456-426614174000"
+          example: 7b439f47-aca3-4475-a23d-1a61ec3b6ffd
         tenantId:
           type: string
           format: uuid
-          example: "456e7890-e89b-12d3-a456-426614174000"
+          example: 1edb5c43-57fc-49bc-84d4-32734f9e39f9
         invoiceNumber:
           type: string
-          example: "INV-2023-001"
+          example: 2f7bce9f-9432-43f8-beda-0fcd728661e9
         status:
           type: string
-          enum: [draft, open, paid, void, uncollectible]
-          example: "paid"
+          enum:
+          - draft
+          - open
+          - paid
+          - void
+          - uncollectible
+          example: paid
         amountDue:
           type: integer
           description: Amount in cents
@@ -699,29 +733,29 @@ components:
           example: 4999
         currency:
           type: string
-          example: "usd"
+          example: usd
         dueDate:
           type: string
           format: date-time
-          example: "2023-12-31T23:59:59Z"
+          example: '2025-09-13T00:14:43.214060+00:00'
         paidAt:
           type: string
           format: date-time
           nullable: true
-          example: "2023-12-15T14:30:00Z"
+          example: '2025-09-13T00:14:43.214060+00:00'
         periodStart:
           type: string
           format: date-time
-          example: "2023-12-01T00:00:00Z"
+          example: '2025-09-13T00:14:43.214060+00:00'
         periodEnd:
           type: string
           format: date-time
-          example: "2024-01-01T00:00:00Z"
+          example: '2025-09-13T00:14:43.214060+00:00'
         downloadUrl:
           type: string
           format: uri
           nullable: true
-          example: "https://api.aivo.com/invoices/inv_123/download"
+          example: https://example.com
         lineItems:
           type: array
           items:
@@ -729,19 +763,18 @@ components:
         createdAt:
           type: string
           format: date-time
-          example: "2023-12-01T00:00:00Z"
-
+          example: '2025-09-13T00:14:43.214060+00:00'
     InvoiceLineItem:
       type: object
       required:
-        - description
-        - quantity
-        - unitAmount
-        - amount
+      - description
+      - quantity
+      - unitAmount
+      - amount
       properties:
         description:
           type: string
-          example: "Professional Plan (Dec 2023)"
+          example: 9e18d856-d49f-4b24-9574-c2825f95b0c4
         quantity:
           type: integer
           example: 50
@@ -753,28 +786,30 @@ components:
           type: integer
           description: Total amount in cents
           example: 4950
-
     PaymentMethod:
       type: object
       required:
-        - id
-        - tenantId
-        - type
-        - isDefault
-        - createdAt
+      - id
+      - tenantId
+      - type
+      - isDefault
+      - createdAt
       properties:
         id:
           type: string
           format: uuid
-          example: "pm_123e4567-e89b-12d3-a456-426614174000"
+          example: 390fb4d7-872a-4ce2-914f-d01eb370d593
         tenantId:
           type: string
           format: uuid
-          example: "456e7890-e89b-12d3-a456-426614174000"
+          example: e1f24175-a5c7-47dc-9997-a7b058739060
         type:
           type: string
-          enum: [card, bank_account, paypal]
-          example: "card"
+          enum:
+          - card
+          - bank_account
+          - paypal
+          example: card
         isDefault:
           type: boolean
           example: true
@@ -783,10 +818,10 @@ components:
           properties:
             brand:
               type: string
-              example: "visa"
+              example: visa
             last4:
               type: string
-              example: "4242"
+              example: '4242'
             expMonth:
               type: integer
               example: 12
@@ -798,66 +833,71 @@ components:
           properties:
             bankName:
               type: string
-              example: "Chase Bank"
+              example: Chase Bank
             last4:
               type: string
-              example: "6789"
+              example: '6789'
             accountType:
               type: string
-              enum: [checking, savings]
-              example: "checking"
+              enum:
+              - checking
+              - savings
+              example: checking
         createdAt:
           type: string
           format: date-time
-          example: "2023-11-01T00:00:00Z"
-
+          example: '2025-09-13T00:14:43.214060+00:00'
     AddPaymentMethodRequest:
       type: object
       required:
-        - tenantId
-        - type
-        - token
+      - tenantId
+      - type
+      - token
       properties:
         tenantId:
           type: string
           format: uuid
-          example: "456e7890-e89b-12d3-a456-426614174000"
+          example: 5092e516-f6e8-4b6a-b045-cd35515c4022
         type:
           type: string
-          enum: [card, bank_account, paypal]
-          example: "card"
+          enum:
+          - card
+          - bank_account
+          - paypal
+          example: card
         token:
           type: string
           description: Payment method token from payment processor
-          example: "tok_1234567890abcdef"
+          example: 395ed9a0-25f2-4c30-ab91-19ff6b5d4fb9
         isDefault:
           type: boolean
           default: false
-
     Coupon:
       type: object
       required:
-        - id
-        - code
-        - discountType
-        - discountValue
-        - active
-        - createdAt
+      - id
+      - code
+      - discountType
+      - discountValue
+      - active
+      - createdAt
       properties:
         id:
           type: string
           format: uuid
-          example: "coup_123e4567-e89b-12d3-a456-426614174000"
+          example: 0bc7ae87-6bfc-4b24-9bf8-ddffe822ee57
         code:
           type: string
-          example: "WELCOME20"
+          example: WELCOME20
         name:
           type: string
-          example: "Welcome Discount"
+          example: 17a23649-b3d5-406a-9570-6c47dc1906b9
         discountType:
           type: string
-          enum: [percent, amount]
-          example: "percent"
+          enum:
+          - percent
+          - amount
+          example: percent
         discountValue:
           type: number
           example: 20.0
@@ -871,40 +911,41 @@ components:
         validFrom:
           type: string
           format: date-time
-          example: "2023-12-01T00:00:00Z"
+          example: '2025-09-13T00:14:43.215060+00:00'
         validUntil:
           type: string
           format: date-time
           nullable: true
-          example: "2024-01-31T23:59:59Z"
+          example: '2025-09-13T00:14:43.215060+00:00'
         active:
           type: boolean
           example: true
         createdAt:
           type: string
           format: date-time
-          example: "2023-11-01T00:00:00Z"
-
+          example: '2025-09-13T00:14:43.215060+00:00'
     CreateCouponRequest:
       type: object
       required:
-        - code
-        - discountType
-        - discountValue
+      - code
+      - discountType
+      - discountValue
       properties:
         code:
           type: string
-          pattern: "^[A-Z0-9_-]+$"
+          pattern: ^[A-Z0-9_-]+$
           minLength: 3
           maxLength: 20
-          example: "WELCOME20"
+          example: WELCOME20
         name:
           type: string
-          example: "Welcome Discount"
+          example: 16d5ffab-26b4-4bb5-bf7e-67a38f8e4318
         discountType:
           type: string
-          enum: [percent, amount]
-          example: "percent"
+          enum:
+          - percent
+          - amount
+          example: percent
         discountValue:
           type: number
           minimum: 0
@@ -916,12 +957,11 @@ components:
         validFrom:
           type: string
           format: date-time
-          example: "2023-12-01T00:00:00Z"
+          example: '2025-09-13T00:14:43.215060+00:00'
         validUntil:
           type: string
           format: date-time
-          example: "2024-01-31T23:59:59Z"
-
+          example: '2025-09-13T00:14:43.215060+00:00'
     Discount:
       type: object
       nullable: true
@@ -929,58 +969,67 @@ components:
         couponId:
           type: string
           format: uuid
-          example: "coup_123e4567-e89b-12d3-a456-426614174000"
+          example: 7ab0a629-e54b-4814-bf54-31056f9c7e0a
         couponCode:
           type: string
-          example: "WELCOME20"
+          example: WELCOME20
         discountType:
           type: string
-          enum: [percent, amount]
-          example: "percent"
+          enum:
+          - percent
+          - amount
+          example: percent
         discountValue:
           type: number
           example: 20.0
-
     Error:
       type: object
       required:
-        - error
-        - message
+      - error
+      - message
       properties:
         error:
           type: string
-          example: "subscription_not_found"
+          example: 86a78c07-b161-4e62-8e5a-9b8eaad8f2e7
         message:
           type: string
-          example: "Subscription not found"
+          example: 85aaa32b-b364-4fb3-8b17-372175166ca9
         details:
           type: object
           additionalProperties: true
-
     ValidationError:
       type: object
       required:
-        - error
-        - message
-        - validationErrors
+      - error
+      - message
+      - validationErrors
       properties:
         error:
           type: string
-          example: "validation_failed"
+          example: cd416ec1-7d5a-484d-9387-69d73d419adf
         message:
           type: string
-          example: "Request validation failed"
+          example: f8c9be0b-e069-4389-8100-16cad62da500
         validationErrors:
           type: array
           items:
             type: object
             required:
-              - field
-              - message
+            - field
+            - message
             properties:
               field:
                 type: string
-                example: "planId"
+                example: planId
               message:
                 type: string
-                example: "Plan ID is required"
+                example: d01273ac-21f2-4e19-9d48-3a72385b5577
+tags:
+- name: Payment Methods
+  description: Payment Methods operations
+- name: Subscriptions
+  description: Subscriptions operations
+- name: Coupons
+  description: Coupons operations
+- name: Invoices
+  description: Invoices operations

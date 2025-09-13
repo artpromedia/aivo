@@ -7,54 +7,65 @@ info:
     name: API Support
     email: api-support@aivo.com
 servers:
-  - url: https://api.aivo.com/enrollment/v1
-    description: Production server
-  - url: https://staging-api.aivo.com/enrollment/v1
-    description: Staging server
+- url: https://api.aivo.com/enrollment/v1
+  description: Production server
+- url: https://staging-api.aivo.com/enrollment/v1
+  description: Staging server
 paths:
   /enrollments:
     get:
       summary: List enrollments
       operationId: listEnrollments
       tags:
-        - Enrollments
+      - Enrollments
       security:
-        - bearerAuth: []
+      - bearerAuth: []
       parameters:
-        - name: tenantId
-          in: query
-          required: true
-          schema:
-            type: string
-            format: uuid
-        - name: learnerId
-          in: query
-          schema:
-            type: string
-            format: uuid
-        - name: courseId
-          in: query
-          schema:
-            type: string
-            format: uuid
-        - name: status
-          in: query
-          schema:
-            type: string
-            enum: [enrolled, in_progress, completed, dropped, expired]
-        - name: limit
-          in: query
-          schema:
-            type: integer
-            minimum: 1
-            maximum: 100
-            default: 20
-        - name: offset
-          in: query
-          schema:
-            type: integer
-            minimum: 0
-            default: 0
+      - name: tenantId
+        in: query
+        required: true
+        schema:
+          type: string
+          format: uuid
+        description: The tenantId query parameter
+      - name: learnerId
+        in: query
+        schema:
+          type: string
+          format: uuid
+        description: The learnerId query parameter
+      - name: courseId
+        in: query
+        schema:
+          type: string
+          format: uuid
+        description: The courseId query parameter
+      - name: status
+        in: query
+        schema:
+          type: string
+          enum:
+          - enrolled
+          - in_progress
+          - completed
+          - dropped
+          - expired
+        description: The status query parameter
+      - name: limit
+        in: query
+        schema:
+          type: integer
+          minimum: 1
+          maximum: 100
+          default: 20
+        description: The limit query parameter
+      - name: offset
+        in: query
+        schema:
+          type: integer
+          minimum: 0
+          default: 0
+        description: The offset query parameter
       responses:
         '200':
           description: Enrollments retrieved successfully
@@ -63,10 +74,10 @@ paths:
               schema:
                 type: object
                 required:
-                  - data
-                  - total
-                  - limit
-                  - offset
+                - data
+                - total
+                - limit
+                - offset
                 properties:
                   data:
                     type: array
@@ -87,14 +98,14 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Error'
-
+      description: Retrieve all Enrollments
     post:
       summary: Create new enrollment
       operationId: createEnrollment
       tags:
-        - Enrollments
+      - Enrollments
       security:
-        - bearerAuth: []
+      - bearerAuth: []
       requestBody:
         required: true
         content:
@@ -132,22 +143,23 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/ValidationError'
-
+      description: Create a new Enrollment
   /enrollments/{enrollmentId}:
     get:
       summary: Get enrollment by ID
       operationId: getEnrollment
       tags:
-        - Enrollments
+      - Enrollments
       security:
-        - bearerAuth: []
+      - bearerAuth: []
       parameters:
-        - name: enrollmentId
-          in: path
-          required: true
-          schema:
-            type: string
-            format: uuid
+      - name: enrollmentId
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+        description: The enrollmentId path parameter
       responses:
         '200':
           description: Enrollment retrieved successfully
@@ -167,21 +179,22 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Error'
-
+      description: Retrieve a specific Enrollment
     put:
       summary: Update enrollment
       operationId: updateEnrollment
       tags:
-        - Enrollments
+      - Enrollments
       security:
-        - bearerAuth: []
+      - bearerAuth: []
       parameters:
-        - name: enrollmentId
-          in: path
-          required: true
-          schema:
-            type: string
-            format: uuid
+      - name: enrollmentId
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+        description: The enrollmentId path parameter
       requestBody:
         required: true
         content:
@@ -213,21 +226,22 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Error'
-
+      description: Update a Enrollment
     delete:
       summary: Delete enrollment
       operationId: deleteEnrollment
       tags:
-        - Enrollments
+      - Enrollments
       security:
-        - bearerAuth: []
+      - bearerAuth: []
       parameters:
-        - name: enrollmentId
-          in: path
-          required: true
-          schema:
-            type: string
-            format: uuid
+      - name: enrollmentId
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+        description: The enrollmentId path parameter
       responses:
         '204':
           description: Enrollment deleted successfully
@@ -243,22 +257,23 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Error'
-
+      description: Delete a Enrollment
   /enrollments/{enrollmentId}/progress:
     get:
       summary: Get enrollment progress
       operationId: getEnrollmentProgress
       tags:
-        - Progress
+      - Progress
       security:
-        - bearerAuth: []
+      - bearerAuth: []
       parameters:
-        - name: enrollmentId
-          in: path
-          required: true
-          schema:
-            type: string
-            format: uuid
+      - name: enrollmentId
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+        description: The enrollmentId path parameter
       responses:
         '200':
           description: Progress retrieved successfully
@@ -278,21 +293,22 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Error'
-
+      description: Retrieve a specific Progre
     put:
       summary: Update enrollment progress
       operationId: updateEnrollmentProgress
       tags:
-        - Progress
+      - Progress
       security:
-        - bearerAuth: []
+      - bearerAuth: []
       parameters:
-        - name: enrollmentId
-          in: path
-          required: true
-          schema:
-            type: string
-            format: uuid
+      - name: enrollmentId
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+        description: The enrollmentId path parameter
       requestBody:
         required: true
         content:
@@ -324,15 +340,15 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Error'
-
+      description: Update a Progre
   /bulk-enroll:
     post:
       summary: Bulk enroll learners
       operationId: bulkEnroll
       tags:
-        - Bulk Operations
+      - Bulk Operations
       security:
-        - bearerAuth: []
+      - bearerAuth: []
       requestBody:
         required: true
         content:
@@ -358,141 +374,147 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Error'
-
+      description: Create a new Bulk Enroll
 components:
   securitySchemes:
     bearerAuth:
       type: http
       scheme: bearer
       bearerFormat: JWT
-
   schemas:
     Enrollment:
       type: object
       required:
-        - id
-        - tenantId
-        - learnerId
-        - courseId
-        - status
-        - enrolledAt
-        - createdAt
-        - updatedAt
+      - id
+      - tenantId
+      - learnerId
+      - courseId
+      - status
+      - enrolledAt
+      - createdAt
+      - updatedAt
       properties:
         id:
           type: string
           format: uuid
-          example: "789e0123-e89b-12d3-a456-426614174000"
+          example: a4d15328-17f4-46f9-8fdc-da049ee4c1ba
         tenantId:
           type: string
           format: uuid
-          example: "456e7890-e89b-12d3-a456-426614174000"
+          example: 0796f199-2875-4003-b18c-b80fd7c43d48
         learnerId:
           type: string
           format: uuid
-          example: "123e4567-e89b-12d3-a456-426614174000"
+          example: f6459e9a-d653-43a7-92f2-dcf4a8cadd6e
         courseId:
           type: string
           format: uuid
-          example: "012e3456-e89b-12d3-a456-426614174000"
+          example: 1d50e9af-fe02-467f-891f-aa26db3ea777
         status:
           type: string
-          enum: [enrolled, in_progress, completed, dropped, expired]
-          example: "in_progress"
+          enum:
+          - enrolled
+          - in_progress
+          - completed
+          - dropped
+          - expired
+          example: enrolled
         enrolledAt:
           type: string
           format: date-time
-          example: "2023-10-01T09:00:00Z"
+          example: '2025-09-13T00:14:42.974307+00:00'
         startedAt:
           type: string
           format: date-time
           nullable: true
-          example: "2023-10-02T14:30:00Z"
+          example: '2025-09-13T00:14:42.974307+00:00'
         completedAt:
           type: string
           format: date-time
           nullable: true
-          example: "2023-11-15T16:45:00Z"
+          example: '2025-09-13T00:14:42.974307+00:00'
         expiresAt:
           type: string
           format: date-time
           nullable: true
-          example: "2024-01-01T23:59:59Z"
+          example: '2025-09-13T00:14:42.974307+00:00'
         enrolledBy:
           type: string
           format: uuid
-          example: "345e6789-e89b-12d3-a456-426614174000"
+          example: d02bff13-131a-4f86-90a1-3ae110d03ab9
         metadata:
           type: object
           additionalProperties: true
           example:
-            source: "bulk_import"
-            cohort: "Q4_2023"
+            source: bulk_import
+            cohort: Q4_2023
         createdAt:
           type: string
           format: date-time
-          example: "2023-10-01T09:00:00Z"
+          example: '2025-09-13T00:14:42.974307+00:00'
         updatedAt:
           type: string
           format: date-time
-          example: "2023-11-15T16:45:00Z"
-
+          example: '2025-09-13T00:14:42.974307+00:00'
     CreateEnrollmentRequest:
       type: object
       required:
-        - tenantId
-        - learnerId
-        - courseId
+      - tenantId
+      - learnerId
+      - courseId
       properties:
         tenantId:
           type: string
           format: uuid
-          example: "456e7890-e89b-12d3-a456-426614174000"
+          example: 3e0a3554-c07e-41d1-9e39-d1d12b7156b8
         learnerId:
           type: string
           format: uuid
-          example: "123e4567-e89b-12d3-a456-426614174000"
+          example: 2ad3b280-b341-4c50-8b0b-5e0bf1fec1ec
         courseId:
           type: string
           format: uuid
-          example: "012e3456-e89b-12d3-a456-426614174000"
+          example: 9433efb9-9122-4d62-a748-cae772afd630
         expiresAt:
           type: string
           format: date-time
-          example: "2024-01-01T23:59:59Z"
+          example: '2025-09-13T00:14:42.975306+00:00'
         metadata:
           type: object
           additionalProperties: true
           example:
-            source: "manual_enrollment"
-
+            source: manual_enrollment
     UpdateEnrollmentRequest:
       type: object
       properties:
         status:
           type: string
-          enum: [enrolled, in_progress, completed, dropped, expired]
-          example: "completed"
+          enum:
+          - enrolled
+          - in_progress
+          - completed
+          - dropped
+          - expired
+          example: completed
         expiresAt:
           type: string
           format: date-time
-          example: "2024-01-01T23:59:59Z"
+          example: '2025-09-13T00:14:42.975306+00:00'
         metadata:
           type: object
           additionalProperties: true
-
     EnrollmentProgress:
       type: object
       required:
-        - enrollmentId
-        - progressPercentage
-        - timeSpentMinutes
-        - lastAccessedAt
+      - enrollmentId
+      - progressPercentage
+      - timeSpentMinutes
+      - lastAccessedAt
       properties:
         enrollmentId:
           type: string
           format: uuid
-          example: "789e0123-e89b-12d3-a456-426614174000"
+          example: 5136e9f2-6438-430f-923b-cbfac5d01285
         progressPercentage:
           type: number
           minimum: 0
@@ -505,18 +527,20 @@ components:
         lastAccessedAt:
           type: string
           format: date-time
-          example: "2023-11-15T16:45:00Z"
+          example: '2025-09-13T00:14:42.975306+00:00'
         completedModules:
           type: array
           items:
             type: string
             format: uuid
-          example: ["mod1-uuid", "mod2-uuid"]
+          example:
+          - 6851dea5-717c-47bb-99d3-e68c41d244d1
+          - 1e2b5067-eb66-4672-b937-c0cc092f4b30
         currentModule:
           type: string
           format: uuid
           nullable: true
-          example: "mod3-uuid"
+          example: 61d9d8a9-1b33-4480-b951-92ac969eb794
         assessmentScores:
           type: array
           items:
@@ -532,12 +556,11 @@ components:
               completedAt:
                 type: string
                 format: date-time
-
     UpdateProgressRequest:
       type: object
       required:
-        - progressPercentage
-        - timeSpentMinutes
+      - progressPercentage
+      - timeSpentMinutes
       properties:
         progressPercentage:
           type: number
@@ -557,22 +580,21 @@ components:
           type: string
           format: uuid
           nullable: true
-
     BulkEnrollRequest:
       type: object
       required:
-        - tenantId
-        - courseId
-        - learnerIds
+      - tenantId
+      - courseId
+      - learnerIds
       properties:
         tenantId:
           type: string
           format: uuid
-          example: "456e7890-e89b-12d3-a456-426614174000"
+          example: 6bbdcd3b-9440-4f10-b369-2708b7dbc9bb
         courseId:
           type: string
           format: uuid
-          example: "012e3456-e89b-12d3-a456-426614174000"
+          example: 860eb5ed-610b-455d-abaf-06e26c9572ec
         learnerIds:
           type: array
           items:
@@ -580,21 +602,21 @@ components:
             format: uuid
           minItems: 1
           maxItems: 1000
-          example: ["123e4567-e89b-12d3-a456-426614174000"]
+          example:
+          - ca97b2fd-3850-4f9d-8ca5-473db25fdf33
         expiresAt:
           type: string
           format: date-time
-          example: "2024-01-01T23:59:59Z"
+          example: '2025-09-13T00:14:42.976306+00:00'
         metadata:
           type: object
           additionalProperties: true
-
     BulkEnrollResponse:
       type: object
       required:
-        - successful
-        - failed
-        - total
+      - successful
+      - failed
+      - total
       properties:
         successful:
           type: integer
@@ -617,47 +639,52 @@ components:
                 type: string
               message:
                 type: string
-
     Error:
       type: object
       required:
-        - error
-        - message
+      - error
+      - message
       properties:
         error:
           type: string
-          example: "enrollment_not_found"
+          example: a84a76d2-4637-4f2e-92ab-fd3e088448cb
         message:
           type: string
-          example: "Enrollment not found"
+          example: 79195506-1bd8-4f5b-a4c8-9a8cc8e6edca
         details:
           type: object
           additionalProperties: true
-
     ValidationError:
       type: object
       required:
-        - error
-        - message
-        - validationErrors
+      - error
+      - message
+      - validationErrors
       properties:
         error:
           type: string
-          example: "validation_failed"
+          example: 4a7dd2da-5421-421a-a53c-6eb7fc1e0888
         message:
           type: string
-          example: "Request validation failed"
+          example: 2ee42092-7843-4d9c-9759-edf72b888e3a
         validationErrors:
           type: array
           items:
             type: object
             required:
-              - field
-              - message
+            - field
+            - message
             properties:
               field:
                 type: string
-                example: "learnerId"
+                example: learnerId
               message:
                 type: string
-                example: "Invalid learner ID format"
+                example: 5e45d4f2-dc94-48f7-8eab-5603acc6ef89
+tags:
+- name: Bulk Operations
+  description: Bulk Operations operations
+- name: Enrollments
+  description: Enrollments operations
+- name: Progress
+  description: Progress operations

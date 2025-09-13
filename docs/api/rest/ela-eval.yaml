@@ -1,28 +1,33 @@
 openapi: 3.1.0
 info:
   title: ELA Evaluator Service API
-  description: |
-    API for evaluating English Language Arts writing submissions using
+  description: 'API for evaluating English Language Arts writing submissions using
+
     rubric-based scoring with PII moderation and content safety.
 
+
     ## Features
+
     - Rubric-based scoring across multiple criteria
+
     - Grade band specific evaluation (K-2, 3-5, 6-8, 9-12)
+
     - PII detection and anonymization
+
     - Content moderation and safety filtering
+
     - AI-powered assessment with teacher notes
 
+    '
   version: 0.1.0
   contact:
     name: Aivo Team
     email: dev@aivo.com
-
 servers:
-  - url: http://localhost:8000
-    description: Development server
-  - url: https://ela-eval.aivo.com
-    description: Production server
-
+- url: http://localhost:8000
+  description: Development server
+- url: https://ela-eval.aivo.com
+  description: Production server
 paths:
   /health:
     get:
@@ -30,7 +35,7 @@ paths:
       description: Returns service health status and dependencies
       operationId: elaEvalHealthCheck
       tags:
-        - Health
+      - Health
       responses:
         '200':
           description: Service is healthy
@@ -38,16 +43,17 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/HealthResponse'
-
   /evaluate:
     post:
       summary: Evaluate ELA submission
-      description: |
-        Evaluates an ELA writing submission using rubric-based scoring.
+      description: 'Evaluates an ELA writing submission using rubric-based scoring.
+
         Includes PII detection, content moderation, and AI-powered assessment.
+
+        '
       operationId: evaluate_submission
       tags:
-        - Evaluation
+      - Evaluation
       requestBody:
         required: true
         content:
@@ -55,10 +61,16 @@ paths:
             schema:
               $ref: '#/components/schemas/EvaluationRequest'
             example:
-              prompt: "Write about your favorite season and explain why you like it. Include specific details and examples."
-              submission: "I love summer because it's warm and sunny. I can go swimming at the beach and play outside with my friends. We have barbecues and eat ice cream. The days are long and I don't have to go to school."
-              grade_band: "3-5"
-              criteria: ["ideas_and_content", "organization", "voice"]
+              prompt: Write about your favorite season and explain why you like it.
+                Include specific details and examples.
+              submission: I love summer because it's warm and sunny. I can go swimming
+                at the beach and play outside with my friends. We have barbecues and
+                eat ice cream. The days are long and I don't have to go to school.
+              grade_band: 3-5
+              criteria:
+              - ideas_and_content
+              - organization
+              - voice
               enable_pii_detection: true
               enable_content_moderation: true
       responses:
@@ -86,59 +98,58 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/ErrorResponse'
-
   /evaluations:
     get:
       summary: Get evaluation history
       description: Retrieves evaluation history with filtering and pagination
       operationId: get_evaluation_history
       tags:
-        - Evaluation
+      - Evaluation
       parameters:
-        - name: student_id
-          in: query
-          description: Filter by student ID
-          schema:
-            type: string
-            format: uuid
-        - name: assignment_id
-          in: query
-          description: Filter by assignment ID
-          schema:
-            type: string
-            format: uuid
-        - name: grade_band
-          in: query
-          description: Filter by grade band
-          schema:
-            $ref: '#/components/schemas/GradeBand'
-        - name: start_date
-          in: query
-          description: Start date for filtering (ISO format)
-          schema:
-            type: string
-            format: date-time
-        - name: end_date
-          in: query
-          description: End date for filtering (ISO format)
-          schema:
-            type: string
-            format: date-time
-        - name: limit
-          in: query
-          description: Maximum number of results
-          schema:
-            type: integer
-            minimum: 1
-            maximum: 1000
-            default: 50
-        - name: offset
-          in: query
-          description: Pagination offset
-          schema:
-            type: integer
-            minimum: 0
-            default: 0
+      - name: student_id
+        in: query
+        description: Filter by student ID
+        schema:
+          type: string
+          format: uuid
+      - name: assignment_id
+        in: query
+        description: Filter by assignment ID
+        schema:
+          type: string
+          format: uuid
+      - name: grade_band
+        in: query
+        description: Filter by grade band
+        schema:
+          $ref: '#/components/schemas/GradeBand'
+      - name: start_date
+        in: query
+        description: Start date for filtering (ISO format)
+        schema:
+          type: string
+          format: date-time
+      - name: end_date
+        in: query
+        description: End date for filtering (ISO format)
+        schema:
+          type: string
+          format: date-time
+      - name: limit
+        in: query
+        description: Maximum number of results
+        schema:
+          type: integer
+          minimum: 1
+          maximum: 1000
+          default: 50
+      - name: offset
+        in: query
+        description: Pagination offset
+        schema:
+          type: integer
+          minimum: 0
+          default: 0
       responses:
         '200':
           description: Evaluation history retrieved successfully
@@ -152,22 +163,21 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/ErrorResponse'
-
   /evaluations/{evaluation_id}:
     get:
       summary: Get evaluation by ID
       description: Retrieves a specific evaluation by its ID
       operationId: get_evaluation_by_id
       tags:
-        - Evaluation
+      - Evaluation
       parameters:
-        - name: evaluation_id
-          in: path
-          required: true
-          description: UUID of the evaluation to retrieve
-          schema:
-            type: string
-            format: uuid
+      - name: evaluation_id
+        in: path
+        required: true
+        description: UUID of the evaluation to retrieve
+        schema:
+          type: string
+          format: uuid
       responses:
         '200':
           description: Evaluation retrieved successfully
@@ -187,45 +197,50 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/ErrorResponse'
-
 components:
   schemas:
     GradeBand:
       type: string
       enum:
-        - "K-2"
-        - "3-5"
-        - "6-8"
-        - "9-12"
+      - K-2
+      - 3-5
+      - 6-8
+      - 9-12
       description: Grade band for rubric evaluation
-
     RubricCriterion:
       type: string
       enum:
-        - "ideas_and_content"
-        - "organization"
-        - "voice"
-        - "word_choice"
-        - "sentence_fluency"
-        - "conventions"
+      - ideas_and_content
+      - organization
+      - voice
+      - word_choice
+      - sentence_fluency
+      - conventions
       description: ELA rubric evaluation criteria
-
     ScoreLevel:
       type: integer
-      enum: [1, 2, 3, 4]
-      description: |
-        Rubric scoring levels:
+      enum:
+      - 1
+      - 2
+      - 3
+      - 4
+      description: 'Rubric scoring levels:
+
         1 - Beginning
+
         2 - Developing
+
         3 - Proficient
+
         4 - Advanced
 
+        '
     EvaluationRequest:
       type: object
       required:
-        - prompt
-        - submission
-        - grade_band
+      - prompt
+      - submission
+      - grade_band
       properties:
         prompt:
           type: string
@@ -258,16 +273,15 @@ components:
           type: boolean
           default: true
           description: Enable content moderation
-
     PIIEntity:
       type: object
       required:
-        - entity_type
-        - text
-        - start
-        - end
-        - confidence
-        - anonymized_text
+      - entity_type
+      - text
+      - start
+      - end
+      - confidence
+      - anonymized_text
       properties:
         entity_type:
           type: string
@@ -289,21 +303,23 @@ components:
         anonymized_text:
           type: string
           description: Anonymized replacement text
-
     ContentModerationFlag:
       type: object
       required:
-        - category
-        - severity
-        - confidence
-        - description
+      - category
+      - severity
+      - confidence
+      - description
       properties:
         category:
           type: string
           description: Moderation category
         severity:
           type: string
-          enum: ["low", "medium", "high"]
+          enum:
+          - low
+          - medium
+          - high
           description: Severity level
         confidence:
           type: number
@@ -313,13 +329,12 @@ components:
         description:
           type: string
           description: Description of the issue
-
     RubricScore:
       type: object
       required:
-        - criterion
-        - score
-        - reasoning
+      - criterion
+      - score
+      - reasoning
       properties:
         criterion:
           $ref: '#/components/schemas/RubricCriterion'
@@ -338,16 +353,15 @@ components:
           items:
             type: string
           description: Areas needing improvement
-
     EvaluationResponse:
       type: object
       required:
-        - evaluation_id
-        - scores
-        - overall_score
-        - grade_band
-        - processing_time_ms
-        - model_used
+      - evaluation_id
+      - scores
+      - overall_score
+      - grade_band
+      - processing_time_ms
+      - model_used
       properties:
         evaluation_id:
           type: string
@@ -401,14 +415,13 @@ components:
         model_used:
           type: string
           description: AI model used for evaluation
-
     EvaluationSummary:
       type: object
       required:
-        - evaluation_id
-        - grade_band
-        - overall_score
-        - processed_at
+      - evaluation_id
+      - grade_band
+      - overall_score
+      - processed_at
       properties:
         evaluation_id:
           type: string
@@ -431,13 +444,12 @@ components:
         has_content_flags:
           type: boolean
           default: false
-
     EvaluationHistoryResponse:
       type: object
       required:
-        - evaluations
-        - total_count
-        - has_more
+      - evaluations
+      - total_count
+      - has_more
       properties:
         evaluations:
           type: array
@@ -449,24 +461,23 @@ components:
         has_more:
           type: boolean
           description: Whether more results exist
-
     HealthResponse:
       type: object
       required:
-        - status
-        - service_name
-        - version
-        - timestamp
+      - status
+      - service_name
+      - version
+      - timestamp
       properties:
         status:
           type: string
-          example: "healthy"
+          example: healthy
         service_name:
           type: string
-          example: "ela-eval-svc"
+          example: 29fd9ea1-e616-4422-a754-f1a6472b61a6
         version:
           type: string
-          example: "0.1.0"
+          example: 0.1.0
         timestamp:
           type: string
           format: date-time
@@ -475,20 +486,18 @@ components:
           additionalProperties:
             type: string
           description: Status of service dependencies
-
     ErrorResponse:
       type: object
       required:
-        - detail
+      - detail
       properties:
         detail:
           type: string
           description: Error message
-
     ValidationError:
       type: object
       required:
-        - detail
+      - detail
       properties:
         detail:
           type: array
@@ -499,15 +508,14 @@ components:
                 type: array
                 items:
                   oneOf:
-                    - type: string
-                    - type: integer
+                  - type: string
+                  - type: integer
               msg:
                 type: string
               type:
                 type: string
-
 tags:
-  - name: Health
-    description: Service health and status
-  - name: Evaluation
-    description: ELA submission evaluation and history
+- name: Health
+  description: Service health and status
+- name: Evaluation
+  description: ELA submission evaluation and history

@@ -2,12 +2,12 @@ openapi: 3.1.0
 info:
   title: Ink Capture Service API
   description: |
-    Digital ink capture service for stylus and finger input. Captures strokes, 
+    Digital ink capture service for stylus and finger input. Captures strokes,
     stores NDJSON pages in S3, and emits recognition events for processing.
 
     ## Features
     - **Stroke Capture**: Process digital ink strokes from stylus/finger input
-    - **Consent Gate**: Validate learner consent and permissions  
+    - **Consent Gate**: Validate learner consent and permissions
     - **Media Gate**: Apply content filtering and validation policies
     - **S3 Storage**: Store ink pages as NDJSON for recognition processing
     - **Event Publishing**: Emit INK_READY events to trigger recognition jobs

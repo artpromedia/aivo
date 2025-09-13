@@ -1,34 +1,55 @@
 openapi: 3.1.0
 info:
   title: Subject-Brain Service API
-  description: |
-    AI-powered planner and runtime for per-learner-subject GPU pods with autoscaling.
+  description: 'AI-powered planner and runtime for per-learner-subject GPU pods with
+    autoscaling.
+
 
     This service provides:
+
     - Personalized activity planning based on learner baseline and mastery levels
+
     - Per-learner-subject runtime pods with GPU autoscaling
+
     - Kubernetes HPA based on GPU queue depth and resource utilization
+
     - TTL-based scale-to-zero for cost optimization
+
 
     ## Features
 
+
     ### Planner
+
     - Analyzes learner baseline and mastery levels
+
     - Considers coursework topics and teacher constraints
+
     - Generates optimal activity sequences for learning sessions
+
     - Supports multiple subjects and activity types
 
+
     ### Runtime Manager
+
     - Creates ephemeral pods per active learner-subject
+
     - GPU resource allocation and management
+
     - Horizontal Pod Autoscaling based on queue depth
+
     - Automatic cleanup of idle runtimes (TTL scale-to-zero)
 
+
     ### Monitoring
+
     - Real-time metrics for scaling decisions
+
     - Runtime status tracking
+
     - Performance analytics for optimization
 
+    '
   version: 1.0.0
   contact:
     name: AI Learning Platform Team
@@ -36,13 +57,11 @@ info:
   license:
     name: MIT
     url: https://opensource.org/licenses/MIT
-
 servers:
-  - url: http://localhost:8000
-    description: Development server
-  - url: https://api.aivo.com/subject-brain
-    description: Production server
-
+- url: http://localhost:8000
+  description: Development server
+- url: https://api.aivo.com/subject-brain
+  description: Production server
 paths:
   /health:
     get:
@@ -50,7 +69,7 @@ paths:
       description: Check service health status
       operationId: subjectBrainHealthCheck
       tags:
-        - Health
+      - Health
       responses:
         '200':
           description: Service is healthy
@@ -67,15 +86,14 @@ paths:
                     example: subject-brain-svc
                   version:
                     type: string
-                    example: "1.0.0"
-
+                    example: 1.0.0
   /metrics:
     get:
       summary: Get service metrics
       description: Retrieve current service and scaling metrics
       operationId: getMetrics
       tags:
-        - Monitoring
+      - Monitoring
       responses:
         '200':
           description: Current metrics
@@ -114,17 +132,20 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Error'
-
   /plan:
     post:
       summary: Create activity plan
-      description: |
-        Create a personalized activity plan for a learner in a specific subject.
+      description: 'Create a personalized activity plan for a learner in a specific
+        subject.
+
         The planner analyzes learner baseline, mastery levels, coursework topics,
+
         and teacher constraints to generate an optimal learning sequence.
+
+        '
       operationId: createActivityPlan
       tags:
-        - Planner
+      - Planner
       requestBody:
         required: true
         content:
@@ -132,8 +153,8 @@ paths:
             schema:
               $ref: '#/components/schemas/PlannerRequest'
             example:
-              learner_id: "learner_123"
-              subject: "mathematics"
+              learner_id: learner_123
+              subject: mathematics
               session_duration_minutes: 30
               force_refresh: false
       responses:
@@ -161,22 +182,21 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Error'
-
   /runtime/{runtime_id}:
     get:
       summary: Get runtime status
       description: Retrieve the current status and metrics of a specific runtime pod
       operationId: getRuntimeStatus
       tags:
-        - Runtime
+      - Runtime
       parameters:
-        - name: runtime_id
-          in: path
-          required: true
-          schema:
-            type: string
-          description: Unique identifier for the runtime
-          example: "runtime_456"
+      - name: runtime_id
+        in: path
+        required: true
+        schema:
+          type: string
+        description: Unique identifier for the runtime
+        example: runtime_456
       responses:
         '200':
           description: Runtime status retrieved successfully
@@ -196,21 +216,20 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Error'
-
     delete:
       summary: Terminate runtime
       description: Manually terminate a specific runtime pod
       operationId: terminateRuntime
       tags:
-        - Runtime
+      - Runtime
       parameters:
-        - name: runtime_id
-          in: path
-          required: true
-          schema:
-            type: string
-          description: Unique identifier for the runtime
-          example: "runtime_456"
+      - name: runtime_id
+        in: path
+        required: true
+        schema:
+          type: string
+        description: Unique identifier for the runtime
+        example: runtime_456
       responses:
         '200':
           description: Runtime termination initiated
@@ -221,10 +240,10 @@ paths:
                 properties:
                   message:
                     type: string
-                    example: "Runtime runtime_456 termination initiated"
+                    example: Runtime runtime_456 termination initiated
                   status:
                     type: string
-                    example: "terminating"
+                    example: terminating
         '404':
           description: Runtime not found
           content:
@@ -237,14 +256,13 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Error'
-
   /cleanup:
     post:
       summary: Cleanup idle runtimes
       description: Manually trigger cleanup of idle runtime pods based on TTL
       operationId: cleanupIdleRuntimes
       tags:
-        - Runtime
+      - Runtime
       responses:
         '200':
           description: Cleanup completed successfully
@@ -255,12 +273,14 @@ paths:
                 properties:
                   message:
                     type: string
-                    example: "Cleanup completed"
+                    example: Cleanup completed
                   cleaned_up_runtimes:
                     type: array
                     items:
                       type: string
-                    example: ["runtime_123", "runtime_456"]
+                    example:
+                    - runtime_123
+                    - runtime_456
                   count:
                     type: integer
                     example: 2
@@ -270,24 +290,28 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Error'
-
 components:
   schemas:
     PlannerRequest:
       type: object
       required:
-        - learner_id
-        - subject
+      - learner_id
+      - subject
       properties:
         learner_id:
           type: string
           description: Unique identifier for the learner
-          example: "learner_123"
+          example: 62991b68-f707-414a-acce-9b055e1b4f8b
         subject:
           type: string
-          enum: [mathematics, science, language_arts, social_studies, foreign_language]
+          enum:
+          - mathematics
+          - science
+          - language_arts
+          - social_studies
+          - foreign_language
           description: Subject area for the learning session
-          example: "mathematics"
+          example: mathematics
         session_duration_minutes:
           type: integer
           minimum: 5
@@ -300,7 +324,6 @@ components:
           default: false
           description: Force regeneration of plan (ignore cache)
           example: false
-
     PlannerResponse:
       type: object
       properties:
@@ -321,23 +344,27 @@ components:
           type: integer
           description: Time taken to process the request in milliseconds
           example: 250
-
     ActivityPlan:
       type: object
       properties:
         plan_id:
           type: string
           description: Unique identifier for the plan
-          example: "plan_789"
+          example: plan_789
         learner_id:
           type: string
           description: Learner identifier
-          example: "learner_123"
+          example: 5df00a07-7391-4233-9896-a2ad86ad2b78
         subject:
           type: string
-          enum: [mathematics, science, language_arts, social_studies, foreign_language]
+          enum:
+          - mathematics
+          - science
+          - language_arts
+          - social_studies
+          - foreign_language
           description: Subject area
-          example: "mathematics"
+          example: mathematics
         activities:
           type: array
           items:
@@ -350,29 +377,33 @@ components:
           type: string
           format: date-time
           description: When the plan was created
-          example: "2025-09-06T10:00:00Z"
+          example: '2025-09-13T00:14:43.325752+00:00'
         expires_at:
           type: string
           format: date-time
           description: When the plan expires
-          example: "2025-09-06T11:00:00Z"
+          example: '2025-09-13T00:14:43.325752+00:00'
         planner_version:
           type: string
           description: Version of the planner used
-          example: "1.0"
-
+          example: '1.0'
     PlannedActivity:
       type: object
       properties:
         activity_id:
           type: string
           description: Unique identifier for the activity
-          example: "activity_101"
+          example: a742fc8f-46fb-4505-ad1d-93f0781553c0
         type:
           type: string
-          enum: [lesson, practice, assessment, remediation, enrichment]
+          enum:
+          - lesson
+          - practice
+          - assessment
+          - remediation
+          - enrichment
           description: Type of learning activity
-          example: "lesson"
+          example: lesson
         topic:
           $ref: '#/components/schemas/CourseworkTopic'
         estimated_duration_minutes:
@@ -390,7 +421,9 @@ components:
           items:
             type: string
           description: Learning objectives for this activity
-          example: ["Understand basic fractions", "Compare fraction sizes"]
+          example:
+          - Understand basic fractions
+          - Compare fraction sizes
         prerequisites_met:
           type: boolean
           description: Whether prerequisites are satisfied
@@ -398,24 +431,28 @@ components:
         rationale:
           type: string
           description: Explanation for why this activity was selected
-          example: "Learner needs foundational support in fractions. Using structured instruction approach."
-
+          example: da929d4e-bf44-475d-ae67-6c4fae8620c8
     CourseworkTopic:
       type: object
       properties:
         topic_id:
           type: string
           description: Unique identifier for the topic
-          example: "topic_fractions_basic"
+          example: 60551d21-63e7-4ce0-a380-2d6299313710
         name:
           type: string
           description: Human-readable topic name
-          example: "Basic Fractions"
+          example: 7052f146-ec6a-48c3-9154-312c577acb2d
         subject:
           type: string
-          enum: [mathematics, science, language_arts, social_studies, foreign_language]
+          enum:
+          - mathematics
+          - science
+          - language_arts
+          - social_studies
+          - foreign_language
           description: Subject area
-          example: "mathematics"
+          example: mathematics
         grade_level:
           type: integer
           minimum: 1
@@ -427,13 +464,16 @@ components:
           items:
             type: string
           description: Required prerequisite topics
-          example: ["topic_whole_numbers"]
+          example:
+          - topic_whole_numbers
         learning_objectives:
           type: array
           items:
             type: string
           description: Learning objectives for this topic
-          example: ["Identify fractions", "Compare fractions"]
+          example:
+          - Identify fractions
+          - Compare fractions
         estimated_duration_minutes:
           type: integer
           description: Estimated time to complete
@@ -444,23 +484,27 @@ components:
           maximum: 10
           description: Difficulty rating
           example: 3
-
     RuntimeRequest:
       type: object
       properties:
         runtime_id:
           type: string
           description: Unique identifier for the runtime
-          example: "runtime_456"
+          example: a14c49a5-b95a-4a1a-87f5-974058f94a2c
         learner_id:
           type: string
           description: Learner identifier
-          example: "learner_123"
+          example: e7d237b4-4276-4213-9495-d14c8f53d266
         subject:
           type: string
-          enum: [mathematics, science, language_arts, social_studies, foreign_language]
+          enum:
+          - mathematics
+          - science
+          - language_arts
+          - social_studies
+          - foreign_language
           description: Subject area
-          example: "mathematics"
+          example: mathematics
         activity_plan:
           $ref: '#/components/schemas/ActivityPlan'
         gpu_required:
@@ -485,19 +529,24 @@ components:
           maximum: 10
           description: Runtime priority level
           example: 5
-
     RuntimeStatusResponse:
       type: object
       properties:
         runtime_id:
           type: string
           description: Runtime identifier
-          example: "runtime_456"
+          example: c655abc8-5868-468d-86a4-c15d54d85b20
         status:
           type: string
-          enum: [pending, running, scaling, idle, terminating, terminated]
+          enum:
+          - pending
+          - running
+          - scaling
+          - idle
+          - terminating
+          - terminated
           description: Current runtime status
-          example: "running"
+          example: running
         metrics:
           $ref: '#/components/schemas/RuntimeMetrics'
         estimated_completion_minutes:
@@ -509,15 +558,14 @@ components:
           type: string
           nullable: true
           description: Currently executing activity
-          example: "Basic Fractions Lesson"
-
+          example: 4e176691-a8f7-40c2-a195-0fe931d3da16
     RuntimeMetrics:
       type: object
       properties:
         runtime_id:
           type: string
           description: Runtime identifier
-          example: "runtime_456"
+          example: 5f47f2d1-6431-4fa7-89b2-f496bc8653b8
         gpu_queue_depth:
           type: integer
           description: Current GPU queue depth
@@ -546,22 +594,20 @@ components:
           type: string
           format: date-time
           description: Timestamp of last activity
-          example: "2025-09-06T10:15:00Z"
-
+          example: '2025-09-13T00:14:43.326757+00:00'
     Error:
       type: object
       properties:
         detail:
           type: string
           description: Error message
-          example: "Runtime not found"
-
+          example: 86e858db-857d-4ac4-bc43-36add5313906
 tags:
-  - name: Health
-    description: Service health monitoring
-  - name: Monitoring
-    description: Metrics and performance monitoring
-  - name: Planner
-    description: AI-powered activity planning
-  - name: Runtime
-    description: Per-learner-subject runtime management
+- name: Health
+  description: Service health monitoring
+- name: Monitoring
+  description: Metrics and performance monitoring
+- name: Planner
+  description: AI-powered activity planning
+- name: Runtime
+  description: Per-learner-subject runtime management
