@@ -13,6 +13,7 @@ from app.models import (
     IndexRequest,
     SearchRequest,
     SearchResponse,
+    SearchScope,
     SuggestionRequest,
     SuggestionResponse,
     UserContext,

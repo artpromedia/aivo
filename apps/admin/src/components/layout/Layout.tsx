@@ -2,11 +2,13 @@ import { useState, useEffect } from 'react';
 import { Outlet } from 'react-router-dom';
 
 import BannerDisplay from '../common/BannerDisplay';
+import GlobalSearch from '../common/GlobalSearch';
 
 import { Sidebar } from './Sidebar';
 
 export function Layout() {
   const [isDark, setIsDark] = useState(false);
+  const [isSearchOpen, setIsSearchOpen] = useState(false);
 
   useEffect(() => {
     // Check for saved theme preference or default to light mode
@@ -19,6 +21,19 @@ export function Layout() {
       setIsDark(true);
       document.documentElement.classList.add('dark');
     }
+  }, []);
+
+  // Cmd-K keyboard shortcut for global search
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if ((e.metaKey || e.ctrlKey) && e.key === 'k') {
+        e.preventDefault();
+        setIsSearchOpen(true);
+      }
+    };
+
+    document.addEventListener('keydown', handleKeyDown);
+    return () => document.removeEventListener('keydown', handleKeyDown);
   }, []);
 
   const toggleTheme = () => {
@@ -37,7 +52,11 @@ export function Layout() {
   return (
     <div className='min-h-screen bg-background'>
       <div className='flex'>
-        <Sidebar onThemeToggle={toggleTheme} isDark={isDark} />
+        <Sidebar
+          onThemeToggle={toggleTheme}
+          isDark={isDark}
+          onSearchOpen={() => setIsSearchOpen(true)}
+        />
 
         {/* Main content */}
         <div className='flex-1 lg:ml-0'>
@@ -47,6 +66,12 @@ export function Layout() {
           </main>
         </div>
       </div>
+
+      {/* Global Search Modal */}
+      <GlobalSearch
+        isOpen={isSearchOpen}
+        onClose={() => setIsSearchOpen(false)}
+      />
     </div>
   );
 }

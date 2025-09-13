@@ -1,10 +1,13 @@
 """RBAC service for access control and filtering."""
 
 import logging
-from typing import Any
+from typing import Any, TYPE_CHECKING
 
 from app.config import settings
 from app.models import UserContext, UserRole
+
+if TYPE_CHECKING:
+    from app.models import SearchRequest, SuggestionRequest
 
 logger = logging.getLogger(__name__)
 
@@ -233,6 +236,12 @@ class RBACService:
                 settings.opensearch.lessons_index,
                 settings.opensearch.coursework_index,
                 settings.opensearch.learners_index,
+                settings.opensearch.get("admin_users_index", "admin_users"),
+                settings.opensearch.get("admin_devices_index", "admin_devices"),
+                settings.opensearch.get("admin_subscriptions_index", "admin_subscriptions"),
+                settings.opensearch.get("admin_invoices_index", "admin_invoices"),
+                settings.opensearch.get("admin_reports_index", "admin_reports"),
+                settings.opensearch.get("admin_audit_logs_index", "admin_audit_logs"),
             ]
 
         # District admin can access all content in their district
@@ -241,6 +250,12 @@ class RBACService:
                 settings.opensearch.lessons_index,
                 settings.opensearch.coursework_index,
                 settings.opensearch.learners_index,
+                settings.opensearch.get("admin_users_index", "admin_users"),
+                settings.opensearch.get("admin_devices_index", "admin_devices"),
+                settings.opensearch.get("admin_subscriptions_index", "admin_subscriptions"),
+                settings.opensearch.get("admin_invoices_index", "admin_invoices"),
+                settings.opensearch.get("admin_reports_index", "admin_reports"),
+                settings.opensearch.get("admin_audit_logs_index", "admin_audit_logs"),
             ]
 
         # Teacher can access lessons and coursework
@@ -270,6 +285,122 @@ class RBACService:
             ]
 
         return accessible_indices
+
+    async def build_admin_search_filter(
+        self, user_context: UserContext, admin_entity_types: list[str] | None = None
+    ) -> dict[str, Any]:
+        """Build OpenSearch filter for admin_all scope searches."""
+        # Only admin roles can use admin_all scope
+        if user_context.role not in [UserRole.SYSTEM_ADMIN, UserRole.DISTRICT_ADMIN]:
+            return {"bool": {"must_not": {"match_all": {}}}}
+
+        filters = []
+
+        # System admin has access to all admin data
+        if user_context.role == UserRole.SYSTEM_ADMIN:
+            base_filter = {"match_all": {}}
+        else:
+            # District admin filter - limit to their district
+            if user_context.district_id:
+                base_filter = {"term": {"district_id": user_context.district_id}}
+            else:
+                return {"bool": {"must_not": {"match_all": {}}}}
+
+        filters.append(base_filter)
+
+        # Filter by admin entity types if specified
+        if admin_entity_types:
+            entity_filter = {"terms": {"type": admin_entity_types}}
+            filters.append(entity_filter)
+        else:
+            # Default to all admin entity types
+            admin_types = ["user", "device", "subscription", "invoice", "report", "audit_log"]
+            entity_filter = {"terms": {"type": admin_types}}
+            filters.append(entity_filter)
+
+        # Combine filters
+        if len(filters) == 1:
+            return filters[0]
+        else:
+            return {"bool": {"must": filters}}
+
+    async def filter_search_request(
+        self, request: "SearchRequest", user_context: UserContext
+    ) -> "SearchRequest":
+        """Filter search request based on user permissions and scope."""
+        from app.models import SearchRequest, SearchScope
+
+        # Handle admin_all scope
+        if request.scope == SearchScope.ADMIN_ALL:
+            # Check if user has admin privileges
+            if user_context.role not in [UserRole.SYSTEM_ADMIN, UserRole.DISTRICT_ADMIN]:
+                # Return empty results for non-admin users
+                empty_request = SearchRequest(
+                    q=request.q,
+                    scope=request.scope,
+                    size=0,
+                    from_=request.from_,
+                    filters={"bool": {"must_not": {"match_all": {}}}},
+                )
+                return empty_request
+
+            # Build admin search filter
+            admin_filter = await self.build_admin_search_filter(user_context)
+
+            # Merge with existing filters
+            combined_filters = request.filters.copy() if request.filters else {}
+            if admin_filter:
+                if "bool" in combined_filters:
+                    if "must" in combined_filters["bool"]:
+                        if isinstance(combined_filters["bool"]["must"], list):
+                            combined_filters["bool"]["must"].append(admin_filter)
+                        else:
+                            combined_filters["bool"]["must"] = [combined_filters["bool"]["must"], admin_filter]
+                    else:
+                        combined_filters["bool"]["must"] = admin_filter
+                else:
+                    combined_filters = admin_filter
+
+            return SearchRequest(
+                q=request.q,
+                scope=request.scope,
+                size=request.size,
+                from_=request.from_,
+                filters=combined_filters,
+            )
+
+        # Handle other scopes with existing RBAC filter
+        rbac_filter = await self.build_rbac_filter(user_context)
+
+        # Merge with existing filters
+        combined_filters = request.filters.copy() if request.filters else {}
+        if rbac_filter:
+            if "bool" in combined_filters:
+                if "must" in combined_filters["bool"]:
+                    if isinstance(combined_filters["bool"]["must"], list):
+                        combined_filters["bool"]["must"].append(rbac_filter)
+                    else:
+                        combined_filters["bool"]["must"] = [combined_filters["bool"]["must"], rbac_filter]
+                else:
+                    combined_filters["bool"]["must"] = rbac_filter
+            else:
+                combined_filters = rbac_filter
+
+        return SearchRequest(
+            q=request.q,
+            scope=request.scope,
+            size=request.size,
+            from_=request.from_,
+            filters=combined_filters,
+        )
+
+    async def filter_suggestion_request(
+        self, request: "SuggestionRequest", user_context: UserContext
+    ) -> "SuggestionRequest":
+        """Filter suggestion request based on user permissions."""
+        # For now, suggestions don't need complex filtering
+        # In production, you might want to apply similar RBAC filtering
+        return request
 
     def get_role_level(self, role: UserRole) -> int:
         """Get numeric level for role hierarchy."""

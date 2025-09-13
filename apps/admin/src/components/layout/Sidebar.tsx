@@ -20,6 +20,8 @@ import {
   Activity,
   Beaker,
   Plug,
+  Search,
+  Command,
 } from 'lucide-react';
 import { useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
@@ -29,6 +31,7 @@ import { Button } from '@/components/ui/button';
 interface SidebarProps {
   onThemeToggle: () => void;
   isDark: boolean;
+  onSearchOpen?: () => void;
 }
 
 const navigationItems = [
@@ -124,7 +127,7 @@ const navigationItems = [
   },
 ];
 
-export function Sidebar({ onThemeToggle, isDark }: SidebarProps) {
+export function Sidebar({ onThemeToggle, isDark, onSearchOpen }: SidebarProps) {
   const location = useLocation();
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
@@ -173,6 +176,24 @@ export function Sidebar({ onThemeToggle, isDark }: SidebarProps) {
               )}
             </Button>
           </div>
+
+          {/* Global Search Button */}
+          {onSearchOpen && (
+            <div className='px-4 pb-4'>
+              <Button
+                variant='outline'
+                onClick={onSearchOpen}
+                className='w-full justify-start text-sm text-muted-foreground'
+              >
+                <Search className='h-4 w-4 mr-2' />
+                Search...
+                <div className='ml-auto flex items-center gap-1'>
+                  <Command className='h-3 w-3' />
+                  <span className='text-xs'>K</span>
+                </div>
+              </Button>
+            </div>
+          )}
 
           {/* Navigation */}
           <nav className='flex-1 p-4 space-y-2'>

@@ -61,6 +61,7 @@ const SubscriptionsPage = lazy(() =>
   }))
 );
 const Moderation = lazy(() => import('@/pages/Trust/Moderation'));
+const SearchPage = lazy(() => import('@/pages/SearchPage'));
 
 // Loading component
 const PageLoader = () => (
@@ -224,6 +225,14 @@ function App() {
             <Route
               path='support'
               element={<div>Support Page (Coming Soon)</div>}
+            />
+            <Route
+              path='search'
+              element={
+                <Suspense fallback={<PageLoader />}>
+                  <SearchPage />
+                </Suspense>
+              }
             />
           </Route>
         </Routes>
