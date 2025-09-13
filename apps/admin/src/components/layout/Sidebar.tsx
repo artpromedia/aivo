@@ -4,6 +4,7 @@ import {
   CreditCard,
   FileText,
   Server,
+  HelpCircle,
   Moon,
   Sun,
   Menu,
@@ -19,10 +20,6 @@ import {
   Activity,
   Beaker,
   Plug,
-  Key,
-  BarChart3,
-  MessageSquare,
-  BookOpen,
 } from 'lucide-react';
 import { useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
@@ -81,11 +78,6 @@ const navigationItems = [
     icon: Plug,
   },
   {
-    name: 'Secrets & Keys Vault',
-    href: '/secrets',
-    icon: Key,
-  },
-  {
     name: 'Incident Center',
     href: '/incidents',
     icon: AlertTriangle,
@@ -99,11 +91,6 @@ const navigationItems = [
     name: 'Notifications',
     href: '/notification-subscriptions',
     icon: Bell,
-  },
-  {
-    name: 'API Usage & Limits',
-    href: '/api-usage',
-    icon: BarChart3,
   },
   {
     name: 'Subscriptions',
@@ -121,14 +108,9 @@ const navigationItems = [
     icon: Server,
   },
   {
-    name: 'Support Tickets',
-    href: '/support/tickets',
-    icon: MessageSquare,
-  },
-  {
-    name: 'Knowledge Base',
-    href: '/support/kb',
-    icon: BookOpen,
+    name: 'Support & Help',
+    href: '/support',
+    icon: HelpCircle,
   },
   {
     name: 'Data Governance',

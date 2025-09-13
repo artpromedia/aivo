@@ -38,7 +38,6 @@ const ExperimentsPage = lazy(() =>
 const Hub = lazy(() =>
   import('@/pages/Integrations').then(module => ({ default: module.Hub }))
 );
-const Secrets = lazy(() => import('@/pages/Integrations/Secrets'));
 const InkOps = lazy(() =>
   import('@/pages/InkOps').then(module => ({ default: module.InkOps }))
 );
@@ -52,9 +51,6 @@ const IncidentsPage = lazy(() => import('@/pages/Operations/Incidents'));
 const NotificationSubscriptionsPage = lazy(
   () => import('@/pages/Operations/NotificationSubscriptions')
 );
-const ApiUsagePage = lazy(() => import('@/pages/Operations/ApiUsage'));
-const TicketsPage = lazy(() => import('@/pages/Support/Tickets'));
-const KBPage = lazy(() => import('@/pages/Support/KB'));
 const OTA = lazy(() =>
   import('@/pages/OTA').then(module => ({ default: module.OTA }))
 );
@@ -154,14 +150,6 @@ function App() {
               }
             />
             <Route
-              path='secrets'
-              element={
-                <Suspense fallback={<PageLoader />}>
-                  <Secrets />
-                </Suspense>
-              }
-            />
-            <Route
               path='integrations'
               element={
                 <Suspense fallback={<PageLoader />}>
@@ -218,14 +206,6 @@ function App() {
               }
             />
             <Route
-              path='api-usage'
-              element={
-                <Suspense fallback={<PageLoader />}>
-                  <ApiUsagePage />
-                </Suspense>
-              }
-            />
-            <Route
               path='data-governance'
               element={
                 <Suspense fallback={<PageLoader />}>
@@ -242,28 +222,8 @@ function App() {
               }
             />
             <Route
-              path='support/tickets'
-              element={
-                <Suspense fallback={<PageLoader />}>
-                  <TicketsPage />
-                </Suspense>
-              }
-            />
-            <Route
-              path='support/kb'
-              element={
-                <Suspense fallback={<PageLoader />}>
-                  <KBPage />
-                </Suspense>
-              }
-            />
-            <Route
               path='support'
-              element={
-                <Suspense fallback={<PageLoader />}>
-                  <TicketsPage />
-                </Suspense>
-              }
+              element={<div>Support Page (Coming Soon)</div>}
             />
           </Route>
         </Routes>

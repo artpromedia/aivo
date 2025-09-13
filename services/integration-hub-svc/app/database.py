@@ -8,20 +8,13 @@ from sqlalchemy.orm import DeclarativeBase
 from app.config import settings
 
 # Create async engine
-database_url = str(settings.database_url)
-engine_kwargs = {
-    "pool_pre_ping": True,
-    "echo": settings.debug,
-}
-
-# Only add pool settings for PostgreSQL
-if database_url.startswith("postgresql"):
-    engine_kwargs.update({
-        "pool_size": settings.database_pool_size,
-        "max_overflow": settings.database_max_overflow,
-    })
-
-engine = create_async_engine(database_url, **engine_kwargs)
+engine = create_async_engine(
+    str(settings.database_url),
+    pool_size=settings.database_pool_size,
+    max_overflow=settings.database_max_overflow,
+    pool_pre_ping=True,
+    echo=settings.debug,
+)
 
 # Create async session factory
 AsyncSessionLocal = async_sessionmaker(

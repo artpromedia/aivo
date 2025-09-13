@@ -101,12 +101,8 @@ const Hub: React.FC = () => {
       setLoading(true);
       const types = await integrationHubAPI.getConnectorTypes();
       setConnectorTypes(types);
-    } catch (err) {
-      setMessage({
-        text:
-          err instanceof Error ? err.message : 'Failed to load connector types',
-        type: 'error',
-      });
+    } catch (error) {
+      setMessage({ text: 'Failed to load connector types', type: 'error' });
     } finally {
       setLoading(false);
     }
