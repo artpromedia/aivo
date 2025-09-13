@@ -53,6 +53,8 @@ const NotificationSubscriptionsPage = lazy(
   () => import('@/pages/Operations/NotificationSubscriptions')
 );
 const ApiUsagePage = lazy(() => import('@/pages/Operations/ApiUsage'));
+const TicketsPage = lazy(() => import('@/pages/Support/Tickets'));
+const KBPage = lazy(() => import('@/pages/Support/KB'));
 const OTA = lazy(() =>
   import('@/pages/OTA').then(module => ({ default: module.OTA }))
 );
@@ -240,8 +242,28 @@ function App() {
               }
             />
             <Route
+              path='support/tickets'
+              element={
+                <Suspense fallback={<PageLoader />}>
+                  <TicketsPage />
+                </Suspense>
+              }
+            />
+            <Route
+              path='support/kb'
+              element={
+                <Suspense fallback={<PageLoader />}>
+                  <KBPage />
+                </Suspense>
+              }
+            />
+            <Route
               path='support'
-              element={<div>Support Page (Coming Soon)</div>}
+              element={
+                <Suspense fallback={<PageLoader />}>
+                  <TicketsPage />
+                </Suspense>
+              }
             />
           </Route>
         </Routes>

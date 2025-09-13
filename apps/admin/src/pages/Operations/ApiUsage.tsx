@@ -186,7 +186,7 @@ export default function ApiUsage() {
       ]);
     } catch (error) {
       // Error handling - log to console for debugging
-       
+
       console.error('Error fetching data:', error);
     } finally {
       setLoading(false);
@@ -267,7 +267,6 @@ export default function ApiUsage() {
         fetchRequests();
       }
     } catch (error) {
-       
       console.error('Error creating quota request:', error);
     }
   };
@@ -285,7 +284,6 @@ export default function ApiUsage() {
         fetchRateLimits();
       }
     } catch (error) {
-       
       console.error('Error creating rate limit:', error);
     }
   };

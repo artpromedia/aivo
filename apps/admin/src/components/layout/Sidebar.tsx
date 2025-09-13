@@ -4,7 +4,6 @@ import {
   CreditCard,
   FileText,
   Server,
-  HelpCircle,
   Moon,
   Sun,
   Menu,
@@ -22,6 +21,8 @@ import {
   Plug,
   Key,
   BarChart3,
+  MessageSquare,
+  BookOpen,
 } from 'lucide-react';
 import { useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
@@ -120,9 +121,14 @@ const navigationItems = [
     icon: Server,
   },
   {
-    name: 'Support & Help',
-    href: '/support',
-    icon: HelpCircle,
+    name: 'Support Tickets',
+    href: '/support/tickets',
+    icon: MessageSquare,
+  },
+  {
+    name: 'Knowledge Base',
+    href: '/support/kb',
+    icon: BookOpen,
   },
   {
     name: 'Data Governance',
