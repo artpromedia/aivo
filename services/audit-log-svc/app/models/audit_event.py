@@ -16,20 +16,25 @@ class AuditEvent(Base, TimestampMixin):
     """
     Immutable audit event model with WORM compliance.
 
+    Schema matches S2C-05 specification:
+    audit_event(id, ts, actor, actor_role, action, resource, before, after, ip, ua, sig)
+
     This table is append-only and uses hash chaining for tamper detection.
     Once written, records cannot be modified or deleted.
     """
 
     __tablename__ = "audit_events"
 
-    # Core audit fields
-    timestamp: Mapped[datetime] = mapped_column(
+    # S2C-05 Core Fields
+    ts: Mapped[datetime] = mapped_column(
+        "timestamp",  # Database column name
         nullable=False,
         index=True,
         insert_default=lambda: datetime.utcnow(),
+        comment="Timestamp when the audit event occurred"
     )
 
-    # Actor information
+    # Actor information (S2C-05: actor, actor_role)
     actor: Mapped[str] = mapped_column(
         String(255),
         nullable=False,
@@ -43,7 +48,7 @@ class AuditEvent(Base, TimestampMixin):
         comment="Role of the actor at the time of action"
     )
 
-    # Action details
+    # Action details (S2C-05: action)
     action: Mapped[str] = mapped_column(
         String(100),
         nullable=False,
@@ -51,47 +56,70 @@ class AuditEvent(Base, TimestampMixin):
         comment="Action performed (create, update, delete, login, etc.)"
     )
 
-    # Resource information
-    resource_type: Mapped[str] = mapped_column(
-        String(100),
+    # Resource information (S2C-05: resource)
+    resource: Mapped[str] = mapped_column(
+        String(255),
         nullable=False,
         index=True,
-        comment="Type of resource affected (user, api_key, webhook, etc.)"
+        comment="Resource identifier (type:id or just type)"
+    )
+
+    # Legacy fields for backward compatibility
+    resource_type: Mapped[Optional[str]] = mapped_column(
+        String(100),
+        nullable=True,
+        index=True,
+        comment="Type of resource affected (derived from resource field)"
     )
 
     resource_id: Mapped[Optional[str]] = mapped_column(
         String(255),
         nullable=True,
         index=True,
-        comment="ID of the specific resource affected"
+        comment="ID of the specific resource affected (derived from resource field)"
     )
 
-    # Change tracking
-    before_state: Mapped[Optional[dict[str, Any]]] = mapped_column(
+    # State tracking (S2C-05: before, after)
+    before: Mapped[Optional[dict[str, Any]]] = mapped_column(
+        "before_state",  # Database column name
         JSON,
         nullable=True,
         comment="State before the change (for updates/deletes)"
     )
 
-    after_state: Mapped[Optional[dict[str, Any]]] = mapped_column(
+    after: Mapped[Optional[dict[str, Any]]] = mapped_column(
+        "after_state",  # Database column name
         JSON,
         nullable=True,
         comment="State after the change (for creates/updates)"
     )
 
-    # Request context
-    ip_address: Mapped[Optional[str]] = mapped_column(
+    # Request context (S2C-05: ip, ua)
+    ip: Mapped[Optional[str]] = mapped_column(
+        "ip_address",  # Database column name
         String(45),  # IPv6 support
         nullable=True,
         comment="IP address of the request"
     )
 
-    user_agent: Mapped[Optional[str]] = mapped_column(
+    ua: Mapped[Optional[str]] = mapped_column(
+        "user_agent",  # Database column name
         Text,
         nullable=True,
         comment="User agent string from the request"
     )
 
+    # Signature/Hash for tamper detection (S2C-05: sig)
+    sig: Mapped[str] = mapped_column(
+        "current_hash",  # Database column name
+        String(64),
+        nullable=False,
+        unique=True,
+        index=True,
+        comment="SHA-256 hash signature for tamper detection"
+    )
+
+    # Additional fields for enhanced audit capabilities
     request_id: Mapped[Optional[str]] = mapped_column(
         String(255),
         nullable=True,
@@ -112,7 +140,7 @@ class AuditEvent(Base, TimestampMixin):
         comment="Additional context-specific metadata"
     )
 
-    # Hash chain for tamper detection
+    # Hash chain for tamper detection (legacy field name)
     current_hash: Mapped[str] = mapped_column(
         String(64),
         nullable=False,

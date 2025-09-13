@@ -140,8 +140,11 @@ async def create_audit_event(
 async def search_audit_events(
     actor: Optional[str] = Query(None, description="Filter by actor"),
     action: Optional[str] = Query(None, description="Filter by action"),
+    resource: Optional[str] = Query(None, description="Filter by resource type or ID"),
     resource_type: Optional[str] = Query(None, description="Filter by resource type"),
     resource_id: Optional[str] = Query(None, description="Filter by resource ID"),
+    from_date: Optional[datetime] = Query(None, alias="from", description="Start date filter (ISO format)"),
+    to_date: Optional[datetime] = Query(None, alias="to", description="End date filter (ISO format)"),
     start_date: Optional[datetime] = Query(None, description="Start date filter (ISO format)"),
     end_date: Optional[datetime] = Query(None, description="End date filter (ISO format)"),
     request_id: Optional[str] = Query(None, description="Filter by request ID"),
@@ -152,14 +155,19 @@ async def search_audit_events(
 ) -> AuditEventList:
     """Search audit events with filtering and pagination."""
     try:
+        # Support both S2C-05 spec parameters (from/to) and descriptive parameters
+        effective_start_date = from_date or start_date
+        effective_end_date = to_date or end_date
+        effective_resource_type = resource or resource_type
+
         result = await audit_service.search_audit_events(
             db=db,
             actor=actor,
             action=action,
-            resource_type=resource_type,
+            resource_type=effective_resource_type,
             resource_id=resource_id,
-            start_date=start_date,
-            end_date=end_date,
+            start_date=effective_start_date,
+            end_date=effective_end_date,
             request_id=request_id,
             ip_address=ip_address,
             page=page,
