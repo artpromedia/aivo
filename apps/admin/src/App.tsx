@@ -1,24 +1,70 @@
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { ReactQueryDevtools } from '@tanstack/react-query-devtools';
+import { Suspense, lazy } from 'react';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 
 import { Layout } from '@/components/layout/Layout';
-import { BillingPage } from '@/pages/BillingPage';
-import { Dashboard } from '@/pages/Dashboard';
-import { DevicePolicy } from '@/pages/DevicePolicy';
-import { Devices } from '@/pages/Devices';
-import { FleetHealth } from '@/pages/Devices/FleetHealth';
-import { ExperimentsPage } from '@/pages/Experiments';
-import { InkOps } from '@/pages/InkOps';
-import { NamespacesPage } from '@/pages/NamespacesPage';
-import BannersPage from '@/pages/Operations/Banners';
-import IncidentsPage from '@/pages/Operations/Incidents';
-import NotificationSubscriptionsPage from '@/pages/Operations/NotificationSubscriptions';
-import { OTA } from '@/pages/OTA';
-import DataGovernance from '@/pages/Security/DataGovernance';
-import { SubscriptionsPage } from '@/pages/SubscriptionsPage';
-import Moderation from '@/pages/Trust/Moderation';
-import { UsersPage } from '@/pages/UsersPage';
+
+// Lazy load components for code splitting
+const Dashboard = lazy(() =>
+  import('@/pages/Dashboard').then(module => ({ default: module.Dashboard }))
+);
+const UsersPage = lazy(() =>
+  import('@/pages/UsersPage').then(module => ({ default: module.UsersPage }))
+);
+const BillingPage = lazy(() =>
+  import('@/pages/BillingPage').then(module => ({
+    default: module.BillingPage,
+  }))
+);
+const DevicePolicy = lazy(() =>
+  import('@/pages/DevicePolicy').then(module => ({
+    default: module.DevicePolicy,
+  }))
+);
+const Devices = lazy(() =>
+  import('@/pages/Devices').then(module => ({ default: module.Devices }))
+);
+const FleetHealth = lazy(() =>
+  import('@/pages/Devices/FleetHealth').then(module => ({
+    default: module.FleetHealth,
+  }))
+);
+const ExperimentsPage = lazy(() =>
+  import('@/pages/Experiments').then(module => ({
+    default: module.ExperimentsPage,
+  }))
+);
+const InkOps = lazy(() =>
+  import('@/pages/InkOps').then(module => ({ default: module.InkOps }))
+);
+const NamespacesPage = lazy(() =>
+  import('@/pages/NamespacesPage').then(module => ({
+    default: module.NamespacesPage,
+  }))
+);
+const BannersPage = lazy(() => import('@/pages/Operations/Banners'));
+const IncidentsPage = lazy(() => import('@/pages/Operations/Incidents'));
+const NotificationSubscriptionsPage = lazy(
+  () => import('@/pages/Operations/NotificationSubscriptions')
+);
+const OTA = lazy(() =>
+  import('@/pages/OTA').then(module => ({ default: module.OTA }))
+);
+const DataGovernance = lazy(() => import('@/pages/Security/DataGovernance'));
+const SubscriptionsPage = lazy(() =>
+  import('@/pages/SubscriptionsPage').then(module => ({
+    default: module.SubscriptionsPage,
+  }))
+);
+const Moderation = lazy(() => import('@/pages/Trust/Moderation'));
+
+// Loading component
+const PageLoader = () => (
+  <div className='flex items-center justify-center min-h-[200px]'>
+    <div className='animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600'></div>
+  </div>
+);
 
 // Create a client
 const queryClient = new QueryClient({
@@ -36,25 +82,134 @@ function App() {
       <Router>
         <Routes>
           <Route path='/' element={<Layout />}>
-            <Route index element={<Dashboard />} />
-            <Route path='users' element={<UsersPage />} />
-            <Route path='devices' element={<Devices />} />
-            <Route path='fleet-health' element={<FleetHealth />} />
-            <Route path='device-policies' element={<DevicePolicy />} />
-            <Route path='ota' element={<OTA />} />
-            <Route path='ink-ops' element={<InkOps />} />
-            <Route path='experiments' element={<ExperimentsPage />} />
-            <Route path='subscriptions' element={<SubscriptionsPage />} />
-            <Route path='billing' element={<BillingPage />} />
-            <Route path='namespaces' element={<NamespacesPage />} />
-            <Route path='incidents' element={<IncidentsPage />} />
-            <Route path='banners' element={<BannersPage />} />
+            <Route
+              index
+              element={
+                <Suspense fallback={<PageLoader />}>
+                  <Dashboard />
+                </Suspense>
+              }
+            />
+            <Route
+              path='users'
+              element={
+                <Suspense fallback={<PageLoader />}>
+                  <UsersPage />
+                </Suspense>
+              }
+            />
+            <Route
+              path='devices'
+              element={
+                <Suspense fallback={<PageLoader />}>
+                  <Devices />
+                </Suspense>
+              }
+            />
+            <Route
+              path='fleet-health'
+              element={
+                <Suspense fallback={<PageLoader />}>
+                  <FleetHealth />
+                </Suspense>
+              }
+            />
+            <Route
+              path='device-policies'
+              element={
+                <Suspense fallback={<PageLoader />}>
+                  <DevicePolicy />
+                </Suspense>
+              }
+            />
+            <Route
+              path='ota'
+              element={
+                <Suspense fallback={<PageLoader />}>
+                  <OTA />
+                </Suspense>
+              }
+            />
+            <Route
+              path='ink-ops'
+              element={
+                <Suspense fallback={<PageLoader />}>
+                  <InkOps />
+                </Suspense>
+              }
+            />
+            <Route
+              path='experiments'
+              element={
+                <Suspense fallback={<PageLoader />}>
+                  <ExperimentsPage />
+                </Suspense>
+              }
+            />
+            <Route
+              path='subscriptions'
+              element={
+                <Suspense fallback={<PageLoader />}>
+                  <SubscriptionsPage />
+                </Suspense>
+              }
+            />
+            <Route
+              path='billing'
+              element={
+                <Suspense fallback={<PageLoader />}>
+                  <BillingPage />
+                </Suspense>
+              }
+            />
+            <Route
+              path='namespaces'
+              element={
+                <Suspense fallback={<PageLoader />}>
+                  <NamespacesPage />
+                </Suspense>
+              }
+            />
+            <Route
+              path='incidents'
+              element={
+                <Suspense fallback={<PageLoader />}>
+                  <IncidentsPage />
+                </Suspense>
+              }
+            />
+            <Route
+              path='banners'
+              element={
+                <Suspense fallback={<PageLoader />}>
+                  <BannersPage />
+                </Suspense>
+              }
+            />
             <Route
               path='notification-subscriptions'
-              element={<NotificationSubscriptionsPage />}
+              element={
+                <Suspense fallback={<PageLoader />}>
+                  <NotificationSubscriptionsPage />
+                </Suspense>
+              }
             />
-            <Route path='data-governance' element={<DataGovernance />} />
-            <Route path='moderation' element={<Moderation />} />
+            <Route
+              path='data-governance'
+              element={
+                <Suspense fallback={<PageLoader />}>
+                  <DataGovernance />
+                </Suspense>
+              }
+            />
+            <Route
+              path='moderation'
+              element={
+                <Suspense fallback={<PageLoader />}>
+                  <Moderation />
+                </Suspense>
+              }
+            />
             <Route
               path='support'
               element={<div>Support Page (Coming Soon)</div>}
@@ -62,7 +217,7 @@ function App() {
           </Route>
         </Routes>
       </Router>
-      <ReactQueryDevtools initialIsOpen={false} />
+      {import.meta.env.DEV && <ReactQueryDevtools initialIsOpen={false} />}
     </QueryClientProvider>
   );
 }

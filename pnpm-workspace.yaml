@@ -4,3 +4,6 @@ packages:
   - libs/*
   - infra/*
   - docs/*
+
+ignoredBuiltDependencies:
+  - esbuild

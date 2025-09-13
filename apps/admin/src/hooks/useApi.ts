@@ -3,6 +3,7 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import {
   AdminPortalAPI,
   UserAPI,
+  AuthAPI,
   SubscriptionAPI,
   BillingAPI,
   NamespaceAPI,
@@ -137,7 +138,7 @@ export const useRestartNamespace = () => {
 export const useRoles = () => {
   return useQuery({
     queryKey: ['roles'],
-    queryFn: UserAPI.getRoles,
+    queryFn: AuthAPI.getRoles,
   });
 };
 
@@ -146,7 +147,7 @@ export const useAssignRole = () => {
 
   return useMutation({
     mutationFn: ({ userId, role }: { userId: string; role: string }) =>
-      UserAPI.assignRole(userId, role),
+      AuthAPI.assignRole(userId, role),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['users'] });
       queryClient.invalidateQueries({ queryKey: ['dashboard'] });
@@ -159,7 +160,7 @@ export const useRevokeRole = () => {
 
   return useMutation({
     mutationFn: ({ userId, role }: { userId: string; role: string }) =>
-      UserAPI.revokeRole(userId, role),
+      AuthAPI.revokeRole(userId, role),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['users'] });
       queryClient.invalidateQueries({ queryKey: ['dashboard'] });
@@ -171,7 +172,7 @@ export const useRevokeRole = () => {
 export const useInvites = () => {
   return useQuery({
     queryKey: ['invites'],
-    queryFn: UserAPI.getInvites,
+    queryFn: AuthAPI.getInvites,
   });
 };
 
@@ -179,7 +180,7 @@ export const useResendInvite = () => {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: (inviteId: string) => UserAPI.resendInvite(inviteId),
+    mutationFn: (inviteId: string) => AuthAPI.resendInvite(inviteId),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['invites'] });
     },

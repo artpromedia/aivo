@@ -1,7 +1,27 @@
 import { http, HttpResponse } from 'msw';
 
+// Subscription type definition
+interface MockSubscription {
+  id: string;
+  tenant_id: string;
+  plan_id: string;
+  plan_name: string;
+  status: string;
+  current_period_start: string;
+  current_period_end: string;
+  cancel_at_period_end: boolean;
+  canceled_at?: string;
+  quantity: number;
+  unit_amount: number;
+  currency: string;
+  billing_cycle: 'monthly' | 'yearly';
+  created_at: string;
+  updated_at: string;
+  metadata: Record<string, string>;
+}
+
 // Mock subscription data
-const mockSubscriptions = [
+const mockSubscriptions: MockSubscription[] = [
   {
     id: 'sub_1',
     tenant_id: 'tenant_123',
@@ -11,7 +31,6 @@ const mockSubscriptions = [
     current_period_start: '2024-01-01T00:00:00Z',
     current_period_end: '2024-02-01T00:00:00Z',
     cancel_at_period_end: false,
-    canceled_at: undefined as string | undefined,
     quantity: 50,
     unit_amount: 2999, // $29.99 in cents
     currency: 'usd',
@@ -232,14 +251,13 @@ export const subscriptionHandlers = [
         Date.now() + 30 * 24 * 60 * 60 * 1000
       ).toISOString(),
       cancel_at_period_end: false,
-      canceled_at: undefined as string | undefined,
       quantity: body.quantity,
       unit_amount: mockPlans.find(p => p.id === body.plan_id)?.amount || 0,
       currency: 'usd',
       billing_cycle: 'monthly' as const,
       created_at: new Date().toISOString(),
       updated_at: new Date().toISOString(),
-      metadata: body.metadata || {},
+      metadata: { trial: 'new', ...body.metadata },
     };
 
     mockSubscriptions.push(newSubscription);

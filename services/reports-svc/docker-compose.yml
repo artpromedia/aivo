@@ -1,0 +1,76 @@
+version: '3.8'
+
+services:
+  reports-service:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - "8004:8004"
+    environment:
+      - DATABASE_URL=postgresql://user:password@postgres:5432/aivo_db
+      - CLICKHOUSE_HOST=clickhouse
+      - CLICKHOUSE_PORT=9000
+      - CLICKHOUSE_USER=default
+      - CLICKHOUSE_PASSWORD=
+      - CLICKHOUSE_DATABASE=aivo_analytics
+      - REDIS_URL=redis://redis:6379/0
+      - S3_BUCKET=aivo-reports
+      - S3_REGION=us-east-1
+      - JWT_SECRET_KEY=your-secret-key-here
+      - SMTP_HOST=smtp.gmail.com
+      - SMTP_PORT=587
+      - SMTP_USER=your-email@gmail.com
+      - SMTP_PASSWORD=your-app-password
+    volumes:
+      - ./exports:/app/exports
+      - ./logs:/app/logs
+    depends_on:
+      - postgres
+      - clickhouse
+      - redis
+    networks:
+      - aivo-network
+
+  postgres:
+    image: postgres:15
+    environment:
+      - POSTGRES_DB=aivo_db
+      - POSTGRES_USER=user
+      - POSTGRES_PASSWORD=password
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    networks:
+      - aivo-network
+
+  clickhouse:
+    image: clickhouse/clickhouse-server:latest
+    ports:
+      - "9000:9000"
+      - "8123:8123"
+    environment:
+      - CLICKHOUSE_DB=aivo_analytics
+    volumes:
+      - clickhouse_data:/var/lib/clickhouse
+    networks:
+      - aivo-network
+
+  redis:
+    image: redis:7-alpine
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+    networks:
+      - aivo-network
+
+volumes:
+  postgres_data:
+  clickhouse_data:
+  redis_data:
+
+networks:
+  aivo-network:
+    driver: bridge
